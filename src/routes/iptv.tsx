@@ -6,9 +6,9 @@ import iptvImg from "@/assets/iptv.jpg";
 export const Route = createFileRoute("/iptv")({
   head: () => ({
     meta: [
-      { title: "IPTV সার্ভিস ও সেট-টপ বক্স — SignalHub" },
+      { title: "IPTV সার্ভিস ও সেট-টপ বক্স — VIP STAR" },
       { name: "description", content: "৫০০+ লাইভ চ্যানেল, 4K স্ট্রিমিং, ভারতীয়/বাংলা/ইংলিশ প্যাকেজ এবং স্মার্ট IPTV বক্স।" },
-      { property: "og:title", content: "IPTV সার্ভিস — SignalHub" },
+      { property: "og:title", content: "IPTV সার্ভিস — VIP STAR" },
       { property: "og:image", content: iptvImg },
     ],
   }),

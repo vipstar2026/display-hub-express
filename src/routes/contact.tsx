@@ -5,20 +5,20 @@ import { Phone, Mail, MapPin, Clock, MessageCircle } from "lucide-react";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "যোগাযোগ — SignalHub" },
-      { name: "description", content: "আমাদের শোরুমের ঠিকানা, ফোন নম্বর ও WhatsApp — যেকোনো সময় যোগাযোগ করুন।" },
-      { property: "og:title", content: "যোগাযোগ — SignalHub" },
+      { title: "যোগাযোগ — VIP STAR" },
+      { name: "description", content: "VIP STAR Satellite & Electronics — WhatsApp, ফোন ও শোরুমের ঠিকানা।" },
+      { property: "og:title", content: "যোগাযোগ — VIP STAR" },
     ],
   }),
   component: ContactPage,
 });
 
 const info = [
-  { icon: Phone, label: "ফোন", value: "01XXX-XXXXXX" },
-  { icon: MessageCircle, label: "WhatsApp", value: "01XXX-XXXXXX" },
-  { icon: Mail, label: "ইমেইল", value: "info@signalhub.bd" },
-  { icon: MapPin, label: "শোরুম", value: "মিরপুর-১০, ঢাকা" },
-  { icon: Clock, label: "খোলা থাকে", value: "প্রতিদিন ১০টা — রাত ১০টা" },
+  { icon: MessageCircle, label: "WhatsApp", value: "3316 1049" },
+  { icon: Phone, label: "ফোন", value: "7708 2893" },
+  { icon: Mail, label: "ইমেইল", value: "pppahmed71@gmail.com" },
+  { icon: MapPin, label: "Instagram", value: "@vipstar449" },
+  { icon: Clock, label: "খোলা থাকে", value: "প্রতিদিন সকাল ৯টা — রাত ১০টা" },
 ];
 
 function ContactPage() {

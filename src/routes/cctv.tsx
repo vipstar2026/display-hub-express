@@ -6,9 +6,9 @@ import cctvImg from "@/assets/cctv.jpg";
 export const Route = createFileRoute("/cctv")({
   head: () => ({
     meta: [
-      { title: "CCTV ক্যামেরা ও সিকিউরিটি সিস্টেম — SignalHub" },
+      { title: "CCTV ক্যামেরা ও সিকিউরিটি সিস্টেম — VIP STAR" },
       { name: "description", content: "HD/4K CCTV ক্যামেরা, DVR/NVR, নাইট ভিশন ও মোবাইল মনিটরিং সিস্টেম।" },
-      { property: "og:title", content: "CCTV ক্যামেরা — SignalHub" },
+      { property: "og:title", content: "CCTV ক্যামেরা — VIP STAR" },
       { property: "og:image", content: cctvImg },
     ],
   }),

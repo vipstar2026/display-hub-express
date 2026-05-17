@@ -6,9 +6,9 @@ import heroImg from "@/assets/hero.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SignalHub — IPTV, ডিশ ও CCTV সমাধান" },
+      { title: "VIP STAR — IPTV, ডিশ ও CCTV সমাধান" },
       { name: "description", content: "IPTV সাবস্ক্রিপশন, ডিশ অ্যান্টেনা, CCTV ক্যামেরা ও পেশাদার ইনস্টলেশন সার্ভিস এক জায়গায়।" },
-      { property: "og:title", content: "SignalHub — IPTV, ডিশ ও CCTV সমাধান" },
+      { property: "og:title", content: "VIP STAR — IPTV, ডিশ ও CCTV সমাধান" },
       { property: "og:description", content: "এক ছাদের নিচে সব entertainment ও security প্রযুক্তি।" },
     ],
   }),

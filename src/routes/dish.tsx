@@ -6,9 +6,9 @@ import dishImg from "@/assets/dish.jpg";
 export const Route = createFileRoute("/dish")({
   head: () => ({
     meta: [
-      { title: "ডিশ অ্যান্টেনা ও সরঞ্জাম — SignalHub" },
+      { title: "ডিশ অ্যান্টেনা ও সরঞ্জাম — VIP STAR" },
       { name: "description", content: "প্রিমিয়াম ডিশ অ্যান্টেনা, LNB, রিসিভার ও ক্যাবল — সব ব্র্যান্ডের আসল পণ্য।" },
-      { property: "og:title", content: "ডিশ অ্যান্টেনা — SignalHub" },
+      { property: "og:title", content: "ডিশ অ্যান্টেনা — VIP STAR" },
       { property: "og:image", content: dishImg },
     ],
   }),

@@ -5,9 +5,9 @@ import { Wrench, Settings, RefreshCw, ShieldCheck } from "lucide-react";
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "ইনস্টলেশন ও সার্ভিস — SignalHub" },
+      { title: "ইনস্টলেশন ও সার্ভিস — VIP STAR" },
       { name: "description", content: "ঘরে গিয়ে IPTV, ডিশ ও CCTV সেটআপ, মেরামত ও রক্ষণাবেক্ষণ সেবা।" },
-      { property: "og:title", content: "সার্ভিস — SignalHub" },
+      { property: "og:title", content: "সার্ভিস — VIP STAR" },
     ],
   }),
   component: ServicesPage,

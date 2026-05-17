@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, Satellite } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const nav = [
   { to: "/", label: "হোম" },
@@ -16,11 +17,12 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 glass">
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 font-display font-bold text-lg">
-          <span className="grid place-items-center w-9 h-9 rounded-lg bg-gradient-primary shadow-glow">
-            <Satellite className="w-5 h-5 text-primary-foreground" />
+        <Link to="/" className="flex items-center gap-3 font-display font-bold">
+          <img src={logo} alt="VIP STAR logo" width={40} height={40} className="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(255,80,80,0.45)]" />
+          <span className="leading-tight">
+            <span className="block text-lg text-gradient">VIP STAR</span>
+            <span className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Satellite & Electronics</span>
           </span>
-          <span className="text-gradient">SignalHub</span>
         </Link>
         <nav className="hidden md:flex items-center gap-1">
           {nav.map((n) => (
