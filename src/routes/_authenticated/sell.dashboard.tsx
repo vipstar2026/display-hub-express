@@ -69,9 +69,14 @@ function VendorDashboard() {
               </p>
             </div>
           </div>
-          <Link to="/sell/products/new" className="h-10 px-5 grid place-items-center rounded-md bg-brand text-brand-foreground font-semibold hover:bg-brand-dark transition-smooth">
-            <span className="flex items-center gap-2"><Plus className="w-4 h-4" /> New Product</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/sell/orders" className="h-10 px-4 grid place-items-center rounded-md border border-border hover:bg-accent text-sm font-semibold">
+              <span className="flex items-center gap-2"><Package className="w-4 h-4" /> Orders</span>
+            </Link>
+            <Link to="/sell/products/new" className="h-10 px-5 grid place-items-center rounded-md bg-brand text-brand-foreground font-semibold hover:bg-brand-dark transition-smooth">
+              <span className="flex items-center gap-2"><Plus className="w-4 h-4" /> New Product</span>
+            </Link>
+          </div>
         </div>
 
         {/* Stats */}
