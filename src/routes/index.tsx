@@ -8,6 +8,7 @@ import dishImg from "@/assets/dish.jpg";
 import cctvImg from "@/assets/cctv.jpg";
 import heroImg from "@/assets/hero.jpg";
 import { useI18n } from "@/lib/i18n";
+import { PRODUCTS } from "@/lib/products";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,29 +23,8 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-const flashDeals = [
-  { name: "MAG 524 4K IPTV Box with Wi-Fi 6", price: "QAR 199", oldPrice: "QAR 320", discount: "38%", image: iptvImg, rating: 5, sold: 1240, freeShipping: true },
-  { name: "Hikvision 2MP Dome CCTV Camera", price: "QAR 99", oldPrice: "QAR 150", discount: "34%", image: cctvImg, rating: 5, sold: 850, badge: "Hot" },
-  { name: "Solid 6ft Satellite Dish + LNB Kit", price: "QAR 159", oldPrice: "QAR 240", discount: "34%", image: dishImg, rating: 4, sold: 420 },
-  { name: "Formuler Z11 Pro Android IPTV", price: "QAR 349", oldPrice: "QAR 499", discount: "30%", image: iptvImg, rating: 5, sold: 2100, badge: "Best Seller", freeShipping: true },
-  { name: "WiFi Smart Security Camera 1080p", price: "QAR 79", oldPrice: "QAR 119", discount: "33%", image: cctvImg, rating: 4, sold: 1530, freeShipping: true },
-  { name: "Ku-Band Universal LNB", price: "QAR 29", oldPrice: "QAR 45", discount: "35%", image: dishImg, rating: 4, sold: 660 },
-];
-
-const justForYou = [
-  { name: "4K UHD Satellite Receiver with Wi-Fi & YouTube", price: "QAR 220", oldPrice: "QAR 320", discount: "31%", image: dishImg, rating: 5, sold: 380, freeShipping: true },
-  { name: "Dahua 4MP Bullet Outdoor Color Night Vision", price: "QAR 145", oldPrice: "QAR 210", discount: "30%", image: cctvImg, rating: 5, sold: 290 },
-  { name: "Xtream Mini IPTV Box Full HD Streaming", price: "QAR 119", oldPrice: "QAR 180", discount: "33%", image: iptvImg, rating: 4, sold: 510, freeShipping: true },
-  { name: "16-Channel NVR with Cloud Backup", price: "QAR 399", oldPrice: "QAR 560", discount: "28%", image: cctvImg, rating: 5, sold: 95 },
-  { name: "Premium Coaxial Cable 100ft Copper Core", price: "QAR 49", oldPrice: "QAR 75", discount: "34%", image: dishImg, rating: 4, sold: 720 },
-  { name: "4 Camera CCTV Combo Package + Installation", price: "QAR 599", oldPrice: "QAR 850", discount: "29%", image: cctvImg, rating: 5, sold: 180, badge: "Combo" },
-  { name: "Universal Dish Mount Kit Heavy Duty", price: "QAR 25", oldPrice: "QAR 40", discount: "37%", image: dishImg, rating: 4, sold: 1100, freeShipping: true },
-  { name: "HD Satellite Receiver Pro with USB Record", price: "QAR 89", oldPrice: "QAR 130", discount: "31%", image: dishImg, rating: 4, sold: 640 },
-  { name: "IPTV Premium Subscription 12 Months 500+ Ch", price: "QAR 299", oldPrice: "QAR 450", discount: "33%", image: iptvImg, rating: 5, sold: 3200, badge: "Top", freeShipping: true },
-  { name: "8-Channel DVR with 1TB HDD Slot", price: "QAR 229", oldPrice: "QAR 330", discount: "30%", image: cctvImg, rating: 4, sold: 410 },
-  { name: "Wireless Indoor Pan Tilt Smart Camera", price: "QAR 109", oldPrice: "QAR 160", discount: "31%", image: cctvImg, rating: 5, sold: 870, freeShipping: true },
-  { name: "Backlit Universal Remote for IPTV Boxes", price: "QAR 35", oldPrice: "QAR 55", discount: "36%", image: iptvImg, rating: 4, sold: 530 },
-];
+const flashDeals = PRODUCTS.slice(0, 6);
+const justForYou = PRODUCTS.slice(0, 12);
 
 function useCountdown(targetMs: number) {
   const [now, setNow] = useState<number | null>(null);
