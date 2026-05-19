@@ -1,55 +1,86 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PageShell, PageHero } from "@/components/PageShell";
+import { useMemo, useState } from "react";
+import { PageShell } from "@/components/PageShell";
 import { ProductCard } from "@/components/ProductCard";
+import { getProductsByCategory, type Product } from "@/lib/products";
+import { useI18n } from "@/lib/i18n";
 import iptvImg from "@/assets/iptv.jpg";
 
 export const Route = createFileRoute("/iptv")({
   head: () => ({
     meta: [
-      { title: "IPTV সার্ভিস ও সেট-টপ বক্স — VIP STAR" },
-      { name: "description", content: "৫০০+ লাইভ চ্যানেল, 4K স্ট্রিমিং, ভারতীয়/বাংলা/ইংলিশ প্যাকেজ এবং স্মার্ট IPTV বক্স।" },
-      { property: "og:title", content: "IPTV সার্ভিস — VIP STAR" },
+      { title: "IPTV — VIP STAR" },
+      { name: "description", content: "IPTV boxes, subscriptions and accessories." },
       { property: "og:image", content: iptvImg },
     ],
   }),
-  component: IptvPage,
+  component: () => <CategoryPage category="iptv" img={iptvImg} titleKey="iptv.title" subKey="iptv.sub" />,
 });
 
-const plans = [
-  { name: "Basic প্যাকেজ", price: "৳৩০০/মাস", description: "১৫০+ চ্যানেল, HD কোয়ালিটি, ১ ডিভাইস।", badge: "শুরুর জন্য" },
-  { name: "Premium প্যাকেজ", price: "৳৬০০/মাস", description: "৫০০+ চ্যানেল, 4K, ২ ডিভাইস, ভিডিও অন ডিমান্ড।", badge: "জনপ্রিয়" },
-  { name: "Family প্যাকেজ", price: "৳৯০০/মাস", description: "৮০০+ চ্যানেল, 4K, ৪ ডিভাইস, পুরো OTT অ্যাক্সেস।", badge: "সেরা ডিল" },
-];
+export function CategoryPage({ category, img, titleKey, subKey }: { category: Product["category"]; img: string; titleKey: string; subKey: string }) {
+  const { t } = useI18n();
+  const products = getProductsByCategory(category);
+  const [sort, setSort] = useState<"pop" | "low" | "high" | "rating">("pop");
 
-const boxes = [
-  { name: "MAG 524 IPTV Box", price: "৳৫,৫০০", description: "4K HDR, Wi-Fi 6, দ্রুত প্রসেসর। ১ বছর ওয়ারেন্টি।" },
-  { name: "Formuler Z11 Pro", price: "৳৮,৯০০", description: "Android 11, ডুয়াল ব্যান্ড Wi-Fi, ব্যাকলিট রিমোট।" },
-  { name: "Xtream Mini Box", price: "৳৩,২০০", description: "বাজেট ফ্রেন্ডলি, Full HD স্ট্রিমিং, সহজ সেটআপ।" },
-];
+  const sorted = useMemo(() => {
+    const arr = [...products];
+    if (sort === "low") arr.sort((a, b) => a.price - b.price);
+    else if (sort === "high") arr.sort((a, b) => b.price - a.price);
+    else if (sort === "rating") arr.sort((a, b) => b.rating - a.rating);
+    else arr.sort((a, b) => b.sold - a.sold);
+    return arr;
+  }, [products, sort]);
 
-function IptvPage() {
   return (
     <PageShell>
-      <PageHero
-        eyebrow="IPTV"
-        title="৫০০+ চ্যানেল, এক রিমোটে সব বিনোদন"
-        subtitle="দেশি-বিদেশি চ্যানেল, স্পোর্টস, মুভি ও OTT — সব এক প্যাকেজে। যেকোনো TV-তে চলবে।"
-      />
-      <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="rounded-2xl overflow-hidden border border-border shadow-card">
-          <img src={iptvImg} alt="IPTV setup" width={1280} height={960} loading="lazy" className="w-full h-72 md:h-96 object-cover" />
+      {/* Hero banner */}
+      <section className="mx-auto max-w-7xl px-4 py-4">
+        <div className="relative rounded-md overflow-hidden bg-gradient-brand h-[200px] md:h-[260px] shadow-card">
+          <img src={img} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+          <div className="relative h-full p-6 md:p-10 flex flex-col justify-center text-white">
+            <h1 className="text-2xl md:text-4xl font-extrabold">{t(titleKey)}</h1>
+            <p className="mt-2 text-sm md:text-base text-white/90 max-w-2xl">{t(subKey)}</p>
+          </div>
         </div>
       </section>
-      <section className="mx-auto max-w-7xl px-6">
-        <h2 className="text-3xl font-bold">সাবস্ক্রিপশন প্যাকেজ</h2>
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
-          {plans.map((p) => <ProductCard key={p.name} {...p} />)}
+
+      {/* Toolbar */}
+      <section className="mx-auto max-w-7xl px-4 mt-4">
+        <div className="bg-card rounded-md border border-border shadow-card p-3 flex items-center justify-between flex-wrap gap-2">
+          <div className="text-sm text-muted-foreground">{products.length} {t("cat.products")}</div>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">{t("cat.sort")}:</span>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as typeof sort)}
+              className="border border-border rounded-md px-3 py-1.5 bg-card text-foreground text-sm outline-none focus:border-brand"
+            >
+              <option value="pop">{t("cat.sortPop")}</option>
+              <option value="low">{t("cat.sortLow")}</option>
+              <option value="high">{t("cat.sortHigh")}</option>
+              <option value="rating">{t("cat.sortRating")}</option>
+            </select>
+          </div>
         </div>
       </section>
-      <section className="mx-auto max-w-7xl px-6 py-20">
-        <h2 className="text-3xl font-bold">IPTV সেট-টপ বক্স</h2>
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
-          {boxes.map((p) => <ProductCard key={p.name} {...p} />)}
+
+      {/* Grid */}
+      <section className="mx-auto max-w-7xl px-4 mt-4 mb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {sorted.map((p) => (
+            <ProductCard
+              key={p.id}
+              id={p.id}
+              name={p.name}
+              price={p.price}
+              oldPrice={p.oldPrice}
+              image={p.image}
+              rating={p.rating}
+              sold={p.sold}
+              badge={p.badge}
+              freeShipping={p.freeShipping}
+            />
+          ))}
         </div>
       </section>
     </PageShell>
