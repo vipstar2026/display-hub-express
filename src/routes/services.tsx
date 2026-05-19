@@ -1,45 +1,58 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PageShell, PageHero } from "@/components/PageShell";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { PageShell } from "@/components/PageShell";
+import { useI18n } from "@/lib/i18n";
 import { Wrench, Settings, RefreshCw, ShieldCheck } from "lucide-react";
+import heroImg from "@/assets/hero.jpg";
 
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "ইনস্টলেশন ও সার্ভিস — VIP STAR" },
-      { name: "description", content: "ঘরে গিয়ে IPTV, ডিশ ও CCTV সেটআপ, মেরামত ও রক্ষণাবেক্ষণ সেবা।" },
-      { property: "og:title", content: "সার্ভিস — VIP STAR" },
+      { title: "Installation & Service — VIP STAR" },
+      { name: "description", content: "Professional installation, configuration, repair and maintenance." },
+      { property: "og:image", content: heroImg },
     ],
   }),
   component: ServicesPage,
 });
 
-const services = [
-  { icon: Wrench, title: "নতুন ইনস্টলেশন", desc: "ডিশ, IPTV বক্স বা CCTV — পেশাদার টিম এসে সেটআপ করে দেবে।", price: "৳৫০০ থেকে" },
-  { icon: Settings, title: "কনফিগারেশন", desc: "চ্যানেল টিউনিং, মোবাইল অ্যাপ সেটআপ, নেটওয়ার্ক কনফিগ।", price: "৳৩০০ থেকে" },
-  { icon: RefreshCw, title: "মেরামত সেবা", desc: "সিগন্যাল সমস্যা, রিসিভার বা ক্যামেরা মেরামত।", price: "ফ্রি ডায়াগনসিস" },
-  { icon: ShieldCheck, title: "বার্ষিক মেইনটেন্যান্স", desc: "বছরে ৩ বার ভিজিট, ফ্রি ক্লিনিং ও চেকআপ।", price: "৳২,০০০/বছর" },
-];
-
 function ServicesPage() {
+  const { t } = useI18n();
+  const services = [
+    { icon: Wrench, key: "s1" },
+    { icon: Settings, key: "s2" },
+    { icon: RefreshCw, key: "s3" },
+    { icon: ShieldCheck, key: "s4" },
+  ] as const;
+
   return (
     <PageShell>
-      <PageHero
-        eyebrow="সার্ভিস"
-        title="ইনস্টলেশন থেকে মেইনটেন্যান্স — সব আমাদের কাজ"
-        subtitle="ঢাকা শহরের যেকোনো জায়গায় আমাদের পেশাদার টেকনিশিয়ান টিম পৌঁছে যাবে।"
-      />
-      <section className="mx-auto max-w-7xl px-6 py-20">
-        <div className="grid gap-5 md:grid-cols-2">
+      <section className="mx-auto max-w-7xl px-4 py-4">
+        <div className="relative rounded-md overflow-hidden bg-gradient-brand h-[200px] md:h-[260px] shadow-card">
+          <img src={heroImg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+          <div className="relative h-full p-6 md:p-10 flex flex-col justify-center text-white">
+            <h1 className="text-2xl md:text-4xl font-extrabold">{t("svc.pageTitle")}</h1>
+            <p className="mt-2 text-sm md:text-base text-white/90 max-w-2xl">{t("svc.pageSub")}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 mt-6 mb-10">
+        <div className="grid gap-4 md:grid-cols-2">
           {services.map((s) => (
-            <div key={s.title} className="rounded-2xl p-7 bg-gradient-card border border-border shadow-card hover:border-primary/60 transition-smooth">
+            <div key={s.key} className="bg-card rounded-md border border-border shadow-card p-5 hover:border-brand transition-smooth">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-primary grid place-items-center shadow-glow shrink-0">
-                  <s.icon className="w-6 h-6 text-primary-foreground" />
+                <div className="w-12 h-12 rounded-full bg-gradient-brand grid place-items-center text-white shrink-0">
+                  <s.icon className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-display font-semibold">{s.title}</h3>
-                  <p className="mt-2 text-muted-foreground">{s.desc}</p>
-                  <div className="mt-4 text-sm font-medium text-glow">{s.price}</div>
+                  <h3 className="text-lg font-bold text-foreground">{t(`svc.${s.key}.t`)}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{t(`svc.${s.key}.d`)}</p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-sm font-bold text-sale">{t(`svc.${s.key}.p`)}</span>
+                    <Link to="/contact" className="px-4 py-2 rounded-md bg-brand hover:bg-brand-dark text-white text-sm font-semibold transition-smooth">
+                      {t("svc.bookNow")}
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
