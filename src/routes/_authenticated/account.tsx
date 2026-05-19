@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
-import { User as UserIcon, Heart, ShoppingBag, Store, LogOut, Shield } from "lucide-react";
+import { User as UserIcon, Heart, ShoppingBag, Store, LogOut, Shield, Package } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/account")({
   component: AccountPage,
@@ -68,6 +68,7 @@ function AccountPage() {
           </div>
           <nav className="mt-4 space-y-1 text-sm">
             <a className="flex items-center gap-2 px-3 py-2 rounded-md bg-accent text-brand font-medium"><UserIcon className="w-4 h-4" /> {t("auth.profile")}</a>
+            <Link to="/orders" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Package className="w-4 h-4" /> My Orders</Link>
             <Link to="/wishlist" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Heart className="w-4 h-4" /> {t("header.wishlist")}</Link>
             <Link to="/cart" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><ShoppingBag className="w-4 h-4" /> {t("header.cart")}</Link>
             {isVendor
