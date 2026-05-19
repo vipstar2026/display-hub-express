@@ -1,15 +1,17 @@
 import { Link } from "@tanstack/react-router";
-import { Search, ShoppingCart, User, Heart, Bell, Globe, ChevronDown, Menu } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Bell, Globe, ChevronDown, Menu, LogOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import logo from "@/assets/logo.png";
 import { LANGS, useI18n, type Lang } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
+import { useAuth } from "@/lib/auth";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const { lang, setLang, t } = useI18n();
   const { count } = useCart();
+  const { user, signOut } = useAuth();
   const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,8 +74,18 @@ export function SiteHeader() {
               )}
             </div>
             <span className="opacity-70 hidden sm:inline">|</span>
-            <Link to="/contact" className="hidden sm:inline hover:underline">{t("top.login")}</Link>
-            <Link to="/contact" className="hidden sm:inline hover:underline">{t("top.signup")}</Link>
+            <span className="opacity-70 hidden sm:inline">|</span>
+            {user ? (
+              <>
+                <Link to="/account" className="hidden sm:inline hover:underline truncate max-w-32">{user.email}</Link>
+                <button onClick={() => signOut()} className="hidden sm:flex items-center gap-1 hover:underline"><LogOut className="w-3 h-3" /> {t("auth.signOut")}</button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="hidden sm:inline hover:underline">{t("top.login")}</Link>
+                <Link to="/signup" className="hidden sm:inline hover:underline">{t("top.signup")}</Link>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -107,7 +119,7 @@ export function SiteHeader() {
               <Heart className="w-5 h-5" />
               <span className="text-[10px] mt-0.5">{t("header.wishlist")}</span>
             </Link>
-            <Link to="/contact" className="hidden sm:flex flex-col items-center text-foreground hover:text-brand transition-smooth">
+            <Link to={user ? "/account" : "/login"} className="hidden sm:flex flex-col items-center text-foreground hover:text-brand transition-smooth">
               <User className="w-5 h-5" />
               <span className="text-[10px] mt-0.5">{t("header.account")}</span>
             </Link>
