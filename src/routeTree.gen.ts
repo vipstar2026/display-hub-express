@@ -22,6 +22,10 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
+import { Route as AuthenticatedSellRegisterRouteImport } from './routes/_authenticated/sell.register'
+import { Route as AuthenticatedSellDashboardRouteImport } from './routes/_authenticated/sell.dashboard'
+import { Route as AuthenticatedSellProductsNewRouteImport } from './routes/_authenticated/sell.products.new'
+import { Route as AuthenticatedSellProductsIdRouteImport } from './routes/_authenticated/sell.products.$id'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -87,6 +91,30 @@ const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSellRegisterRoute =
+  AuthenticatedSellRegisterRouteImport.update({
+    id: '/sell/register',
+    path: '/sell/register',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedSellDashboardRoute =
+  AuthenticatedSellDashboardRouteImport.update({
+    id: '/sell/dashboard',
+    path: '/sell/dashboard',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedSellProductsNewRoute =
+  AuthenticatedSellProductsNewRouteImport.update({
+    id: '/sell/products/new',
+    path: '/sell/products/new',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedSellProductsIdRoute =
+  AuthenticatedSellProductsIdRouteImport.update({
+    id: '/sell/products/$id',
+    path: '/sell/products/$id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -101,6 +129,10 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof WishlistRoute
   '/account': typeof AuthenticatedAccountRoute
   '/product/$id': typeof ProductIdRoute
+  '/sell/dashboard': typeof AuthenticatedSellDashboardRoute
+  '/sell/register': typeof AuthenticatedSellRegisterRoute
+  '/sell/products/$id': typeof AuthenticatedSellProductsIdRoute
+  '/sell/products/new': typeof AuthenticatedSellProductsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -115,6 +147,10 @@ export interface FileRoutesByTo {
   '/wishlist': typeof WishlistRoute
   '/account': typeof AuthenticatedAccountRoute
   '/product/$id': typeof ProductIdRoute
+  '/sell/dashboard': typeof AuthenticatedSellDashboardRoute
+  '/sell/register': typeof AuthenticatedSellRegisterRoute
+  '/sell/products/$id': typeof AuthenticatedSellProductsIdRoute
+  '/sell/products/new': typeof AuthenticatedSellProductsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -131,6 +167,10 @@ export interface FileRoutesById {
   '/wishlist': typeof WishlistRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/product/$id': typeof ProductIdRoute
+  '/_authenticated/sell/dashboard': typeof AuthenticatedSellDashboardRoute
+  '/_authenticated/sell/register': typeof AuthenticatedSellRegisterRoute
+  '/_authenticated/sell/products/$id': typeof AuthenticatedSellProductsIdRoute
+  '/_authenticated/sell/products/new': typeof AuthenticatedSellProductsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,6 +187,10 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/account'
     | '/product/$id'
+    | '/sell/dashboard'
+    | '/sell/register'
+    | '/sell/products/$id'
+    | '/sell/products/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -161,6 +205,10 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/account'
     | '/product/$id'
+    | '/sell/dashboard'
+    | '/sell/register'
+    | '/sell/products/$id'
+    | '/sell/products/new'
   id:
     | '__root__'
     | '/'
@@ -176,6 +224,10 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/_authenticated/account'
     | '/product/$id'
+    | '/_authenticated/sell/dashboard'
+    | '/_authenticated/sell/register'
+    | '/_authenticated/sell/products/$id'
+    | '/_authenticated/sell/products/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -286,15 +338,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/sell/register': {
+      id: '/_authenticated/sell/register'
+      path: '/sell/register'
+      fullPath: '/sell/register'
+      preLoaderRoute: typeof AuthenticatedSellRegisterRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/sell/dashboard': {
+      id: '/_authenticated/sell/dashboard'
+      path: '/sell/dashboard'
+      fullPath: '/sell/dashboard'
+      preLoaderRoute: typeof AuthenticatedSellDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/sell/products/new': {
+      id: '/_authenticated/sell/products/new'
+      path: '/sell/products/new'
+      fullPath: '/sell/products/new'
+      preLoaderRoute: typeof AuthenticatedSellProductsNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/sell/products/$id': {
+      id: '/_authenticated/sell/products/$id'
+      path: '/sell/products/$id'
+      fullPath: '/sell/products/$id'
+      preLoaderRoute: typeof AuthenticatedSellProductsIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
+  AuthenticatedSellDashboardRoute: typeof AuthenticatedSellDashboardRoute
+  AuthenticatedSellRegisterRoute: typeof AuthenticatedSellRegisterRoute
+  AuthenticatedSellProductsIdRoute: typeof AuthenticatedSellProductsIdRoute
+  AuthenticatedSellProductsNewRoute: typeof AuthenticatedSellProductsNewRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
+  AuthenticatedSellDashboardRoute: AuthenticatedSellDashboardRoute,
+  AuthenticatedSellRegisterRoute: AuthenticatedSellRegisterRoute,
+  AuthenticatedSellProductsIdRoute: AuthenticatedSellProductsIdRoute,
+  AuthenticatedSellProductsNewRoute: AuthenticatedSellProductsNewRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -318,3 +406,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
