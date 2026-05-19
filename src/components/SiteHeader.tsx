@@ -3,11 +3,13 @@ import { Search, ShoppingCart, User, Heart, Bell, Globe, ChevronDown, Menu } fro
 import { useEffect, useRef, useState } from "react";
 import logo from "@/assets/logo.png";
 import { LANGS, useI18n, type Lang } from "@/lib/i18n";
+import { useCart } from "@/lib/cart";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const { lang, setLang, t } = useI18n();
+  const { count } = useCart();
   const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -101,21 +103,21 @@ export function SiteHeader() {
           </form>
 
           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-            <button className="hidden sm:flex flex-col items-center text-foreground hover:text-brand transition-smooth">
+            <Link to="/wishlist" className="hidden sm:flex flex-col items-center text-foreground hover:text-brand transition-smooth">
               <Heart className="w-5 h-5" />
               <span className="text-[10px] mt-0.5">{t("header.wishlist")}</span>
-            </button>
+            </Link>
             <Link to="/contact" className="hidden sm:flex flex-col items-center text-foreground hover:text-brand transition-smooth">
               <User className="w-5 h-5" />
               <span className="text-[10px] mt-0.5">{t("header.account")}</span>
             </Link>
-            <button className="relative flex flex-col items-center text-foreground hover:text-brand transition-smooth">
+            <Link to="/cart" className="relative flex flex-col items-center text-foreground hover:text-brand transition-smooth">
               <div className="relative">
                 <ShoppingCart className="w-5 h-5" />
-                <span className="absolute -top-2 -end-2 bg-sale text-white text-[10px] rounded-full w-4 h-4 grid place-items-center font-bold">0</span>
+                <span className="absolute -top-2 -end-2 bg-sale text-white text-[10px] rounded-full min-w-4 h-4 px-1 grid place-items-center font-bold">{count}</span>
               </div>
               <span className="text-[10px] mt-0.5">{t("header.cart")}</span>
-            </button>
+            </Link>
             <button onClick={() => setOpen((v) => !v)} className="md:hidden text-foreground">
               <Menu className="w-6 h-6" />
             </button>
