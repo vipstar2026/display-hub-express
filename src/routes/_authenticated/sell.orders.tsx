@@ -58,7 +58,7 @@ function VendorOrdersPage() {
   }, [user]);
 
   async function updateStatus(id: string, status: string) {
-    const { error } = await supabase.from("order_items").update({ status }).eq("id", id);
+    const { error } = await supabase.from("order_items").update({ status: status as any }).eq("id", id);
     if (error) return toast.error(error.message);
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, status } : it)));
     toast.success("Status updated");
