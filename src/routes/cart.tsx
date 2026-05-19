@@ -82,9 +82,9 @@ function CartPage() {
                 <span className="font-bold">{t("cart.total")}</span><span className="font-extrabold text-sale">QAR {total}</span>
               </div>
             </div>
-            <button className="mt-5 w-full h-12 rounded-md bg-sale hover:opacity-90 text-white font-semibold transition-smooth">
+            <Link to="/checkout" className="mt-5 w-full h-12 rounded-md bg-sale hover:opacity-90 text-white font-semibold flex items-center justify-center transition-smooth">
               {t("cart.checkout")}
-            </button>
+            </Link>
             <Link to="/" className="mt-2 block text-center text-sm text-brand hover:underline">{t("cart.continue")}</Link>
           </aside>
         </div>
