@@ -21,9 +21,13 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
+import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedSellRegisterRouteImport } from './routes/_authenticated/sell.register'
+import { Route as AuthenticatedSellOrdersRouteImport } from './routes/_authenticated/sell.orders'
 import { Route as AuthenticatedSellDashboardRouteImport } from './routes/_authenticated/sell.dashboard'
+import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders.$id'
 import { Route as AuthenticatedSellProductsNewRouteImport } from './routes/_authenticated/sell.products.new'
 import { Route as AuthenticatedSellProductsIdRouteImport } from './routes/_authenticated/sell.products.$id'
 
@@ -86,6 +90,16 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
   id: '/account',
   path: '/account',
@@ -97,12 +111,22 @@ const AuthenticatedSellRegisterRoute =
     path: '/sell/register',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedSellOrdersRoute = AuthenticatedSellOrdersRouteImport.update({
+  id: '/sell/orders',
+  path: '/sell/orders',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedSellDashboardRoute =
   AuthenticatedSellDashboardRouteImport.update({
     id: '/sell/dashboard',
     path: '/sell/dashboard',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedOrdersIdRoute = AuthenticatedOrdersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedOrdersRoute,
+} as any)
 const AuthenticatedSellProductsNewRoute =
   AuthenticatedSellProductsNewRouteImport.update({
     id: '/sell/products/new',
@@ -128,8 +152,12 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/wishlist': typeof WishlistRoute
   '/account': typeof AuthenticatedAccountRoute
+  '/checkout': typeof AuthenticatedCheckoutRoute
+  '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/product/$id': typeof ProductIdRoute
+  '/orders/$id': typeof AuthenticatedOrdersIdRoute
   '/sell/dashboard': typeof AuthenticatedSellDashboardRoute
+  '/sell/orders': typeof AuthenticatedSellOrdersRoute
   '/sell/register': typeof AuthenticatedSellRegisterRoute
   '/sell/products/$id': typeof AuthenticatedSellProductsIdRoute
   '/sell/products/new': typeof AuthenticatedSellProductsNewRoute
@@ -146,8 +174,12 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/wishlist': typeof WishlistRoute
   '/account': typeof AuthenticatedAccountRoute
+  '/checkout': typeof AuthenticatedCheckoutRoute
+  '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/product/$id': typeof ProductIdRoute
+  '/orders/$id': typeof AuthenticatedOrdersIdRoute
   '/sell/dashboard': typeof AuthenticatedSellDashboardRoute
+  '/sell/orders': typeof AuthenticatedSellOrdersRoute
   '/sell/register': typeof AuthenticatedSellRegisterRoute
   '/sell/products/$id': typeof AuthenticatedSellProductsIdRoute
   '/sell/products/new': typeof AuthenticatedSellProductsNewRoute
@@ -166,8 +198,12 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/wishlist': typeof WishlistRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
+  '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
+  '/_authenticated/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/product/$id': typeof ProductIdRoute
+  '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRoute
   '/_authenticated/sell/dashboard': typeof AuthenticatedSellDashboardRoute
+  '/_authenticated/sell/orders': typeof AuthenticatedSellOrdersRoute
   '/_authenticated/sell/register': typeof AuthenticatedSellRegisterRoute
   '/_authenticated/sell/products/$id': typeof AuthenticatedSellProductsIdRoute
   '/_authenticated/sell/products/new': typeof AuthenticatedSellProductsNewRoute
@@ -186,8 +222,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/wishlist'
     | '/account'
+    | '/checkout'
+    | '/orders'
     | '/product/$id'
+    | '/orders/$id'
     | '/sell/dashboard'
+    | '/sell/orders'
     | '/sell/register'
     | '/sell/products/$id'
     | '/sell/products/new'
@@ -204,8 +244,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/wishlist'
     | '/account'
+    | '/checkout'
+    | '/orders'
     | '/product/$id'
+    | '/orders/$id'
     | '/sell/dashboard'
+    | '/sell/orders'
     | '/sell/register'
     | '/sell/products/$id'
     | '/sell/products/new'
@@ -223,8 +267,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/wishlist'
     | '/_authenticated/account'
+    | '/_authenticated/checkout'
+    | '/_authenticated/orders'
     | '/product/$id'
+    | '/_authenticated/orders/$id'
     | '/_authenticated/sell/dashboard'
+    | '/_authenticated/sell/orders'
     | '/_authenticated/sell/register'
     | '/_authenticated/sell/products/$id'
     | '/_authenticated/sell/products/new'
@@ -331,6 +379,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/orders': {
+      id: '/_authenticated/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AuthenticatedOrdersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/checkout': {
+      id: '/_authenticated/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof AuthenticatedCheckoutRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/account': {
       id: '/_authenticated/account'
       path: '/account'
@@ -345,12 +407,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSellRegisterRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/sell/orders': {
+      id: '/_authenticated/sell/orders'
+      path: '/sell/orders'
+      fullPath: '/sell/orders'
+      preLoaderRoute: typeof AuthenticatedSellOrdersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/sell/dashboard': {
       id: '/_authenticated/sell/dashboard'
       path: '/sell/dashboard'
       fullPath: '/sell/dashboard'
       preLoaderRoute: typeof AuthenticatedSellDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/orders/$id': {
+      id: '/_authenticated/orders/$id'
+      path: '/$id'
+      fullPath: '/orders/$id'
+      preLoaderRoute: typeof AuthenticatedOrdersIdRouteImport
+      parentRoute: typeof AuthenticatedOrdersRoute
     }
     '/_authenticated/sell/products/new': {
       id: '/_authenticated/sell/products/new'
@@ -369,9 +445,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedOrdersRouteChildren {
+  AuthenticatedOrdersIdRoute: typeof AuthenticatedOrdersIdRoute
+}
+
+const AuthenticatedOrdersRouteChildren: AuthenticatedOrdersRouteChildren = {
+  AuthenticatedOrdersIdRoute: AuthenticatedOrdersIdRoute,
+}
+
+const AuthenticatedOrdersRouteWithChildren =
+  AuthenticatedOrdersRoute._addFileChildren(AuthenticatedOrdersRouteChildren)
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
+  AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
+  AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRouteWithChildren
   AuthenticatedSellDashboardRoute: typeof AuthenticatedSellDashboardRoute
+  AuthenticatedSellOrdersRoute: typeof AuthenticatedSellOrdersRoute
   AuthenticatedSellRegisterRoute: typeof AuthenticatedSellRegisterRoute
   AuthenticatedSellProductsIdRoute: typeof AuthenticatedSellProductsIdRoute
   AuthenticatedSellProductsNewRoute: typeof AuthenticatedSellProductsNewRoute
@@ -379,7 +469,10 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
+  AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
+  AuthenticatedOrdersRoute: AuthenticatedOrdersRouteWithChildren,
   AuthenticatedSellDashboardRoute: AuthenticatedSellDashboardRoute,
+  AuthenticatedSellOrdersRoute: AuthenticatedSellOrdersRoute,
   AuthenticatedSellRegisterRoute: AuthenticatedSellRegisterRoute,
   AuthenticatedSellProductsIdRoute: AuthenticatedSellProductsIdRoute,
   AuthenticatedSellProductsNewRoute: AuthenticatedSellProductsNewRoute,
