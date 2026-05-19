@@ -43,7 +43,7 @@ export function SiteHeader() {
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline">{t("top.saveApp")}</span>
             <span className="hidden md:inline opacity-70">|</span>
-            <Link to="/services" className="hidden md:inline hover:underline">{t("top.becomeSeller")}</Link>
+            <Link to="/sell/register" className="hidden md:inline hover:underline">{t("top.becomeSeller")}</Link>
             <span className="hidden md:inline opacity-70">|</span>
             <span className="hidden md:inline">{t("top.help")}</span>
           </div>
