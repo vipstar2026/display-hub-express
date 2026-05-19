@@ -162,7 +162,7 @@ function HomePage() {
           </div>
           <div className="p-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {flashDeals.map((p) => (
-              <ProductCard key={p.name} {...p} />
+              <ProductCard key={p.id} {...p} />
             ))}
           </div>
         </div>
@@ -196,7 +196,7 @@ function HomePage() {
         </div>
         <div className="bg-card border border-border border-t-0 rounded-b-md p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {justForYou.map((p) => (
-            <ProductCard key={p.name} {...p} />
+            <ProductCard key={p.id} {...p} />
           ))}
         </div>
         <div className="mt-4 text-center">
