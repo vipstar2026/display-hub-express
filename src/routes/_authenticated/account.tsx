@@ -70,7 +70,9 @@ function AccountPage() {
             <a className="flex items-center gap-2 px-3 py-2 rounded-md bg-accent text-brand font-medium"><UserIcon className="w-4 h-4" /> {t("auth.profile")}</a>
             <Link to="/wishlist" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Heart className="w-4 h-4" /> {t("header.wishlist")}</Link>
             <Link to="/cart" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><ShoppingBag className="w-4 h-4" /> {t("header.cart")}</Link>
-            {isVendor && <a className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Store className="w-4 h-4" /> {t("auth.vendorDash")}</a>}
+            {isVendor
+              ? <Link to="/sell/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Store className="w-4 h-4" /> {t("auth.vendorDash")}</Link>
+              : <Link to="/sell/register" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Store className="w-4 h-4" /> Become a Seller</Link>}
             {isAdmin && <a className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Shield className="w-4 h-4" /> {t("auth.admin")}</a>}
             <button onClick={onSignOut} className="w-full text-start flex items-center gap-2 px-3 py-2 rounded-md hover:bg-sale/10 text-sale font-medium">
               <LogOut className="w-4 h-4" /> {t("auth.signOut")}
