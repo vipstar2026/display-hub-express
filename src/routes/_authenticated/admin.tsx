@@ -47,14 +47,14 @@ function AdminLayout() {
 
   if (!isAdmin) return null;
 
-  const items = [
+  const items: { to: "/admin" | "/admin/vendors" | "/admin/products" | "/admin/categories" | "/admin/orders" | "/admin/users"; icon: typeof LayoutDashboard; label: string; exact?: boolean }[] = [
     { to: "/admin", icon: LayoutDashboard, label: "Overview", exact: true },
     { to: "/admin/vendors", icon: Store, label: "Vendors" },
     { to: "/admin/products", icon: Package, label: "Products" },
     { to: "/admin/categories", icon: ListTree, label: "Categories" },
     { to: "/admin/orders", icon: ShoppingBag, label: "Orders" },
     { to: "/admin/users", icon: Users, label: "Users & Roles" },
-  ] as const;
+  ];
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");

@@ -14,7 +14,7 @@ type Vendor = {
   slug: string;
   description: string | null;
   logo_url: string | null;
-  status: "pending" | "approved" | "rejected" | "suspended";
+  status: "pending" | "approved" | "suspended";
   owner_id: string;
   created_at: string;
 };
@@ -22,14 +22,13 @@ type Vendor = {
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
   approved: "bg-emerald-100 text-emerald-800",
-  rejected: "bg-rose-100 text-rose-800",
   suspended: "bg-slate-200 text-slate-700",
 };
 
 function AdminVendors() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected" | "suspended">("all");
+  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "suspended">("all");
 
   async function load() {
     setLoading(true);
@@ -58,7 +57,7 @@ function AdminVendors() {
           <p className="text-sm text-muted-foreground mt-1">Approve, reject, or suspend seller stores.</p>
         </div>
         <div className="flex gap-1 bg-card border border-border rounded-md p-1">
-          {(["all", "pending", "approved", "rejected", "suspended"] as const).map((s) => (
+          {(["all", "pending", "approved", "suspended"] as const).map((s) => (
             <button
               key={s}
               onClick={() => setFilter(s)}
@@ -108,11 +107,11 @@ function AdminVendors() {
                       {v.status !== "approved" && (
                         <button onClick={() => setStatus(v.id, "approved")} className="p-1.5 rounded hover:bg-emerald-100 text-emerald-700" title="Approve"><Check className="w-4 h-4" /></button>
                       )}
-                      {v.status !== "rejected" && (
-                        <button onClick={() => setStatus(v.id, "rejected")} className="p-1.5 rounded hover:bg-rose-100 text-rose-700" title="Reject"><X className="w-4 h-4" /></button>
-                      )}
                       {v.status !== "suspended" && (
                         <button onClick={() => setStatus(v.id, "suspended")} className="p-1.5 rounded hover:bg-slate-200 text-slate-700" title="Suspend"><Pause className="w-4 h-4" /></button>
+                      )}
+                      {v.status !== "pending" && (
+                        <button onClick={() => setStatus(v.id, "pending")} className="p-1.5 rounded hover:bg-amber-100 text-amber-700" title="Set pending"><X className="w-4 h-4" /></button>
                       )}
                     </div>
                   </td>

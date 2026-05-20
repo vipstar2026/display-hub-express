@@ -16,7 +16,7 @@ type Product = {
   sale_price: number | null;
   currency: string;
   stock: number;
-  status: "draft" | "active" | "archived";
+  status: "draft" | "active" | "inactive" | "out_of_stock";
   vendor_id: string;
   created_at: string;
   vendors: { name: string } | null;
@@ -25,7 +25,7 @@ type Product = {
 function AdminProducts() {
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | "active" | "draft" | "archived">("all");
+  const [filter, setFilter] = useState<"all" | "active" | "draft" | "inactive" | "out_of_stock">("all");
   const [search, setSearch] = useState("");
 
   async function load() {
@@ -68,8 +68,8 @@ function AdminProducts() {
           <p className="text-sm text-muted-foreground mt-1">Moderate listings across all vendors.</p>
         </div>
         <div className="flex gap-1 bg-card border border-border rounded-md p-1">
-          {(["all", "active", "draft", "archived"] as const).map((s) => (
-            <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1.5 text-xs rounded capitalize ${filter === s ? "bg-brand text-brand-foreground font-semibold" : "text-foreground hover:bg-accent"}`}>{s}</button>
+          {(["all", "active", "draft", "inactive", "out_of_stock"] as const).map((s) => (
+            <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1.5 text-xs rounded capitalize ${filter === s ? "bg-brand text-brand-foreground font-semibold" : "text-foreground hover:bg-accent"}`}>{s.replace("_", " ")}</button>
           ))}
         </div>
       </div>
@@ -117,7 +117,8 @@ function AdminProducts() {
                     >
                       <option value="draft">draft</option>
                       <option value="active">active</option>
-                      <option value="archived">archived</option>
+                      <option value="inactive">inactive</option>
+                      <option value="out_of_stock">out of stock</option>
                     </select>
                   </td>
                   <td className="p-3 text-end">
