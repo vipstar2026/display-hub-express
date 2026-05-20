@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
 import { ProductCard } from "@/components/ProductCard";
-import { getProductsByCategory, type Product } from "@/lib/products";
 import { useI18n } from "@/lib/i18n";
+import { useCategoryProducts } from "@/lib/db-products";
+import { Loader2 } from "lucide-react";
 import iptvImg from "@/assets/iptv.jpg";
 
 export const Route = createFileRoute("/iptv")({
@@ -17,23 +18,23 @@ export const Route = createFileRoute("/iptv")({
   component: () => <CategoryPage category="iptv" img={iptvImg} titleKey="iptv.title" subKey="iptv.sub" />,
 });
 
-export function CategoryPage({ category, img, titleKey, subKey }: { category: Product["category"]; img: string; titleKey: string; subKey: string }) {
+export function CategoryPage({ category, img, titleKey, subKey }: { category: string; img: string; titleKey: string; subKey: string }) {
   const { t } = useI18n();
-  const products = getProductsByCategory(category);
+  const { items, loading } = useCategoryProducts(category);
   const [sort, setSort] = useState<"pop" | "low" | "high" | "rating">("pop");
 
   const sorted = useMemo(() => {
-    const arr = [...products];
-    if (sort === "low") arr.sort((a, b) => a.price - b.price);
-    else if (sort === "high") arr.sort((a, b) => b.price - a.price);
-    else if (sort === "rating") arr.sort((a, b) => b.rating - a.rating);
-    else arr.sort((a, b) => b.sold - a.sold);
+    const arr = [...items];
+    const price = (p: typeof items[number]) => Number(p.sale_price ?? p.price);
+    if (sort === "low") arr.sort((a, b) => price(a) - price(b));
+    else if (sort === "high") arr.sort((a, b) => price(b) - price(a));
+    else if (sort === "rating") arr.sort((a, b) => Number(b.rating) - Number(a.rating));
+    else arr.sort((a, b) => b.sales_count - a.sales_count);
     return arr;
-  }, [products, sort]);
+  }, [items, sort]);
 
   return (
     <PageShell>
-      {/* Hero banner */}
       <section className="mx-auto max-w-7xl px-4 py-4">
         <div className="relative rounded-md overflow-hidden bg-gradient-brand h-[200px] md:h-[260px] shadow-card">
           <img src={img} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
@@ -44,10 +45,9 @@ export function CategoryPage({ category, img, titleKey, subKey }: { category: Pr
         </div>
       </section>
 
-      {/* Toolbar */}
       <section className="mx-auto max-w-7xl px-4 mt-4">
         <div className="bg-card rounded-md border border-border shadow-card p-3 flex items-center justify-between flex-wrap gap-2">
-          <div className="text-sm text-muted-foreground">{products.length} {t("cat.products")}</div>
+          <div className="text-sm text-muted-foreground">{items.length} {t("cat.products")}</div>
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">{t("cat.sort")}:</span>
             <select
@@ -64,24 +64,29 @@ export function CategoryPage({ category, img, titleKey, subKey }: { category: Pr
         </div>
       </section>
 
-      {/* Grid */}
       <section className="mx-auto max-w-7xl px-4 mt-4 mb-10">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {sorted.map((p) => (
-            <ProductCard
-              key={p.id}
-              id={p.id}
-              name={p.name}
-              price={p.price}
-              oldPrice={p.oldPrice}
-              image={p.image}
-              rating={p.rating}
-              sold={p.sold}
-              badge={p.badge}
-              freeShipping={p.freeShipping}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid place-items-center py-20"><Loader2 className="w-6 h-6 animate-spin text-brand" /></div>
+        ) : sorted.length === 0 ? (
+          <div className="bg-card border border-border rounded-xl p-12 text-center text-muted-foreground">
+            لا توجد منتجات بعد في هذا القسم.
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {sorted.map((p) => (
+              <ProductCard
+                key={p.id}
+                id={p.id}
+                name={p.title}
+                price={Number(p.sale_price ?? p.price)}
+                oldPrice={p.sale_price ? Number(p.price) : undefined}
+                image={p.image}
+                rating={Number(p.rating)}
+                sold={p.sales_count}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </PageShell>
   );

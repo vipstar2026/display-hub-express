@@ -1,8 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { slugify } from "@/lib/uploads";
 import { toast } from "sonner";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
   component: AdminProducts,
@@ -23,10 +25,34 @@ type Product = {
 };
 
 function AdminProducts() {
+  const { user } = useAuth();
+  const nav = useNavigate();
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
   const [filter, setFilter] = useState<"all" | "active" | "draft" | "inactive" | "out_of_stock">("all");
   const [search, setSearch] = useState("");
+
+  async function ensureAdminVendor(): Promise<string | null> {
+    if (!user) return null;
+    const { data: existing } = await supabase.from("vendors").select("id").eq("owner_id", user.id).maybeSingle();
+    if (existing) return existing.id;
+    const slug = `admin-store-${Math.random().toString(36).slice(2, 6)}`;
+    const { data, error } = await supabase
+      .from("vendors")
+      .insert({ owner_id: user.id, name: "Admin Store", slug, description: "Official store" })
+      .select("id")
+      .single();
+    if (error) { toast.error(error.message); return null; }
+    return data.id;
+  }
+
+  async function handleNew() {
+    setCreating(true);
+    const vid = await ensureAdminVendor();
+    setCreating(false);
+    if (vid) nav({ to: "/sell/products/new" });
+  }
 
   async function load() {
     setLoading(true);
@@ -67,10 +93,15 @@ function AdminProducts() {
           <h1 className="text-2xl font-bold text-foreground">Products</h1>
           <p className="text-sm text-muted-foreground mt-1">Moderate listings across all vendors.</p>
         </div>
-        <div className="flex gap-1 bg-card border border-border rounded-md p-1">
-          {(["all", "active", "draft", "inactive", "out_of_stock"] as const).map((s) => (
-            <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1.5 text-xs rounded capitalize ${filter === s ? "bg-brand text-brand-foreground font-semibold" : "text-foreground hover:bg-accent"}`}>{s.replace("_", " ")}</button>
-          ))}
+        <div className="flex items-center gap-2 flex-wrap">
+          <button onClick={handleNew} disabled={creating} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-brand text-brand-foreground text-sm font-semibold hover:bg-brand-dark disabled:opacity-50">
+            {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Add Product
+          </button>
+          <div className="flex gap-1 bg-card border border-border rounded-md p-1">
+            {(["all", "active", "draft", "inactive", "out_of_stock"] as const).map((s) => (
+              <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1.5 text-xs rounded capitalize ${filter === s ? "bg-brand text-brand-foreground font-semibold" : "text-foreground hover:bg-accent"}`}>{s.replace("_", " ")}</button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -122,7 +153,10 @@ function AdminProducts() {
                     </select>
                   </td>
                   <td className="p-3 text-end">
-                    <button onClick={() => remove(p.id)} className="p-1.5 rounded hover:bg-rose-100 text-rose-700" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                    <div className="inline-flex gap-1">
+                      <button onClick={() => nav({ to: "/sell/products/$id", params: { id: p.id } })} className="p-1.5 rounded hover:bg-accent text-foreground" title="Edit"><Pencil className="w-4 h-4" /></button>
+                      <button onClick={() => remove(p.id)} className="p-1.5 rounded hover:bg-rose-100 text-rose-700" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                    </div>
                   </td>
                 </tr>
               ))}
