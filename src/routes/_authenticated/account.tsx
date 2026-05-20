@@ -74,7 +74,7 @@ function AccountPage() {
             {isVendor
               ? <Link to="/sell/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Store className="w-4 h-4" /> {t("auth.vendorDash")}</Link>
               : <Link to="/sell/register" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Store className="w-4 h-4" /> Become a Seller</Link>}
-            {isAdmin && <a className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Shield className="w-4 h-4" /> {t("auth.admin")}</a>}
+            {isAdmin && <Link to="/admin" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Shield className="w-4 h-4" /> {t("auth.admin")}</Link>}
             <button onClick={onSignOut} className="w-full text-start flex items-center gap-2 px-3 py-2 rounded-md hover:bg-sale/10 text-sale font-medium">
               <LogOut className="w-4 h-4" /> {t("auth.signOut")}
             </button>
