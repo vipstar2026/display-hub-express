@@ -5,6 +5,7 @@ import logo from "@/assets/logo.png";
 import { LANGS, useI18n, type Lang } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
+import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -73,7 +74,8 @@ export function SiteHeader() {
                 </div>
               )}
             </div>
-            <span className="opacity-70 hidden sm:inline">|</span>
+            <span className="opacity-70">|</span>
+            <CurrencySwitcher compact />
             <span className="opacity-70 hidden sm:inline">|</span>
             {user ? (
               <>
