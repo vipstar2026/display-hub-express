@@ -284,11 +284,11 @@ function CheckoutPage() {
             <aside className="bg-card border border-border rounded-xl p-5 h-fit lg:sticky lg:top-32">
               <h2 className="font-bold text-foreground">Order summary</h2>
               <div className="mt-3 space-y-2 text-sm">
-                <Row label="Subtotal" value={`QAR ${subtotal.toFixed(2)}`} />
-                <Row label="Shipping" value={shipping === 0 ? "Free" : `QAR ${shipping}`} />
+                <Row label="Subtotal" value={format(subtotal)} />
+                <Row label="Shipping" value={shipping === 0 ? "Free" : format(shipping)} />
                 <div className="border-t border-border pt-2 mt-2 flex justify-between text-base">
                   <span className="font-bold">Total</span>
-                  <span className="font-extrabold text-sale">QAR {total.toFixed(2)}</span>
+                  <span className="font-extrabold text-sale">{format(total)}</span>
                 </div>
               </div>
               <button
