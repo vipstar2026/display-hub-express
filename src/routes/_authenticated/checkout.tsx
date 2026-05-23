@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
+import { useCurrency, type CurrencyCode } from "@/lib/currency";
 import { toast } from "sonner";
 import { MapPin, Package, CreditCard, Truck, Loader2 } from "lucide-react";
 
@@ -40,6 +41,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 function CheckoutPage() {
   const { user } = useAuth();
   const { items, clear } = useCart();
+  const { format } = useCurrency();
   const nav = useNavigate();
 
   const [products, setProducts] = useState<DBProduct[]>([]);
@@ -242,9 +244,9 @@ function CheckoutPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-foreground line-clamp-2">{r.product.title}</div>
-                        <div className="text-xs text-muted-foreground mt-1">QAR {r.unit} × {r.qty}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{format(r.unit, (r.product.currency as CurrencyCode) || undefined)} × {r.qty}</div>
                       </div>
-                      <div className="text-sm font-bold text-sale">QAR {r.line.toFixed(2)}</div>
+                      <div className="text-sm font-bold text-sale">{format(r.line, (r.product.currency as CurrencyCode) || undefined)}</div>
                     </div>
                   ))}
                 </div>

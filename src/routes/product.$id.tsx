@@ -4,6 +4,7 @@ import { useCart } from "@/lib/cart";
 import { useI18n } from "@/lib/i18n";
 import { useState } from "react";
 import { useDbProduct } from "@/lib/db-products";
+import { useCurrency, type CurrencyCode } from "@/lib/currency";
 import { Star, Heart, Minus, Plus, ShoppingCart, Truck, ShieldCheck, RotateCcw, Check, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/product/$id")({
@@ -17,6 +18,7 @@ function ProductPage() {
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const { product, loading } = useDbProduct(id);
+  const { format } = useCurrency();
 
   if (loading) {
     return (
@@ -98,8 +100,8 @@ function ProductPage() {
 
             <div className="mt-4 bg-accent/40 rounded-md p-4">
               <div className="flex items-baseline gap-3 flex-wrap">
-                <span className="text-3xl font-extrabold text-sale">{product.currency} {price}</span>
-                {oldPrice && <span className="text-base text-muted-foreground line-through">{product.currency} {oldPrice}</span>}
+                <span className="text-3xl font-extrabold text-sale">{format(price, (product.currency as CurrencyCode) || undefined)}</span>
+                {oldPrice && <span className="text-base text-muted-foreground line-through">{format(oldPrice, (product.currency as CurrencyCode) || undefined)}</span>}
                 {discount > 0 && <span className="text-sm bg-sale text-white font-bold px-2 py-0.5 rounded">-{discount}%</span>}
               </div>
             </div>

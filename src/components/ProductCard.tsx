@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Star, Heart } from "lucide-react";
 import { useCart } from "@/lib/cart";
+import { useCurrency } from "@/lib/currency";
 
 type Props = {
   id?: string;
@@ -16,11 +17,11 @@ type Props = {
   freeShipping?: boolean;
 };
 
-const fmt = (v: string | number) => (typeof v === "number" ? `QAR ${v}` : v);
-
 export function ProductCard({ id, name, price, oldPrice, discount, image, rating = 4.5, sold, badge, freeShipping }: Props) {
   const { toggleWishlist, isWished } = useCart();
+  const { format } = useCurrency();
   const wished = id ? isWished(id) : false;
+  const fmt = (v: string | number) => (typeof v === "number" ? format(v) : v);
 
   const inner = (
     <>

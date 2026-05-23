@@ -3,6 +3,7 @@ import { PageShell } from "@/components/PageShell";
 import { useCart } from "@/lib/cart";
 import { getProduct } from "@/lib/products";
 import { useI18n } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 
 export const Route = createFileRoute("/cart")({
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/cart")({
 function CartPage() {
   const { items, setQty, remove } = useCart();
   const { t } = useI18n();
+  const { format } = useCurrency();
 
   const rows = items.map((it) => ({ item: it, product: getProduct(it.id) })).filter((r) => r.product);
   const subtotal = rows.reduce((sum, r) => sum + r.product!.price * r.item.qty, 0);
@@ -54,8 +56,8 @@ function CartPage() {
                   <div className="mt-1 text-xs text-muted-foreground">{product!.brand}</div>
                   <div className="mt-2 flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-base font-bold text-sale">QAR {product!.price}</span>
-                      {product!.oldPrice && <span className="text-xs text-muted-foreground line-through">QAR {product!.oldPrice}</span>}
+                      <span className="text-base font-bold text-sale">{format(product!.price)}</span>
+                      {product!.oldPrice && <span className="text-xs text-muted-foreground line-through">{format(product!.oldPrice)}</span>}
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="flex items-center border border-border rounded-md overflow-hidden">
@@ -76,10 +78,10 @@ function CartPage() {
           <aside className="bg-card rounded-md border border-border shadow-card p-5 h-fit lg:sticky lg:top-44">
             <h2 className="text-base font-bold text-foreground mb-4">{t("cart.total")}</h2>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-muted-foreground">{t("cart.subtotal")}</span><span className="font-semibold">QAR {subtotal}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">{t("cart.shipping")}</span><span className="font-semibold">{shipping === 0 ? t("cart.free") : `QAR ${shipping}`}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">{t("cart.subtotal")}</span><span className="font-semibold">{format(subtotal)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">{t("cart.shipping")}</span><span className="font-semibold">{shipping === 0 ? t("cart.free") : format(shipping)}</span></div>
               <div className="border-t border-border pt-2 mt-2 flex justify-between text-base">
-                <span className="font-bold">{t("cart.total")}</span><span className="font-extrabold text-sale">QAR {total}</span>
+                <span className="font-bold">{t("cart.total")}</span><span className="font-extrabold text-sale">{format(total)}</span>
               </div>
             </div>
             <Link to="/checkout" className="mt-5 w-full h-12 rounded-md bg-sale hover:opacity-90 text-white font-semibold flex items-center justify-center transition-smooth">
