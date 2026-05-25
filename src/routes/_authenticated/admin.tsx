@@ -17,6 +17,7 @@ function AdminLayout() {
   const nav = useNavigate();
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [cats, setCats] = useState<{ slug: string; name: string }[]>([]);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
@@ -30,6 +31,13 @@ function AdminLayout() {
       if (!data) nav({ to: "/account" });
     })();
   }, [user, nav]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("categories").select("slug,name").order("sort_order");
+      setCats((data ?? []) as { slug: string; name: string }[]);
+    })();
+  }, []);
 
   if (checking) {
     return (
@@ -49,7 +57,7 @@ function AdminLayout() {
     {
       label: "Catalog",
       items: [
-        { to: "/admin/products", icon: Package, label: "Products" },
+        { to: "/admin/products", icon: Package, label: "All Products" },
         { to: "/admin/categories", icon: ListTree, label: "Categories" },
         { to: "/admin/vendors", icon: Store, label: "Vendors" },
       ],
@@ -69,6 +77,7 @@ function AdminLayout() {
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
+  const isCatActive = (slug: string) => pathname === `/admin/catalog/${slug}`;
 
   const crumb = pathname.replace("/admin", "").replace(/^\//, "") || "overview";
 
@@ -112,7 +121,35 @@ function AdminLayout() {
               </div>
             </div>
           ))}
+
+          {cats.length > 0 && (
+            <div>
+              <div className="px-3 text-[10px] uppercase tracking-[0.18em] text-slate-500 font-semibold mb-2">Sections</div>
+              <div className="space-y-0.5">
+                {cats.map((c) => {
+                  const active = isCatActive(c.slug);
+                  return (
+                    <Link
+                      key={c.slug}
+                      to="/admin/catalog/$slug"
+                      params={{ slug: c.slug }}
+                      className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all relative ${
+                        active
+                          ? "bg-gradient-to-r from-amber-500/15 to-transparent text-amber-300"
+                          : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                      }`}
+                    >
+                      {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-amber-400" />}
+                      <Package className={`w-4 h-4 ${active ? "text-amber-400" : ""}`} />
+                      <span className="font-medium">{c.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </nav>
+
 
         <div className="p-3 border-t border-slate-800 space-y-1">
           <Link to="/" className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-slate-800/60">

@@ -38,6 +38,7 @@ import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_authenticated/admin.categories'
 import { Route as AuthenticatedSellProductsNewRouteImport } from './routes/_authenticated/sell.products.new'
 import { Route as AuthenticatedSellProductsIdRouteImport } from './routes/_authenticated/sell.products.$id'
+import { Route as AuthenticatedAdminCatalogSlugRouteImport } from './routes/_authenticated/admin.catalog.$slug'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -192,6 +193,12 @@ const AuthenticatedSellProductsIdRoute =
     path: '/sell/products/$id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminCatalogSlugRoute =
+  AuthenticatedAdminCatalogSlugRouteImport.update({
+    id: '/catalog/$slug',
+    path: '/catalog/$slug',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/sell/orders': typeof AuthenticatedSellOrdersRoute
   '/sell/register': typeof AuthenticatedSellRegisterRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/catalog/$slug': typeof AuthenticatedAdminCatalogSlugRoute
   '/sell/products/$id': typeof AuthenticatedSellProductsIdRoute
   '/sell/products/new': typeof AuthenticatedSellProductsNewRoute
 }
@@ -249,6 +257,7 @@ export interface FileRoutesByTo {
   '/sell/orders': typeof AuthenticatedSellOrdersRoute
   '/sell/register': typeof AuthenticatedSellRegisterRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/catalog/$slug': typeof AuthenticatedAdminCatalogSlugRoute
   '/sell/products/$id': typeof AuthenticatedSellProductsIdRoute
   '/sell/products/new': typeof AuthenticatedSellProductsNewRoute
 }
@@ -281,6 +290,7 @@ export interface FileRoutesById {
   '/_authenticated/sell/orders': typeof AuthenticatedSellOrdersRoute
   '/_authenticated/sell/register': typeof AuthenticatedSellRegisterRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/catalog/$slug': typeof AuthenticatedAdminCatalogSlugRoute
   '/_authenticated/sell/products/$id': typeof AuthenticatedSellProductsIdRoute
   '/_authenticated/sell/products/new': typeof AuthenticatedSellProductsNewRoute
 }
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/sell/orders'
     | '/sell/register'
     | '/admin/'
+    | '/admin/catalog/$slug'
     | '/sell/products/$id'
     | '/sell/products/new'
   fileRoutesByTo: FileRoutesByTo
@@ -342,6 +353,7 @@ export interface FileRouteTypes {
     | '/sell/orders'
     | '/sell/register'
     | '/admin'
+    | '/admin/catalog/$slug'
     | '/sell/products/$id'
     | '/sell/products/new'
   id:
@@ -373,6 +385,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sell/orders'
     | '/_authenticated/sell/register'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/catalog/$slug'
     | '/_authenticated/sell/products/$id'
     | '/_authenticated/sell/products/new'
   fileRoutesById: FileRoutesById
@@ -597,6 +610,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSellProductsIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/catalog/$slug': {
+      id: '/_authenticated/admin/catalog/$slug'
+      path: '/catalog/$slug'
+      fullPath: '/admin/catalog/$slug'
+      preLoaderRoute: typeof AuthenticatedAdminCatalogSlugRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
@@ -608,6 +628,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminVendorsRoute: typeof AuthenticatedAdminVendorsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminCatalogSlugRoute: typeof AuthenticatedAdminCatalogSlugRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
@@ -618,6 +639,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminVendorsRoute: AuthenticatedAdminVendorsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedAdminCatalogSlugRoute: AuthenticatedAdminCatalogSlugRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
