@@ -27,7 +27,7 @@ const META: Record<CurrencyCode, CurrencyMeta> = Object.fromEntries(
 ) as Record<CurrencyCode, CurrencyMeta>;
 
 /** All numeric prices stored in the app are expressed in this base currency. */
-export const BASE_CURRENCY: CurrencyCode = "QAR";
+export const BASE_CURRENCY: CurrencyCode = "BHD";
 
 type Ctx = {
   currency: CurrencyCode;
