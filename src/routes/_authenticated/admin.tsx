@@ -17,6 +17,7 @@ function AdminLayout() {
   const nav = useNavigate();
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [cats, setCats] = useState<{ slug: string; name: string }[]>([]);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
@@ -30,6 +31,13 @@ function AdminLayout() {
       if (!data) nav({ to: "/account" });
     })();
   }, [user, nav]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("categories").select("slug,name").order("sort_order");
+      setCats((data ?? []) as { slug: string; name: string }[]);
+    })();
+  }, []);
 
   if (checking) {
     return (
@@ -49,7 +57,7 @@ function AdminLayout() {
     {
       label: "Catalog",
       items: [
-        { to: "/admin/products", icon: Package, label: "Products" },
+        { to: "/admin/products", icon: Package, label: "All Products" },
         { to: "/admin/categories", icon: ListTree, label: "Categories" },
         { to: "/admin/vendors", icon: Store, label: "Vendors" },
       ],
@@ -69,6 +77,7 @@ function AdminLayout() {
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
+  const isCatActive = (slug: string) => pathname === `/admin/catalog/${slug}`;
 
   const crumb = pathname.replace("/admin", "").replace(/^\//, "") || "overview";
 
