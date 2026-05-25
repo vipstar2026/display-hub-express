@@ -1,0 +1,1 @@
+UPDATE public.products SET price = ROUND((price * 0.1033)::numeric, 3), sale_price = CASE WHEN sale_price IS NOT NULL THEN ROUND((sale_price * 0.1033)::numeric, 3) ELSE NULL END, currency = 'BHD' WHERE currency = 'QAR';
