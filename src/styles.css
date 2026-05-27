@@ -98,8 +98,10 @@
   .bg-gradient-brand { background: var(--gradient-brand); }
   .bg-gradient-topbar { background: var(--gradient-topbar); }
   .bg-gradient-flash { background: var(--gradient-flash); }
+  .bg-gradient-hero { background: var(--gradient-hero); }
   .shadow-card { box-shadow: var(--shadow-card); }
   .shadow-hover { box-shadow: var(--shadow-hover); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
   .transition-smooth { transition: var(--transition-smooth); }
   .text-brand { color: var(--brand); }
   .bg-brand { background-color: var(--brand); }
