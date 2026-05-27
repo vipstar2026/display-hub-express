@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrency } from "@/lib/currency";
 import {
   Store, Package, ShoppingBag, Users, DollarSign, AlertCircle, Loader2,
   TrendingUp, ArrowUpRight, Activity, Plus, ListTree, Settings as SettingsIcon,
+  Sparkles, Zap, Eye, Layers,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -23,14 +25,16 @@ type RecentOrder = {
 };
 
 function AdminOverview() {
+  const { format } = useCurrency();
   const [stats, setStats] = useState<Stats | null>(null);
   const [recent, setRecent] = useState<RecentOrder[]>([]);
   const [topProducts, setTopProducts] = useState<{ id: string; title: string; sales_count: number; price: number; currency: string }[]>([]);
+  const [dailyRevenue, setDailyRevenue] = useState<number[]>([]);
 
   useEffect(() => {
     (async () => {
       const sinceISO = new Date(Date.now() - 30 * 86400000).toISOString();
-      const [v, vp, p, pa, o, op, ur, rev, rev30, ro, tp] = await Promise.all([
+      const [v, vp, p, pa, o, op, ur, rev, rev30, ro, tp, rd] = await Promise.all([
         supabase.from("vendors").select("id", { count: "exact", head: true }),
         supabase.from("vendors").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("products").select("id", { count: "exact", head: true }),
@@ -42,10 +46,22 @@ function AdminOverview() {
         supabase.from("orders").select("total").gte("created_at", sinceISO),
         supabase.from("orders").select("id, total, currency, status, ship_full_name, created_at").order("created_at", { ascending: false }).limit(6),
         supabase.from("products").select("id, title, sales_count, price, currency").order("sales_count", { ascending: false }).limit(5),
+        supabase.from("orders").select("total, created_at").gte("created_at", sinceISO),
       ]);
 
       const uniqueUsers = new Set((ur.data || []).map((r) => r.user_id)).size;
       const sum = (rows: { total: number }[] | null) => (rows || []).reduce((s, r) => s + Number(r.total || 0), 0);
+
+      // build last-14-day spark
+      const days = 14;
+      const buckets = Array(days).fill(0) as number[];
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      (rd.data || []).forEach((r: { total: number; created_at: string }) => {
+        const d = new Date(r.created_at); d.setHours(0, 0, 0, 0);
+        const idx = days - 1 - Math.floor((today.getTime() - d.getTime()) / 86400000);
+        if (idx >= 0 && idx < days) buckets[idx] += Number(r.total || 0);
+      });
+      setDailyRevenue(buckets);
 
       setStats({
         vendors: v.count || 0, vendorsPending: vp.count || 0,
@@ -59,43 +75,54 @@ function AdminOverview() {
   }, []);
 
   if (!stats) {
-    return <div className="grid place-items-center py-32"><Loader2 className="w-6 h-6 animate-spin text-amber-500" /></div>;
+    return <div className="grid place-items-center py-32"><Loader2 className="w-6 h-6 animate-spin text-brand" /></div>;
   }
 
   const kpis = [
-    { label: "Revenue (30d)", value: `QAR ${stats.revenue30.toFixed(0)}`, sub: `All-time: QAR ${stats.revenue.toFixed(0)}`, icon: DollarSign, gradient: "from-emerald-500 to-teal-600", trend: "+12%" },
-    { label: "Orders", value: stats.orders, sub: `${stats.ordersPending} pending`, icon: ShoppingBag, gradient: "from-amber-500 to-orange-600", trend: stats.ordersPending > 0 ? "Action" : "Stable" },
-    { label: "Products", value: stats.products, sub: `${stats.productsActive} active`, icon: Package, gradient: "from-indigo-500 to-purple-600", trend: `${stats.productsActive}/${stats.products}` },
-    { label: "Vendors", value: stats.vendors, sub: `${stats.vendorsPending} pending review`, icon: Store, gradient: "from-rose-500 to-pink-600", trend: stats.vendorsPending > 0 ? "Review" : "OK" },
+    { label: "إيرادات 30 يوم", value: format(stats.revenue30), sub: `الإجمالي: ${format(stats.revenue)}`, icon: DollarSign, accent: "brand", trend: "+12%" },
+    { label: "الطلبات", value: String(stats.orders), sub: `${stats.ordersPending} قيد المعالجة`, icon: ShoppingBag, accent: "accent2", trend: stats.ordersPending > 0 ? "تنبيه" : "مستقر" },
+    { label: "المنتجات", value: String(stats.products), sub: `${stats.productsActive} نشطة`, icon: Package, accent: "brand", trend: `${stats.productsActive}/${stats.products}` },
+    { label: "البائعون", value: String(stats.vendors), sub: `${stats.vendorsPending} بانتظار الموافقة`, icon: Store, accent: "accent2", trend: stats.vendorsPending > 0 ? "مراجعة" : "OK" },
   ];
 
-  const statusColor: Record<string, string> = {
-    pending: "bg-amber-100 text-amber-700",
-    processing: "bg-blue-100 text-blue-700",
-    paid: "bg-emerald-100 text-emerald-700",
-    shipped: "bg-indigo-100 text-indigo-700",
-    completed: "bg-green-100 text-green-700",
-    cancelled: "bg-rose-100 text-rose-700",
+  const statusStyle: Record<string, string> = {
+    pending: "bg-brand/15 text-brand border-brand/30",
+    processing: "bg-accent2/15 text-accent2 border-accent2/30",
+    paid: "bg-brand/20 text-brand border-brand/40",
+    shipped: "bg-accent2/20 text-accent2 border-accent2/40",
+    completed: "bg-brand/25 text-brand border-brand/40",
+    cancelled: "bg-destructive/15 text-destructive border-destructive/30",
   };
 
+  const maxRev = Math.max(1, ...dailyRevenue);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 md:p-8 border border-slate-800">
-        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-amber-500/20 blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-indigo-500/10 blur-3xl" />
-        <div className="relative flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.25em] text-amber-400 font-bold">Dashboard</div>
-            <h1 className="mt-2 text-3xl md:text-4xl font-extrabold tracking-tight">Welcome back, Admin</h1>
-            <p className="mt-2 text-sm text-slate-300 max-w-xl">Manage your entire marketplace — vendors, products, orders, users, and site content — from one professional console.</p>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-hero text-foreground p-6 md:p-10 border border-border shadow-card">
+        <div className="absolute -top-32 -end-32 w-96 h-96 rounded-full bg-brand/20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 -start-32 w-96 h-96 rounded-full bg-accent2/20 blur-3xl pointer-events-none" />
+        <div className="relative flex flex-wrap items-end justify-between gap-6">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 border border-brand/30 text-brand text-[11px] uppercase tracking-[0.25em] font-bold font-mono">
+              <Sparkles className="w-3 h-3" /> Command Center
+            </div>
+            <h1 className="mt-4 text-3xl md:text-5xl font-extrabold tracking-tight">
+              مرحبًا بك في <span className="bg-gradient-brand bg-clip-text text-transparent">VIP STAR</span>
+            </h1>
+            <p className="mt-3 text-sm md:text-base text-muted-foreground max-w-xl">
+              منصة موحدة لإدارة المتجر كاملًا — منتجات، طلبات، بائعون، أقسام، مستخدمون، ومحتوى الموقع.
+            </p>
           </div>
-          <div className="flex gap-2">
-            <Link to="/admin/products" className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg bg-amber-400 text-slate-900 text-sm font-bold hover:bg-amber-300 transition">
-              <Plus className="w-4 h-4" /> New product
+          <div className="flex gap-2 flex-wrap">
+            <Link to="/admin/products" className="inline-flex items-center gap-1.5 h-11 px-5 rounded-xl bg-gradient-brand text-brand-foreground text-sm font-bold hover:opacity-90 shadow-glow transition-smooth">
+              <Plus className="w-4 h-4" /> منتج جديد
             </Link>
-            <Link to="/admin/settings" className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg bg-white/10 text-white text-sm font-semibold hover:bg-white/20 border border-white/10 transition">
-              <SettingsIcon className="w-4 h-4" /> Site settings
+            <Link to="/admin/settings" className="inline-flex items-center gap-1.5 h-11 px-5 rounded-xl bg-card/60 backdrop-blur text-foreground text-sm font-semibold hover:bg-card border border-border transition-smooth">
+              <SettingsIcon className="w-4 h-4" /> إعدادات الموقع
+            </Link>
+            <Link to="/" className="inline-flex items-center gap-1.5 h-11 px-5 rounded-xl bg-card/40 text-foreground text-sm font-semibold hover:bg-card border border-border transition-smooth">
+              <Eye className="w-4 h-4" /> معاينة الموقع
             </Link>
           </div>
         </div>
@@ -104,62 +131,99 @@ function AdminOverview() {
       {/* KPI cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((k) => (
-          <div key={k.label} className="group relative overflow-hidden rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 hover:shadow-lg transition">
-            <div className={`absolute -right-8 -top-8 w-28 h-28 rounded-full bg-gradient-to-br ${k.gradient} opacity-10 group-hover:opacity-20 transition`} />
+          <div key={k.label} className="group relative overflow-hidden rounded-2xl bg-card border border-border p-5 hover:border-brand/40 hover:shadow-hover transition-smooth">
+            <div className={`absolute -end-10 -top-10 w-32 h-32 rounded-full ${k.accent === "brand" ? "bg-brand/15" : "bg-accent2/15"} blur-2xl group-hover:scale-125 transition-transform duration-500`} />
             <div className="flex items-start justify-between relative">
-              <div className={`w-11 h-11 rounded-lg bg-gradient-to-br ${k.gradient} text-white grid place-items-center shadow-md`}>
+              <div className={`w-11 h-11 rounded-xl ${k.accent === "brand" ? "bg-brand/15 text-brand" : "bg-accent2/15 text-accent2"} grid place-items-center border ${k.accent === "brand" ? "border-brand/30" : "border-accent2/30"}`}>
                 <k.icon className="w-5 h-5" />
               </div>
-              <span className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold">
+              <span className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-full bg-accent/60 text-foreground font-semibold font-mono">
                 <TrendingUp className="w-3 h-3" /> {k.trend}
               </span>
             </div>
-            <div className="mt-4 text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">{k.label}</div>
-            <div className="mt-1 text-2xl font-extrabold text-slate-900 dark:text-white">{k.value}</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{k.sub}</div>
+            <div className="mt-4 text-[11px] text-muted-foreground font-semibold uppercase tracking-wider font-mono">{k.label}</div>
+            <div className="mt-1 text-3xl font-extrabold text-foreground tracking-tight">{k.value}</div>
+            <div className="text-xs text-muted-foreground mt-1">{k.sub}</div>
           </div>
         ))}
       </div>
 
-      {/* Quick actions */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { to: "/admin/products" as const, label: "Manage Products", icon: Package, color: "text-indigo-600 bg-indigo-50" },
-          { to: "/admin/orders" as const, label: "Process Orders", icon: ShoppingBag, color: "text-amber-600 bg-amber-50" },
-          { to: "/admin/vendors" as const, label: "Approve Vendors", icon: Store, color: "text-rose-600 bg-rose-50" },
-          { to: "/admin/categories" as const, label: "Edit Categories", icon: ListTree, color: "text-emerald-600 bg-emerald-50" },
-        ].map((q) => (
-          <Link key={q.to} to={q.to} className="flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-400 hover:shadow-md transition group">
-            <div className={`w-10 h-10 rounded-lg grid place-items-center ${q.color}`}><q.icon className="w-5 h-5" /></div>
-            <div className="flex-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{q.label}</div>
-            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition" />
-          </Link>
-        ))}
+      {/* Revenue spark + quick actions */}
+      <div className="grid lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 relative overflow-hidden rounded-2xl bg-card border border-border p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground font-mono font-semibold">
+                <Zap className="w-3 h-3 text-brand" /> آخر 14 يوم
+              </div>
+              <h2 className="text-lg font-bold text-foreground mt-1">منحنى الإيرادات</h2>
+            </div>
+            <div className="text-end">
+              <div className="text-2xl font-extrabold bg-gradient-brand bg-clip-text text-transparent">{format(dailyRevenue.reduce((a, b) => a + b, 0))}</div>
+              <div className="text-[11px] text-muted-foreground">مجموع الفترة</div>
+            </div>
+          </div>
+          <div className="flex items-end gap-1.5 h-32">
+            {dailyRevenue.map((v, i) => (
+              <div key={i} className="flex-1 group relative">
+                <div
+                  className="w-full rounded-t-md bg-gradient-to-t from-brand to-accent2 opacity-80 hover:opacity-100 transition-smooth"
+                  style={{ height: `${(v / maxRev) * 100}%`, minHeight: v > 0 ? 4 : 2 }}
+                />
+                <div className="absolute -top-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] bg-foreground text-background px-1.5 py-0.5 rounded font-mono whitespace-nowrap pointer-events-none transition-smooth">
+                  {format(v)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl bg-card border border-border p-5">
+          <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground font-mono font-semibold mb-4">
+            <Layers className="w-3 h-3 text-accent2" /> اختصارات سريعة
+          </div>
+          <div className="space-y-2">
+            {[
+              { to: "/admin/products" as const, label: "إدارة المنتجات", icon: Package },
+              { to: "/admin/orders" as const, label: "معالجة الطلبات", icon: ShoppingBag },
+              { to: "/admin/vendors" as const, label: "اعتماد البائعين", icon: Store },
+              { to: "/admin/categories" as const, label: "تحرير الأقسام", icon: ListTree },
+            ].map((q) => (
+              <Link key={q.to} to={q.to} className="flex items-center gap-3 p-3 rounded-xl bg-accent/40 hover:bg-accent border border-border hover:border-brand/40 transition-smooth group">
+                <div className="w-9 h-9 rounded-lg bg-card border border-border grid place-items-center text-brand">
+                  <q.icon className="w-4 h-4" />
+                </div>
+                <div className="flex-1 text-sm font-semibold text-foreground">{q.label}</div>
+                <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-brand transition-smooth" />
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Recent activity + top products */}
       <div className="grid lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div className="lg:col-span-2 bg-card border border-border rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-amber-500" />
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white">Recent orders</h2>
+              <Activity className="w-4 h-4 text-brand" />
+              <h2 className="text-sm font-bold text-foreground">آخر الطلبات</h2>
             </div>
-            <Link to="/admin/orders" className="text-xs text-amber-600 hover:underline font-semibold">View all →</Link>
+            <Link to="/admin/orders" className="text-xs text-brand hover:underline font-semibold">عرض الكل ←</Link>
           </div>
           {recent.length === 0 ? (
-            <div className="p-10 text-center text-sm text-slate-500">No orders yet.</div>
+            <div className="p-12 text-center text-sm text-muted-foreground">لا توجد طلبات حتى الآن.</div>
           ) : (
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="divide-y divide-border">
               {recent.map((o) => (
-                <Link key={o.id} to="/orders/$id" params={{ id: o.id }} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <Link key={o.id} to="/orders/$id" params={{ id: o.id }} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-accent/40 transition-smooth">
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold text-slate-900 dark:text-white truncate">{o.ship_full_name}</div>
-                    <div className="text-[11px] text-slate-500 font-mono">#{o.id.slice(0, 8)} · {new Date(o.created_at).toLocaleString()}</div>
+                    <div className="text-sm font-semibold text-foreground truncate">{o.ship_full_name}</div>
+                    <div className="text-[11px] text-muted-foreground font-mono">#{o.id.slice(0, 8)} · {new Date(o.created_at).toLocaleString()}</div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold capitalize ${statusColor[o.status] || "bg-slate-100 text-slate-700"}`}>{o.status}</span>
-                    <div className="text-sm font-bold text-slate-900 dark:text-white">{o.currency} {Number(o.total).toFixed(2)}</div>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold capitalize border ${statusStyle[o.status] || "bg-accent/60 text-foreground border-border"}`}>{o.status}</span>
+                    <div className="text-sm font-bold text-foreground font-mono">{format(Number(o.total))}</div>
                   </div>
                 </Link>
               ))}
@@ -167,23 +231,23 @@ function AdminOverview() {
           )}
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800">
-            <h2 className="text-sm font-bold text-slate-900 dark:text-white">Top products</h2>
-            <p className="text-[11px] text-slate-500 mt-0.5">By total sales</p>
+        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="text-sm font-bold text-foreground">الأكثر مبيعًا</h2>
+            <p className="text-[11px] text-muted-foreground mt-0.5">حسب إجمالي المبيعات</p>
           </div>
           {topProducts.length === 0 ? (
-            <div className="p-10 text-center text-sm text-slate-500">No data.</div>
+            <div className="p-12 text-center text-sm text-muted-foreground">لا توجد بيانات.</div>
           ) : (
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="divide-y divide-border">
               {topProducts.map((p, i) => (
                 <div key={p.id} className="flex items-center gap-3 px-5 py-3">
-                  <div className="w-7 h-7 rounded-md bg-gradient-to-br from-amber-400 to-amber-600 grid place-items-center text-xs font-bold text-slate-900">{i + 1}</div>
+                  <div className="w-7 h-7 rounded-lg bg-gradient-brand grid place-items-center text-xs font-bold text-brand-foreground">{i + 1}</div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-slate-900 dark:text-white truncate">{p.title}</div>
-                    <div className="text-[11px] text-slate-500">{p.sales_count} sold</div>
+                    <div className="text-sm font-medium text-foreground truncate">{p.title}</div>
+                    <div className="text-[11px] text-muted-foreground">{p.sales_count} مبيع</div>
                   </div>
-                  <div className="text-xs font-bold text-emerald-600">{p.currency} {Number(p.price).toFixed(0)}</div>
+                  <div className="text-xs font-bold text-brand font-mono">{format(Number(p.price))}</div>
                 </div>
               ))}
             </div>
@@ -195,28 +259,28 @@ function AdminOverview() {
       {(stats.vendorsPending > 0 || stats.ordersPending > 0) && (
         <div className="grid sm:grid-cols-2 gap-3">
           {stats.vendorsPending > 0 && (
-            <Link to="/admin/vendors" className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 hover:bg-amber-100 transition">
-              <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+            <Link to="/admin/vendors" className="flex items-start gap-3 p-4 rounded-2xl bg-brand/10 border border-brand/30 hover:bg-brand/15 transition-smooth">
+              <AlertCircle className="w-5 h-5 text-brand mt-0.5 shrink-0" />
               <div>
-                <div className="text-sm font-bold text-amber-900">{stats.vendorsPending} vendor(s) awaiting approval</div>
-                <div className="text-xs text-amber-700 mt-0.5">Review and approve new sellers →</div>
+                <div className="text-sm font-bold text-foreground">{stats.vendorsPending} بائع بانتظار الموافقة</div>
+                <div className="text-xs text-muted-foreground mt-0.5">راجع واعتمد البائعين الجدد ←</div>
               </div>
             </Link>
           )}
           {stats.ordersPending > 0 && (
-            <Link to="/admin/orders" className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 border border-blue-200 hover:bg-blue-100 transition">
-              <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+            <Link to="/admin/orders" className="flex items-start gap-3 p-4 rounded-2xl bg-accent2/10 border border-accent2/30 hover:bg-accent2/15 transition-smooth">
+              <AlertCircle className="w-5 h-5 text-accent2 mt-0.5 shrink-0" />
               <div>
-                <div className="text-sm font-bold text-blue-900">{stats.ordersPending} order(s) pending</div>
-                <div className="text-xs text-blue-700 mt-0.5">Process and update fulfillment →</div>
+                <div className="text-sm font-bold text-foreground">{stats.ordersPending} طلب قيد المعالجة</div>
+                <div className="text-xs text-muted-foreground mt-0.5">عالج وحدّث حالات التنفيذ ←</div>
               </div>
             </Link>
           )}
         </div>
       )}
 
-      <div className="flex items-center gap-2 text-[11px] text-slate-400 justify-center pt-4">
-        <Users className="w-3 h-3" /> {stats.users} registered users across the platform
+      <div className="flex items-center gap-2 text-[11px] text-muted-foreground justify-center pt-4 font-mono">
+        <Users className="w-3 h-3" /> {stats.users} مستخدم مسجل عبر المنصة
       </div>
     </div>
   );
