@@ -22,14 +22,13 @@ function AdminSettings() {
     (async () => {
       const { data } = await supabase.from("site_settings").select("*");
       (data as Row[] | null || []).forEach((r) => {
-        if (r.key === "hero") setHero({ ...hero, ...(r.value as typeof hero) });
-        if (r.key === "contact") setContact({ ...contact, ...(r.value as typeof contact) });
-        if (r.key === "social") setSocial({ ...social, ...(r.value as typeof social) });
-        if (r.key === "announcement") setAnnouncement({ ...announcement, ...(r.value as typeof announcement) });
+        if (r.key === "hero") setHero((p) => ({ ...p, ...(r.value as typeof hero) }));
+        if (r.key === "contact") setContact((p) => ({ ...p, ...(r.value as typeof contact) }));
+        if (r.key === "social") setSocial((p) => ({ ...p, ...(r.value as typeof social) }));
+        if (r.key === "announcement") setAnnouncement((p) => ({ ...p, ...(r.value as typeof announcement) }));
       });
       setLoading(false);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function saveAll() {
@@ -43,67 +42,73 @@ function AdminSettings() {
     const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("Site settings saved");
+    toast.success("تم حفظ إعدادات الموقع");
   }
 
-  if (loading) return <div className="grid place-items-center py-16"><Loader2 className="w-6 h-6 animate-spin text-amber-500" /></div>;
+  if (loading) {
+    return (
+      <div className="grid place-items-center py-16">
+        <Loader2 className="w-6 h-6 animate-spin text-brand" />
+      </div>
+    );
+  }
 
-  const inp = "mt-1 w-full h-10 rounded-md border border-slate-200 dark:border-slate-700 px-3 text-sm bg-white dark:bg-slate-900 outline-none focus:border-amber-500";
-  const lbl = "text-xs font-semibold text-slate-600 dark:text-slate-300";
+  const inp = "mt-1.5 w-full h-10 rounded-lg border border-border bg-card/60 px-3 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-smooth";
+  const lbl = "text-xs font-semibold text-muted-foreground";
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 max-w-5xl" dir="rtl">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Site Settings</h1>
-          <p className="text-sm text-slate-500 mt-1">Control global content shown across the website.</p>
+          <h1 className="text-2xl font-bold text-foreground">إعدادات الموقع</h1>
+          <p className="text-sm text-muted-foreground mt-1">تحكم بالمحتوى العام الذي يظهر في جميع صفحات الموقع.</p>
         </div>
-        <button onClick={saveAll} disabled={saving} className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 disabled:opacity-50">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save changes
+        <button onClick={saveAll} disabled={saving} className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-gradient-brand text-brand-foreground text-sm font-bold shadow-glow hover:opacity-90 disabled:opacity-50 transition-smooth">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} حفظ التغييرات
         </button>
       </div>
 
-      <Section icon={Sparkles} title="Hero banner" subtitle="The headline visitors see first on the home page.">
+      <Section icon={Sparkles} title="بانر الواجهة" subtitle="العنوان الذي يراه الزوار أول مرة في الصفحة الرئيسية.">
         <div className="grid md:grid-cols-2 gap-4">
-          <div><label className={lbl}>Title</label><input className={inp} value={hero.title} onChange={(e) => setHero({ ...hero, title: e.target.value })} /></div>
-          <div><label className={lbl}>Subtitle</label><input className={inp} value={hero.subtitle} onChange={(e) => setHero({ ...hero, subtitle: e.target.value })} /></div>
-          <div><label className={lbl}>CTA label</label><input className={inp} value={hero.cta_label} onChange={(e) => setHero({ ...hero, cta_label: e.target.value })} /></div>
-          <div><label className={lbl}>CTA link</label><input className={inp} value={hero.cta_link} onChange={(e) => setHero({ ...hero, cta_link: e.target.value })} placeholder="/iptv" /></div>
+          <div><label className={lbl}>العنوان</label><input className={inp} value={hero.title} onChange={(e) => setHero({ ...hero, title: e.target.value })} placeholder="VIP STAR" /></div>
+          <div><label className={lbl}>العنوان الفرعي</label><input className={inp} value={hero.subtitle} onChange={(e) => setHero({ ...hero, subtitle: e.target.value })} placeholder="حلول IPTV و كاميرات المراقبة" /></div>
+          <div><label className={lbl}>نص زر الإجراء</label><input className={inp} value={hero.cta_label} onChange={(e) => setHero({ ...hero, cta_label: e.target.value })} placeholder="تسوّق الآن" /></div>
+          <div><label className={lbl}>رابط زر الإجراء</label><input className={inp} value={hero.cta_link} onChange={(e) => setHero({ ...hero, cta_link: e.target.value })} placeholder="/iptv" dir="ltr" /></div>
         </div>
       </Section>
 
-      <Section icon={Megaphone} title="Announcement bar" subtitle="A small banner shown at the top of every page.">
-        <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200 mb-3">
-          <input type="checkbox" checked={announcement.enabled} onChange={(e) => setAnnouncement({ ...announcement, enabled: e.target.checked })} className="w-4 h-4 accent-amber-500" />
-          Enable announcement
+      <Section icon={Megaphone} title="شريط الإعلان" subtitle="شريط صغير يظهر أعلى كل صفحة.">
+        <label className="inline-flex items-center gap-2 text-sm font-medium text-foreground mb-4 cursor-pointer">
+          <input type="checkbox" checked={announcement.enabled} onChange={(e) => setAnnouncement({ ...announcement, enabled: e.target.checked })} className="w-4 h-4 accent-brand" />
+          تفعيل الإعلان
         </label>
         <div className="grid md:grid-cols-2 gap-4">
-          <div><label className={lbl}>Message</label><input className={inp} value={announcement.message} onChange={(e) => setAnnouncement({ ...announcement, message: e.target.value })} placeholder="Free shipping on orders over QAR 200" /></div>
-          <div><label className={lbl}>Link (optional)</label><input className={inp} value={announcement.link} onChange={(e) => setAnnouncement({ ...announcement, link: e.target.value })} placeholder="/services" /></div>
+          <div><label className={lbl}>الرسالة</label><input className={inp} value={announcement.message} onChange={(e) => setAnnouncement({ ...announcement, message: e.target.value })} placeholder="شحن مجاني للطلبات فوق ٢٠ د.ب" /></div>
+          <div><label className={lbl}>رابط (اختياري)</label><input className={inp} value={announcement.link} onChange={(e) => setAnnouncement({ ...announcement, link: e.target.value })} placeholder="/services" dir="ltr" /></div>
         </div>
       </Section>
 
-      <Section icon={Phone} title="Contact information" subtitle="Used in the footer and contact pages.">
+      <Section icon={Phone} title="معلومات التواصل" subtitle="تستخدم في تذييل الموقع وصفحات التواصل.">
         <div className="grid md:grid-cols-2 gap-4">
-          <div><label className={lbl}>Phone</label><input className={inp} value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} /></div>
-          <div><label className={lbl}>Email</label><input className={inp} value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} /></div>
-          <div><label className={lbl}>WhatsApp</label><input className={inp} value={contact.whatsapp} onChange={(e) => setContact({ ...contact, whatsapp: e.target.value })} /></div>
-          <div><label className={lbl}>Address</label><input className={inp} value={contact.address} onChange={(e) => setContact({ ...contact, address: e.target.value })} /></div>
+          <div><label className={lbl}>الهاتف</label><input className={inp} value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>البريد الإلكتروني</label><input className={inp} value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>واتساب</label><input className={inp} value={contact.whatsapp} onChange={(e) => setContact({ ...contact, whatsapp: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>العنوان</label><input className={inp} value={contact.address} onChange={(e) => setContact({ ...contact, address: e.target.value })} placeholder="المنامة، البحرين" /></div>
         </div>
       </Section>
 
-      <Section icon={Share2} title="Social links" subtitle="Links shown in the footer.">
+      <Section icon={Share2} title="روابط التواصل الاجتماعي" subtitle="تظهر في تذييل الموقع.">
         <div className="grid md:grid-cols-2 gap-4">
-          <div><label className={lbl}>Facebook</label><input className={inp} value={social.facebook} onChange={(e) => setSocial({ ...social, facebook: e.target.value })} /></div>
-          <div><label className={lbl}>Instagram</label><input className={inp} value={social.instagram} onChange={(e) => setSocial({ ...social, instagram: e.target.value })} /></div>
-          <div><label className={lbl}>Twitter / X</label><input className={inp} value={social.twitter} onChange={(e) => setSocial({ ...social, twitter: e.target.value })} /></div>
-          <div><label className={lbl}>YouTube</label><input className={inp} value={social.youtube} onChange={(e) => setSocial({ ...social, youtube: e.target.value })} /></div>
+          <div><label className={lbl}>فيسبوك</label><input className={inp} value={social.facebook} onChange={(e) => setSocial({ ...social, facebook: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>إنستغرام</label><input className={inp} value={social.instagram} onChange={(e) => setSocial({ ...social, instagram: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>تويتر / X</label><input className={inp} value={social.twitter} onChange={(e) => setSocial({ ...social, twitter: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>يوتيوب</label><input className={inp} value={social.youtube} onChange={(e) => setSocial({ ...social, youtube: e.target.value })} dir="ltr" /></div>
         </div>
       </Section>
 
       <div className="flex justify-end">
-        <button onClick={saveAll} disabled={saving} className="inline-flex items-center gap-2 h-11 px-6 rounded-lg bg-amber-500 text-slate-900 text-sm font-bold hover:bg-amber-400 disabled:opacity-50">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save all settings
+        <button onClick={saveAll} disabled={saving} className="inline-flex items-center gap-2 h-11 px-6 rounded-lg bg-gradient-brand text-brand-foreground text-sm font-bold shadow-glow hover:opacity-90 disabled:opacity-50 transition-smooth">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} حفظ جميع الإعدادات
         </button>
       </div>
     </div>
@@ -112,12 +117,14 @@ function AdminSettings() {
 
 function Section({ icon: Icon, title, subtitle, children }: { icon: typeof Save; title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 md:p-6">
+    <section className="bg-card border border-border rounded-2xl p-5 md:p-6 shadow-card">
       <div className="flex items-start gap-3 mb-5">
-        <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 grid place-items-center"><Icon className="w-5 h-5" /></div>
+        <div className="w-10 h-10 rounded-xl bg-gradient-brand text-brand-foreground grid place-items-center shadow-glow shrink-0">
+          <Icon className="w-5 h-5" />
+        </div>
         <div>
-          <h2 className="text-base font-bold text-slate-900 dark:text-white">{title}</h2>
-          <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
+          <h2 className="text-base font-bold text-foreground">{title}</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
         </div>
       </div>
       {children}
