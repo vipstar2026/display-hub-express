@@ -44,6 +44,16 @@ function AdminLayout() {
 
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
+  const crumb = useMemo(() => {
+    const map: Record<string, string> = {
+      "": "لوحة القيادة", vendors: "البائعون", products: "المنتجات",
+      categories: "الأقسام", orders: "الطلبات", users: "المستخدمون",
+      settings: "الإعدادات", catalog: "إدارة القسم",
+    };
+    const seg = pathname.replace("/admin", "").replace(/^\//, "").split("/")[0] || "";
+    return map[seg] ?? seg;
+  }, [pathname]);
+
   if (checking) {
     return (
       <div className="min-h-screen grid place-items-center bg-background">
@@ -71,16 +81,6 @@ function AdminLayout() {
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
   const isCatActive = (slug: string) => pathname === `/admin/catalog/${slug}`;
-
-  const crumb = useMemo(() => {
-    const map: Record<string, string> = {
-      "": "لوحة القيادة", vendors: "البائعون", products: "المنتجات",
-      categories: "الأقسام", orders: "الطلبات", users: "المستخدمون",
-      settings: "الإعدادات", catalog: "إدارة القسم",
-    };
-    const seg = pathname.replace("/admin", "").replace(/^\//, "").split("/")[0] || "";
-    return map[seg] ?? seg;
-  }, [pathname]);
 
   const SidebarBody = (
     <>
