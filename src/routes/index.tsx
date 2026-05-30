@@ -162,7 +162,7 @@ function HomePage() {
           </div>
           <div className="p-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {flashDeals.map((p) => (
-              <ProductCard key={p.id} {...p} />
+              <ProductCard key={p.id} {...p} currency="QAR" />
             ))}
           </div>
         </div>
