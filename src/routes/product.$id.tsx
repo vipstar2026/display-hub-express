@@ -101,7 +101,7 @@ function ProductPage() {
               </div>
               <span>{Number(product.rating).toFixed(1)}</span>
               <span className="opacity-60">|</span>
-              <span>{product.sales_count} sold</span>
+              <span>{product.sales_count} {t("pd.sold")}</span>
             </div>
 
             <div className="mt-4 bg-accent/40 rounded-md p-4">
