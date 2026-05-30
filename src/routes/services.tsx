@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { useI18n } from "@/lib/i18n";
+import { useCurrency } from "@/lib/currency";
 import { Wrench, Settings, RefreshCw, ShieldCheck } from "lucide-react";
 import heroImg from "@/assets/hero.jpg";
 
@@ -17,12 +18,23 @@ export const Route = createFileRoute("/services")({
 
 function ServicesPage() {
   const { t } = useI18n();
+  const { format } = useCurrency();
+
+  // Prices are expressed in QAR (the catalogue base for demo services).
   const services = [
-    { icon: Wrench, key: "s1" },
-    { icon: Settings, key: "s2" },
-    { icon: RefreshCw, key: "s3" },
-    { icon: ShieldCheck, key: "s4" },
+    { icon: Wrench,      key: "s1", price: 100, prefix: "from"   },
+    { icon: Settings,    key: "s2", price: 50,  prefix: "from"   },
+    { icon: RefreshCw,   key: "s3", price: 0,   prefix: "free"   },
+    { icon: ShieldCheck, key: "s4", price: 300, prefix: "yearly" },
   ] as const;
+
+  const renderPrice = (s: (typeof services)[number]) => {
+    if (s.prefix === "free") return t(`svc.${s.key}.p`); // keep "Free diagnosis" copy
+    const amount = format(s.price, "QAR");
+    if (s.prefix === "from")   return `${t("svc.from")} ${amount}`;
+    if (s.prefix === "yearly") return `${amount} / ${t("svc.perYear")}`;
+    return amount;
+  };
 
   return (
     <PageShell>
@@ -48,7 +60,7 @@ function ServicesPage() {
                   <h3 className="text-lg font-bold text-foreground">{t(`svc.${s.key}.t`)}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{t(`svc.${s.key}.d`)}</p>
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="text-sm font-bold text-sale">{t(`svc.${s.key}.p`)}</span>
+                    <span className="text-sm font-bold text-sale">{renderPrice(s)}</span>
                     <Link to="/contact" className="px-4 py-2 rounded-md bg-brand hover:bg-brand-dark text-white text-sm font-semibold transition-smooth">
                       {t("svc.bookNow")}
                     </Link>
