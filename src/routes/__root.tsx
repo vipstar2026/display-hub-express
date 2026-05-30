@@ -13,6 +13,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { CartProvider } from "@/lib/cart";
 import { AuthProvider } from "@/lib/auth";
 import { CurrencyProvider } from "@/lib/currency";
+import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
@@ -118,16 +119,18 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <I18nProvider>
-          <CurrencyProvider>
-            <CartProvider>
-              <Outlet />
-              <Toaster richColors position="top-center" />
-            </CartProvider>
-          </CurrencyProvider>
-        </I18nProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <I18nProvider>
+            <CurrencyProvider>
+              <CartProvider>
+                <Outlet />
+                <Toaster richColors position="top-center" />
+              </CartProvider>
+            </CurrencyProvider>
+          </I18nProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

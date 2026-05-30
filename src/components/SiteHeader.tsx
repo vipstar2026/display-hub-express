@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Search, ShoppingCart, User, Heart, Bell, Globe, ChevronDown, Menu, LogOut } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Bell, Globe, ChevronDown, Menu, LogOut, Sun, Moon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import logo from "@/assets/logo.png";
 import { LANGS, useI18n, type Lang } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/lib/theme";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 
 export function SiteHeader() {
@@ -13,6 +14,7 @@ export function SiteHeader() {
   const { lang, setLang, t } = useI18n();
   const { count } = useCart();
   const { user, signOut } = useAuth();
+  const { theme, toggle: toggleTheme } = useTheme();
   const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,6 +51,16 @@ export function SiteHeader() {
             <span className="hidden md:inline">{t("top.help")}</span>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-1 hover:underline"
+              aria-label="Toggle theme"
+              title={theme === "dark" ? "الوضع النهاري" : "الوضع الليلي"}
+            >
+              {theme === "dark" ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{theme === "dark" ? "نهاري" : "ليلي"}</span>
+            </button>
+            <span className="opacity-70">|</span>
             <button className="flex items-center gap-1 hover:underline"><Bell className="w-3 h-3" /> {t("top.notifications")}</button>
             <span className="opacity-70">|</span>
             <div className="relative" ref={langRef}>

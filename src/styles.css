@@ -83,6 +83,45 @@
   --transition-smooth: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Light mode overrides — applied when <html class="light"> */
+.light {
+  --background: oklch(0.99 0.005 250);
+  --foreground: oklch(0.18 0.03 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.03 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.03 265);
+
+  --brand: oklch(0.62 0.17 210);
+  --brand-foreground: oklch(1 0 0);
+  --brand-dark: oklch(0.50 0.17 215);
+  --primary: oklch(0.62 0.17 210);
+  --primary-foreground: oklch(1 0 0);
+
+  --accent2: oklch(0.58 0.22 305);
+  --sale: oklch(0.62 0.24 25);
+
+  --secondary: oklch(0.95 0.01 250);
+  --secondary-foreground: oklch(0.20 0.03 265);
+  --muted: oklch(0.96 0.008 250);
+  --muted-foreground: oklch(0.45 0.02 260);
+  --accent: oklch(0.94 0.02 215);
+  --accent-foreground: oklch(0.25 0.06 215);
+  --destructive: oklch(0.60 0.24 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.90 0.01 250);
+  --input: oklch(0.94 0.01 250);
+  --ring: oklch(0.62 0.17 210);
+
+  --gradient-brand: linear-gradient(135deg, oklch(0.62 0.17 210), oklch(0.58 0.22 305));
+  --gradient-topbar: linear-gradient(90deg, oklch(0.30 0.06 265), oklch(0.38 0.08 240));
+  --gradient-flash: linear-gradient(90deg, oklch(0.58 0.22 305), oklch(0.62 0.17 210));
+  --gradient-hero: radial-gradient(ellipse at top, oklch(0.92 0.04 215) 0%, oklch(0.99 0.005 250) 70%);
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 6%), 0 6px 20px oklch(0.20 0.05 265 / 10%);
+  --shadow-hover: 0 10px 30px oklch(0.62 0.17 210 / 18%), 0 0 0 1px oklch(0.62 0.17 210 / 20%);
+  --shadow-glow: 0 0 28px oklch(0.62 0.17 210 / 25%);
+}
+
 @layer base {
   * { border-color: var(--color-border); }
   html { scroll-behavior: smooth; }
