@@ -6,7 +6,7 @@ import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 import {
   Shield, LayoutDashboard, Store, Package, ListTree, ShoppingBag,
   Users, Loader2, Settings, LogOut, ExternalLink, Bell, Search,
-  Sparkles, ChevronRight, Menu, X, CreditCard,
+  Sparkles, ChevronRight, Menu, X, CreditCard, LifeBuoy,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -48,7 +48,7 @@ function AdminLayout() {
     const map: Record<string, string> = {
       "": "لوحة القيادة", vendors: "البائعون", products: "المنتجات",
       categories: "الأقسام", orders: "الطلبات", users: "المستخدمون",
-      settings: "الإعدادات", catalog: "إدارة القسم", payments: "بوابات الدفع",
+      settings: "الإعدادات", catalog: "إدارة القسم", payments: "بوابات الدفع", support: "الدعم الفني",
     };
     const seg = pathname.replace("/admin", "").replace(/^\//, "").split("/")[0] || "";
     return map[seg] ?? seg;
@@ -63,7 +63,7 @@ function AdminLayout() {
   }
   if (!isAdmin) return null;
 
-  type NavTo = "/admin" | "/admin/vendors" | "/admin/products" | "/admin/categories" | "/admin/orders" | "/admin/users" | "/admin/settings" | "/admin/payments";
+  type NavTo = "/admin" | "/admin/vendors" | "/admin/products" | "/admin/categories" | "/admin/orders" | "/admin/users" | "/admin/settings" | "/admin/payments" | "/admin/support";
   const groups: { label: string; items: { to: NavTo; icon: typeof LayoutDashboard; label: string; exact?: boolean }[] }[] = [
     { label: "نظرة عامة", items: [{ to: "/admin", icon: LayoutDashboard, label: "لوحة القيادة", exact: true }] },
     { label: "الكتالوج", items: [
@@ -74,6 +74,9 @@ function AdminLayout() {
     { label: "التجارة", items: [
       { to: "/admin/orders", icon: ShoppingBag, label: "الطلبات" },
       { to: "/admin/payments", icon: CreditCard, label: "بوابات الدفع" },
+    ]},
+    { label: "العملاء", items: [
+      { to: "/admin/support", icon: LifeBuoy, label: "الدعم الفني" },
     ]},
     { label: "النظام", items: [
       { to: "/admin/users", icon: Users, label: "المستخدمون والصلاحيات" },

@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { useI18n } from "@/lib/i18n";
-import { LifeBuoy, MessageCircle, Phone, Mail, HelpCircle, Send, Clock, ShieldCheck, ChevronDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { LifeBuoy, MessageCircle, Phone, Mail, HelpCircle, Send, Clock, ShieldCheck, ChevronDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 import heroImg from "@/assets/hero.jpg";
 
@@ -20,8 +22,28 @@ export const Route = createFileRoute("/support")({
 
 function SupportPage() {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [open, setOpen] = useState<number | null>(0);
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [form, setForm] = useState({ name: "", email: user?.email ?? "", problem_type: "", message: "" });
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    const { error } = await supabase.from("support_tickets").insert({
+      user_id: user?.id ?? null,
+      name: form.name,
+      email: form.email,
+      problem_type: form.problem_type,
+      message: form.message,
+    });
+    setSubmitting(false);
+    if (error) { setError(error.message); return; }
+    setSent(true);
+  };
 
   const channels = [
     { icon: MessageCircle, title: "WhatsApp", desc: "3316 1049", href: "https://wa.me/97433161049", color: "bg-emerald-500" },
@@ -122,7 +144,7 @@ function SupportPage() {
 
         {/* Ticket form */}
         <form
-          onSubmit={(e) => { e.preventDefault(); setSent(true); }}
+          onSubmit={submit}
           className="md:col-span-2 bg-card rounded-md border border-border shadow-card p-5 space-y-3 h-fit"
         >
           <div className="flex items-center gap-2">
@@ -135,9 +157,9 @@ function SupportPage() {
             </div>
           ) : (
             <>
-              <input required placeholder="الاسم الكامل" className="w-full px-3 py-2.5 rounded-md border border-border bg-white text-foreground outline-none focus:border-brand transition-smooth" />
-              <input required type="email" placeholder="البريد الإلكتروني" className="w-full px-3 py-2.5 rounded-md border border-border bg-white text-foreground outline-none focus:border-brand transition-smooth" />
-              <select required className="w-full px-3 py-2.5 rounded-md border border-border bg-white text-foreground outline-none focus:border-brand transition-smooth">
+              <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="الاسم الكامل" className="w-full px-3 py-2.5 rounded-md border border-border bg-background text-foreground outline-none focus:border-brand transition-smooth" />
+              <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="البريد الإلكتروني" className="w-full px-3 py-2.5 rounded-md border border-border bg-background text-foreground outline-none focus:border-brand transition-smooth" />
+              <select required value={form.problem_type} onChange={(e) => setForm({ ...form, problem_type: e.target.value })} className="w-full px-3 py-2.5 rounded-md border border-border bg-background text-foreground outline-none focus:border-brand transition-smooth">
                 <option value="">اختر نوع المشكلة</option>
                 <option>مشكلة في الطلب</option>
                 <option>مشكلة تقنية في الجهاز</option>
@@ -145,9 +167,11 @@ function SupportPage() {
                 <option>طلب تركيب أو صيانة</option>
                 <option>أخرى</option>
               </select>
-              <textarea required rows={4} placeholder="اشرح المشكلة بالتفصيل..." className="w-full px-3 py-2.5 rounded-md border border-border bg-white text-foreground outline-none focus:border-brand transition-smooth" />
-              <button type="submit" className="w-full h-11 rounded-md bg-brand hover:bg-brand-dark text-white font-semibold transition-smooth">
-                إرسال التذكرة
+              <textarea required rows={4} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="اشرح المشكلة بالتفصيل..." className="w-full px-3 py-2.5 rounded-md border border-border bg-background text-foreground outline-none focus:border-brand transition-smooth" />
+              {error && <p className="text-xs text-destructive">{error}</p>}
+              <button type="submit" disabled={submitting} className="w-full h-11 rounded-md bg-brand hover:bg-brand-dark text-white font-semibold transition-smooth disabled:opacity-60 flex items-center justify-center gap-2">
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {submitting ? "جاري الإرسال..." : "إرسال التذكرة"}
               </button>
               <p className="text-xs text-muted-foreground text-center">
                 أو تواصل مباشرة عبر <Link to="/contact" className="text-brand hover:underline">صفحة الاتصال</Link>
@@ -155,6 +179,7 @@ function SupportPage() {
             </>
           )}
         </form>
+
       </section>
     </PageShell>
   );
