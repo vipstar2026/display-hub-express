@@ -46,13 +46,6 @@ function SupportPage() {
     setSent(true);
   };
 
-  const channels = [
-    { icon: MessageCircle, title: "WhatsApp", desc: "3316 1049", href: "https://wa.me/97433161049", color: "bg-emerald-500" },
-    { icon: Phone, title: "Hotline", desc: "7708 2893", href: "tel:+97477082893", color: "bg-brand" },
-    { icon: Mail, title: "Email", desc: "pppahmed71@gmail.com", href: "mailto:pppahmed71@gmail.com", color: "bg-sale" },
-  ];
-
-  const faqs = [
     { q: "كيف يمكنني تتبع طلبي؟", a: "يمكنك تتبع طلبك من صفحة \"طلباتي\" بعد تسجيل الدخول، أو عبر رابط التتبع المرسل في رسالة التأكيد." },
     { q: "ما هي طرق الدفع المتاحة؟", a: "ندعم البطاقات الائتمانية، Apple Pay، Google Pay، والدفع عند الاستلام داخل قطر." },
     { q: "كم تستغرق عملية التركيب؟", a: "التركيب القياسي يستغرق من 1 إلى 3 ساعات حسب نوع الخدمة (IPTV، Dish، CCTV)." },
