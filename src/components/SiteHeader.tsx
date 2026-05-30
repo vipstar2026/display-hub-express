@@ -14,6 +14,7 @@ export function SiteHeader() {
   const { lang, setLang, t } = useI18n();
   const { count } = useCart();
   const { user, signOut } = useAuth();
+  const { theme, toggle: toggleTheme } = useTheme();
   const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
