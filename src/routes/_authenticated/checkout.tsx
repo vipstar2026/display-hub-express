@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { useCurrency, type CurrencyCode } from "@/lib/currency";
 import { toast } from "sonner";
-import { MapPin, Package, CreditCard, Truck, Loader2, Lock, ShieldCheck, Check } from "lucide-react";
+import { MapPin, Package, CreditCard, Truck, Loader2, Lock, ShieldCheck, Check, Wallet, Building2, Smartphone, Apple } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/checkout")({
   component: CheckoutPage,
