@@ -26,6 +26,17 @@ type Address = {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+type PaymentMethod = "cod" | "card" | "benefit" | "apple_pay" | "google_pay" | "bank_transfer";
+
+const PAYMENT_OPTIONS: { id: PaymentMethod; label: string; sub: string; icon: any; badge?: string }[] = [
+  { id: "card",          label: "بطاقة ائتمان / مدى",  sub: "Visa · Mastercard · Mada",        icon: CreditCard, badge: "الأكثر استخداماً" },
+  { id: "benefit",       label: "بِنِفت (BenefitPay)",  sub: "الدفع عبر تطبيق Benefit البحريني", icon: Smartphone },
+  { id: "apple_pay",     label: "Apple Pay",            sub: "دفع سريع وآمن بلمسة واحدة",       icon: Apple },
+  { id: "google_pay",    label: "Google Pay",           sub: "ادفع ببطاقتك المحفوظة في Google", icon: Wallet },
+  { id: "bank_transfer", label: "تحويل بنكي",            sub: "حوالة مباشرة إلى حساب المتجر",    icon: Building2 },
+  { id: "cod",           label: "الدفع عند الاستلام",   sub: "ادفع نقداً عند وصول طلبك",       icon: Truck },
+];
+
 function CheckoutPage() {
   const { user } = useAuth();
   const { items, clear } = useCart();
