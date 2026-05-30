@@ -88,7 +88,7 @@ function CartPage() {
         if (!p) return null;
         return {
           id: it.id, qty: it.qty, title: p.name, brand: p.brand, image: p.image,
-          unit: p.price, oldUnit: p.oldPrice, currency: undefined, stock: p.stock, source: "demo",
+          unit: p.price, oldUnit: p.oldPrice, currency: "QAR", stock: p.stock, source: "demo",
         } as Row;
       })
       .filter(Boolean) as Row[];
