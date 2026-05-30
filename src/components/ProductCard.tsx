@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Star, Heart } from "lucide-react";
 import { useCart } from "@/lib/cart";
-import { useCurrency } from "@/lib/currency";
+import { useCurrency, type CurrencyCode } from "@/lib/currency";
 
 type Props = {
   id?: string;
@@ -15,13 +15,15 @@ type Props = {
   sold?: number;
   badge?: string;
   freeShipping?: boolean;
+  /** Source currency of the numeric prices. Defaults to base currency. */
+  currency?: CurrencyCode;
 };
 
-export function ProductCard({ id, name, price, oldPrice, discount, image, rating = 4.5, sold, badge, freeShipping }: Props) {
+export function ProductCard({ id, name, price, oldPrice, discount, image, rating = 4.5, sold, badge, freeShipping, currency }: Props) {
   const { toggleWishlist, isWished } = useCart();
   const { format } = useCurrency();
   const wished = id ? isWished(id) : false;
-  const fmt = (v: string | number) => (typeof v === "number" ? format(v) : v);
+  const fmt = (v: string | number) => (typeof v === "number" ? format(v, currency) : v);
 
   const inner = (
     <>
