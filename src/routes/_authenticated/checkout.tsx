@@ -51,6 +51,37 @@ function CheckoutPage() {
   const [payment, setPayment] = useState<PaymentMethod>("cod");
   const [notes, setNotes] = useState("");
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [enabledMethods, setEnabledMethods] = useState<Set<PaymentMethod>>(
+    () => new Set(PAYMENT_OPTIONS.map((o) => o.id))
+  );
+  const [bankInfo, setBankInfo] = useState({
+    bank_name: "Bank of Bahrain & Kuwait (BBK)",
+    account_name: "VIP STAR Trading",
+    iban: "BH00 BBKU 0000 0000 0000 00",
+  });
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("site_settings").select("value").eq("key", "payment_gateways").maybeSingle();
+      if (!data?.value) return;
+      const v = data.value as Record<string, { enabled?: boolean; bank_name?: string; account_name?: string; iban?: string }>;
+      const en = new Set<PaymentMethod>();
+      (Object.keys(v) as PaymentMethod[]).forEach((k) => { if (v[k]?.enabled) en.add(k); });
+      if (en.size > 0) {
+        setEnabledMethods(en);
+        if (!en.has(payment)) setPayment(Array.from(en)[0]);
+      }
+      if (v.bank_transfer) {
+        setBankInfo({
+          bank_name: v.bank_transfer.bank_name || bankInfo.bank_name,
+          account_name: v.bank_transfer.account_name || bankInfo.account_name,
+          iban: v.bank_transfer.iban || bankInfo.iban,
+        });
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Card form state (UI ready, gateway plug-in pending)
   const [card, setCard] = useState({ number: "", name: "", expiry: "", cvc: "", save: false });
@@ -304,7 +335,7 @@ function CheckoutPage() {
                 </div>
 
                 <div className="mt-4 grid sm:grid-cols-2 gap-3">
-                  {PAYMENT_OPTIONS.map((opt) => {
+                  {PAYMENT_OPTIONS.filter((o) => enabledMethods.has(o.id)).map((opt) => {
                     const Icon = opt.icon;
                     const active = payment === opt.id;
                     return (
@@ -379,9 +410,9 @@ function CheckoutPage() {
                 {payment === "bank_transfer" && (
                   <div className="mt-5 rounded-xl border border-border bg-background/40 p-4 text-sm space-y-2">
                     <div className="font-semibold text-foreground">تفاصيل التحويل البنكي</div>
-                    <Row label="البنك" value="Bank of Bahrain & Kuwait (BBK)" />
-                    <Row label="اسم المستفيد" value="VIP STAR Trading" />
-                    <Row label="رقم الحساب (IBAN)" value="BH00 BBKU 0000 0000 0000 00" />
+                    <Row label="البنك" value={bankInfo.bank_name} />
+                    <Row label="اسم المستفيد" value={bankInfo.account_name} />
+                    <Row label="رقم الحساب (IBAN)" value={bankInfo.iban} />
                     <p className="text-[11px] text-muted-foreground pt-2">أرسل صورة إيصال التحويل في خانة الملاحظات ليتم تأكيد طلبك خلال 24 ساعة.</p>
                   </div>
                 )}
