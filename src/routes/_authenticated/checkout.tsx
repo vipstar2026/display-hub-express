@@ -335,7 +335,7 @@ function CheckoutPage() {
                 </div>
 
                 <div className="mt-4 grid sm:grid-cols-2 gap-3">
-                  {PAYMENT_OPTIONS.map((opt) => {
+                  {PAYMENT_OPTIONS.filter((o) => enabledMethods.has(o.id)).map((opt) => {
                     const Icon = opt.icon;
                     const active = payment === opt.id;
                     return (
