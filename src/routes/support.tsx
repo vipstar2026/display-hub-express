@@ -3,7 +3,7 @@ import { PageShell } from "@/components/PageShell";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { LifeBuoy, MessageCircle, Phone, Mail, HelpCircle, Send, Clock, ShieldCheck, ChevronDown, Loader2 } from "lucide-react";
+import { LifeBuoy, HelpCircle, Send, Clock, ShieldCheck, ChevronDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 import heroImg from "@/assets/hero.jpg";
 
@@ -45,18 +45,12 @@ function SupportPage() {
     setSent(true);
   };
 
-  const channels = [
-    { icon: MessageCircle, title: "WhatsApp", desc: "3316 1049", href: "https://wa.me/97433161049", color: "bg-emerald-500" },
-    { icon: Phone, title: "Hotline", desc: "7708 2893", href: "tel:+97477082893", color: "bg-brand" },
-    { icon: Mail, title: "Email", desc: "pppahmed71@gmail.com", href: "mailto:pppahmed71@gmail.com", color: "bg-sale" },
-  ];
-
   const faqs = [
     { q: "كيف يمكنني تتبع طلبي؟", a: "يمكنك تتبع طلبك من صفحة \"طلباتي\" بعد تسجيل الدخول، أو عبر رابط التتبع المرسل في رسالة التأكيد." },
     { q: "ما هي طرق الدفع المتاحة؟", a: "ندعم البطاقات الائتمانية، Apple Pay، Google Pay، والدفع عند الاستلام داخل قطر." },
     { q: "كم تستغرق عملية التركيب؟", a: "التركيب القياسي يستغرق من 1 إلى 3 ساعات حسب نوع الخدمة (IPTV، Dish، CCTV)." },
     { q: "هل يوجد ضمان على المنتجات؟", a: "نعم، جميع المنتجات تشمل ضمان الوكيل الرسمي لمدة 12 شهرًا على الأقل." },
-    { q: "كيف يمكنني إرجاع منتج؟", a: "يمكنك طلب الإرجاع خلال 7 أيام من الاستلام عبر تذكرة دعم أو الواتساب." },
+    { q: "كيف يمكنني إرجاع منتج؟", a: "يمكنك طلب الإرجاع خلال 7 أيام من الاستلام عبر تذكرة دعم." },
   ];
 
   return (
@@ -80,29 +74,8 @@ function SupportPage() {
         </div>
       </section>
 
-      {/* Quick channels */}
-      <section className="mx-auto max-w-7xl px-4 mt-6 grid gap-4 md:grid-cols-3">
-        {channels.map((c) => (
-          <a
-            key={c.title}
-            href={c.href}
-            target="_blank"
-            rel="noreferrer"
-            className="group bg-card rounded-md border border-border shadow-card p-5 flex items-center gap-4 hover:border-brand hover:shadow-lg transition-smooth"
-          >
-            <div className={`w-12 h-12 rounded-full ${c.color} grid place-items-center text-white shrink-0`}>
-              <c.icon className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">{c.title}</div>
-              <div className="text-base font-bold text-foreground group-hover:text-brand transition-smooth">{c.desc}</div>
-            </div>
-          </a>
-        ))}
-      </section>
-
       {/* Status strip */}
-      <section className="mx-auto max-w-7xl px-4 mt-4">
+      <section className="mx-auto max-w-7xl px-4 mt-6">
         <div className="bg-card rounded-md border border-border shadow-card p-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm">
             <span className="relative flex h-2.5 w-2.5">
