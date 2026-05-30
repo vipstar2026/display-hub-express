@@ -6,7 +6,7 @@ import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 import {
   Shield, LayoutDashboard, Store, Package, ListTree, ShoppingBag,
   Users, Loader2, Settings, LogOut, ExternalLink, Bell, Search,
-  Sparkles, ChevronRight, Menu, X, CreditCard,
+  Sparkles, ChevronRight, Menu, X, CreditCard, LifeBuoy,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
