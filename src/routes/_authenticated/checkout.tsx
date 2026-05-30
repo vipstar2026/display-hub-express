@@ -107,9 +107,25 @@ function CheckoutPage() {
   const shippingSrc = subtotalSrc === 0 || subtotalSrc >= 200 ? 0 : 20; // simple legacy rule
   const totalSrc = subtotalSrc + shippingSrc;
 
+  function validatePayment(): string | null {
+    if (payment === "card") {
+      const digits = card.number.replace(/\s+/g, "");
+      if (digits.length < 13 || digits.length > 19) return "رقم البطاقة غير صحيح";
+      if (!/^\d{2}\s*\/\s*\d{2}$/.test(card.expiry)) return "تاريخ الانتهاء بصيغة MM/YY";
+      if (!/^\d{3,4}$/.test(card.cvc)) return "رمز CVC غير صحيح";
+      if (card.name.trim().length < 3) return "اكتب اسم حامل البطاقة";
+    }
+    if (payment === "benefit" && !/^\+?\d{8,}$/.test(benefitPhone.replace(/\s+/g, "")))
+      return "أدخل رقم هاتف صحيح لتطبيق Benefit";
+    return null;
+  }
+
   async function placeOrder() {
     if (!user) return;
     if (rows.length === 0) { toast.error("لا توجد منتجات قابلة للشراء في السلة."); return; }
+
+    const payErr = validatePayment();
+    if (payErr) { toast.error(payErr); setStep(2); return; }
 
     let addr = addresses.find((a) => a.id === selectedAddr);
     if (!addr) {
