@@ -48,7 +48,7 @@ function AdminLayout() {
     const map: Record<string, string> = {
       "": "لوحة القيادة", vendors: "البائعون", products: "المنتجات",
       categories: "الأقسام", orders: "الطلبات", users: "المستخدمون",
-      settings: "الإعدادات", catalog: "إدارة القسم", payments: "بوابات الدفع",
+      settings: "الإعدادات", catalog: "إدارة القسم", payments: "بوابات الدفع", support: "الدعم الفني",
     };
     const seg = pathname.replace("/admin", "").replace(/^\//, "").split("/")[0] || "";
     return map[seg] ?? seg;
