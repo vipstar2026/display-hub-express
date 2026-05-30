@@ -368,6 +368,45 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          problem_type: string
+          status: Database["public"]["Enums"]["ticket_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          problem_type: string
+          status?: Database["public"]["Enums"]["ticket_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          problem_type?: string
+          status?: Database["public"]["Enums"]["ticket_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -463,6 +502,7 @@ export type Database = {
         | "completed"
         | "cancelled"
       product_status: "draft" | "active" | "inactive" | "out_of_stock"
+      ticket_status: "open" | "in_progress" | "resolved" | "closed"
       vendor_status: "pending" | "approved" | "suspended"
     }
     CompositeTypes: {
@@ -608,6 +648,7 @@ export const Constants = {
         "cancelled",
       ],
       product_status: ["draft", "active", "inactive", "out_of_stock"],
+      ticket_status: ["open", "in_progress", "resolved", "closed"],
       vendor_status: ["pending", "approved", "suspended"],
     },
   },
