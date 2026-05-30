@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
 import { useCart } from "@/lib/cart";
 import { getProduct } from "@/lib/products";
-import { useI18n } from "@/lib/i18n";
 import { useCurrency, type CurrencyCode } from "@/lib/currency";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,32 +25,29 @@ type Row = {
   title: string;
   brand?: string;
   image?: string;
-  unit: number;          // current selling price in product currency
-  oldUnit?: number;      // original price if on sale
-  currency?: CurrencyCode;
+  unit: number;           // selling price in product currency
+  oldUnit?: number;       // original price if on sale
+  currency?: CurrencyCode; // undefined => assume base currency
   stock: number;
-  href?: { to: "/product/$id"; params: { id: string } } | null;
   source: "db" | "demo";
 };
 
 function CartPage() {
   const { items, setQty, remove, clear } = useCart();
-  const { t } = useI18n();
-  const { format, convert } = useCurrency();
+  const { format, toBase } = useCurrency();
   const { user } = useAuth();
   const nav = useNavigate();
 
   const [dbRows, setDbRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(false);
   const [coupon, setCoupon] = useState("");
-  const [discount, setDiscount] = useState(0); // % off
+  const [discount, setDiscount] = useState(0); // %
 
   const uuidIds = useMemo(
     () => items.map((i) => i.id).filter((id) => UUID_RE.test(id)),
     [items],
   );
 
-  // Fetch real DB products in cart
   useEffect(() => {
     let cancel = false;
     (async () => {
@@ -64,8 +60,6 @@ function CartPage() {
       if (cancel) return;
       const rows: Row[] = (data ?? []).map((p: any) => {
         const imgs = (p.product_images ?? []).slice().sort((a: any, b: any) => a.sort_order - b.sort_order);
-        const unit = Number(p.sale_price ?? p.price);
-        const oldUnit = p.sale_price ? Number(p.price) : undefined;
         const it = items.find((x) => x.id === p.id);
         return {
           id: p.id,
@@ -73,11 +67,10 @@ function CartPage() {
           title: p.title,
           brand: p.brand ?? undefined,
           image: imgs[0]?.url,
-          unit,
-          oldUnit,
+          unit: Number(p.sale_price ?? p.price),
+          oldUnit: p.sale_price ? Number(p.price) : undefined,
           currency: (p.currency as CurrencyCode) ?? undefined,
           stock: p.stock ?? 0,
-          href: { to: "/product/$id", params: { id: p.id } },
           source: "db",
         };
       });
@@ -87,7 +80,6 @@ function CartPage() {
     return () => { cancel = true; };
   }, [uuidIds.join(","), items]);
 
-  // Build demo product rows (legacy/static)
   const demoRows: Row[] = useMemo(() => {
     return items
       .filter((it) => !UUID_RE.test(it.id))
@@ -95,17 +87,8 @@ function CartPage() {
         const p = getProduct(it.id);
         if (!p) return null;
         return {
-          id: it.id,
-          qty: it.qty,
-          title: p.name,
-          brand: p.brand,
-          image: p.image,
-          unit: p.price,
-          oldUnit: p.oldPrice,
-          currency: undefined, // assume base currency
-          stock: p.stock,
-          href: { to: "/product/$id", params: { id: it.id } },
-          source: "demo",
+          id: it.id, qty: it.qty, title: p.name, brand: p.brand, image: p.image,
+          unit: p.price, oldUnit: p.oldPrice, currency: undefined, stock: p.stock, source: "demo",
         } as Row;
       })
       .filter(Boolean) as Row[];
@@ -113,41 +96,37 @@ function CartPage() {
 
   const rows: Row[] = useMemo(() => [...dbRows, ...demoRows], [dbRows, demoRows]);
 
-  // All math is done in the user's selected currency for a consistent view.
-  const subtotal = rows.reduce((s, r) => s + convert(r.unit, r.currency) * r.qty, 0);
-  const savings = rows.reduce(
-    (s, r) => s + (r.oldUnit ? (convert(r.oldUnit, r.currency) - convert(r.unit, r.currency)) * r.qty : 0),
+  // Everything stored/summed in BASE currency (BHD), then formatted to user's currency.
+  const subtotalBase = rows.reduce((s, r) => s + toBase(r.unit, r.currency) * r.qty, 0);
+  const savingsBase = rows.reduce(
+    (s, r) => s + (r.oldUnit ? (toBase(r.oldUnit, r.currency) - toBase(r.unit, r.currency)) * r.qty : 0),
     0,
   );
-  const freeShipThreshold = convert(200, "QAR"); // legacy threshold ~200 QAR
-  const shipping = subtotal === 0 || subtotal >= freeShipThreshold ? 0 : convert(20, "QAR");
-  const discountAmount = (subtotal * discount) / 100;
-  const total = Math.max(0, subtotal - discountAmount + shipping);
+  // Free shipping threshold ~200 QAR expressed in BHD via toBase
+  const freeShipBase = toBase(200, "QAR");
+  const shippingBase = subtotalBase === 0 || subtotalBase >= freeShipBase ? 0 : toBase(20, "QAR");
+  const discountBase = (subtotalBase * discount) / 100;
+  const totalBase = Math.max(0, subtotalBase - discountBase + shippingBase);
+  const remainingToFreeShip = Math.max(0, freeShipBase - subtotalBase);
 
   function applyCoupon() {
     const c = coupon.trim().toUpperCase();
     if (!c) return;
     const map: Record<string, number> = { WELCOME10: 10, VIP15: 15, STAR20: 20 };
-    if (map[c]) {
-      setDiscount(map[c]);
-      toast.success(`تم تطبيق كود الخصم: ${map[c]}%`);
-    } else {
-      setDiscount(0);
-      toast.error("كود الخصم غير صالح");
-    }
+    if (map[c]) { setDiscount(map[c]); toast.success(`تم تطبيق خصم ${map[c]}%`); }
+    else { setDiscount(0); toast.error("كود الخصم غير صالح"); }
   }
 
   function proceedCheckout() {
     if (rows.length === 0) return;
     if (!user) {
       toast.message("سجل الدخول لإكمال الشراء");
-      nav({ to: "/login", search: { redirect: "/checkout" } as any });
+      nav({ to: "/login" });
       return;
     }
     nav({ to: "/checkout" });
   }
 
-  // Empty state
   if (!loading && rows.length === 0) {
     return (
       <PageShell>
@@ -162,7 +141,7 @@ function CartPage() {
               تسوّق الآن
             </Link>
             <Link to="/wishlist" className="px-6 py-3 rounded-xl border border-border text-foreground hover:bg-card transition-smooth">
-              عرض المفضلة
+              المفضلة
             </Link>
           </div>
         </section>
@@ -173,7 +152,6 @@ function CartPage() {
   return (
     <PageShell>
       <section dir="rtl" className="mx-auto max-w-7xl px-4 py-6 md:py-10">
-        {/* Heading */}
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
@@ -191,27 +169,29 @@ function CartPage() {
           )}
         </div>
 
-        {/* Free shipping progress */}
-        {subtotal > 0 && shipping > 0 && (
+        {subtotalBase > 0 && shippingBase > 0 && (
           <div className="mb-6 rounded-2xl border border-border bg-card p-4 shadow-card">
-            <div className="flex items-center gap-2 text-sm text-foreground">
-              <Truck className="w-4 h-4 text-brand" />
-              أضف <span className="font-bold text-brand">{format(freeShipThreshold - subtotal, "USD" as CurrencyCode)
-                /* convert: use no source - amounts already in current currency, but format expects base. trick: convert back */}
-                {/* simpler: compute in base */}</span>
-              <span className="opacity-70">— استخدم الشريط أدناه لمتابعة التقدم نحو الشحن المجاني</span>
+            <div className="flex items-center gap-2 text-sm text-foreground flex-wrap">
+              <Truck className="w-4 h-4 text-brand shrink-0" />
+              أضف <span className="font-bold text-brand">{format(remainingToFreeShip)}</span>
+              <span className="opacity-70">للحصول على شحن مجاني</span>
             </div>
             <div className="mt-3 h-2 rounded-full bg-secondary overflow-hidden">
               <div
                 className="h-full bg-gradient-brand transition-smooth"
-                style={{ width: `${Math.min(100, (subtotal / freeShipThreshold) * 100)}%` }}
+                style={{ width: `${Math.min(100, (subtotalBase / freeShipBase) * 100)}%` }}
               />
             </div>
           </div>
         )}
+        {subtotalBase > 0 && shippingBase === 0 && (
+          <div className="mb-6 rounded-2xl border border-brand/40 bg-brand/10 p-4 flex items-center gap-2 text-sm text-foreground">
+            <Truck className="w-4 h-4 text-brand" />
+            <span className="font-semibold text-brand">رائع!</span> حصلت على شحن مجاني لهذا الطلب.
+          </div>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-          {/* Items column */}
           <div className="space-y-4">
             {loading && (
               <div className="grid place-items-center py-10 rounded-2xl bg-card border border-border">
@@ -224,36 +204,34 @@ function CartPage() {
                 key={r.id}
                 className="bg-card rounded-2xl border border-border shadow-card p-4 md:p-5 flex gap-4 transition-smooth hover:shadow-hover"
               >
-                {r.href ? (
-                  <Link to={r.href.to} params={r.href.params} className="w-24 h-24 md:w-28 md:h-28 shrink-0 rounded-xl bg-secondary overflow-hidden">
-                    {r.image ? (
-                      <img src={r.image} alt={r.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full grid place-items-center text-muted-foreground"><Package className="w-6 h-6" /></div>
-                    )}
-                  </Link>
-                ) : (
-                  <div className="w-24 h-24 md:w-28 md:h-28 shrink-0 rounded-xl bg-secondary overflow-hidden">
-                    {r.image && <img src={r.image} alt={r.title} className="w-full h-full object-cover" />}
-                  </div>
-                )}
+                <Link
+                  to="/product/$id"
+                  params={{ id: r.id }}
+                  className="w-24 h-24 md:w-28 md:h-28 shrink-0 rounded-xl bg-secondary overflow-hidden"
+                >
+                  {r.image ? (
+                    <img src={r.image} alt={r.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full grid place-items-center text-muted-foreground"><Package className="w-6 h-6" /></div>
+                  )}
+                </Link>
 
                 <div className="flex-1 min-w-0 flex flex-col">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      {r.href ? (
-                        <Link to={r.href.to} params={r.href.params} className="text-sm md:text-base font-semibold text-foreground hover:text-brand line-clamp-2">
-                          {r.title}
-                        </Link>
-                      ) : (
-                        <div className="text-sm md:text-base font-semibold text-foreground line-clamp-2">{r.title}</div>
-                      )}
-                      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                      <Link
+                        to="/product/$id"
+                        params={{ id: r.id }}
+                        className="text-sm md:text-base font-semibold text-foreground hover:text-brand line-clamp-2"
+                      >
+                        {r.title}
+                      </Link>
+                      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                         {r.brand && <span>{r.brand}</span>}
                         {r.source === "demo" && (
                           <span className="px-1.5 py-0.5 rounded bg-accent text-accent-foreground text-[10px]">عرض تجريبي</span>
                         )}
-                        {r.stock <= 5 && r.stock > 0 && (
+                        {r.stock > 0 && r.stock <= 5 && (
                           <span className="px-1.5 py-0.5 rounded bg-sale/15 text-sale text-[10px] font-semibold">
                             متبقي {r.stock} فقط
                           </span>
@@ -286,7 +264,7 @@ function CartPage() {
                       <span className="w-10 text-center text-sm font-bold tabular-nums">{r.qty}</span>
                       <button
                         onClick={() => {
-                          if (r.qty + 1 > r.stock) { toast.error("لقد بلغت الحد الأقصى للمخزون"); return; }
+                          if (r.stock > 0 && r.qty + 1 > r.stock) { toast.error("لقد بلغت الحد الأقصى للمخزون"); return; }
                           setQty(r.id, r.qty + 1);
                         }}
                         className="w-9 h-9 grid place-items-center hover:bg-accent transition-smooth"
@@ -300,7 +278,7 @@ function CartPage() {
                       <div className="text-lg font-extrabold text-sale">
                         {format(r.unit * r.qty, r.currency)}
                       </div>
-                      <div className="text-xs text-muted-foreground flex items-baseline gap-1 justify-end">
+                      <div className="text-xs text-muted-foreground flex items-baseline gap-1 justify-end flex-wrap">
                         <span>{format(r.unit, r.currency)} × {r.qty}</span>
                         {r.oldUnit && (
                           <span className="line-through opacity-60">{format(r.oldUnit, r.currency)}</span>
@@ -312,17 +290,12 @@ function CartPage() {
               </div>
             ))}
 
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 text-sm text-brand hover:underline mt-2"
-            >
+            <Link to="/" className="inline-flex items-center gap-2 text-sm text-brand hover:underline mt-2">
               <ArrowRight className="w-4 h-4 rotate-180" /> متابعة التسوق
             </Link>
           </div>
 
-          {/* Summary column */}
           <aside className="lg:sticky lg:top-32 h-fit space-y-4">
-            {/* Coupon */}
             <div className="bg-card rounded-2xl border border-border shadow-card p-5">
               <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                 <Tag className="w-4 h-4 text-brand" /> كود الخصم
@@ -332,7 +305,7 @@ function CartPage() {
                   value={coupon}
                   onChange={(e) => setCoupon(e.target.value)}
                   placeholder="مثال: WELCOME10"
-                  className="flex-1 h-10 rounded-xl border border-border bg-background/60 px-3 text-sm outline-none focus:border-brand"
+                  className="flex-1 h-10 rounded-xl border border-border bg-background/60 px-3 text-sm outline-none focus:border-brand text-foreground"
                 />
                 <button
                   onClick={applyCoupon}
@@ -341,40 +314,24 @@ function CartPage() {
                   تطبيق
                 </button>
               </div>
-              {discount > 0 && (
-                <p className="mt-2 text-xs text-emerald-400">تم تطبيق خصم {discount}%</p>
-              )}
+              {discount > 0 && <p className="mt-2 text-xs text-emerald-400">تم تطبيق خصم {discount}%</p>}
               <p className="mt-2 text-[11px] text-muted-foreground">جرّب: WELCOME10 · VIP15 · STAR20</p>
             </div>
 
-            {/* Summary */}
             <div className="bg-card rounded-2xl border border-border shadow-card p-5">
               <h2 className="text-base font-bold text-foreground">ملخص الطلب</h2>
-
               <div className="mt-4 space-y-2.5 text-sm">
-                <SummaryRow label="المجموع الفرعي" value={format(subtotal, "USD" as CurrencyCode)} convertHack={subtotal} />
-                {savings > 0 && (
-                  <SummaryRow label="توفير العروض" value={`- ${format(savings, "USD" as CurrencyCode)}`} convertHack={savings} positive />
+                <Row label="المجموع الفرعي" value={format(subtotalBase)} />
+                {savingsBase > 0 && (
+                  <Row label="توفير العروض" value={`- ${format(savingsBase)}`} positive />
                 )}
                 {discount > 0 && (
-                  <SummaryRow
-                    label={`الكوبون (${discount}%)`}
-                    value={`- ${format(discountAmount, "USD" as CurrencyCode)}`}
-                    convertHack={discountAmount}
-                    positive
-                  />
+                  <Row label={`الكوبون (${discount}%)`} value={`- ${format(discountBase)}`} positive />
                 )}
-                <SummaryRow
-                  label="الشحن"
-                  value={shipping === 0 ? "مجاني" : format(shipping, "USD" as CurrencyCode)}
-                  convertHack={shipping}
-                />
+                <Row label="الشحن" value={shippingBase === 0 ? "مجاني" : format(shippingBase)} />
                 <div className="border-t border-border pt-3 mt-3 flex items-baseline justify-between">
                   <span className="text-base font-bold">الإجمالي</span>
-                  <span className="text-2xl font-extrabold text-sale tabular-nums">
-                    {format(total, "USD" as CurrencyCode)
-                      .replace(/[\d.,]+/, total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 3 }))}
-                  </span>
+                  <span className="text-2xl font-extrabold text-sale tabular-nums">{format(totalBase)}</span>
                 </div>
               </div>
 
@@ -400,38 +357,11 @@ function CartPage() {
   );
 }
 
-/**
- * The cart math is computed in the user's display currency, but `format()` expects
- * an amount expressed in BASE currency. We render an already-converted number by
- * formatting `convertHack` directly via locale formatting and the meta from format().
- */
-function SummaryRow({
-  label,
-  value,
-  convertHack,
-  positive = false,
-}: {
-  label: string;
-  value: string;
-  convertHack: number;
-  positive?: boolean;
-}) {
-  // We just trust `value` was produced from already-converted numeric.
-  // The label/value pair uses `format()`'s symbol but we override numeric via convertHack.
-  // Most callers pass already-formatted strings via format(amount, "USD") -- where amount is already in display currency.
-  // To keep symbol from current currency, we replace digits within value with the convertHack rendering:
-  const num = convertHack.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 3,
-  });
-  // Replace the digit sequence in `value` with `num` (preserves leading "- " and the currency symbol from format()).
-  const replaced = value.replace(/[\d.,]+/, num);
+function Row({ label, value, positive = false }: { label: string; value: string; positive?: boolean }) {
   return (
     <div className="flex justify-between items-baseline">
       <span className="text-muted-foreground">{label}</span>
-      <span className={`font-semibold tabular-nums ${positive ? "text-emerald-400" : "text-foreground"}`}>
-        {replaced}
-      </span>
+      <span className={`font-semibold tabular-nums ${positive ? "text-emerald-400" : "text-foreground"}`}>{value}</span>
     </div>
   );
 }
