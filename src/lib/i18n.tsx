@@ -547,6 +547,18 @@ const translations: Record<Lang, Dict> = {
     "auth.saveChanges": "تبدیلیاں محفوظ کریں",
     "auth.vendorDash": "وینڈر ڈیش بورڈ",
     "auth.admin": "ایڈمن پینل",
+    "pd.home": "ہوم",
+    "pd.sold": "فروخت ہو چکے",
+    "pd.seller": "فروخت کنندہ",
+    "pd.noImage": "کوئی تصویر نہیں",
+    "pd.wishlisted": "پسندیدہ میں شامل",
+    "pd.addWishlist": "پسندیدہ میں شامل کریں",
+    "pd.shipping": "معیاری شپنگ",
+    "pd.returns7": "7 دن کی واپسی پالیسی",
+    "pd.warranty1y": "1 سال کی وارنٹی",
+    "acc.orders": "میرے آرڈرز",
+    "acc.becomeSeller": "فروخت کنندہ بنیں",
+    "acc.title": "میرا اکاؤنٹ",
   },
 };
 
