@@ -169,21 +169,21 @@ function ProductPage() {
               className="mt-2 w-full h-10 rounded-md border border-border hover:bg-accent text-sm flex items-center justify-center gap-2"
             >
               <Heart className={`w-4 h-4 ${wished ? "fill-sale text-sale" : ""}`} />
-              {wished ? "Wishlisted" : "Add to Wishlist"}
+              {wished ? t("pd.wishlisted") : t("pd.addWishlist")}
             </button>
 
             <div className="mt-5 pt-5 border-t border-border space-y-3 text-xs">
               <div className="flex items-center gap-2 text-foreground">
                 <Truck className="w-4 h-4 text-brand" />
-                <span>Standard Shipping</span>
+                <span>{t("pd.shipping")}</span>
               </div>
               <div className="flex items-center gap-2 text-foreground">
                 <RotateCcw className="w-4 h-4 text-brand" />
-                <span>7-day return policy</span>
+                <span>{t("pd.returns7")}</span>
               </div>
               <div className="flex items-center gap-2 text-foreground">
                 <ShieldCheck className="w-4 h-4 text-brand" />
-                <span>1 year warranty</span>
+                <span>{t("pd.warranty1y")}</span>
               </div>
             </div>
           </div>
