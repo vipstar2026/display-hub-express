@@ -37,9 +37,13 @@ function CheckoutPage() {
   const [selectedAddr, setSelectedAddr] = useState<string | "new">("new");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [payment, setPayment] = useState<"cod" | "card">("cod");
+  const [payment, setPayment] = useState<PaymentMethod>("cod");
   const [notes, setNotes] = useState("");
   const [step, setStep] = useState<1 | 2 | 3>(1);
+
+  // Card form state (UI ready, gateway plug-in pending)
+  const [card, setCard] = useState({ number: "", name: "", expiry: "", cvc: "", save: false });
+  const [benefitPhone, setBenefitPhone] = useState("");
 
   const [form, setForm] = useState({
     full_name: "", phone: "", line1: "", line2: "", city: "", country: "Bahrain", save: true,
