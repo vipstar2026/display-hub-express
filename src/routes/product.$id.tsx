@@ -62,7 +62,7 @@ function ProductPage() {
     <PageShell>
       <section className="mx-auto max-w-7xl px-4 py-6">
         <div className="text-xs text-muted-foreground mb-3">
-          <Link to="/" className="hover:text-brand">Home</Link>
+          <Link to="/" className="hover:text-brand">{t("pd.home")}</Link>
           {product.category_slug && (
             <>
               <span className="mx-2">/</span>
