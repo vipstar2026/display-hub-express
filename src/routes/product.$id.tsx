@@ -127,7 +127,7 @@ function ProductPage() {
               </div>
               {product.vendor_name && (
                 <div className="flex justify-between border-b border-border pb-2">
-                  <span className="text-muted-foreground">Seller</span>
+                  <span className="text-muted-foreground">{t("pd.seller")}</span>
                   <span className="font-medium text-foreground">{product.vendor_name}</span>
                 </div>
               )}
