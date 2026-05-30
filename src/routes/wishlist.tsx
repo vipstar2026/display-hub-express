@@ -33,7 +33,7 @@ function WishlistPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {products.map((p) => (
-              <ProductCard key={p!.id} id={p!.id} name={p!.name} price={p!.price} oldPrice={p!.oldPrice} image={p!.image} rating={p!.rating} sold={p!.sold} badge={p!.badge} freeShipping={p!.freeShipping} />
+              <ProductCard key={p!.id} id={p!.id} name={p!.name} price={p!.price} oldPrice={p!.oldPrice} image={p!.image} rating={p!.rating} sold={p!.sold} badge={p!.badge} freeShipping={p!.freeShipping} currency="QAR" />
             ))}
           </div>
         )}
