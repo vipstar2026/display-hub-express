@@ -48,7 +48,7 @@ export function SiteHeader() {
             <span className="hidden md:inline opacity-70">|</span>
             <Link to="/sell/register" className="hidden md:inline hover:underline">{t("top.becomeSeller")}</Link>
             <span className="hidden md:inline opacity-70">|</span>
-            <span className="hidden md:inline">{t("top.help")}</span>
+            <Link to="/support" className="hidden md:inline hover:underline">{t("top.help")}</Link>
           </div>
           <div className="flex items-center gap-3">
             <button
