@@ -119,16 +119,18 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <I18nProvider>
-          <CurrencyProvider>
-            <CartProvider>
-              <Outlet />
-              <Toaster richColors position="top-center" />
-            </CartProvider>
-          </CurrencyProvider>
-        </I18nProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <I18nProvider>
+            <CurrencyProvider>
+              <CartProvider>
+                <Outlet />
+                <Toaster richColors position="top-center" />
+              </CartProvider>
+            </CurrencyProvider>
+          </I18nProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
