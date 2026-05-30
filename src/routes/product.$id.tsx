@@ -62,7 +62,7 @@ function ProductPage() {
     <PageShell>
       <section className="mx-auto max-w-7xl px-4 py-6">
         <div className="text-xs text-muted-foreground mb-3">
-          <Link to="/" className="hover:text-brand">Home</Link>
+          <Link to="/" className="hover:text-brand">{t("pd.home")}</Link>
           {product.category_slug && (
             <>
               <span className="mx-2">/</span>
@@ -79,7 +79,7 @@ function ProductPage() {
               {product.image ? (
                 <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full grid place-items-center text-muted-foreground">No image</div>
+                <div className="w-full h-full grid place-items-center text-muted-foreground">{t("pd.noImage")}</div>
               )}
             </div>
             {product.images.length > 1 && (
@@ -101,7 +101,7 @@ function ProductPage() {
               </div>
               <span>{Number(product.rating).toFixed(1)}</span>
               <span className="opacity-60">|</span>
-              <span>{product.sales_count} sold</span>
+              <span>{product.sales_count} {t("pd.sold")}</span>
             </div>
 
             <div className="mt-4 bg-accent/40 rounded-md p-4">
@@ -127,7 +127,7 @@ function ProductPage() {
               </div>
               {product.vendor_name && (
                 <div className="flex justify-between border-b border-border pb-2">
-                  <span className="text-muted-foreground">Seller</span>
+                  <span className="text-muted-foreground">{t("pd.seller")}</span>
                   <span className="font-medium text-foreground">{product.vendor_name}</span>
                 </div>
               )}
@@ -169,21 +169,21 @@ function ProductPage() {
               className="mt-2 w-full h-10 rounded-md border border-border hover:bg-accent text-sm flex items-center justify-center gap-2"
             >
               <Heart className={`w-4 h-4 ${wished ? "fill-sale text-sale" : ""}`} />
-              {wished ? "Wishlisted" : "Add to Wishlist"}
+              {wished ? t("pd.wishlisted") : t("pd.addWishlist")}
             </button>
 
             <div className="mt-5 pt-5 border-t border-border space-y-3 text-xs">
               <div className="flex items-center gap-2 text-foreground">
                 <Truck className="w-4 h-4 text-brand" />
-                <span>Standard Shipping</span>
+                <span>{t("pd.shipping")}</span>
               </div>
               <div className="flex items-center gap-2 text-foreground">
                 <RotateCcw className="w-4 h-4 text-brand" />
-                <span>7-day return policy</span>
+                <span>{t("pd.returns7")}</span>
               </div>
               <div className="flex items-center gap-2 text-foreground">
                 <ShieldCheck className="w-4 h-4 text-brand" />
-                <span>1 year warranty</span>
+                <span>{t("pd.warranty1y")}</span>
               </div>
             </div>
           </div>

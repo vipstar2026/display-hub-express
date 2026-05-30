@@ -10,7 +10,7 @@ import { User as UserIcon, Heart, ShoppingBag, Store, LogOut, Shield, Package } 
 
 export const Route = createFileRoute("/_authenticated/account")({
   component: AccountPage,
-  head: () => ({ meta: [{ title: "My Account | VIP STAR" }] }),
+  head: () => ({ meta: [{ title: "حسابي | VIP STAR" }] }),
 });
 
 type Profile = { display_name: string | null; phone: string | null; avatar_url: string | null };
@@ -68,12 +68,12 @@ function AccountPage() {
           </div>
           <nav className="mt-4 space-y-1 text-sm">
             <a className="flex items-center gap-2 px-3 py-2 rounded-md bg-accent text-brand font-medium"><UserIcon className="w-4 h-4" /> {t("auth.profile")}</a>
-            <Link to="/orders" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Package className="w-4 h-4" /> My Orders</Link>
+            <Link to="/orders" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Package className="w-4 h-4" /> {t("acc.orders")}</Link>
             <Link to="/wishlist" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Heart className="w-4 h-4" /> {t("header.wishlist")}</Link>
             <Link to="/cart" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><ShoppingBag className="w-4 h-4" /> {t("header.cart")}</Link>
             {isVendor
               ? <Link to="/sell/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Store className="w-4 h-4" /> {t("auth.vendorDash")}</Link>
-              : <Link to="/sell/register" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Store className="w-4 h-4" /> Become a Seller</Link>}
+              : <Link to="/sell/register" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Store className="w-4 h-4" /> {t("acc.becomeSeller")}</Link>}
             {isAdmin && <Link to="/admin" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Shield className="w-4 h-4" /> {t("auth.admin")}</Link>}
             <button onClick={onSignOut} className="w-full text-start flex items-center gap-2 px-3 py-2 rounded-md hover:bg-sale/10 text-sale font-medium">
               <LogOut className="w-4 h-4" /> {t("auth.signOut")}
