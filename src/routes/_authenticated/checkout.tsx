@@ -410,9 +410,9 @@ function CheckoutPage() {
                 {payment === "bank_transfer" && (
                   <div className="mt-5 rounded-xl border border-border bg-background/40 p-4 text-sm space-y-2">
                     <div className="font-semibold text-foreground">تفاصيل التحويل البنكي</div>
-                    <Row label="البنك" value="Bank of Bahrain & Kuwait (BBK)" />
-                    <Row label="اسم المستفيد" value="VIP STAR Trading" />
-                    <Row label="رقم الحساب (IBAN)" value="BH00 BBKU 0000 0000 0000 00" />
+                    <Row label="البنك" value={bankInfo.bank_name} />
+                    <Row label="اسم المستفيد" value={bankInfo.account_name} />
+                    <Row label="رقم الحساب (IBAN)" value={bankInfo.iban} />
                     <p className="text-[11px] text-muted-foreground pt-2">أرسل صورة إيصال التحويل في خانة الملاحظات ليتم تأكيد طلبك خلال 24 ساعة.</p>
                   </div>
                 )}
