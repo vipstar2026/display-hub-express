@@ -157,7 +157,7 @@ function CheckoutPage() {
         .from("orders")
         .insert({
           buyer_id: user.id,
-          status: payment === "cod" ? "processing" : "pending",
+          status: payment === "cod" ? "processing" : payment === "bank_transfer" ? "pending" : "pending",
           subtotal: subtotalSrc, shipping: shippingSrc, total: totalSrc,
           currency: orderCurrency,
           payment_method: payment,
