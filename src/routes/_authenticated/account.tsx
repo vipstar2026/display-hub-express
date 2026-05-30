@@ -10,7 +10,7 @@ import { User as UserIcon, Heart, ShoppingBag, Store, LogOut, Shield, Package } 
 
 export const Route = createFileRoute("/_authenticated/account")({
   component: AccountPage,
-  head: () => ({ meta: [{ title: "My Account | VIP STAR" }] }),
+  head: () => ({ meta: [{ title: "حسابي | VIP STAR" }] }),
 });
 
 type Profile = { display_name: string | null; phone: string | null; avatar_url: string | null };
