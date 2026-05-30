@@ -83,6 +83,7 @@ export function CategoryPage({ category, img, titleKey, subKey }: { category: st
                 image={p.image}
                 rating={Number(p.rating)}
                 sold={p.sales_count}
+                currency={(p.currency as any) || undefined}
               />
             ))}
           </div>
