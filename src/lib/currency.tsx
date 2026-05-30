@@ -33,6 +33,7 @@ type Ctx = {
   currency: CurrencyCode;
   setCurrency: (c: CurrencyCode) => void;
   convert: (amount: number, from?: CurrencyCode) => number;
+  toBase: (amount: number, from?: CurrencyCode) => number;
   format: (amount: number, from?: CurrencyCode) => string;
 };
 
@@ -60,6 +61,13 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     return inUsd / META[currency].usd;
   }
 
+  function toBase(amount: number, from: CurrencyCode = BASE_CURRENCY) {
+    if (!Number.isFinite(amount)) return 0;
+    if (from === BASE_CURRENCY) return amount;
+    const inUsd = amount * META[from].usd;
+    return inUsd / META[BASE_CURRENCY].usd;
+  }
+
   function format(amount: number, from: CurrencyCode = BASE_CURRENCY) {
     const meta = META[currency];
     const value = convert(amount, from);
@@ -71,7 +79,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, convert, format }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency, convert, toBase, format }}>
       {children}
     </CurrencyContext.Provider>
   );

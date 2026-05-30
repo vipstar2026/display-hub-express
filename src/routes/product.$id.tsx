@@ -52,6 +52,12 @@ function ProductPage() {
     setTimeout(() => setAdded(false), 1500);
   };
 
+  const handleBuyNow = () => {
+    add(product.id, qty);
+    window.location.assign("/checkout");
+  };
+
+
   return (
     <PageShell>
       <section className="mx-auto max-w-7xl px-4 py-6">
@@ -150,9 +156,14 @@ function ProductPage() {
               {added ? <Check className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
               {t("pd.addCart")}
             </button>
-            <Link to="/cart" className="mt-2 w-full h-12 rounded-md bg-sale hover:opacity-90 text-white font-semibold flex items-center justify-center transition-smooth">
+            <button
+              onClick={handleBuyNow}
+              disabled={product.stock === 0}
+              className="mt-2 w-full h-12 rounded-md bg-sale hover:opacity-90 text-white font-semibold flex items-center justify-center transition-smooth disabled:opacity-50"
+            >
               {t("pd.buyNow")}
-            </Link>
+            </button>
+
             <button
               onClick={() => toggleWishlist(product.id)}
               className="mt-2 w-full h-10 rounded-md border border-border hover:bg-accent text-sm flex items-center justify-center gap-2"
