@@ -41,12 +41,55 @@ const CurrencyContext = createContext<Ctx | null>(null);
 
 const STORAGE_KEY = "currency";
 
+/** Map of country code (ISO-3166 alpha-2) -> default currency for the region. */
+const COUNTRY_TO_CURRENCY: Record<string, CurrencyCode> = {
+  BH: "BHD", QA: "QAR", SA: "SAR", AE: "AED", KW: "KWD", OM: "OMR",
+  US: "USD", GB: "USD", CA: "USD", AU: "USD",
+  DE: "EUR", FR: "EUR", IT: "EUR", ES: "EUR", NL: "EUR", BE: "EUR",
+  PT: "EUR", IE: "EUR", AT: "EUR", FI: "EUR", GR: "EUR",
+};
+
+/** Map of IANA timezone -> country code (fallback when locale lacks region). */
+const TZ_TO_COUNTRY: Record<string, string> = {
+  "Asia/Bahrain": "BH",
+  "Asia/Qatar": "QA",
+  "Asia/Riyadh": "SA",
+  "Asia/Dubai": "AE",
+  "Asia/Kuwait": "KW",
+  "Asia/Muscat": "OM",
+};
+
+function detectRegionCurrency(): CurrencyCode | null {
+  if (typeof window === "undefined") return null;
+  try {
+    // 1) Try browser locale region (e.g. "ar-BH", "en-US")
+    const langs: string[] = [
+      ...(navigator.languages ?? []),
+      navigator.language,
+    ].filter(Boolean) as string[];
+    for (const l of langs) {
+      const region = l.split("-")[1]?.toUpperCase();
+      if (region && COUNTRY_TO_CURRENCY[region]) return COUNTRY_TO_CURRENCY[region];
+    }
+    // 2) Fallback to timezone
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const country = TZ_TO_COUNTRY[tz];
+    if (country && COUNTRY_TO_CURRENCY[country]) return COUNTRY_TO_CURRENCY[country];
+  } catch {}
+  return null;
+}
+
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState<CurrencyCode>("BHD");
 
   useEffect(() => {
     const saved = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
-    if (saved && META[saved as CurrencyCode]) setCurrencyState(saved as CurrencyCode);
+    if (saved && META[saved as CurrencyCode]) {
+      setCurrencyState(saved as CurrencyCode);
+      return;
+    }
+    const auto = detectRegionCurrency();
+    if (auto) setCurrencyState(auto);
   }, []);
 
   function setCurrency(c: CurrencyCode) {
