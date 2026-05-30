@@ -79,7 +79,7 @@ function ProductPage() {
               {product.image ? (
                 <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full grid place-items-center text-muted-foreground">No image</div>
+                <div className="w-full h-full grid place-items-center text-muted-foreground">{t("pd.noImage")}</div>
               )}
             </div>
             {product.images.length > 1 && (
