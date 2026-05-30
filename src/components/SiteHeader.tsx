@@ -51,6 +51,16 @@ export function SiteHeader() {
             <span className="hidden md:inline">{t("top.help")}</span>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-1 hover:underline"
+              aria-label="Toggle theme"
+              title={theme === "dark" ? "الوضع النهاري" : "الوضع الليلي"}
+            >
+              {theme === "dark" ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{theme === "dark" ? "نهاري" : "ليلي"}</span>
+            </button>
+            <span className="opacity-70">|</span>
             <button className="flex items-center gap-1 hover:underline"><Bell className="w-3 h-3" /> {t("top.notifications")}</button>
             <span className="opacity-70">|</span>
             <div className="relative" ref={langRef}>
