@@ -13,6 +13,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { CartProvider } from "@/lib/cart";
 import { AuthProvider } from "@/lib/auth";
 import { CurrencyProvider } from "@/lib/currency";
+import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
