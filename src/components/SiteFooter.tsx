@@ -55,7 +55,8 @@ export function SiteFooter() {
         <div>
           <h4 className="text-sm font-semibold mb-3 text-foreground">{t("foot.care")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/contact" className="hover:text-brand">{t("foot.help")}</Link></li>
+            <li><Link to="/support" className="hover:text-brand">{t("foot.help")}</Link></li>
+            <li><Link to="/support" className="hover:text-brand">المساعدة والدعم الفني</Link></li>
             <li><Link to="/contact" className="hover:text-brand">{t("foot.howBuy")}</Link></li>
             <li><Link to="/services" className="hover:text-brand">{t("foot.returnsLink")}</Link></li>
             <li><Link to="/contact" className="hover:text-brand">{t("foot.contact")}</Link></li>

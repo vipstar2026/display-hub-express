@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as LoginRouteImport } from './routes/login'
@@ -44,6 +45,11 @@ import { Route as AuthenticatedAdminCatalogSlugRouteImport } from './routes/_aut
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
   path: '/wishlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -217,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
+  '/support': typeof SupportRoute
   '/wishlist': typeof WishlistRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -249,6 +256,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
+  '/support': typeof SupportRoute
   '/wishlist': typeof WishlistRoute
   '/account': typeof AuthenticatedAccountRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
+  '/support': typeof SupportRoute
   '/wishlist': typeof WishlistRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -316,6 +325,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/services'
     | '/signup'
+    | '/support'
     | '/wishlist'
     | '/account'
     | '/admin'
@@ -348,6 +358,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/services'
     | '/signup'
+    | '/support'
     | '/wishlist'
     | '/account'
     | '/checkout'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/services'
     | '/signup'
+    | '/support'
     | '/wishlist'
     | '/_authenticated/account'
     | '/_authenticated/admin'
@@ -414,6 +426,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ServicesRoute: typeof ServicesRoute
   SignupRoute: typeof SignupRoute
+  SupportRoute: typeof SupportRoute
   WishlistRoute: typeof WishlistRoute
   ProductIdRoute: typeof ProductIdRoute
 }
@@ -425,6 +438,13 @@ declare module '@tanstack/react-router' {
       path: '/wishlist'
       fullPath: '/wishlist'
       preLoaderRoute: typeof WishlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -717,6 +737,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ServicesRoute: ServicesRoute,
   SignupRoute: SignupRoute,
+  SupportRoute: SupportRoute,
   WishlistRoute: WishlistRoute,
   ProductIdRoute: ProductIdRoute,
 }
