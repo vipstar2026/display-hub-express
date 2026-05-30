@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Search, ShoppingCart, User, Heart, Bell, Globe, ChevronDown, Menu, LogOut } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Bell, Globe, ChevronDown, Menu, LogOut, Sun, Moon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import logo from "@/assets/logo.png";
 import { LANGS, useI18n, type Lang } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/lib/theme";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 
 export function SiteHeader() {
