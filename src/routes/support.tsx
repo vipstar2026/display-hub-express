@@ -3,9 +3,10 @@ import { PageShell } from "@/components/PageShell";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { LifeBuoy, MessageCircle, Phone, Mail, HelpCircle, Send, Clock, ShieldCheck, ChevronDown, Loader2 } from "lucide-react";
+import { LifeBuoy, HelpCircle, Send, Clock, ShieldCheck, ChevronDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 import heroImg from "@/assets/hero.jpg";
+
 
 export const Route = createFileRoute("/support")({
   head: () => ({
