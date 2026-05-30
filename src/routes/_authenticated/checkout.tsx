@@ -296,31 +296,109 @@ function CheckoutPage() {
 
               {/* Payment */}
               <section className={`bg-card border border-border rounded-2xl p-5 shadow-card transition-smooth ${step === 2 ? "ring-1 ring-brand/40" : ""}`}>
-                <h2 className="flex items-center gap-2 font-bold text-foreground"><CreditCard className="w-4 h-4 text-brand" /> طريقة الدفع</h2>
-                <div className="mt-3 grid sm:grid-cols-2 gap-3">
-                  <label className={`flex items-center gap-3 border rounded-xl p-3 cursor-pointer text-sm transition-smooth ${payment === "cod" ? "border-brand ring-1 ring-brand bg-brand/5" : "border-border hover:border-brand/40"}`}>
-                    <input type="radio" name="pay" className="sr-only" checked={payment === "cod"} onChange={() => setPayment("cod")} />
-                    <Truck className="w-5 h-5 text-brand" />
-                    <div>
-                      <div className="font-semibold text-foreground">الدفع عند الاستلام</div>
-                      <div className="text-xs text-muted-foreground">ادفع نقداً عند وصول طلبك</div>
-                    </div>
-                  </label>
-                  <label className="flex items-center gap-3 border border-border rounded-xl p-3 cursor-not-allowed text-sm opacity-50">
-                    <input type="radio" name="pay" className="sr-only" disabled />
-                    <CreditCard className="w-5 h-5 text-brand" />
-                    <div>
-                      <div className="font-semibold text-foreground">بطاقة ائتمان (قريباً)</div>
-                      <div className="text-xs text-muted-foreground">Visa · Mastercard · Apple Pay</div>
-                    </div>
-                  </label>
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="flex items-center gap-2 font-bold text-foreground"><CreditCard className="w-4 h-4 text-brand" /> طريقة الدفع</h2>
+                  <span className="text-[10px] px-2 py-1 rounded-full bg-brand/10 text-brand font-semibold flex items-center gap-1">
+                    <Lock className="w-3 h-3" /> SSL 256-bit
+                  </span>
                 </div>
+
+                <div className="mt-4 grid sm:grid-cols-2 gap-3">
+                  {PAYMENT_OPTIONS.map((opt) => {
+                    const Icon = opt.icon;
+                    const active = payment === opt.id;
+                    return (
+                      <label
+                        key={opt.id}
+                        className={`relative flex items-center gap-3 border rounded-xl p-3 cursor-pointer text-sm transition-smooth ${
+                          active ? "border-brand ring-1 ring-brand bg-brand/5" : "border-border hover:border-brand/40"
+                        }`}
+                      >
+                        <input type="radio" name="pay" className="sr-only" checked={active} onChange={() => setPayment(opt.id)} />
+                        <div className={`w-10 h-10 rounded-lg grid place-items-center shrink-0 ${active ? "bg-brand text-brand-foreground" : "bg-secondary text-brand"}`}>
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-foreground flex items-center gap-2">
+                            {opt.label}
+                            {opt.badge && <span className="text-[9px] px-1.5 py-0.5 rounded bg-sale/15 text-sale font-bold">{opt.badge}</span>}
+                          </div>
+                          <div className="text-xs text-muted-foreground truncate">{opt.sub}</div>
+                        </div>
+                        {active && <Check className="w-4 h-4 text-brand absolute top-2 left-2" />}
+                      </label>
+                    );
+                  })}
+                </div>
+
+                {/* Card details form */}
+                {payment === "card" && (
+                  <div className="mt-5 grid sm:grid-cols-2 gap-3 rounded-xl border border-border bg-background/40 p-4">
+                    <Input
+                      label="رقم البطاقة"
+                      value={card.number}
+                      onChange={(v) => setCard({ ...card, number: formatCardNumber(v) })}
+                      className="sm:col-span-2"
+                    />
+                    <Input label="الاسم على البطاقة" value={card.name} onChange={(v) => setCard({ ...card, name: v })} className="sm:col-span-2" />
+                    <Input label="تاريخ الانتهاء (MM/YY)" value={card.expiry} onChange={(v) => setCard({ ...card, expiry: formatExpiry(v) })} />
+                    <Input label="CVC" value={card.cvc} onChange={(v) => setCard({ ...card, cvc: v.replace(/\D/g, "").slice(0, 4) })} />
+                    <label className="sm:col-span-2 flex items-center gap-2 text-xs text-muted-foreground">
+                      <input type="checkbox" checked={card.save} onChange={(e) => setCard({ ...card, save: e.target.checked })} />
+                      حفظ هذه البطاقة بأمان للاستخدام لاحقاً
+                    </label>
+                    <p className="sm:col-span-2 text-[11px] text-muted-foreground flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3 text-brand" /> لن يتم تحصيل أي مبلغ حتى ربط بوابة الدفع الرسمية.
+                    </p>
+                  </div>
+                )}
+
+                {payment === "benefit" && (
+                  <div className="mt-5 rounded-xl border border-border bg-background/40 p-4 space-y-3">
+                    <Input label="رقم الهاتف المسجّل في Benefit" value={benefitPhone} onChange={setBenefitPhone} />
+                    <p className="text-[11px] text-muted-foreground">ستصلك إشعار في تطبيق Benefit لاعتماد الدفع فور ربط البوابة.</p>
+                  </div>
+                )}
+
+                {payment === "apple_pay" && (
+                  <div className="mt-5 rounded-xl border border-border bg-background/40 p-4 text-center">
+                    <Apple className="w-8 h-8 mx-auto text-foreground" />
+                    <p className="mt-2 text-sm font-semibold text-foreground">ادفع بـ Apple Pay</p>
+                    <p className="text-xs text-muted-foreground mt-1">سيُفعَّل تلقائياً على أجهزة Apple فور ربط بوابة الدفع.</p>
+                  </div>
+                )}
+
+                {payment === "google_pay" && (
+                  <div className="mt-5 rounded-xl border border-border bg-background/40 p-4 text-center">
+                    <Wallet className="w-8 h-8 mx-auto text-brand" />
+                    <p className="mt-2 text-sm font-semibold text-foreground">ادفع بـ Google Pay</p>
+                    <p className="text-xs text-muted-foreground mt-1">يتطلب جهاز Android مع Google Pay مفعّل.</p>
+                  </div>
+                )}
+
+                {payment === "bank_transfer" && (
+                  <div className="mt-5 rounded-xl border border-border bg-background/40 p-4 text-sm space-y-2">
+                    <div className="font-semibold text-foreground">تفاصيل التحويل البنكي</div>
+                    <Row label="البنك" value="Bank of Bahrain & Kuwait (BBK)" />
+                    <Row label="اسم المستفيد" value="VIP STAR Trading" />
+                    <Row label="رقم الحساب (IBAN)" value="BH00 BBKU 0000 0000 0000 00" />
+                    <p className="text-[11px] text-muted-foreground pt-2">أرسل صورة إيصال التحويل في خانة الملاحظات ليتم تأكيد طلبك خلال 24 ساعة.</p>
+                  </div>
+                )}
+
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="ملاحظات على الطلب (اختياري)"
                   className="mt-4 w-full min-h-[80px] rounded-xl border border-border bg-background/60 p-3 text-sm outline-none focus:border-brand text-foreground"
                 />
+
+                {/* Trust badges */}
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[10px] text-muted-foreground">
+                  {["VISA", "Mastercard", "Mada", "Benefit", "Apple Pay", "Google Pay"].map((b) => (
+                    <span key={b} className="px-2 py-1 rounded-md border border-border bg-secondary/50 font-semibold tracking-wide">{b}</span>
+                  ))}
+                </div>
               </section>
             </div>
 
