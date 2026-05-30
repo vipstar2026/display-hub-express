@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { useI18n } from "@/lib/i18n";
-import { LifeBuoy, MessageCircle, Phone, Mail, HelpCircle, Send, Clock, ShieldCheck, ChevronDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { LifeBuoy, MessageCircle, Phone, Mail, HelpCircle, Send, Clock, ShieldCheck, ChevronDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 import heroImg from "@/assets/hero.jpg";
 
@@ -20,8 +22,28 @@ export const Route = createFileRoute("/support")({
 
 function SupportPage() {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [open, setOpen] = useState<number | null>(0);
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [form, setForm] = useState({ name: "", email: user?.email ?? "", problem_type: "", message: "" });
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    const { error } = await supabase.from("support_tickets").insert({
+      user_id: user?.id ?? null,
+      name: form.name,
+      email: form.email,
+      problem_type: form.problem_type,
+      message: form.message,
+    });
+    setSubmitting(false);
+    if (error) { setError(error.message); return; }
+    setSent(true);
+  };
 
   const channels = [
     { icon: MessageCircle, title: "WhatsApp", desc: "3316 1049", href: "https://wa.me/97433161049", color: "bg-emerald-500" },
