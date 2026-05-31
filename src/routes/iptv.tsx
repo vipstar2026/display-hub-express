@@ -18,20 +18,34 @@ export const Route = createFileRoute("/iptv")({
   component: () => <CategoryPage category="iptv" img={iptvImg} titleKey="iptv.title" subKey="iptv.sub" />,
 });
 
-export function CategoryPage({ category, img, titleKey, subKey }: { category: string; img: string; titleKey: string; subKey: string }) {
+export type ProductGroup = {
+  key: string;
+  labelKey: string;
+  match: (title: string) => boolean;
+};
+
+export function CategoryPage({ category, img, titleKey, subKey, groups }: { category: string; img: string; titleKey: string; subKey: string; groups?: ProductGroup[] }) {
   const { t } = useI18n();
   const { items, loading } = useCategoryProducts(category);
   const [sort, setSort] = useState<"pop" | "low" | "high" | "rating">("pop");
+  const [group, setGroup] = useState<string>("all");
+
+  const filtered = useMemo(() => {
+    if (!groups || group === "all") return items;
+    const g = groups.find((x) => x.key === group);
+    if (!g) return items;
+    return items.filter((p) => g.match(p.title || ""));
+  }, [items, group, groups]);
 
   const sorted = useMemo(() => {
-    const arr = [...items];
-    const price = (p: typeof items[number]) => Number(p.sale_price ?? p.price);
+    const arr = [...filtered];
+    const price = (p: typeof filtered[number]) => Number(p.sale_price ?? p.price);
     if (sort === "low") arr.sort((a, b) => price(a) - price(b));
     else if (sort === "high") arr.sort((a, b) => price(b) - price(a));
     else if (sort === "rating") arr.sort((a, b) => Number(b.rating) - Number(a.rating));
     else arr.sort((a, b) => b.sales_count - a.sales_count);
     return arr;
-  }, [items, sort]);
+  }, [filtered, sort]);
 
   return (
     <PageShell>
@@ -45,9 +59,34 @@ export function CategoryPage({ category, img, titleKey, subKey }: { category: st
         </div>
       </section>
 
+      {groups && groups.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 mt-4">
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setGroup("all")}
+              className={`px-4 py-2 rounded-md text-sm font-semibold border transition-smooth ${group === "all" ? "bg-brand text-brand-foreground border-brand" : "bg-card text-foreground border-border hover:border-brand"}`}
+            >
+              {t("dish.gAll")}
+            </button>
+            {groups.map((g) => {
+              const count = items.filter((p) => g.match(p.title || "")).length;
+              return (
+                <button
+                  key={g.key}
+                  onClick={() => setGroup(g.key)}
+                  className={`px-4 py-2 rounded-md text-sm font-semibold border transition-smooth ${group === g.key ? "bg-brand text-brand-foreground border-brand" : "bg-card text-foreground border-border hover:border-brand"}`}
+                >
+                  {t(g.labelKey)} <span className="opacity-70">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <section className="mx-auto max-w-7xl px-4 mt-4">
         <div className="bg-card rounded-md border border-border shadow-card p-3 flex items-center justify-between flex-wrap gap-2">
-          <div className="text-sm text-muted-foreground">{items.length} {t("cat.products")}</div>
+          <div className="text-sm text-muted-foreground">{sorted.length} {t("cat.products")}</div>
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">{t("cat.sort")}:</span>
             <select
@@ -92,3 +131,4 @@ export function CategoryPage({ category, img, titleKey, subKey }: { category: st
     </PageShell>
   );
 }
+
