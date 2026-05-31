@@ -17,12 +17,12 @@ export type DbProduct = {
   vendor_id: string;
   category_id: string | null;
   image?: string;
+  category_slug?: string;
 };
 
 export type DbProductDetail = DbProduct & {
   images: string[];
   vendor_name?: string;
-  category_slug?: string;
 };
 
 export function useCategoryProducts(slug: string) {
@@ -35,17 +35,21 @@ export function useCategoryProducts(slug: string) {
       setLoading(true);
       const { data: cat } = await supabase.from("categories").select("id").eq("slug", slug).maybeSingle();
       if (!cat) { if (!cancel) { setItems([]); setLoading(false); } return; }
+      // Include child categories so a parent like "dish" also lists products of its subcategories.
+      const { data: children } = await supabase.from("categories").select("id, slug").eq("parent_id", cat.id);
+      const catIds = [cat.id, ...((children ?? []).map((c: any) => c.id))];
+      const slugMap = new Map<string, string>([[cat.id, slug], ...((children ?? []).map((c: any) => [c.id, c.slug] as [string, string]))]);
       const { data } = await supabase
         .from("products")
         .select("id, title, slug, description, price, sale_price, currency, stock, brand, status, rating, sales_count, vendor_id, category_id, product_images(url, sort_order)")
-        .eq("category_id", cat.id)
+        .in("category_id", catIds)
         .eq("status", "active")
         .order("created_at", { ascending: false })
-        .limit(60);
+        .limit(120);
       if (cancel) return;
       const mapped: DbProduct[] = (data ?? []).map((p: any) => {
         const imgs = (p.product_images ?? []).slice().sort((a: any, b: any) => a.sort_order - b.sort_order);
-        return { ...p, image: imgs[0]?.url };
+        return { ...p, image: imgs[0]?.url, category_slug: slugMap.get(p.category_id) };
       });
       setItems(mapped);
       setLoading(false);
