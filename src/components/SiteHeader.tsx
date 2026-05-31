@@ -30,10 +30,6 @@ export function SiteHeader() {
     { name: t("nav.dish"), to: "/dish" as const },
     { name: t("nav.cctv"), to: "/cctv" as const },
     { name: t("nav.installation"), to: "/services" as const },
-    { name: t("nav.accessories"), to: "/iptv" as const },
-    { name: t("nav.smartTv"), to: "/iptv" as const },
-    { name: t("nav.receivers"), to: "/dish" as const },
-    { name: t("nav.cables"), to: "/dish" as const },
   ];
 
   const currentLang = LANGS.find((l) => l.code === lang)!;
