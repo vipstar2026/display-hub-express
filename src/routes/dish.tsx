@@ -3,21 +3,9 @@ import { CategoryPage, type ProductGroup } from "./iptv";
 import dishImg from "@/assets/dish.jpg";
 
 const DISH_GROUPS: ProductGroup[] = [
-  {
-    key: "receivers",
-    labelKey: "dish.gReceivers",
-    match: (t) => /receiver|ريسيفر|استقبال|جهاز/i.test(t),
-  },
-  {
-    key: "cables",
-    labelKey: "dish.gCables",
-    match: (t) => /cable|coax|wire|كابل|كيبل|سلك|اسلاك|أسلاك/i.test(t),
-  },
-  {
-    key: "dishes",
-    labelKey: "dish.gDishes",
-    match: (t) => /dish|lnb|mount|طبق|أطباق|حامل|تركيب/i.test(t),
-  },
+  { key: "dish-receivers", labelKey: "dish.gReceivers", match: (_t, slug) => slug === "dish-receivers" },
+  { key: "dish-cables", labelKey: "dish.gCables", match: (_t, slug) => slug === "dish-cables" },
+  { key: "dish-accessories", labelKey: "dish.gDishes", match: (_t, slug) => slug === "dish-accessories" },
 ];
 
 export const Route = createFileRoute("/dish")({
