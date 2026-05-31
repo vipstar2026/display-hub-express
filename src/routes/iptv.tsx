@@ -69,7 +69,7 @@ export function CategoryPage({ category, img, titleKey, subKey, groups }: { cate
               {t("dish.gAll")}
             </button>
             {groups.map((g) => {
-              const count = items.filter((p) => g.match(p.title || "")).length;
+              const count = items.filter((p) => g.match(p.title || "", p.category_slug)).length;
               return (
                 <button
                   key={g.key}
