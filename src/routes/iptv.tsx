@@ -21,7 +21,7 @@ export const Route = createFileRoute("/iptv")({
 export type ProductGroup = {
   key: string;
   labelKey: string;
-  match: (title: string) => boolean;
+  match: (title: string, categorySlug?: string) => boolean;
 };
 
 export function CategoryPage({ category, img, titleKey, subKey, groups }: { category: string; img: string; titleKey: string; subKey: string; groups?: ProductGroup[] }) {
@@ -34,7 +34,7 @@ export function CategoryPage({ category, img, titleKey, subKey, groups }: { cate
     if (!groups || group === "all") return items;
     const g = groups.find((x) => x.key === group);
     if (!g) return items;
-    return items.filter((p) => g.match(p.title || ""));
+    return items.filter((p) => g.match(p.title || "", p.category_slug));
   }, [items, group, groups]);
 
   const sorted = useMemo(() => {
@@ -69,7 +69,7 @@ export function CategoryPage({ category, img, titleKey, subKey, groups }: { cate
               {t("dish.gAll")}
             </button>
             {groups.map((g) => {
-              const count = items.filter((p) => g.match(p.title || "")).length;
+              const count = items.filter((p) => g.match(p.title || "", p.category_slug)).length;
               return (
                 <button
                   key={g.key}
