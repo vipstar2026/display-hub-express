@@ -55,17 +55,27 @@ export function SiteFooter() {
         <div>
           <h4 className="text-sm font-semibold mb-3 text-foreground">{t("foot.care")}</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/support" className="hover:text-brand">{t("foot.help")}</Link></li>
             <li><Link to="/support" className="hover:text-brand">المساعدة والدعم الفني</Link></li>
-            <li><Link to="/contact" className="hover:text-brand">{t("foot.howBuy")}</Link></li>
-            <li><Link to="/services" className="hover:text-brand">{t("foot.returnsLink")}</Link></li>
+            <li><Link to="/about" className="hover:text-brand">من نحن</Link></li>
             <li><Link to="/contact" className="hover:text-brand">{t("foot.contact")}</Link></li>
+            <li><Link to="/services" className="hover:text-brand">التركيب والصيانة</Link></li>
           </ul>
         </div>
 
         <div>
-          <h4 className="text-sm font-semibold mb-3 text-foreground">{t("foot.contactTitle")}</h4>
+          <h4 className="text-sm font-semibold mb-3 text-foreground">السياسات</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
+            <li><Link to="/terms" className="hover:text-brand">الشروط والأحكام</Link></li>
+            <li><Link to="/privacy" className="hover:text-brand">سياسة الخصوصية</Link></li>
+            <li><Link to="/shipping" className="hover:text-brand">سياسة الشحن والتوصيل</Link></li>
+            <li><Link to="/refund" className="hover:text-brand">الإرجاع والاسترداد</Link></li>
+            <li><Link to="/exchange" className="hover:text-brand">سياسة الاستبدال</Link></li>
+          </ul>
+        </div>
+
+        <div className="md:col-span-5 border-t border-border pt-6">
+          <h4 className="text-sm font-semibold mb-3 text-foreground">{t("foot.contactTitle")}</h4>
+          <ul className="grid sm:grid-cols-3 gap-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-brand" /><span>WhatsApp: 3316 1049</span></li>
             <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-brand" /><span>Tel: 7708 2893</span></li>
             <li className="flex items-center gap-2"><Mail className="w-4 h-4 text-brand" /><span>pppahmed71@gmail.com</span></li>

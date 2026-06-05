@@ -10,15 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ShippingRouteImport } from './routes/shipping'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as RefundRouteImport } from './routes/refund'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IptvRouteImport } from './routes/iptv'
+import { Route as ExchangeRouteImport } from './routes/exchange'
 import { Route as DishRouteImport } from './routes/dish'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CctvRouteImport } from './routes/cctv'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
@@ -48,6 +54,11 @@ const WishlistRoute = WishlistRouteImport.update({
   path: '/wishlist',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -58,9 +69,24 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShippingRoute = ShippingRouteImport.update({
+  id: '/shipping',
+  path: '/shipping',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundRoute = RefundRouteImport.update({
+  id: '/refund',
+  path: '/refund',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -71,6 +97,11 @@ const LoginRoute = LoginRouteImport.update({
 const IptvRoute = IptvRouteImport.update({
   id: '/iptv',
   path: '/iptv',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExchangeRoute = ExchangeRouteImport.update({
+  id: '/exchange',
+  path: '/exchange',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DishRoute = DishRouteImport.update({
@@ -91,6 +122,11 @@ const CctvRoute = CctvRouteImport.update({
 const CartRoute = CartRouteImport.update({
   id: '/cart',
   path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -222,15 +258,21 @@ const AuthenticatedAdminCatalogSlugRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cart': typeof CartRoute
   '/cctv': typeof CctvRoute
   '/contact': typeof ContactRoute
   '/dish': typeof DishRoute
+  '/exchange': typeof ExchangeRoute
   '/iptv': typeof IptvRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
   '/services': typeof ServicesRoute
+  '/shipping': typeof ShippingRoute
   '/signup': typeof SignupRoute
   '/support': typeof SupportRoute
+  '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -256,15 +298,21 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cart': typeof CartRoute
   '/cctv': typeof CctvRoute
   '/contact': typeof ContactRoute
   '/dish': typeof DishRoute
+  '/exchange': typeof ExchangeRoute
   '/iptv': typeof IptvRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
   '/services': typeof ServicesRoute
+  '/shipping': typeof ShippingRoute
   '/signup': typeof SignupRoute
   '/support': typeof SupportRoute
+  '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
   '/account': typeof AuthenticatedAccountRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
@@ -291,15 +339,21 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/about': typeof AboutRoute
   '/cart': typeof CartRoute
   '/cctv': typeof CctvRoute
   '/contact': typeof ContactRoute
   '/dish': typeof DishRoute
+  '/exchange': typeof ExchangeRoute
   '/iptv': typeof IptvRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
   '/services': typeof ServicesRoute
+  '/shipping': typeof ShippingRoute
   '/signup': typeof SignupRoute
   '/support': typeof SupportRoute
+  '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
@@ -327,15 +381,21 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/cart'
     | '/cctv'
     | '/contact'
     | '/dish'
+    | '/exchange'
     | '/iptv'
     | '/login'
+    | '/privacy'
+    | '/refund'
     | '/services'
+    | '/shipping'
     | '/signup'
     | '/support'
+    | '/terms'
     | '/wishlist'
     | '/account'
     | '/admin'
@@ -361,15 +421,21 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/cart'
     | '/cctv'
     | '/contact'
     | '/dish'
+    | '/exchange'
     | '/iptv'
     | '/login'
+    | '/privacy'
+    | '/refund'
     | '/services'
+    | '/shipping'
     | '/signup'
     | '/support'
+    | '/terms'
     | '/wishlist'
     | '/account'
     | '/checkout'
@@ -395,15 +461,21 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/about'
     | '/cart'
     | '/cctv'
     | '/contact'
     | '/dish'
+    | '/exchange'
     | '/iptv'
     | '/login'
+    | '/privacy'
+    | '/refund'
     | '/services'
+    | '/shipping'
     | '/signup'
     | '/support'
+    | '/terms'
     | '/wishlist'
     | '/_authenticated/account'
     | '/_authenticated/admin'
@@ -431,15 +503,21 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AboutRoute: typeof AboutRoute
   CartRoute: typeof CartRoute
   CctvRoute: typeof CctvRoute
   ContactRoute: typeof ContactRoute
   DishRoute: typeof DishRoute
+  ExchangeRoute: typeof ExchangeRoute
   IptvRoute: typeof IptvRoute
   LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
+  RefundRoute: typeof RefundRoute
   ServicesRoute: typeof ServicesRoute
+  ShippingRoute: typeof ShippingRoute
   SignupRoute: typeof SignupRoute
   SupportRoute: typeof SupportRoute
+  TermsRoute: typeof TermsRoute
   WishlistRoute: typeof WishlistRoute
   ProductIdRoute: typeof ProductIdRoute
 }
@@ -451,6 +529,13 @@ declare module '@tanstack/react-router' {
       path: '/wishlist'
       fullPath: '/wishlist'
       preLoaderRoute: typeof WishlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/support': {
@@ -467,11 +552,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shipping': {
+      id: '/shipping'
+      path: '/shipping'
+      fullPath: '/shipping'
+      preLoaderRoute: typeof ShippingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/services': {
       id: '/services'
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund': {
+      id: '/refund'
+      path: '/refund'
+      fullPath: '/refund'
+      preLoaderRoute: typeof RefundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -486,6 +592,13 @@ declare module '@tanstack/react-router' {
       path: '/iptv'
       fullPath: '/iptv'
       preLoaderRoute: typeof IptvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exchange': {
+      id: '/exchange'
+      path: '/exchange'
+      fullPath: '/exchange'
+      preLoaderRoute: typeof ExchangeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dish': {
@@ -514,6 +627,13 @@ declare module '@tanstack/react-router' {
       path: '/cart'
       fullPath: '/cart'
       preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -751,15 +871,21 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AboutRoute: AboutRoute,
   CartRoute: CartRoute,
   CctvRoute: CctvRoute,
   ContactRoute: ContactRoute,
   DishRoute: DishRoute,
+  ExchangeRoute: ExchangeRoute,
   IptvRoute: IptvRoute,
   LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
+  RefundRoute: RefundRoute,
   ServicesRoute: ServicesRoute,
+  ShippingRoute: ShippingRoute,
   SignupRoute: SignupRoute,
   SupportRoute: SupportRoute,
+  TermsRoute: TermsRoute,
   WishlistRoute: WishlistRoute,
   ProductIdRoute: ProductIdRoute,
 }
