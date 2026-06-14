@@ -23,11 +23,28 @@ jobs:
           script: |
             set -e
             export PATH="$HOME/.bun/bin:/usr/local/bin:/usr/bin:$PATH"
-            cd /home/deploy/vipstar
+            APP_DIR="/home/deploy/vipstar"
+            APP_NAME="vipstar"
+            APP_PORT="3000"
+
+            cd "$APP_DIR"
             git fetch --all
             git reset --hard origin/main
+
             bun install --frozen-lockfile
             bun run build
-            pm2 restart vipstar --update-env
+
+            # Kill anything holding the port (orphan workerd from prior runs)
+            fuser -k ${APP_PORT}/tcp 2>/dev/null || true
+            sleep 2
+
+            pm2 delete ${APP_NAME} 2>/dev/null || true
+            pm2 start "bunx wrangler dev --ip 127.0.0.1 --port ${APP_PORT}" \
+              --name ${APP_NAME} \
+              --cwd "$APP_DIR" \
+              --update-env
             pm2 save
+
+            sleep 5
+            curl -fsS -I http://127.0.0.1:${APP_PORT} || (pm2 logs ${APP_NAME} --lines 30 --nostream; exit 1)
             echo "✅ Deployed $(git rev-parse --short HEAD)"
