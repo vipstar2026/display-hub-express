@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: Deploy to Cloudflare Workers
 
 on:
   push:
@@ -9,45 +9,33 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          script: |
-            set -e
-            export PATH="$HOME/.bun/bin:$PATH"
+          bun-version: latest
 
-            # تثبيت Bun إذا غير موجود
-            if ! command -v bun &> /dev/null; then
-              curl -fsSL https://bun.sh/install | bash
-              export PATH="$HOME/.bun/bin:$PATH"
-            fi
+      - name: Install dependencies
+        run: bun install
 
-            # المسار على VPS
-            APP_DIR="$HOME/display-hub-express"
+      - name: Build
+        run: bun run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
 
-            # Clone أو Pull
-            if [ ! -d "$APP_DIR" ]; then
-              git clone git@github.com:vipstar2026/display-hub-express.git "$APP_DIR"
-            fi
-
-            cd "$APP_DIR"
-            git fetch origin main
-            git reset --hard origin/main
-
-            # تثبيت الحزم والبناء
-            bun install
-            bun run build
-
-            # إعادة تشغيل التطبيق (PM2)
-            if command -v pm2 &> /dev/null; then
-              pm2 restart display-hub || pm2 start "bun run start" --name display-hub
-              pm2 save
-            else
-              echo "PM2 not installed - install with: npm i -g pm2"
-            fi
-
-            echo "✅ Deploy complete"
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+          secrets: |
+            SUPABASE_URL
+            SUPABASE_PUBLISHABLE_KEY
+            SUPABASE_SERVICE_ROLE_KEY
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
