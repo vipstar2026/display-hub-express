@@ -1,29 +1,28 @@
 #!/usr/bin/env bash
 # =====================================================================
 # VPS Bootstrap Script — Ubuntu/Debian 22.04+
-# تثبيت كل المتطلبات لتشغيل display-hub-express على VPS جديد
+# تثبيت كل المتطلبات لتشغيل VIP Star (vipstar.cc) على VPS جديد
 #
-# الاستخدام (كـ root أو sudo):
-#   curl -fsSL <raw-url>/scripts/vps-setup.sh | sudo bash -s -- \
-#     yourdomain.com  your-email@example.com  git@github.com:vipstar2026/display-hub-express.git
+# الاستخدام السريع (افتراضات vipstar.cc جاهزة):
+#   curl -fsSL https://raw.githubusercontent.com/vipstar2026/display-hub-express/main/scripts/vps-setup.sh | sudo bash
 #
-# أو يدوياً:
-#   sudo bash vps-setup.sh yourdomain.com your-email@example.com <git-url>
+# أو مع قيم مخصصة:
+#   sudo bash vps-setup.sh <domain> <email> [git-url]
 # =====================================================================
 set -euo pipefail
 
-DOMAIN="${1:-}"
-EMAIL="${2:-}"
-REPO_URL="${3:-git@github.com:vipstar2026/display-hub-express.git}"
-APP_NAME="display-hub"
+DOMAIN="${1:-vipstar.cc}"
+EMAIL="${2:-pppahmed71@gmail.com}"
+REPO_URL="${3:-https://github.com/vipstar2026/display-hub-express.git}"
+APP_NAME="vipstar"
 APP_USER="deploy"
 APP_DIR="/home/${APP_USER}/${APP_NAME}"
 APP_PORT="3000"
 
-if [[ -z "$DOMAIN" || -z "$EMAIL" ]]; then
-  echo "❌ الاستخدام: sudo bash vps-setup.sh <domain> <email> [git-url]"
-  exit 1
-fi
+echo "🌐 Domain: ${DOMAIN}"
+echo "📧 Email:  ${EMAIL}"
+echo "📦 Repo:   ${REPO_URL}"
+echo ""
 
 echo "▶ 1/8 تحديث النظام..."
 export DEBIAN_FRONTEND=noninteractive
@@ -47,39 +46,45 @@ apt-get install -y nodejs
 npm install -g pm2
 
 sudo -u ${APP_USER} bash -c 'curl -fsSL https://bun.sh/install | bash'
-echo 'export PATH="$HOME/.bun/bin:$PATH"' >> /home/${APP_USER}/.bashrc
+grep -q '.bun/bin' /home/${APP_USER}/.bashrc || \
+  echo 'export PATH="$HOME/.bun/bin:$PATH"' >> /home/${APP_USER}/.bashrc
 
 echo "▶ 4/8 إعداد جدار الحماية..."
 ufw allow OpenSSH
 ufw allow 'Nginx Full'
 ufw --force enable
 
-echo "▶ 5/8 استنساخ المشروع..."
+echo "▶ 5/8 استنساخ المشروع وبنائه..."
 sudo -u ${APP_USER} bash <<EOF
   set -e
   export PATH="\$HOME/.bun/bin:\$PATH"
-  if [ ! -d "${APP_DIR}" ]; then
+  if [ ! -d "${APP_DIR}/.git" ]; then
+    rm -rf "${APP_DIR}"
     git clone ${REPO_URL} ${APP_DIR}
+  else
+    cd ${APP_DIR} && git pull --rebase
   fi
   cd ${APP_DIR}
   bun install
   bun run build
 EOF
 
-echo "▶ 6/8 إنشاء ملف البيئة..."
+echo "▶ 6/8 إنشاء ملف البيئة (إذا غير موجود)..."
+if [ ! -f ${APP_DIR}/.env.production ]; then
 cat > ${APP_DIR}/.env.production <<EOF
-# املأ هذه القيم بعد التثبيت
-VITE_SUPABASE_URL=
-VITE_SUPABASE_PUBLISHABLE_KEY=
-VITE_SUPABASE_PROJECT_ID=
-SUPABASE_URL=
-SUPABASE_PUBLISHABLE_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+# قيم Lovable Cloud الجاهزة (مفاتيح عامة فقط)
+VITE_SUPABASE_URL=https://eyccrpqjcdszzmquddto.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5Y2NycHFqY2RzenptcXVkZHRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTczNDMsImV4cCI6MjA5NDc5MzM0M30.1dSiWcyI0IiFfM6JDnImdad43aMbzD7UgLRciqaSCAs
+VITE_SUPABASE_PROJECT_ID=eyccrpqjcdszzmquddto
+SUPABASE_URL=https://eyccrpqjcdszzmquddto.supabase.co
+SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5Y2NycHFqY2RzenptcXVkZHRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTczNDMsImV4cCI6MjA5NDc5MzM0M30.1dSiWcyI0IiFfM6JDnImdad43aMbzD7UgLRciqaSCAs
 PORT=${APP_PORT}
+NODE_ENV=production
 EOF
 chown ${APP_USER}:${APP_USER} ${APP_DIR}/.env.production
+fi
 
-echo "▶ 7/8 تشغيل التطبيق عبر PM2 (wrangler)..."
+echo "▶ 7/8 تشغيل التطبيق عبر PM2 (wrangler/workerd)..."
 sudo -u ${APP_USER} bash <<EOF
   set -e
   export PATH="\$HOME/.bun/bin:/usr/bin:\$PATH"
@@ -88,7 +93,7 @@ sudo -u ${APP_USER} bash <<EOF
   pm2 start "bunx wrangler dev --ip 0.0.0.0 --port ${APP_PORT} --local" --name ${APP_NAME}
   pm2 save
 EOF
-env PATH=$PATH:/usr/bin pm2 startup systemd -u ${APP_USER} --hp /home/${APP_USER}
+env PATH=$PATH:/usr/bin pm2 startup systemd -u ${APP_USER} --hp /home/${APP_USER} | tail -1 | bash || true
 
 echo "▶ 8/8 إعداد Nginx + SSL (Let's Encrypt)..."
 cat > /etc/nginx/sites-available/${APP_NAME} <<EOF
@@ -117,23 +122,19 @@ rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
 
 certbot --nginx -d ${DOMAIN} -d www.${DOMAIN} --non-interactive --agree-tos -m ${EMAIL} --redirect || \
-  echo "⚠ فشل إصدار SSL — تأكد أن DNS للنطاق يشير إلى IP السيرفر ثم أعد تشغيل: certbot --nginx -d ${DOMAIN}"
+  echo "⚠ فشل إصدار SSL — تأكد أن DNS للنطاق ${DOMAIN} يشير إلى IP السيرفر ثم نفذ: certbot --nginx -d ${DOMAIN} -d www.${DOMAIN}"
 
 echo ""
 echo "✅ التثبيت اكتمل!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🌐 الموقع:        https://${DOMAIN}"
 echo "📂 مسار التطبيق:  ${APP_DIR}"
 echo "👤 مستخدم النشر:  ${APP_USER}"
-echo "🌐 النطاق:        https://${DOMAIN}"
 echo "🔌 المنفذ الداخلي: ${APP_PORT}"
 echo ""
-echo "الخطوات التالية:"
-echo "  1) املأ القيم في:  ${APP_DIR}/.env.production"
-echo "  2) أعد التشغيل:    sudo -u ${APP_USER} pm2 restart ${APP_NAME}"
-echo "  3) أضف مفتاح SSH لـ ${APP_USER} لتفعيل النشر التلقائي من GitHub Actions"
-echo "  4) أضف في GitHub Secrets:"
-echo "       VPS_HOST = <IP السيرفر>"
-echo "       VPS_USER = ${APP_USER}"
-echo "       VPS_SSH_KEY = <المفتاح الخاص>"
-echo "       VPS_PORT = 22"
+echo "للنشر التلقائي من GitHub Actions أضف هذه الـ Secrets في المستودع:"
+echo "   VPS_HOST     = <IP السيرفر>"
+echo "   VPS_USER     = ${APP_USER}"
+echo "   VPS_PORT     = 22"
+echo "   VPS_SSH_KEY  = <المفتاح الخاص ed25519>"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
