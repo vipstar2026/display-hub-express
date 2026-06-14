@@ -84,13 +84,37 @@ EOF
 chown ${APP_USER}:${APP_USER} ${APP_DIR}/.env.production
 fi
 
-echo "▶ 7/8 تشغيل التطبيق عبر PM2 (wrangler/workerd)..."
+echo "▶ 7/8 تشغيل التطبيق عبر PM2 (production server)..."
+fuser -k ${APP_PORT}/tcp 2>/dev/null || true
 sudo -u ${APP_USER} bash <<EOF
   set -e
   export PATH="\$HOME/.bun/bin:/usr/bin:\$PATH"
   cd ${APP_DIR}
+  set -a
+  [ -f .env.production ] && . ./.env.production
+  export PORT="${APP_PORT}"
+  export NODE_ENV=production
+  set +a
   pm2 delete ${APP_NAME} 2>/dev/null || true
-  pm2 start "bunx wrangler dev --ip 0.0.0.0 --port ${APP_PORT} --local" --name ${APP_NAME}
+
+  ENTRY=""
+  for candidate in \
+    .output/server/index.mjs \
+    .output/server/server/index.mjs \
+    dist/server/index.mjs \
+    dist/index.mjs
+  do
+    if [ -f "\$candidate" ]; then
+      ENTRY="\$candidate"
+      break
+    fi
+  done
+
+  if [ -n "\$ENTRY" ]; then
+    pm2 start "\$ENTRY" --name ${APP_NAME} --interpreter node --update-env
+  else
+    pm2 start "bun run preview -- --host 0.0.0.0 --port ${APP_PORT}" --name ${APP_NAME} --update-env
+  fi
   pm2 save
 EOF
 env PATH=$PATH:/usr/bin pm2 startup systemd -u ${APP_USER} --hp /home/${APP_USER} | tail -1 | bash || true
