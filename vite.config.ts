@@ -12,4 +12,14 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  vite: {
+    preview: {
+      allowedHosts: ["vipstar.cc", "www.vipstar.cc"],
+      host: true,
+      port: 3000,
+    },
+    server: {
+      allowedHosts: ["vipstar.cc", "www.vipstar.cc"],
+    },
+  },
 });
