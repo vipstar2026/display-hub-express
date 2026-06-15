@@ -62,7 +62,10 @@ sudo -u ${APP_USER} bash <<EOF
     rm -rf "${APP_DIR}"
     git clone ${REPO_URL} ${APP_DIR}
   else
-    cd ${APP_DIR} && git pull --rebase
+    cd ${APP_DIR}
+    git fetch --all
+    git reset --hard origin/main
+    git clean -fd
   fi
   cd ${APP_DIR}
   bun install
