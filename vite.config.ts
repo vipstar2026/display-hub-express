@@ -14,12 +14,12 @@ export default defineConfig({
   },
   vite: {
     preview: {
-      allowedHosts: ["vipstar.cc", "www.vipstar.cc"],
+      allowedHosts: true,
       host: true,
       port: 3000,
     },
     server: {
-      allowedHosts: ["vipstar.cc", "www.vipstar.cc"],
+      allowedHosts: true,
     },
   },
 });
