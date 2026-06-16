@@ -28,6 +28,7 @@ jobs:
             APP_PORT="3000"
 
             cd "$APP_DIR"
+            git config --global --add safe.directory "$APP_DIR"
             git fetch --all
             git reset --hard origin/main
 
