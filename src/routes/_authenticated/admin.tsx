@@ -35,6 +35,7 @@ function AdminLayout() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  useEffect(() => {
     if (!user) return;
     (async () => {
       const { data } = await supabase
