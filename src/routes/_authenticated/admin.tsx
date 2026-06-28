@@ -56,15 +56,46 @@ function AdminLayout() {
 
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
+  const L = useMemo(() => {
+    const ar = {
+      dashboard: "لوحة القيادة", vendors: "البائعون", products: "المنتجات",
+      categories: "الأقسام", orders: "الطلبات", users: "المستخدمون والصلاحيات",
+      settings: "إعدادات الموقع", catalog: "إدارة القسم", payments: "بوابات الدفع", support: "الدعم الفني",
+      gOverview: "نظرة عامة", gCatalog: "الكتالوج", gCommerce: "التجارة",
+      gCustomers: "العملاء", gSystem: "النظام", allProducts: "كل المنتجات",
+      sitePages: "صفحات الموقع", viewSite: "عرض الموقع المباشر", backAccount: "العودة للحساب",
+      quickSearch: "بحث سريع…",
+    };
+    const en = {
+      dashboard: "Dashboard", vendors: "Vendors", products: "Products",
+      categories: "Categories", orders: "Orders", users: "Users & Roles",
+      settings: "Site Settings", catalog: "Catalog", payments: "Payment Gateways", support: "Support",
+      gOverview: "Overview", gCatalog: "Catalog", gCommerce: "Commerce",
+      gCustomers: "Customers", gSystem: "System", allProducts: "All Products",
+      sitePages: "Site Pages", viewSite: "View live site", backAccount: "Back to account",
+      quickSearch: "Quick search…",
+    };
+    const ur = {
+      dashboard: "ڈیش بورڈ", vendors: "وینڈرز", products: "پروڈکٹس",
+      categories: "زمرے", orders: "آرڈرز", users: "صارفین اور کردار",
+      settings: "سائٹ کی ترتیبات", catalog: "کیٹلاگ", payments: "ادائیگی گیٹ ویز", support: "سپورٹ",
+      gOverview: "جائزہ", gCatalog: "کیٹلاگ", gCommerce: "کامرس",
+      gCustomers: "صارفین", gSystem: "سسٹم", allProducts: "تمام پروڈکٹس",
+      sitePages: "سائٹ کے صفحات", viewSite: "لائیو سائٹ دیکھیں", backAccount: "اکاؤنٹ پر واپس",
+      quickSearch: "فوری تلاش…",
+    };
+    return lang === "en" ? en : lang === "ur" ? ur : ar;
+  }, [lang]);
+
   const crumb = useMemo(() => {
     const map: Record<string, string> = {
-      "": "لوحة القيادة", vendors: "البائعون", products: "المنتجات",
-      categories: "الأقسام", orders: "الطلبات", users: "المستخدمون",
-      settings: "الإعدادات", catalog: "إدارة القسم", payments: "بوابات الدفع", support: "الدعم الفني",
+      "": L.dashboard, vendors: L.vendors, products: L.products,
+      categories: L.categories, orders: L.orders, users: L.users,
+      settings: L.settings, catalog: L.catalog, payments: L.payments, support: L.support,
     };
     const seg = pathname.replace("/admin", "").replace(/^\//, "").split("/")[0] || "";
     return map[seg] ?? seg;
-  }, [pathname]);
+  }, [pathname, L]);
 
   if (checking) {
     return (
@@ -77,24 +108,25 @@ function AdminLayout() {
 
   type NavTo = "/admin" | "/admin/vendors" | "/admin/products" | "/admin/categories" | "/admin/orders" | "/admin/users" | "/admin/settings" | "/admin/payments" | "/admin/support";
   const groups: { label: string; items: { to: NavTo; icon: typeof LayoutDashboard; label: string; exact?: boolean }[] }[] = [
-    { label: "نظرة عامة", items: [{ to: "/admin", icon: LayoutDashboard, label: "لوحة القيادة", exact: true }] },
-    { label: "الكتالوج", items: [
-      { to: "/admin/products", icon: Package, label: "كل المنتجات" },
-      { to: "/admin/categories", icon: ListTree, label: "الأقسام" },
-      { to: "/admin/vendors", icon: Store, label: "البائعون" },
+    { label: L.gOverview, items: [{ to: "/admin", icon: LayoutDashboard, label: L.dashboard, exact: true }] },
+    { label: L.gCatalog, items: [
+      { to: "/admin/products", icon: Package, label: L.allProducts },
+      { to: "/admin/categories", icon: ListTree, label: L.categories },
+      { to: "/admin/vendors", icon: Store, label: L.vendors },
     ]},
-    { label: "التجارة", items: [
-      { to: "/admin/orders", icon: ShoppingBag, label: "الطلبات" },
-      { to: "/admin/payments", icon: CreditCard, label: "بوابات الدفع" },
+    { label: L.gCommerce, items: [
+      { to: "/admin/orders", icon: ShoppingBag, label: L.orders },
+      { to: "/admin/payments", icon: CreditCard, label: L.payments },
     ]},
-    { label: "العملاء", items: [
-      { to: "/admin/support", icon: LifeBuoy, label: "الدعم الفني" },
+    { label: L.gCustomers, items: [
+      { to: "/admin/support", icon: LifeBuoy, label: L.support },
     ]},
-    { label: "النظام", items: [
-      { to: "/admin/users", icon: Users, label: "المستخدمون والصلاحيات" },
-      { to: "/admin/settings", icon: Settings, label: "إعدادات الموقع" },
+    { label: L.gSystem, items: [
+      { to: "/admin/users", icon: Users, label: L.users },
+      { to: "/admin/settings", icon: Settings, label: L.settings },
     ]},
   ];
+
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
