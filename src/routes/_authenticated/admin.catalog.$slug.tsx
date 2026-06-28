@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { Loader2, Plus, Pencil, Trash2, Package, ArrowLeft } from "lucide-react";
+import { useAdminI18n, statusLabel } from "@/lib/i18n-admin";
 
 export const Route = createFileRoute("/_authenticated/admin/catalog/$slug")({
   component: AdminCategoryProducts,
@@ -28,6 +29,7 @@ type Product = {
 function AdminCategoryProducts() {
   const { slug } = Route.useParams();
   const { user } = useAuth();
+  const { L } = useAdminI18n();
   const nav = useNavigate();
   const [category, setCategory] = useState<Category | null>(null);
   const [items, setItems] = useState<Product[]>([]);
@@ -83,23 +85,26 @@ function AdminCategoryProducts() {
   async function setStatus(id: string, status: Product["status"]) {
     const { error } = await supabase.from("products").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Updated");
+    toast.success(L.updated);
     load();
   }
 
   async function remove(id: string) {
-    if (!confirm("حذف هذا المنتج نهائياً؟")) return;
+    if (!confirm(L.confirmDelete)) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("تم الحذف");
+    toast.success(L.deleted);
     load();
   }
+
+  const filterLabel = (s: "all" | "active" | "draft" | "inactive" | "out_of_stock") =>
+    s === "all" ? L.all : statusLabel(L, s);
 
   if (!loading && !category) {
     return (
       <div className="text-center py-16">
-        <p className="text-muted-foreground">القسم غير موجود.</p>
-        <Link to="/admin/products" className="text-brand text-sm mt-2 inline-block">← العودة للمنتجات</Link>
+        <p className="text-muted-foreground">{L.caNotFound}</p>
+        <Link to="/admin/products" className="text-brand text-sm mt-2 inline-block">{L.caBackToProducts}</Link>
       </div>
     );
   }
@@ -107,7 +112,7 @@ function AdminCategoryProducts() {
   return (
     <div>
       <Link to="/admin/products" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-brand mb-3">
-        <ArrowLeft className="w-3.5 h-3.5" /> كل المنتجات
+        <ArrowLeft className="w-3.5 h-3.5" /> {L.caBack}
       </Link>
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
@@ -115,25 +120,25 @@ function AdminCategoryProducts() {
             <Package className="w-6 h-6 text-slate-900" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{category?.name ?? "—"}</h1>
-            <p className="text-sm text-muted-foreground">إدارة منتجات قسم <span className="font-mono">/{slug}</span> ({items.length})</p>
+            <h1 className="text-2xl font-bold text-foreground">{category?.name ?? L.none}</h1>
+            <p className="text-sm text-muted-foreground">{L.caTitleSub(items.length)} · <span className="font-mono">/{slug}</span></p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button onClick={handleNew} disabled={creating} className="inline-flex items-center gap-1.5 h-10 px-4 rounded-md bg-brand text-brand-foreground text-sm font-semibold hover:bg-brand-dark disabled:opacity-50">
-            {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} إضافة منتج
+            {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} {L.caAddProduct}
           </button>
           <div className="flex gap-1 bg-card border border-border rounded-md p-1">
             {(["all", "active", "draft", "inactive", "out_of_stock"] as const).map((s) => (
-              <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1.5 text-xs rounded capitalize ${filter === s ? "bg-brand text-brand-foreground font-semibold" : "text-foreground hover:bg-accent"}`}>{s.replace("_", " ")}</button>
+              <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1.5 text-xs rounded ${filter === s ? "bg-brand text-brand-foreground font-semibold" : "text-foreground hover:bg-accent"}`}>{filterLabel(s)}</button>
             ))}
           </div>
         </div>
       </div>
 
       <form onSubmit={(e) => { e.preventDefault(); load(); }} className="mt-4 flex gap-2">
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="بحث في عناوين المنتجات…" className="flex-1 h-10 px-3 rounded-md border border-border bg-background text-sm outline-none focus:border-brand" />
-        <button className="h-10 px-4 rounded-md bg-brand text-brand-foreground text-sm font-semibold">بحث</button>
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={L.searchPlaceholder} className="flex-1 h-10 px-3 rounded-md border border-border bg-background text-sm outline-none focus:border-brand" />
+        <button className="h-10 px-4 rounded-md bg-brand text-brand-foreground text-sm font-semibold">{L.search}</button>
       </form>
 
       {loading ? (
@@ -141,9 +146,9 @@ function AdminCategoryProducts() {
       ) : items.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-12 text-center mt-6">
           <Package className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-          <p className="text-muted-foreground">لا توجد منتجات بعد في هذا القسم.</p>
+          <p className="text-muted-foreground">{L.caNoProducts}</p>
           <button onClick={handleNew} className="mt-4 inline-flex items-center gap-1.5 h-10 px-4 rounded-md bg-brand text-brand-foreground text-sm font-semibold">
-            <Plus className="w-4 h-4" /> أضف أول منتج
+            <Plus className="w-4 h-4" /> {L.caAddFirst}
           </button>
         </div>
       ) : (
@@ -151,12 +156,12 @@ function AdminCategoryProducts() {
           <table className="w-full text-sm min-w-[760px]">
             <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="text-start p-3">المنتج</th>
-                <th className="text-start p-3">البائع</th>
-                <th className="text-start p-3">السعر</th>
-                <th className="text-start p-3">المخزون</th>
-                <th className="text-start p-3">الحالة</th>
-                <th className="text-end p-3">إجراءات</th>
+                <th className="text-start p-3">{L.caCol_product}</th>
+                <th className="text-start p-3">{L.prCol_vendor}</th>
+                <th className="text-start p-3">{L.prCol_price}</th>
+                <th className="text-start p-3">{L.prCol_stock}</th>
+                <th className="text-start p-3">{L.status}</th>
+                <th className="text-end p-3">{L.actions}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -175,21 +180,21 @@ function AdminCategoryProducts() {
                         </div>
                       </div>
                     </td>
-                    <td className="p-3 text-muted-foreground">{p.vendors?.name ?? "—"}</td>
+                    <td className="p-3 text-muted-foreground">{p.vendors?.name ?? L.none}</td>
                     <td className="p-3 font-semibold text-sale">{p.currency} {Number(p.sale_price || p.price).toFixed(2)}</td>
                     <td className="p-3">{p.stock}</td>
                     <td className="p-3">
-                      <select value={p.status} onChange={(e) => setStatus(p.id, e.target.value as Product["status"])} className="text-xs rounded border border-border bg-background px-2 py-1 capitalize">
-                        <option value="draft">draft</option>
-                        <option value="active">active</option>
-                        <option value="inactive">inactive</option>
-                        <option value="out_of_stock">out of stock</option>
+                      <select value={p.status} onChange={(e) => setStatus(p.id, e.target.value as Product["status"])} className="text-xs rounded border border-border bg-background px-2 py-1">
+                        <option value="draft">{L.st_draft}</option>
+                        <option value="active">{L.st_active}</option>
+                        <option value="inactive">{L.st_inactive}</option>
+                        <option value="out_of_stock">{L.st_out_of_stock}</option>
                       </select>
                     </td>
                     <td className="p-3 text-end">
                       <div className="inline-flex gap-1">
-                        <button onClick={() => nav({ to: "/sell/products/$id", params: { id: p.id } })} className="p-1.5 rounded hover:bg-accent text-foreground" title="تعديل"><Pencil className="w-4 h-4" /></button>
-                        <button onClick={() => remove(p.id)} className="p-1.5 rounded hover:bg-rose-100 text-rose-700" title="حذف"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => nav({ to: "/sell/products/$id", params: { id: p.id } })} className="p-1.5 rounded hover:bg-accent text-foreground" title={L.edit}><Pencil className="w-4 h-4" /></button>
+                        <button onClick={() => remove(p.id)} className="p-1.5 rounded hover:bg-rose-100 text-rose-700" title={L.delete}><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>

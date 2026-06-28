@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Save, Megaphone, Phone, Share2, Sparkles } from "lucide-react";
+import { useAdminI18n } from "@/lib/i18n-admin";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   component: AdminSettings,
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/_authenticated/admin/settings")({
 type Row = { key: string; value: Record<string, unknown> };
 
 function AdminSettings() {
+  const { L } = useAdminI18n();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hero, setHero] = useState({ title: "", subtitle: "", cta_label: "", cta_link: "" });
@@ -42,7 +44,7 @@ function AdminSettings() {
     const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("تم حفظ إعدادات الموقع");
+    toast.success(L.seSavedToast);
   }
 
   if (loading) {
@@ -57,58 +59,58 @@ function AdminSettings() {
   const lbl = "text-xs font-semibold text-muted-foreground";
 
   return (
-    <div className="space-y-6 max-w-5xl" dir="rtl">
+    <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">إعدادات الموقع</h1>
-          <p className="text-sm text-muted-foreground mt-1">تحكم بالمحتوى العام الذي يظهر في جميع صفحات الموقع.</p>
+          <h1 className="text-2xl font-bold text-foreground">{L.seTitle}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{L.seSub}</p>
         </div>
         <button onClick={saveAll} disabled={saving} className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-gradient-brand text-brand-foreground text-sm font-bold shadow-glow hover:opacity-90 disabled:opacity-50 transition-smooth">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} حفظ التغييرات
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {L.saveChanges}
         </button>
       </div>
 
-      <Section icon={Sparkles} title="بانر الواجهة" subtitle="العنوان الذي يراه الزوار أول مرة في الصفحة الرئيسية.">
+      <Section icon={Sparkles} title={L.seHero} subtitle={L.seHeroSub}>
         <div className="grid md:grid-cols-2 gap-4">
-          <div><label className={lbl}>العنوان</label><input className={inp} value={hero.title} onChange={(e) => setHero({ ...hero, title: e.target.value })} placeholder="VIP STAR" /></div>
-          <div><label className={lbl}>العنوان الفرعي</label><input className={inp} value={hero.subtitle} onChange={(e) => setHero({ ...hero, subtitle: e.target.value })} placeholder="حلول IPTV و كاميرات المراقبة" /></div>
-          <div><label className={lbl}>نص زر الإجراء</label><input className={inp} value={hero.cta_label} onChange={(e) => setHero({ ...hero, cta_label: e.target.value })} placeholder="تسوّق الآن" /></div>
-          <div><label className={lbl}>رابط زر الإجراء</label><input className={inp} value={hero.cta_link} onChange={(e) => setHero({ ...hero, cta_link: e.target.value })} placeholder="/iptv" dir="ltr" /></div>
+          <div><label className={lbl}>{L.seHeroTitle}</label><input className={inp} value={hero.title} onChange={(e) => setHero({ ...hero, title: e.target.value })} placeholder="VIP STAR" /></div>
+          <div><label className={lbl}>{L.seHeroSubtitle}</label><input className={inp} value={hero.subtitle} onChange={(e) => setHero({ ...hero, subtitle: e.target.value })} /></div>
+          <div><label className={lbl}>{L.seCtaLabel}</label><input className={inp} value={hero.cta_label} onChange={(e) => setHero({ ...hero, cta_label: e.target.value })} /></div>
+          <div><label className={lbl}>{L.seCtaLink}</label><input className={inp} value={hero.cta_link} onChange={(e) => setHero({ ...hero, cta_link: e.target.value })} placeholder="/iptv" dir="ltr" /></div>
         </div>
       </Section>
 
-      <Section icon={Megaphone} title="شريط الإعلان" subtitle="شريط صغير يظهر أعلى كل صفحة.">
+      <Section icon={Megaphone} title={L.seAnnouncement} subtitle={L.seAnnouncementSub}>
         <label className="inline-flex items-center gap-2 text-sm font-medium text-foreground mb-4 cursor-pointer">
           <input type="checkbox" checked={announcement.enabled} onChange={(e) => setAnnouncement({ ...announcement, enabled: e.target.checked })} className="w-4 h-4 accent-brand" />
-          تفعيل الإعلان
+          {L.seAnnEnable}
         </label>
         <div className="grid md:grid-cols-2 gap-4">
-          <div><label className={lbl}>الرسالة</label><input className={inp} value={announcement.message} onChange={(e) => setAnnouncement({ ...announcement, message: e.target.value })} placeholder="شحن مجاني للطلبات فوق ٢٠ د.ب" /></div>
-          <div><label className={lbl}>رابط (اختياري)</label><input className={inp} value={announcement.link} onChange={(e) => setAnnouncement({ ...announcement, link: e.target.value })} placeholder="/services" dir="ltr" /></div>
+          <div><label className={lbl}>{L.seAnnMessage}</label><input className={inp} value={announcement.message} onChange={(e) => setAnnouncement({ ...announcement, message: e.target.value })} /></div>
+          <div><label className={lbl}>{L.seAnnLink}</label><input className={inp} value={announcement.link} onChange={(e) => setAnnouncement({ ...announcement, link: e.target.value })} placeholder="/services" dir="ltr" /></div>
         </div>
       </Section>
 
-      <Section icon={Phone} title="معلومات التواصل" subtitle="تستخدم في تذييل الموقع وصفحات التواصل.">
+      <Section icon={Phone} title={L.seContact} subtitle={L.seContactSub}>
         <div className="grid md:grid-cols-2 gap-4">
-          <div><label className={lbl}>الهاتف</label><input className={inp} value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} dir="ltr" /></div>
-          <div><label className={lbl}>البريد الإلكتروني</label><input className={inp} value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} dir="ltr" /></div>
-          <div><label className={lbl}>واتساب</label><input className={inp} value={contact.whatsapp} onChange={(e) => setContact({ ...contact, whatsapp: e.target.value })} dir="ltr" /></div>
-          <div><label className={lbl}>العنوان</label><input className={inp} value={contact.address} onChange={(e) => setContact({ ...contact, address: e.target.value })} placeholder="المنامة، البحرين" /></div>
+          <div><label className={lbl}>{L.seCtPhone}</label><input className={inp} value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>{L.seCtEmail}</label><input className={inp} value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>{L.seCtWhats}</label><input className={inp} value={contact.whatsapp} onChange={(e) => setContact({ ...contact, whatsapp: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>{L.seCtAddress}</label><input className={inp} value={contact.address} onChange={(e) => setContact({ ...contact, address: e.target.value })} /></div>
         </div>
       </Section>
 
-      <Section icon={Share2} title="روابط التواصل الاجتماعي" subtitle="تظهر في تذييل الموقع.">
+      <Section icon={Share2} title={L.seSocial} subtitle={L.seSocialSub}>
         <div className="grid md:grid-cols-2 gap-4">
-          <div><label className={lbl}>فيسبوك</label><input className={inp} value={social.facebook} onChange={(e) => setSocial({ ...social, facebook: e.target.value })} dir="ltr" /></div>
-          <div><label className={lbl}>إنستغرام</label><input className={inp} value={social.instagram} onChange={(e) => setSocial({ ...social, instagram: e.target.value })} dir="ltr" /></div>
-          <div><label className={lbl}>تويتر / X</label><input className={inp} value={social.twitter} onChange={(e) => setSocial({ ...social, twitter: e.target.value })} dir="ltr" /></div>
-          <div><label className={lbl}>يوتيوب</label><input className={inp} value={social.youtube} onChange={(e) => setSocial({ ...social, youtube: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>{L.seFacebook}</label><input className={inp} value={social.facebook} onChange={(e) => setSocial({ ...social, facebook: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>{L.seInstagram}</label><input className={inp} value={social.instagram} onChange={(e) => setSocial({ ...social, instagram: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>{L.seTwitter}</label><input className={inp} value={social.twitter} onChange={(e) => setSocial({ ...social, twitter: e.target.value })} dir="ltr" /></div>
+          <div><label className={lbl}>{L.seYoutube}</label><input className={inp} value={social.youtube} onChange={(e) => setSocial({ ...social, youtube: e.target.value })} dir="ltr" /></div>
         </div>
       </Section>
 
       <div className="flex justify-end">
         <button onClick={saveAll} disabled={saving} className="inline-flex items-center gap-2 h-11 px-6 rounded-lg bg-gradient-brand text-brand-foreground text-sm font-bold shadow-glow hover:opacity-90 disabled:opacity-50 transition-smooth">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} حفظ جميع الإعدادات
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {L.seSaveAll}
         </button>
       </div>
     </div>

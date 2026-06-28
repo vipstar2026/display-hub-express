@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useAdminI18n, statusLabel } from "@/lib/i18n-admin";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({
   component: AdminOrders,
@@ -30,6 +31,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 function AdminOrders() {
+  const { L } = useAdminI18n();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | Order["status"]>("all");
@@ -49,22 +51,23 @@ function AdminOrders() {
   async function setStatus(id: string, status: Order["status"]) {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Updated");
+    toast.success(L.updated);
     load();
   }
 
   const statuses: Order["status"][] = ["pending", "processing", "paid", "shipped", "completed", "cancelled"];
+  const filterLabel = (s: "all" | Order["status"]) => (s === "all" ? L.all : statusLabel(L, s));
 
   return (
     <div>
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Orders</h1>
-          <p className="text-sm text-muted-foreground mt-1">View and update orders across the marketplace.</p>
+          <h1 className="text-2xl font-bold text-foreground">{L.orTitle}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{L.orSub}</p>
         </div>
         <div className="flex gap-1 bg-card border border-border rounded-md p-1 overflow-x-auto max-w-full">
           {(["all", ...statuses] as const).map((s) => (
-            <button key={s} onClick={() => setFilter(s as typeof filter)} className={`px-3 py-1.5 text-xs rounded capitalize whitespace-nowrap ${filter === s ? "bg-brand text-brand-foreground font-semibold" : "text-foreground hover:bg-accent"}`}>{s}</button>
+            <button key={s} onClick={() => setFilter(s as typeof filter)} className={`px-3 py-1.5 text-xs rounded whitespace-nowrap ${filter === s ? "bg-brand text-brand-foreground font-semibold" : "text-foreground hover:bg-accent"}`}>{filterLabel(s)}</button>
           ))}
         </div>
       </div>
@@ -72,18 +75,18 @@ function AdminOrders() {
       {loading ? (
         <div className="grid place-items-center py-16"><Loader2 className="w-6 h-6 animate-spin text-brand" /></div>
       ) : orders.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl p-10 text-center text-muted-foreground mt-6">No orders.</div>
+        <div className="bg-card border border-border rounded-xl p-10 text-center text-muted-foreground mt-6">{L.orNo}</div>
       ) : (
         <div className="mt-6 bg-card border border-border rounded-xl overflow-hidden overflow-x-auto">
           <table className="w-full text-sm min-w-[700px]">
             <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="text-start p-3">Order</th>
-                <th className="text-start p-3">Customer</th>
-                <th className="text-start p-3">Total</th>
-                <th className="text-start p-3">Payment</th>
-                <th className="text-start p-3">Status</th>
-                <th className="text-end p-3">Actions</th>
+                <th className="text-start p-3">{L.orCol_order}</th>
+                <th className="text-start p-3">{L.orCol_customer}</th>
+                <th className="text-start p-3">{L.orCol_total}</th>
+                <th className="text-start p-3">{L.orCol_payment}</th>
+                <th className="text-start p-3">{L.status}</th>
+                <th className="text-end p-3">{L.actions}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -98,11 +101,11 @@ function AdminOrders() {
                     <div className="text-xs text-muted-foreground">{o.ship_city}</div>
                   </td>
                   <td className="p-3 font-bold text-sale">{o.currency} {Number(o.total).toFixed(2)}</td>
-                  <td className="p-3 capitalize text-muted-foreground">{o.payment_method === "cod" ? "COD" : o.payment_method}</td>
-                  <td className="p-3"><span className={`text-xs px-2 py-1 rounded-full font-semibold capitalize ${STATUS_COLOR[o.status]}`}>{o.status}</span></td>
+                  <td className="p-3 text-muted-foreground">{o.payment_method === "cod" ? L.orCod : o.payment_method}</td>
+                  <td className="p-3"><span className={`text-xs px-2 py-1 rounded-full font-semibold ${STATUS_COLOR[o.status]}`}>{statusLabel(L, o.status)}</span></td>
                   <td className="p-3 text-end">
-                    <select value={o.status} onChange={(e) => setStatus(o.id, e.target.value as Order["status"])} className="text-xs rounded border border-border bg-background px-2 py-1 capitalize">
-                      {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
+                    <select value={o.status} onChange={(e) => setStatus(o.id, e.target.value as Order["status"])} className="text-xs rounded border border-border bg-background px-2 py-1">
+                      {statuses.map((s) => <option key={s} value={s}>{statusLabel(L, s)}</option>)}
                     </select>
                   </td>
                 </tr>
