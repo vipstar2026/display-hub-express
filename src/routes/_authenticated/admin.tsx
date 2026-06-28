@@ -18,13 +18,23 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminLayout() {
   const { user } = useAuth();
   const nav = useNavigate();
+  const { lang, setLang, dir } = useI18n();
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [cats, setCats] = useState<{ slug: string; name: string }[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
+    }
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
     if (!user) return;
     (async () => {
       const { data } = await supabase
