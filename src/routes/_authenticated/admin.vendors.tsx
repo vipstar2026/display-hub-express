@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Check, X, Pause } from "lucide-react";
+import { useAdminI18n, statusLabel } from "@/lib/i18n-admin";
 
 export const Route = createFileRoute("/_authenticated/admin/vendors")({
   component: AdminVendors,
@@ -26,6 +27,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function AdminVendors() {
+  const { L } = useAdminI18n();
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "suspended">("all");
@@ -45,25 +47,28 @@ function AdminVendors() {
   async function setStatus(id: string, status: Vendor["status"]) {
     const { error } = await supabase.from("vendors").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success(`Vendor ${status}`);
+    toast.success(L.venUpdated(statusLabel(L, status)));
     load();
   }
+
+  const filterLabel = (s: "all" | "pending" | "approved" | "suspended") =>
+    s === "all" ? L.all : statusLabel(L, s);
 
   return (
     <div>
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Vendors</h1>
-          <p className="text-sm text-muted-foreground mt-1">Approve, reject, or suspend seller stores.</p>
+          <h1 className="text-2xl font-bold text-foreground">{L.venTitle}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{L.venSub}</p>
         </div>
         <div className="flex gap-1 bg-card border border-border rounded-md p-1">
           {(["all", "pending", "approved", "suspended"] as const).map((s) => (
             <button
               key={s}
               onClick={() => setFilter(s)}
-              className={`px-3 py-1.5 text-xs rounded capitalize ${filter === s ? "bg-brand text-brand-foreground font-semibold" : "text-foreground hover:bg-accent"}`}
+              className={`px-3 py-1.5 text-xs rounded ${filter === s ? "bg-brand text-brand-foreground font-semibold" : "text-foreground hover:bg-accent"}`}
             >
-              {s}
+              {filterLabel(s)}
             </button>
           ))}
         </div>
@@ -72,17 +77,17 @@ function AdminVendors() {
       {loading ? (
         <div className="grid place-items-center py-16"><Loader2 className="w-6 h-6 animate-spin text-brand" /></div>
       ) : vendors.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl p-10 text-center text-muted-foreground mt-6">No vendors.</div>
+        <div className="bg-card border border-border rounded-xl p-10 text-center text-muted-foreground mt-6">{L.venNo}</div>
       ) : (
         <div className="mt-6 bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="text-start p-3">Store</th>
-                <th className="text-start p-3 hidden md:table-cell">Slug</th>
-                <th className="text-start p-3">Status</th>
-                <th className="text-start p-3 hidden lg:table-cell">Joined</th>
-                <th className="text-end p-3">Actions</th>
+                <th className="text-start p-3">{L.venStore}</th>
+                <th className="text-start p-3 hidden md:table-cell">{L.venSlug}</th>
+                <th className="text-start p-3">{L.status}</th>
+                <th className="text-start p-3 hidden lg:table-cell">{L.venJoined}</th>
+                <th className="text-end p-3">{L.actions}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -100,18 +105,18 @@ function AdminVendors() {
                     </div>
                   </td>
                   <td className="p-3 hidden md:table-cell text-muted-foreground">{v.slug}</td>
-                  <td className="p-3"><span className={`text-xs px-2 py-1 rounded-full font-semibold capitalize ${STATUS_STYLES[v.status]}`}>{v.status}</span></td>
+                  <td className="p-3"><span className={`text-xs px-2 py-1 rounded-full font-semibold ${STATUS_STYLES[v.status]}`}>{statusLabel(L, v.status)}</span></td>
                   <td className="p-3 hidden lg:table-cell text-muted-foreground">{new Date(v.created_at).toLocaleDateString()}</td>
                   <td className="p-3">
                     <div className="flex items-center justify-end gap-1">
                       {v.status !== "approved" && (
-                        <button onClick={() => setStatus(v.id, "approved")} className="p-1.5 rounded hover:bg-emerald-100 text-emerald-700" title="Approve"><Check className="w-4 h-4" /></button>
+                        <button onClick={() => setStatus(v.id, "approved")} className="p-1.5 rounded hover:bg-emerald-100 text-emerald-700" title={L.venApprove}><Check className="w-4 h-4" /></button>
                       )}
                       {v.status !== "suspended" && (
-                        <button onClick={() => setStatus(v.id, "suspended")} className="p-1.5 rounded hover:bg-slate-200 text-slate-700" title="Suspend"><Pause className="w-4 h-4" /></button>
+                        <button onClick={() => setStatus(v.id, "suspended")} className="p-1.5 rounded hover:bg-slate-200 text-slate-700" title={L.venSuspend}><Pause className="w-4 h-4" /></button>
                       )}
                       {v.status !== "pending" && (
-                        <button onClick={() => setStatus(v.id, "pending")} className="p-1.5 rounded hover:bg-amber-100 text-amber-700" title="Set pending"><X className="w-4 h-4" /></button>
+                        <button onClick={() => setStatus(v.id, "pending")} className="p-1.5 rounded hover:bg-amber-100 text-amber-700" title={L.venSetPending}><X className="w-4 h-4" /></button>
                       )}
                     </div>
                   </td>

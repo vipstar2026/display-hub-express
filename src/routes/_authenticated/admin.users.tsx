@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Shield, Store, User as UserIcon, X, Check } from "lucide-react";
+import { useAdminI18n } from "@/lib/i18n-admin";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
   component: AdminUsers,
@@ -28,8 +29,11 @@ const ROLE_COLOR: Record<string, string> = {
 };
 
 function AdminUsers() {
+  const { L } = useAdminI18n();
   const [rows, setRows] = useState<UserAggregate[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const roleLabel = (r: RoleRow["role"]) => (r === "admin" ? L.role_admin : r === "vendor" ? L.role_vendor : L.role_customer);
 
   async function load() {
     setLoading(true);
@@ -64,33 +68,33 @@ function AdminUsers() {
     if (has) {
       const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role);
       if (error) return toast.error(error.message);
-      toast.success(`Removed ${role}`);
+      toast.success(L.usRemoved(roleLabel(role)));
     } else {
       const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
       if (error) return toast.error(error.message);
-      toast.success(`Granted ${role}`);
+      toast.success(L.usGranted(roleLabel(role)));
     }
     load();
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-foreground">Users & Roles</h1>
-      <p className="text-sm text-muted-foreground mt-1">Grant or revoke admin, vendor, and customer roles.</p>
+      <h1 className="text-2xl font-bold text-foreground">{L.usTitle}</h1>
+      <p className="text-sm text-muted-foreground mt-1">{L.usSub}</p>
 
       {loading ? (
         <div className="grid place-items-center py-16"><Loader2 className="w-6 h-6 animate-spin text-brand" /></div>
       ) : rows.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl p-10 text-center text-muted-foreground mt-6">No users.</div>
+        <div className="bg-card border border-border rounded-xl p-10 text-center text-muted-foreground mt-6">{L.usNo}</div>
       ) : (
         <div className="mt-6 bg-card border border-border rounded-xl overflow-hidden overflow-x-auto">
           <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="text-start p-3">User</th>
-                <th className="text-start p-3">Current roles</th>
-                <th className="text-start p-3 hidden md:table-cell">Joined</th>
-                <th className="text-end p-3">Manage</th>
+                <th className="text-start p-3">{L.usCol_user}</th>
+                <th className="text-start p-3">{L.usCol_roles}</th>
+                <th className="text-start p-3 hidden md:table-cell">{L.usCol_joined}</th>
+                <th className="text-end p-3">{L.usCol_manage}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -102,7 +106,7 @@ function AdminUsers() {
                         {(u.profile?.display_name || u.user_id).charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <div className="font-medium text-foreground truncate">{u.profile?.display_name || "Unnamed"}</div>
+                        <div className="font-medium text-foreground truncate">{u.profile?.display_name || L.usUnnamed}</div>
                         <div className="text-[10px] text-muted-foreground font-mono truncate max-w-[180px]">{u.user_id}</div>
                       </div>
                     </div>
@@ -112,8 +116,8 @@ function AdminUsers() {
                       {u.roles.map((r) => {
                         const Icon = ROLE_ICON[r];
                         return (
-                          <span key={r} className={`text-[10px] px-2 py-0.5 rounded-full font-semibold capitalize inline-flex items-center gap-1 ${ROLE_COLOR[r]}`}>
-                            <Icon className="w-3 h-3" /> {r}
+                          <span key={r} className={`text-[10px] px-2 py-0.5 rounded-full font-semibold inline-flex items-center gap-1 ${ROLE_COLOR[r]}`}>
+                            <Icon className="w-3 h-3" /> {roleLabel(r)}
                           </span>
                         );
                       })}
@@ -128,10 +132,10 @@ function AdminUsers() {
                           <button
                             key={role}
                             onClick={() => toggleRole(u.user_id, role, has)}
-                            className={`text-xs px-2 py-1 rounded border inline-flex items-center gap-1 capitalize ${has ? "border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100" : "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"}`}
+                            className={`text-xs px-2 py-1 rounded border inline-flex items-center gap-1 ${has ? "border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100" : "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"}`}
                           >
                             {has ? <X className="w-3 h-3" /> : <Check className="w-3 h-3" />}
-                            {role}
+                            {roleLabel(role)}
                           </button>
                         );
                       })}

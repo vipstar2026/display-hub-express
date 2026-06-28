@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/lib/currency";
+import { useAdminI18n, statusLabel } from "@/lib/i18n-admin";
 import {
   Store, Package, ShoppingBag, Users, DollarSign, AlertCircle, Loader2,
   TrendingUp, ArrowUpRight, Activity, Plus, ListTree, Settings as SettingsIcon,
@@ -26,6 +27,7 @@ type RecentOrder = {
 
 function AdminOverview() {
   const { format } = useCurrency();
+  const { L } = useAdminI18n();
   const [stats, setStats] = useState<Stats | null>(null);
   const [recent, setRecent] = useState<RecentOrder[]>([]);
   const [topProducts, setTopProducts] = useState<{ id: string; title: string; sales_count: number; price: number; currency: string }[]>([]);
@@ -52,7 +54,6 @@ function AdminOverview() {
       const uniqueUsers = new Set((ur.data || []).map((r) => r.user_id)).size;
       const sum = (rows: { total: number }[] | null) => (rows || []).reduce((s, r) => s + Number(r.total || 0), 0);
 
-      // build last-14-day spark
       const days = 14;
       const buckets = Array(days).fill(0) as number[];
       const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -79,10 +80,10 @@ function AdminOverview() {
   }
 
   const kpis = [
-    { label: "إيرادات 30 يوم", value: format(stats.revenue30), sub: `الإجمالي: ${format(stats.revenue)}`, icon: DollarSign, accent: "brand", trend: "+12%" },
-    { label: "الطلبات", value: String(stats.orders), sub: `${stats.ordersPending} قيد المعالجة`, icon: ShoppingBag, accent: "accent2", trend: stats.ordersPending > 0 ? "تنبيه" : "مستقر" },
-    { label: "المنتجات", value: String(stats.products), sub: `${stats.productsActive} نشطة`, icon: Package, accent: "brand", trend: `${stats.productsActive}/${stats.products}` },
-    { label: "البائعون", value: String(stats.vendors), sub: `${stats.vendorsPending} بانتظار الموافقة`, icon: Store, accent: "accent2", trend: stats.vendorsPending > 0 ? "مراجعة" : "OK" },
+    { label: L.ovRevenue30, value: format(stats.revenue30), sub: `${L.ovTotal}: ${format(stats.revenue)}`, icon: DollarSign, accent: "brand", trend: "+12%" },
+    { label: L.ovOrders, value: String(stats.orders), sub: `${stats.ordersPending} ${L.ovOrdersProcessing}`, icon: ShoppingBag, accent: "accent2", trend: stats.ordersPending > 0 ? L.ovAlert : L.ovStable },
+    { label: L.ovProducts, value: String(stats.products), sub: `${stats.productsActive} ${L.ovProductsActive}`, icon: Package, accent: "brand", trend: `${stats.productsActive}/${stats.products}` },
+    { label: L.ovVendors, value: String(stats.vendors), sub: `${stats.vendorsPending} ${L.ovVendorsPending}`, icon: Store, accent: "accent2", trend: stats.vendorsPending > 0 ? L.ovReview : L.ovOk },
   ];
 
   const statusStyle: Record<string, string> = {
@@ -97,38 +98,34 @@ function AdminOverview() {
   const maxRev = Math.max(1, ...dailyRevenue);
 
   return (
-    <div className="space-y-6" dir="rtl">
-      {/* Hero */}
+    <div className="space-y-6">
       <div className="relative overflow-hidden rounded-2xl bg-gradient-hero text-foreground p-6 md:p-10 border border-border shadow-card">
         <div className="absolute -top-32 -end-32 w-96 h-96 rounded-full bg-brand/20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-32 -start-32 w-96 h-96 rounded-full bg-accent2/20 blur-3xl pointer-events-none" />
         <div className="relative flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 border border-brand/30 text-brand text-[11px] uppercase tracking-[0.25em] font-bold font-mono">
-              <Sparkles className="w-3 h-3" /> Command Center
+              <Sparkles className="w-3 h-3" /> {L.ovTagline}
             </div>
             <h1 className="mt-4 text-3xl md:text-5xl font-extrabold tracking-tight">
-              مرحبًا بك في <span className="bg-gradient-brand bg-clip-text text-transparent">VIP STAR</span>
+              {L.ovWelcome} <span className="bg-gradient-brand bg-clip-text text-transparent">VIP STAR</span>
             </h1>
-            <p className="mt-3 text-sm md:text-base text-muted-foreground max-w-xl">
-              منصة موحدة لإدارة المتجر كاملًا — منتجات، طلبات، بائعون، أقسام، مستخدمون، ومحتوى الموقع.
-            </p>
+            <p className="mt-3 text-sm md:text-base text-muted-foreground max-w-xl">{L.ovSub}</p>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Link to="/admin/products" className="inline-flex items-center gap-1.5 h-11 px-5 rounded-xl bg-gradient-brand text-brand-foreground text-sm font-bold hover:opacity-90 shadow-glow transition-smooth">
-              <Plus className="w-4 h-4" /> منتج جديد
+              <Plus className="w-4 h-4" /> {L.ovNewProduct}
             </Link>
             <Link to="/admin/settings" className="inline-flex items-center gap-1.5 h-11 px-5 rounded-xl bg-card/60 backdrop-blur text-foreground text-sm font-semibold hover:bg-card border border-border transition-smooth">
-              <SettingsIcon className="w-4 h-4" /> إعدادات الموقع
+              <SettingsIcon className="w-4 h-4" /> {L.ovSiteSettings}
             </Link>
             <Link to="/" className="inline-flex items-center gap-1.5 h-11 px-5 rounded-xl bg-card/40 text-foreground text-sm font-semibold hover:bg-card border border-border transition-smooth">
-              <Eye className="w-4 h-4" /> معاينة الموقع
+              <Eye className="w-4 h-4" /> {L.ovPreview}
             </Link>
           </div>
         </div>
       </div>
 
-      {/* KPI cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((k) => (
           <div key={k.label} className="group relative overflow-hidden rounded-2xl bg-card border border-border p-5 hover:border-brand/40 hover:shadow-hover transition-smooth">
@@ -148,19 +145,18 @@ function AdminOverview() {
         ))}
       </div>
 
-      {/* Revenue spark + quick actions */}
       <div className="grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 relative overflow-hidden rounded-2xl bg-card border border-border p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground font-mono font-semibold">
-                <Zap className="w-3 h-3 text-brand" /> آخر 14 يوم
+                <Zap className="w-3 h-3 text-brand" /> {L.ovLast14}
               </div>
-              <h2 className="text-lg font-bold text-foreground mt-1">منحنى الإيرادات</h2>
+              <h2 className="text-lg font-bold text-foreground mt-1">{L.ovRevenueCurve}</h2>
             </div>
             <div className="text-end">
               <div className="text-2xl font-extrabold bg-gradient-brand bg-clip-text text-transparent">{format(dailyRevenue.reduce((a, b) => a + b, 0))}</div>
-              <div className="text-[11px] text-muted-foreground">مجموع الفترة</div>
+              <div className="text-[11px] text-muted-foreground">{L.ovPeriodTotal}</div>
             </div>
           </div>
           <div className="flex items-end gap-1.5 h-32">
@@ -180,14 +176,14 @@ function AdminOverview() {
 
         <div className="rounded-2xl bg-card border border-border p-5">
           <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-muted-foreground font-mono font-semibold mb-4">
-            <Layers className="w-3 h-3 text-accent2" /> اختصارات سريعة
+            <Layers className="w-3 h-3 text-accent2" /> {L.ovShortcuts}
           </div>
           <div className="space-y-2">
             {[
-              { to: "/admin/products" as const, label: "إدارة المنتجات", icon: Package },
-              { to: "/admin/orders" as const, label: "معالجة الطلبات", icon: ShoppingBag },
-              { to: "/admin/vendors" as const, label: "اعتماد البائعين", icon: Store },
-              { to: "/admin/categories" as const, label: "تحرير الأقسام", icon: ListTree },
+              { to: "/admin/products" as const, label: L.ovManageProducts, icon: Package },
+              { to: "/admin/orders" as const, label: L.ovProcessOrders, icon: ShoppingBag },
+              { to: "/admin/vendors" as const, label: L.ovApproveVendors, icon: Store },
+              { to: "/admin/categories" as const, label: L.ovEditCats, icon: ListTree },
             ].map((q) => (
               <Link key={q.to} to={q.to} className="flex items-center gap-3 p-3 rounded-xl bg-accent/40 hover:bg-accent border border-border hover:border-brand/40 transition-smooth group">
                 <div className="w-9 h-9 rounded-lg bg-card border border-border grid place-items-center text-brand">
@@ -201,18 +197,17 @@ function AdminOverview() {
         </div>
       </div>
 
-      {/* Recent activity + top products */}
       <div className="grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 bg-card border border-border rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Activity className="w-4 h-4 text-brand" />
-              <h2 className="text-sm font-bold text-foreground">آخر الطلبات</h2>
+              <h2 className="text-sm font-bold text-foreground">{L.ovRecentOrders}</h2>
             </div>
-            <Link to="/admin/orders" className="text-xs text-brand hover:underline font-semibold">عرض الكل ←</Link>
+            <Link to="/admin/orders" className="text-xs text-brand hover:underline font-semibold">{L.ovViewAll}</Link>
           </div>
           {recent.length === 0 ? (
-            <div className="p-12 text-center text-sm text-muted-foreground">لا توجد طلبات حتى الآن.</div>
+            <div className="p-12 text-center text-sm text-muted-foreground">{L.ovNoOrders}</div>
           ) : (
             <div className="divide-y divide-border">
               {recent.map((o) => (
@@ -222,7 +217,7 @@ function AdminOverview() {
                     <div className="text-[11px] text-muted-foreground font-mono">#{o.id.slice(0, 8)} · {new Date(o.created_at).toLocaleString()}</div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold capitalize border ${statusStyle[o.status] || "bg-accent/60 text-foreground border-border"}`}>{o.status}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${statusStyle[o.status] || "bg-accent/60 text-foreground border-border"}`}>{statusLabel(L, o.status)}</span>
                     <div className="text-sm font-bold text-foreground font-mono">{format(Number(o.total))}</div>
                   </div>
                 </Link>
@@ -233,11 +228,11 @@ function AdminOverview() {
 
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
-            <h2 className="text-sm font-bold text-foreground">الأكثر مبيعًا</h2>
-            <p className="text-[11px] text-muted-foreground mt-0.5">حسب إجمالي المبيعات</p>
+            <h2 className="text-sm font-bold text-foreground">{L.ovTopSelling}</h2>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{L.ovBySales}</p>
           </div>
           {topProducts.length === 0 ? (
-            <div className="p-12 text-center text-sm text-muted-foreground">لا توجد بيانات.</div>
+            <div className="p-12 text-center text-sm text-muted-foreground">{L.ovNoData}</div>
           ) : (
             <div className="divide-y divide-border">
               {topProducts.map((p, i) => (
@@ -245,7 +240,7 @@ function AdminOverview() {
                   <div className="w-7 h-7 rounded-lg bg-gradient-brand grid place-items-center text-xs font-bold text-brand-foreground">{i + 1}</div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-foreground truncate">{p.title}</div>
-                    <div className="text-[11px] text-muted-foreground">{p.sales_count} مبيع</div>
+                    <div className="text-[11px] text-muted-foreground">{p.sales_count} {L.ovSold}</div>
                   </div>
                   <div className="text-xs font-bold text-brand font-mono">{format(Number(p.price))}</div>
                 </div>
@@ -255,15 +250,14 @@ function AdminOverview() {
         </div>
       </div>
 
-      {/* Alerts */}
       {(stats.vendorsPending > 0 || stats.ordersPending > 0) && (
         <div className="grid sm:grid-cols-2 gap-3">
           {stats.vendorsPending > 0 && (
             <Link to="/admin/vendors" className="flex items-start gap-3 p-4 rounded-2xl bg-brand/10 border border-brand/30 hover:bg-brand/15 transition-smooth">
               <AlertCircle className="w-5 h-5 text-brand mt-0.5 shrink-0" />
               <div>
-                <div className="text-sm font-bold text-foreground">{stats.vendorsPending} بائع بانتظار الموافقة</div>
-                <div className="text-xs text-muted-foreground mt-0.5">راجع واعتمد البائعين الجدد ←</div>
+                <div className="text-sm font-bold text-foreground">{stats.vendorsPending} {L.ovVendorsAlert}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{L.ovVendorsAlertSub}</div>
               </div>
             </Link>
           )}
@@ -271,8 +265,8 @@ function AdminOverview() {
             <Link to="/admin/orders" className="flex items-start gap-3 p-4 rounded-2xl bg-accent2/10 border border-accent2/30 hover:bg-accent2/15 transition-smooth">
               <AlertCircle className="w-5 h-5 text-accent2 mt-0.5 shrink-0" />
               <div>
-                <div className="text-sm font-bold text-foreground">{stats.ordersPending} طلب قيد المعالجة</div>
-                <div className="text-xs text-muted-foreground mt-0.5">عالج وحدّث حالات التنفيذ ←</div>
+                <div className="text-sm font-bold text-foreground">{stats.ordersPending} {L.ovOrdersAlert}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{L.ovOrdersAlertSub}</div>
               </div>
             </Link>
           )}
@@ -280,7 +274,7 @@ function AdminOverview() {
       )}
 
       <div className="flex items-center gap-2 text-[11px] text-muted-foreground justify-center pt-4 font-mono">
-        <Users className="w-3 h-3" /> {stats.users} مستخدم مسجل عبر المنصة
+        <Users className="w-3 h-3" /> {stats.users} {L.ovUsersTotal}
       </div>
     </div>
   );

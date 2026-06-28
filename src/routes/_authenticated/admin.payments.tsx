@@ -6,10 +6,11 @@ import {
   CreditCard, Smartphone, Apple, Wallet, Building2, Truck,
   Loader2, ShieldCheck, Plug, Save, KeyRound, AlertTriangle,
 } from "lucide-react";
+import { useAdminI18n } from "@/lib/i18n-admin";
 
 export const Route = createFileRoute("/_authenticated/admin/payments")({
   component: AdminPaymentsPage,
-  head: () => ({ meta: [{ title: "بوابات الدفع | VIP STAR" }] }),
+  head: () => ({ meta: [{ title: "Payment Gateways | VIP STAR" }] }),
 });
 
 type GatewayId = "card" | "benefit" | "apple_pay" | "google_pay" | "bank_transfer" | "cod";
@@ -19,10 +20,9 @@ type Gateway = {
   id: GatewayId;
   enabled: boolean;
   mode: Mode;
-  provider?: string;        // e.g. "stripe", "tap", "benefit"
-  public_key?: string;      // publishable key (safe in DB)
+  provider?: string;
+  public_key?: string;
   webhook_url?: string;
-  // bank transfer extras
   bank_name?: string;
   account_name?: string;
   iban?: string;
@@ -30,8 +30,8 @@ type Gateway = {
 
 type GatewayMeta = {
   id: GatewayId;
-  title: string;
-  subtitle: string;
+  titleKey: "payG_card" | "payG_benefit" | "payG_apple" | "payG_google" | "payG_bank" | "payG_cod";
+  subKey: "payG_cardSub" | "payG_benefitSub" | "payG_appleSub" | "payG_googleSub" | "payG_bankSub" | "payG_codSub";
   icon: any;
   providers: string[];
   needsKeys: boolean;
@@ -39,12 +39,12 @@ type GatewayMeta = {
 };
 
 const GATEWAYS: GatewayMeta[] = [
-  { id: "card",          title: "بطاقات الائتمان",  subtitle: "Visa · Mastercard · Mada",                  icon: CreditCard, providers: ["stripe", "tap", "checkout.com", "paytabs"], needsKeys: true },
-  { id: "benefit",       title: "BenefitPay",         subtitle: "بوابة بِنِفت البحرينية",                       icon: Smartphone, providers: ["benefit", "tap"], needsKeys: true },
-  { id: "apple_pay",     title: "Apple Pay",          subtitle: "دفع سريع وآمن على أجهزة Apple",             icon: Apple,      providers: ["stripe", "tap"], needsKeys: true },
-  { id: "google_pay",    title: "Google Pay",         subtitle: "ادفع ببطاقتك في Google Wallet",             icon: Wallet,     providers: ["stripe", "tap"], needsKeys: true },
-  { id: "bank_transfer", title: "تحويل بنكي",          subtitle: "حوالة مباشرة إلى حساب المتجر",              icon: Building2,  providers: [], needsKeys: false, needsBank: true },
-  { id: "cod",           title: "الدفع عند الاستلام", subtitle: "تحصيل نقدي عند توصيل الطلب للعميل",         icon: Truck,      providers: [], needsKeys: false },
+  { id: "card",          titleKey: "payG_card",    subKey: "payG_cardSub",    icon: CreditCard, providers: ["stripe", "tap", "checkout.com", "paytabs"], needsKeys: true },
+  { id: "benefit",       titleKey: "payG_benefit", subKey: "payG_benefitSub", icon: Smartphone, providers: ["benefit", "tap"], needsKeys: true },
+  { id: "apple_pay",     titleKey: "payG_apple",   subKey: "payG_appleSub",   icon: Apple,      providers: ["stripe", "tap"], needsKeys: true },
+  { id: "google_pay",    titleKey: "payG_google",  subKey: "payG_googleSub",  icon: Wallet,     providers: ["stripe", "tap"], needsKeys: true },
+  { id: "bank_transfer", titleKey: "payG_bank",    subKey: "payG_bankSub",    icon: Building2,  providers: [], needsKeys: false, needsBank: true },
+  { id: "cod",           titleKey: "payG_cod",     subKey: "payG_codSub",     icon: Truck,      providers: [], needsKeys: false },
 ];
 
 const DEFAULTS: Record<GatewayId, Gateway> = {
@@ -59,6 +59,7 @@ const DEFAULTS: Record<GatewayId, Gateway> = {
 const SETTINGS_KEY = "payment_gateways";
 
 function AdminPaymentsPage() {
+  const { L, dir } = useAdminI18n();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [gateways, setGateways] = useState<Record<GatewayId, Gateway>>(DEFAULTS);
@@ -93,31 +94,29 @@ function AdminPaymentsPage() {
         .from("site_settings")
         .upsert({ key: SETTINGS_KEY, value: gateways as any }, { onConflict: "key" });
       if (error) throw error;
-      toast.success("تم حفظ إعدادات بوابات الدفع");
+      toast.success(L.paySaved);
     } catch (e: any) {
-      toast.error(e.message || "فشل الحفظ");
+      toast.error(e.message || L.paySaveFail);
     } finally {
       setSaving(false);
     }
   }
 
   if (loading) {
-    return <div dir="rtl" className="grid place-items-center py-24"><Loader2 className="w-6 h-6 animate-spin text-brand" /></div>;
+    return <div className="grid place-items-center py-24"><Loader2 className="w-6 h-6 animate-spin text-brand" /></div>;
   }
 
   const enabledCount = Object.values(gateways).filter((g) => g.enabled).length;
+  const listPad = dir === "rtl" ? "pr-5" : "pl-5";
 
   return (
-    <div dir="rtl" className="space-y-6">
-      {/* Header */}
+    <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
-            <CreditCard className="w-6 h-6 text-brand" /> بوابات الدفع الإلكتروني
+            <CreditCard className="w-6 h-6 text-brand" /> {L.payTitle}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            تحكم بطرق الدفع المتاحة للعملاء عند إتمام الشراء، وأضف مفاتيح الربط متى ما أردت تفعيل بوابة فعلية.
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">{L.paySub}</p>
         </div>
         <button
           onClick={save}
@@ -125,18 +124,16 @@ function AdminPaymentsPage() {
           className="h-11 px-5 rounded-xl bg-gradient-brand text-brand-foreground font-bold flex items-center gap-2 shadow-glow hover:opacity-90 transition-smooth disabled:opacity-50"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          حفظ التغييرات
+          {L.saveChanges}
         </button>
       </div>
 
-      {/* Stats */}
       <div className="grid sm:grid-cols-3 gap-4">
-        <Stat icon={Plug}        label="بوابات مفعّلة"     value={`${enabledCount} / ${GATEWAYS.length}`} />
-        <Stat icon={ShieldCheck} label="وضع الإنتاج"      value={Object.values(gateways).filter(g => g.mode === "live" && g.enabled).length.toString()} accent />
-        <Stat icon={KeyRound}    label="بانتظار المفاتيح" value={Object.values(gateways).filter(g => g.enabled && GATEWAYS.find(m => m.id === g.id)?.needsKeys && !g.public_key).length.toString()} />
+        <Stat icon={Plug}        label={L.payEnabled}    value={`${enabledCount} / ${GATEWAYS.length}`} />
+        <Stat icon={ShieldCheck} label={L.payLiveCount}  value={Object.values(gateways).filter(g => g.mode === "live" && g.enabled).length.toString()} accent />
+        <Stat icon={KeyRound}    label={L.payNeedKeys}   value={Object.values(gateways).filter(g => g.enabled && GATEWAYS.find(m => m.id === g.id)?.needsKeys && !g.public_key).length.toString()} />
       </div>
 
-      {/* Gateways list */}
       <div className="grid gap-4">
         {GATEWAYS.map((meta) => {
           const g = gateways[meta.id];
@@ -150,25 +147,24 @@ function AdminPaymentsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-bold text-foreground">{meta.title}</h3>
+                    <h3 className="font-bold text-foreground">{L[meta.titleKey]}</h3>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${g.mode === "live" ? "bg-emerald-500/15 text-emerald-400" : "bg-amber-500/15 text-amber-400"}`}>
-                      {g.mode === "live" ? "إنتاج (Live)" : "تجريبي (Test)"}
+                      {g.mode === "live" ? L.payModeLive : L.payModeTest}
                     </span>
                     {needsKey && (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-sale/15 text-sale font-bold flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" /> لم يتم الربط بعد
+                        <AlertTriangle className="w-3 h-3" /> {L.payNotLinked}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">{meta.subtitle}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{L[meta.subKey]}</p>
                 </div>
                 <Toggle checked={g.enabled} onChange={(v) => update(meta.id, { enabled: v })} />
               </header>
 
               {g.enabled && (
                 <div className="p-5 grid sm:grid-cols-2 gap-4">
-                  {/* Mode switch */}
-                  <Field label="وضع التشغيل">
+                  <Field label={L.payMode}>
                     <div className="flex gap-2">
                       {(["test", "live"] as Mode[]).map((m) => (
                         <button
@@ -180,14 +176,14 @@ function AdminPaymentsPage() {
                               : "bg-background/40 text-foreground border-border hover:border-brand/40"
                           }`}
                         >
-                          {m === "test" ? "تجريبي" : "إنتاج"}
+                          {m === "test" ? L.payModeTest : L.payModeLive}
                         </button>
                       ))}
                     </div>
                   </Field>
 
                   {meta.providers.length > 0 && (
-                    <Field label="مزود الخدمة">
+                    <Field label={L.payProvider}>
                       <select
                         value={g.provider || ""}
                         onChange={(e) => update(meta.id, { provider: e.target.value })}
@@ -200,7 +196,7 @@ function AdminPaymentsPage() {
 
                   {meta.needsKeys && (
                     <>
-                      <Field label="Publishable / Public Key" hint="مفتاح علني — يمكن تخزينه هنا">
+                      <Field label={L.payPubKey} hint={L.payPubKeyHint}>
                         <input
                           value={g.public_key || ""}
                           onChange={(e) => update(meta.id, { public_key: e.target.value })}
@@ -209,7 +205,7 @@ function AdminPaymentsPage() {
                           className="w-full h-10 rounded-xl border border-border bg-background/60 px-3 text-sm text-foreground outline-none focus:border-brand font-mono"
                         />
                       </Field>
-                      <Field label="Webhook URL" hint="يُرسل من بوابة الدفع إلى متجرك">
+                      <Field label={L.payWebhook} hint={L.payWebhookHint}>
                         <input
                           value={g.webhook_url || ""}
                           onChange={(e) => update(meta.id, { webhook_url: e.target.value })}
@@ -220,24 +216,22 @@ function AdminPaymentsPage() {
                       </Field>
                       <div className="sm:col-span-2 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-foreground flex gap-2">
                         <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
-                        <p>
-                          المفتاح السري (Secret Key) لا يُخزَّن في قاعدة البيانات لأسباب أمنية — يُحفظ كـ <span className="font-mono">Secret</span> في إعدادات الخادم عند تفعيل الربط الفعلي.
-                        </p>
+                        <p>{L.paySecretNote}</p>
                       </div>
                     </>
                   )}
 
                   {meta.needsBank && (
                     <>
-                      <Field label="اسم البنك">
+                      <Field label={L.payBank}>
                         <input value={g.bank_name || ""} onChange={(e) => update(meta.id, { bank_name: e.target.value })}
                           className="w-full h-10 rounded-xl border border-border bg-background/60 px-3 text-sm text-foreground outline-none focus:border-brand" />
                       </Field>
-                      <Field label="اسم المستفيد">
+                      <Field label={L.payAccountName}>
                         <input value={g.account_name || ""} onChange={(e) => update(meta.id, { account_name: e.target.value })}
                           className="w-full h-10 rounded-xl border border-border bg-background/60 px-3 text-sm text-foreground outline-none focus:border-brand" />
                       </Field>
-                      <Field label="IBAN" className="sm:col-span-2">
+                      <Field label={L.payIban} className="sm:col-span-2">
                         <input value={g.iban || ""} onChange={(e) => update(meta.id, { iban: e.target.value })}
                           dir="ltr"
                           className="w-full h-10 rounded-xl border border-border bg-background/60 px-3 text-sm text-foreground outline-none focus:border-brand font-mono" />
@@ -253,13 +247,13 @@ function AdminPaymentsPage() {
 
       <div className="rounded-2xl border border-border bg-card/60 p-5 text-sm text-muted-foreground">
         <div className="flex items-center gap-2 text-foreground font-semibold mb-2">
-          <Plug className="w-4 h-4 text-brand" /> كيف يعمل الربط؟
+          <Plug className="w-4 h-4 text-brand" /> {L.payHowTitle}
         </div>
-        <ul className="space-y-1 list-disc pr-5 text-xs leading-relaxed">
-          <li>إيقاف أي بوابة يخفيها فوراً عن صفحة إتمام الشراء.</li>
-          <li>الوضع التجريبي يسمح بمحاكاة الدفع دون تحصيل فعلي.</li>
-          <li>عند ربط مفاتيح بوابة فعلية (Stripe / Tap / Benefit) يتم تحويل العميل تلقائياً لإتمام الدفع الآمن.</li>
-          <li>يمكنك إضافة مفتاح Publishable هنا والمفتاح السري يُحفظ كسر مشفّر في إعدادات الخادم.</li>
+        <ul className={`space-y-1 list-disc ${listPad} text-xs leading-relaxed`}>
+          <li>{L.payHow1}</li>
+          <li>{L.payHow2}</li>
+          <li>{L.payHow3}</li>
+          <li>{L.payHow4}</li>
         </ul>
       </div>
     </div>
