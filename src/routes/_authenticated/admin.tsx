@@ -252,8 +252,33 @@ function AdminLayout() {
             <div className="flex items-center gap-2">
               <div className="hidden lg:flex items-center gap-2 h-9 px-3 rounded-lg bg-accent/40 border border-border text-xs text-muted-foreground w-64">
                 <Search className="w-3.5 h-3.5" />
-                <span>بحث سريع…</span>
+                <span>{L.quickSearch}</span>
                 <kbd className="ms-auto text-[10px] px-1.5 py-0.5 rounded bg-card border border-border font-mono">⌘K</kbd>
+              </div>
+              <div className="relative" ref={langRef}>
+                <button
+                  onClick={() => setLangOpen((v) => !v)}
+                  className="h-9 px-2.5 flex items-center gap-1.5 rounded-lg bg-accent/60 hover:bg-accent text-foreground text-xs font-semibold transition-smooth"
+                  aria-haspopup="menu"
+                  aria-expanded={langOpen}
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span className="uppercase">{lang}</span>
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+                {langOpen && (
+                  <div className="absolute end-0 mt-1 w-36 rounded-md bg-card shadow-card border border-border overflow-hidden z-50">
+                    {LANGS.map((l) => (
+                      <button
+                        key={l.code}
+                        onClick={() => { setLang(l.code as Lang); setLangOpen(false); }}
+                        className={`w-full text-start px-3 py-2 text-xs hover:bg-accent transition-smooth ${l.code === lang ? "bg-accent text-brand font-semibold" : "text-foreground"}`}
+                      >
+                        {l.native}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="hidden sm:block"><CurrencySwitcher compact /></div>
               <button className="w-9 h-9 grid place-items-center rounded-lg bg-accent/60 hover:bg-accent text-foreground relative transition-smooth">
