@@ -211,7 +211,7 @@ function AdminLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-background flex" dir="rtl">
+    <div className="min-h-screen bg-background flex" dir={dir}>
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-64 shrink-0 flex-col bg-card border-s border-border sticky top-0 h-screen">
         {SidebarBody}
