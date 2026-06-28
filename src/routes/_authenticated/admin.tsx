@@ -173,7 +173,7 @@ function AdminLayout() {
 
         {cats.length > 0 && (
           <div>
-            <div className="px-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-2 font-mono">صفحات الموقع</div>
+            <div className="px-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-2 font-mono">{L.sitePages}</div>
             <div className="space-y-1">
               {cats.map((c) => {
                 const active = isCatActive(c.slug);
