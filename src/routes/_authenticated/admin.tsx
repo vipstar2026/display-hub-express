@@ -1,12 +1,13 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
+import { LANGS, useI18n, type Lang } from "@/lib/i18n";
 import {
   Shield, LayoutDashboard, Store, Package, ListTree, ShoppingBag,
   Users, Loader2, Settings, LogOut, ExternalLink, Bell, Search,
-  Sparkles, ChevronRight, Menu, X, CreditCard, LifeBuoy,
+  Sparkles, ChevronRight, Menu, X, CreditCard, LifeBuoy, Globe, ChevronDown,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
