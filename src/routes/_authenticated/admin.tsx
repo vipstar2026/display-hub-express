@@ -201,10 +201,10 @@ function AdminLayout() {
 
       <div className="p-3 border-t border-border space-y-1">
         <Link to="/" className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-brand hover:bg-accent/60 transition-smooth">
-          <ExternalLink className="w-3.5 h-3.5" /> عرض الموقع المباشر
+          <ExternalLink className="w-3.5 h-3.5" /> {L.viewSite}
         </Link>
         <Link to="/account" className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-smooth">
-          <LogOut className="w-3.5 h-3.5" /> العودة للحساب
+          <LogOut className="w-3.5 h-3.5" /> {L.backAccount}
         </Link>
       </div>
     </>
