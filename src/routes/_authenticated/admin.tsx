@@ -1,12 +1,13 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
+import { LANGS, useI18n, type Lang } from "@/lib/i18n";
 import {
   Shield, LayoutDashboard, Store, Package, ListTree, ShoppingBag,
   Users, Loader2, Settings, LogOut, ExternalLink, Bell, Search,
-  Sparkles, ChevronRight, Menu, X, CreditCard, LifeBuoy,
+  Sparkles, ChevronRight, Menu, X, CreditCard, LifeBuoy, Globe, ChevronDown,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -17,11 +18,22 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminLayout() {
   const { user } = useAuth();
   const nav = useNavigate();
+  const { lang, setLang, dir } = useI18n();
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [cats, setCats] = useState<{ slug: string; name: string }[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
+    }
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -44,15 +56,46 @@ function AdminLayout() {
 
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
+  const L = useMemo(() => {
+    const ar = {
+      dashboard: "لوحة القيادة", vendors: "البائعون", products: "المنتجات",
+      categories: "الأقسام", orders: "الطلبات", users: "المستخدمون والصلاحيات",
+      settings: "إعدادات الموقع", catalog: "إدارة القسم", payments: "بوابات الدفع", support: "الدعم الفني",
+      gOverview: "نظرة عامة", gCatalog: "الكتالوج", gCommerce: "التجارة",
+      gCustomers: "العملاء", gSystem: "النظام", allProducts: "كل المنتجات",
+      sitePages: "صفحات الموقع", viewSite: "عرض الموقع المباشر", backAccount: "العودة للحساب",
+      quickSearch: "بحث سريع…",
+    };
+    const en = {
+      dashboard: "Dashboard", vendors: "Vendors", products: "Products",
+      categories: "Categories", orders: "Orders", users: "Users & Roles",
+      settings: "Site Settings", catalog: "Catalog", payments: "Payment Gateways", support: "Support",
+      gOverview: "Overview", gCatalog: "Catalog", gCommerce: "Commerce",
+      gCustomers: "Customers", gSystem: "System", allProducts: "All Products",
+      sitePages: "Site Pages", viewSite: "View live site", backAccount: "Back to account",
+      quickSearch: "Quick search…",
+    };
+    const ur = {
+      dashboard: "ڈیش بورڈ", vendors: "وینڈرز", products: "پروڈکٹس",
+      categories: "زمرے", orders: "آرڈرز", users: "صارفین اور کردار",
+      settings: "سائٹ کی ترتیبات", catalog: "کیٹلاگ", payments: "ادائیگی گیٹ ویز", support: "سپورٹ",
+      gOverview: "جائزہ", gCatalog: "کیٹلاگ", gCommerce: "کامرس",
+      gCustomers: "صارفین", gSystem: "سسٹم", allProducts: "تمام پروڈکٹس",
+      sitePages: "سائٹ کے صفحات", viewSite: "لائیو سائٹ دیکھیں", backAccount: "اکاؤنٹ پر واپس",
+      quickSearch: "فوری تلاش…",
+    };
+    return lang === "en" ? en : lang === "ur" ? ur : ar;
+  }, [lang]);
+
   const crumb = useMemo(() => {
     const map: Record<string, string> = {
-      "": "لوحة القيادة", vendors: "البائعون", products: "المنتجات",
-      categories: "الأقسام", orders: "الطلبات", users: "المستخدمون",
-      settings: "الإعدادات", catalog: "إدارة القسم", payments: "بوابات الدفع", support: "الدعم الفني",
+      "": L.dashboard, vendors: L.vendors, products: L.products,
+      categories: L.categories, orders: L.orders, users: L.users,
+      settings: L.settings, catalog: L.catalog, payments: L.payments, support: L.support,
     };
     const seg = pathname.replace("/admin", "").replace(/^\//, "").split("/")[0] || "";
     return map[seg] ?? seg;
-  }, [pathname]);
+  }, [pathname, L]);
 
   if (checking) {
     return (
@@ -65,24 +108,25 @@ function AdminLayout() {
 
   type NavTo = "/admin" | "/admin/vendors" | "/admin/products" | "/admin/categories" | "/admin/orders" | "/admin/users" | "/admin/settings" | "/admin/payments" | "/admin/support";
   const groups: { label: string; items: { to: NavTo; icon: typeof LayoutDashboard; label: string; exact?: boolean }[] }[] = [
-    { label: "نظرة عامة", items: [{ to: "/admin", icon: LayoutDashboard, label: "لوحة القيادة", exact: true }] },
-    { label: "الكتالوج", items: [
-      { to: "/admin/products", icon: Package, label: "كل المنتجات" },
-      { to: "/admin/categories", icon: ListTree, label: "الأقسام" },
-      { to: "/admin/vendors", icon: Store, label: "البائعون" },
+    { label: L.gOverview, items: [{ to: "/admin", icon: LayoutDashboard, label: L.dashboard, exact: true }] },
+    { label: L.gCatalog, items: [
+      { to: "/admin/products", icon: Package, label: L.allProducts },
+      { to: "/admin/categories", icon: ListTree, label: L.categories },
+      { to: "/admin/vendors", icon: Store, label: L.vendors },
     ]},
-    { label: "التجارة", items: [
-      { to: "/admin/orders", icon: ShoppingBag, label: "الطلبات" },
-      { to: "/admin/payments", icon: CreditCard, label: "بوابات الدفع" },
+    { label: L.gCommerce, items: [
+      { to: "/admin/orders", icon: ShoppingBag, label: L.orders },
+      { to: "/admin/payments", icon: CreditCard, label: L.payments },
     ]},
-    { label: "العملاء", items: [
-      { to: "/admin/support", icon: LifeBuoy, label: "الدعم الفني" },
+    { label: L.gCustomers, items: [
+      { to: "/admin/support", icon: LifeBuoy, label: L.support },
     ]},
-    { label: "النظام", items: [
-      { to: "/admin/users", icon: Users, label: "المستخدمون والصلاحيات" },
-      { to: "/admin/settings", icon: Settings, label: "إعدادات الموقع" },
+    { label: L.gSystem, items: [
+      { to: "/admin/users", icon: Users, label: L.users },
+      { to: "/admin/settings", icon: Settings, label: L.settings },
     ]},
   ];
+
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
@@ -129,7 +173,7 @@ function AdminLayout() {
 
         {cats.length > 0 && (
           <div>
-            <div className="px-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-2 font-mono">صفحات الموقع</div>
+            <div className="px-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-2 font-mono">{L.sitePages}</div>
             <div className="space-y-1">
               {cats.map((c) => {
                 const active = isCatActive(c.slug);
@@ -157,17 +201,17 @@ function AdminLayout() {
 
       <div className="p-3 border-t border-border space-y-1">
         <Link to="/" className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-brand hover:bg-accent/60 transition-smooth">
-          <ExternalLink className="w-3.5 h-3.5" /> عرض الموقع المباشر
+          <ExternalLink className="w-3.5 h-3.5" /> {L.viewSite}
         </Link>
         <Link to="/account" className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-smooth">
-          <LogOut className="w-3.5 h-3.5" /> العودة للحساب
+          <LogOut className="w-3.5 h-3.5" /> {L.backAccount}
         </Link>
       </div>
     </>
   );
 
   return (
-    <div className="min-h-screen bg-background flex" dir="rtl">
+    <div className="min-h-screen bg-background flex" dir={dir}>
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-64 shrink-0 flex-col bg-card border-s border-border sticky top-0 h-screen">
         {SidebarBody}
@@ -208,8 +252,33 @@ function AdminLayout() {
             <div className="flex items-center gap-2">
               <div className="hidden lg:flex items-center gap-2 h-9 px-3 rounded-lg bg-accent/40 border border-border text-xs text-muted-foreground w-64">
                 <Search className="w-3.5 h-3.5" />
-                <span>بحث سريع…</span>
+                <span>{L.quickSearch}</span>
                 <kbd className="ms-auto text-[10px] px-1.5 py-0.5 rounded bg-card border border-border font-mono">⌘K</kbd>
+              </div>
+              <div className="relative" ref={langRef}>
+                <button
+                  onClick={() => setLangOpen((v) => !v)}
+                  className="h-9 px-2.5 flex items-center gap-1.5 rounded-lg bg-accent/60 hover:bg-accent text-foreground text-xs font-semibold transition-smooth"
+                  aria-haspopup="menu"
+                  aria-expanded={langOpen}
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span className="uppercase">{lang}</span>
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+                {langOpen && (
+                  <div className="absolute end-0 mt-1 w-36 rounded-md bg-card shadow-card border border-border overflow-hidden z-50">
+                    {LANGS.map((l) => (
+                      <button
+                        key={l.code}
+                        onClick={() => { setLang(l.code as Lang); setLangOpen(false); }}
+                        className={`w-full text-start px-3 py-2 text-xs hover:bg-accent transition-smooth ${l.code === lang ? "bg-accent text-brand font-semibold" : "text-foreground"}`}
+                      >
+                        {l.native}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="hidden sm:block"><CurrencySwitcher compact /></div>
               <button className="w-9 h-9 grid place-items-center rounded-lg bg-accent/60 hover:bg-accent text-foreground relative transition-smooth">
