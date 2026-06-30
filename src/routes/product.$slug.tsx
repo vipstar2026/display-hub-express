@@ -7,7 +7,7 @@ import { useCart } from "@/lib/cart";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { formatPrice, firstImage } from "@/lib/format";
-import { Package, ShoppingCart } from "lucide-react";
+import { Package, ShoppingCart, Download, Copy, Tv, Calendar, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -59,6 +59,39 @@ function ProductPage() {
           </div>
 
           {description && <p className="mt-6 whitespace-pre-line leading-relaxed text-foreground/80">{description}</p>}
+
+          {p.type === "subscription" && p.features && typeof p.features === "object" && (
+            <div className="mt-6 space-y-3 rounded-xl border border-cyan-500/20 bg-card/50 p-5">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {(p.features as any).channels && (
+                  <div className="flex items-center gap-2"><Tv className="h-4 w-4 text-cyan-400" /><span className="text-muted-foreground">{lang === "ar" ? "القنوات" : lang === "ur" ? "چینلز" : "Channels"}:</span><span className="font-mono">{(p.features as any).channels}</span></div>
+                )}
+                {(p.features as any).quality && (
+                  <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-cyan-400" /><span className="text-muted-foreground">{lang === "ar" ? "الجودة" : lang === "ur" ? "معیار" : "Quality"}:</span><span className="font-mono">{(p.features as any).quality}</span></div>
+                )}
+                {(p.features as any).duration_months && (
+                  <div className="flex items-center gap-2 col-span-2"><Calendar className="h-4 w-4 text-cyan-400" /><span className="text-muted-foreground">{lang === "ar" ? "المدة" : lang === "ur" ? "مدت" : "Duration"}:</span><span className="font-mono">{(p.features as any).duration_months} {lang === "ar" ? "شهر" : lang === "ur" ? "ماہ" : "months"}</span></div>
+                )}
+              </div>
+
+              {(p.features as any).downloader_code && (
+                <div className="rounded-lg border border-cyan-500/30 bg-background/60 p-3">
+                  <div className="mb-1 text-xs uppercase tracking-wider text-cyan-400/80">{lang === "ar" ? "كود Downloader" : lang === "ur" ? "Downloader کوڈ" : "Downloader Code"}</div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-2xl font-bold tracking-widest text-cyan-300">{(p.features as any).downloader_code}</span>
+                    <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText((p.features as any).downloader_code); toast.success(lang === "ar" ? "تم النسخ" : "Copied"); }}><Copy className="h-4 w-4" /></Button>
+                  </div>
+                </div>
+              )}
+
+              {(p.features as any).app_download_url && (
+                <a href={(p.features as any).app_download_url} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:bg-cyan-500/20">
+                  <Download className="h-4 w-4" />
+                  {lang === "ar" ? "تحميل التطبيق (APK)" : lang === "ur" ? "ایپ ڈاؤن لوڈ کریں" : "Download App (APK)"}
+                </a>
+              )}
+            </div>
+          )}
 
           <div className="mt-6 flex items-center gap-4">
             <div className="flex items-center rounded-md border border-cyan-500/20">
