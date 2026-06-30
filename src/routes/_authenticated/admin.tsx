@@ -1,9 +1,10 @@
 import { createFileRoute, Outlet, Link, redirect, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  LayoutDashboard, Package, FolderTree, ShoppingBag, Key, Users, Settings,
+  LayoutDashboard, FolderTree, ShoppingBag, Key, Users, Settings,
   Satellite, ArrowLeft, Search, Bell, Menu, ChevronRight, Store, LogOut, Globe,
 } from "lucide-react";
+
 import { useI18n, type Lang } from "@/lib/i18n";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -35,11 +36,11 @@ function AdminLayout() {
     {
       label: t("admin.catalog"),
       items: [
-        { to: "/admin/products", icon: Package, label: t("admin.products") },
         { to: "/admin/categories", icon: FolderTree, label: t("admin.categories") },
         { to: "/admin/codes", icon: Key, label: t("admin.codes") },
       ],
     },
+
     {
       label: t("admin.sales"),
       items: [{ to: "/admin/orders", icon: ShoppingBag, label: t("admin.orders") }],
