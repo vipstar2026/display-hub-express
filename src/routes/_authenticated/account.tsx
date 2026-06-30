@@ -1,115 +1,56 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { SiteHeader } from "@/components/SiteHeader";
-import { SiteFooter } from "@/components/SiteFooter";
-import { useAuth } from "@/lib/auth";
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
-import { toast } from "sonner";
-import { User as UserIcon, Heart, ShoppingBag, Store, LogOut, Shield, Package } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { formatPrice } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/account")({
   component: AccountPage,
-  head: () => ({ meta: [{ title: "حسابي | VIP STAR" }] }),
 });
-
-type Profile = { display_name: string | null; phone: string | null; avatar_url: string | null };
 
 function AccountPage() {
   const { t } = useI18n();
-  const { user, signOut } = useAuth();
-  const nav = useNavigate();
-  const [profile, setProfile] = useState<Profile>({ display_name: "", phone: "", avatar_url: "" });
-  const [roles, setRoles] = useState<string[]>([]);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const [{ data: p }, { data: r }] = await Promise.all([
-        supabase.from("profiles").select("display_name, phone, avatar_url").eq("id", user.id).maybeSingle(),
-        supabase.from("user_roles").select("role").eq("user_id", user.id),
-      ]);
-      if (p) setProfile(p);
-      if (r) setRoles(r.map((x) => x.role));
-    })();
-  }, [user]);
-
-  async function save() {
-    if (!user) return;
-    setSaving(true);
-    const { error } = await supabase.from("profiles").update(profile).eq("id", user.id);
-    setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success(t("auth.profileSaved"));
-  }
-
-  async function onSignOut() {
-    await signOut();
-    nav({ to: "/" });
-  }
-
-  const isAdmin = roles.includes("admin");
-  const isVendor = roles.includes("vendor");
+  const { data: orders } = useQuery({
+    queryKey: ["my-orders"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return [];
+      const { data } = await supabase.from("orders").select("*, order_items(*)").eq("buyer_id", u.user.id).order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <SiteHeader />
-      <main className="flex-1 mx-auto max-w-6xl w-full px-4 py-8 grid md:grid-cols-[260px_1fr] gap-6">
-        <aside className="bg-card border border-border rounded-xl p-4 h-fit">
-          <div className="flex items-center gap-3 pb-4 border-b border-border">
-            <div className="w-12 h-12 rounded-full bg-brand text-brand-foreground grid place-items-center font-bold text-lg">
-              {(profile.display_name || user?.email || "U")[0].toUpperCase()}
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="mb-6 font-display text-3xl font-bold">{t("nav.account")}</h1>
+        <h2 className="mb-4 text-lg font-semibold">{t("admin.orders")}</h2>
+        <div className="space-y-3">
+          {(orders ?? []).length === 0 && <div className="rounded-xl border border-cyan-500/10 bg-card p-8 text-center text-muted-foreground">—</div>}
+          {(orders ?? []).map((o) => (
+            <div key={o.id} className="rounded-xl border border-cyan-500/10 bg-card p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="font-mono text-sm text-cyan-400">{o.order_number}</span>
+                <span className="rounded-full border border-cyan-500/20 px-2 py-0.5 text-xs">{o.status}</span>
+                <span className="font-mono font-bold">{formatPrice(Number(o.total), o.currency)}</span>
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()}</div>
+              <div className="mt-3 space-y-1">
+                {o.order_items?.map((it: { id: string; product_name: string; quantity: number; total: number }) => (
+                  <div key={it.id} className="flex justify-between text-sm">
+                    <span>{it.product_name} × {it.quantity}</span>
+                    <span className="font-mono">{formatPrice(Number(it.total), o.currency)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="min-w-0">
-              <div className="font-semibold text-foreground truncate">{profile.display_name || t("auth.account")}</div>
-              <div className="text-xs text-muted-foreground truncate">{user?.email}</div>
-            </div>
-          </div>
-          <nav className="mt-4 space-y-1 text-sm">
-            <a className="flex items-center gap-2 px-3 py-2 rounded-md bg-accent text-brand font-medium"><UserIcon className="w-4 h-4" /> {t("auth.profile")}</a>
-            <Link to="/orders" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Package className="w-4 h-4" /> {t("acc.orders")}</Link>
-            <Link to="/wishlist" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Heart className="w-4 h-4" /> {t("header.wishlist")}</Link>
-            <Link to="/cart" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><ShoppingBag className="w-4 h-4" /> {t("header.cart")}</Link>
-            {isVendor
-              ? <Link to="/sell/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Store className="w-4 h-4" /> {t("auth.vendorDash")}</Link>
-              : <Link to="/sell/register" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Store className="w-4 h-4" /> {t("acc.becomeSeller")}</Link>}
-            {isAdmin && <Link to="/admin" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent text-foreground"><Shield className="w-4 h-4" /> {t("auth.admin")}</Link>}
-            <button onClick={onSignOut} className="w-full text-start flex items-center gap-2 px-3 py-2 rounded-md hover:bg-sale/10 text-sale font-medium">
-              <LogOut className="w-4 h-4" /> {t("auth.signOut")}
-            </button>
-          </nav>
-        </aside>
-
-        <section className="bg-card border border-border rounded-xl p-6">
-          <h1 className="text-xl font-bold text-foreground">{t("auth.profile")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{t("auth.profileSub")}</p>
-
-          <div className="mt-6 grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">{t("auth.name")}</label>
-              <input value={profile.display_name ?? ""} onChange={(e) => setProfile({ ...profile, display_name: e.target.value })} className="mt-1 w-full h-11 rounded-md border border-border px-3 text-sm bg-background outline-none focus:border-brand" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">{t("auth.email")}</label>
-              <input disabled value={user?.email ?? ""} className="mt-1 w-full h-11 rounded-md border border-border px-3 text-sm bg-muted text-muted-foreground" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">{t("auth.phone")}</label>
-              <input value={profile.phone ?? ""} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className="mt-1 w-full h-11 rounded-md border border-border px-3 text-sm bg-background outline-none focus:border-brand" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">{t("auth.avatar")}</label>
-              <input value={profile.avatar_url ?? ""} onChange={(e) => setProfile({ ...profile, avatar_url: e.target.value })} placeholder="https://..." className="mt-1 w-full h-11 rounded-md border border-border px-3 text-sm bg-background outline-none focus:border-brand" />
-            </div>
-          </div>
-
-          <button onClick={save} disabled={saving} className="mt-6 h-11 px-6 rounded-md bg-brand text-brand-foreground font-semibold hover:bg-brand-dark transition-smooth disabled:opacity-50">
-            {saving ? "..." : t("auth.saveChanges")}
-          </button>
-        </section>
-      </main>
-      <SiteFooter />
+          ))}
+        </div>
+      </div>
+      <Footer />
     </div>
   );
 }

@@ -1,63 +1,65 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-export type CartItem = { id: string; qty: number };
+export interface CartItem {
+  product_id: string;
+  slug: string;
+  name: string;
+  image: string | null;
+  price: number;
+  quantity: number;
+  type: "physical" | "digital" | "subscription";
+}
 
-type Ctx = {
+interface CartCtx {
   items: CartItem[];
-  count: number;
-  add: (id: string, qty?: number) => void;
-  remove: (id: string) => void;
-  setQty: (id: string, qty: number) => void;
+  add: (item: Omit<CartItem, "quantity">, qty?: number) => void;
+  remove: (product_id: string) => void;
+  setQty: (product_id: string, qty: number) => void;
   clear: () => void;
-  wishlist: string[];
-  toggleWishlist: (id: string) => void;
-  isWished: (id: string) => boolean;
-};
+  count: number;
+  subtotal: number;
+}
 
-const CartCtx = createContext<Ctx>({
-  items: [], count: 0, add: () => {}, remove: () => {}, setQty: () => {}, clear: () => {},
-  wishlist: [], toggleWishlist: () => {}, isWished: () => false,
-});
+const Ctx = createContext<CartCtx | null>(null);
+const KEY = "vipstar-cart";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [wishlist, setWishlist] = useState<string[]>([]);
-  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     try {
-      const c = localStorage.getItem("vs_cart");
-      const w = localStorage.getItem("vs_wish");
-      if (c) setItems(JSON.parse(c));
-      if (w) setWishlist(JSON.parse(w));
+      const raw = localStorage.getItem(KEY);
+      if (raw) setItems(JSON.parse(raw));
     } catch {}
-    setHydrated(true);
   }, []);
 
-  useEffect(() => { if (hydrated) localStorage.setItem("vs_cart", JSON.stringify(items)); }, [items, hydrated]);
-  useEffect(() => { if (hydrated) localStorage.setItem("vs_wish", JSON.stringify(wishlist)); }, [wishlist, hydrated]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(KEY, JSON.stringify(items));
+  }, [items]);
 
-  const add = (id: string, qty = 1) =>
-    setItems((prev) => {
-      const ex = prev.find((i) => i.id === id);
-      if (ex) return prev.map((i) => (i.id === id ? { ...i, qty: i.qty + qty } : i));
-      return [...prev, { id, qty }];
+  const add: CartCtx["add"] = (item, qty = 1) => {
+    setItems((cur) => {
+      const existing = cur.find((i) => i.product_id === item.product_id);
+      if (existing) {
+        return cur.map((i) => (i.product_id === item.product_id ? { ...i, quantity: i.quantity + qty } : i));
+      }
+      return [...cur, { ...item, quantity: qty }];
     });
-  const remove = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id));
+  };
+  const remove = (id: string) => setItems((c) => c.filter((i) => i.product_id !== id));
   const setQty = (id: string, qty: number) =>
-    setItems((prev) => (qty <= 0 ? prev.filter((i) => i.id !== id) : prev.map((i) => (i.id === id ? { ...i, qty } : i))));
+    setItems((c) => (qty <= 0 ? c.filter((i) => i.product_id !== id) : c.map((i) => (i.product_id === id ? { ...i, quantity: qty } : i))));
   const clear = () => setItems([]);
-  const toggleWishlist = (id: string) =>
-    setWishlist((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  const isWished = (id: string) => wishlist.includes(id);
+  const count = items.reduce((s, i) => s + i.quantity, 0);
+  const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
 
-  const count = items.reduce((n, i) => n + i.qty, 0);
-
-  return (
-    <CartCtx.Provider value={{ items, count, add, remove, setQty, clear, wishlist, toggleWishlist, isWished }}>
-      {children}
-    </CartCtx.Provider>
-  );
+  return <Ctx.Provider value={{ items, add, remove, setQty, clear, count, subtotal }}>{children}</Ctx.Provider>;
 }
 
-export const useCart = () => useContext(CartCtx);
+export function useCart() {
+  const c = useContext(Ctx);
+  if (!c) throw new Error("useCart must be inside CartProvider");
+  return c;
+}
