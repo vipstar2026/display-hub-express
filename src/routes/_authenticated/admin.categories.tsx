@@ -63,11 +63,18 @@ function AdminCategories() {
 
       <div className="rounded-xl border border-cyan-500/10 bg-card divide-y divide-cyan-500/10">
         {(data ?? []).map((c) => (
-          <div key={c.id} className="flex items-center gap-3 p-3">
-            <div className="flex-1">
-              <div className="font-medium">{c.name_en} <span className="text-muted-foreground">· {c.name_ar}</span></div>
-              <div className="text-xs text-muted-foreground">/{c.slug}</div>
-            </div>
+          <div key={c.id} className="flex items-center gap-3 p-3 transition-colors hover:bg-cyan-500/5">
+            <Link
+              to="/admin/categories/$slug"
+              params={{ slug: c.slug }}
+              className="flex min-w-0 flex-1 items-center gap-2"
+            >
+              <div className="min-w-0">
+                <div className="truncate font-medium">{c.name_en} <span className="text-muted-foreground">· {c.name_ar}</span></div>
+                <div className="text-xs text-muted-foreground">/{c.slug}</div>
+              </div>
+              <ChevronRight className="ms-auto h-4 w-4 text-muted-foreground rtl:rotate-180" />
+            </Link>
             <Button size="sm" variant="ghost" onClick={() => { setForm({ id: c.id, slug: c.slug, name_ar: c.name_ar, name_en: c.name_en, name_ur: c.name_ur ?? "", icon: c.icon ?? "", sort_order: String(c.sort_order) }); setOpen(true); }}>
               <Edit className="h-4 w-4" />
             </Button>
@@ -78,6 +85,7 @@ function AdminCategories() {
             }}><Trash2 className="h-4 w-4 text-destructive" /></Button>
           </div>
         ))}
+
       </div>
     </div>
   );
