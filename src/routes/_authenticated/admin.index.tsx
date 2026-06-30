@@ -106,10 +106,10 @@ function AdminDashboard() {
         .select("product_id, quantity, unit_price, products(id, name_ar, name_en, name_ur, images)")
         .limit(200);
       const agg = new Map<string, { product: Record<string, unknown>; qty: number; revenue: number }>();
-      (data ?? []).forEach((row: { product_id: string; quantity: number; unit_price: string | number; products: Record<string, unknown> | null }) => {
-        if (!row.products) return;
+      (data ?? []).forEach((row) => {
+        if (!row.products || !row.product_id) return;
         const key = row.product_id;
-        const cur = agg.get(key) ?? { product: row.products, qty: 0, revenue: 0 };
+        const cur = agg.get(key) ?? { product: row.products as unknown as Record<string, unknown>, qty: 0, revenue: 0 };
         cur.qty += row.quantity;
         cur.revenue += Number(row.unit_price) * row.quantity;
         agg.set(key, cur);
