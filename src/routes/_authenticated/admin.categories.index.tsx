@@ -10,7 +10,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 
-export const Route = createFileRoute("/_authenticated/admin/categories")({
+export const Route = createFileRoute("/_authenticated/admin/categories/")({
   component: AdminCategories,
 });
 
