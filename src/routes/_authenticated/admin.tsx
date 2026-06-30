@@ -35,11 +35,11 @@ function AdminLayout() {
     {
       label: t("admin.catalog"),
       items: [
-        { to: "/admin/products", icon: Package, label: t("admin.products") },
         { to: "/admin/categories", icon: FolderTree, label: t("admin.categories") },
         { to: "/admin/codes", icon: Key, label: t("admin.codes") },
       ],
     },
+
     {
       label: t("admin.sales"),
       items: [{ to: "/admin/orders", icon: ShoppingBag, label: t("admin.orders") }],
