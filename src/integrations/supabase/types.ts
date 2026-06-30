@@ -16,41 +16,41 @@ export type Database = {
     Tables: {
       addresses: {
         Row: {
+          address_line: string
           city: string
           country: string
           created_at: string
           full_name: string
           id: string
           is_default: boolean
-          line1: string
-          line2: string | null
           phone: string
+          postal_code: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          address_line: string
           city: string
-          country?: string
+          country: string
           created_at?: string
           full_name: string
           id?: string
           is_default?: boolean
-          line1: string
-          line2?: string | null
           phone: string
+          postal_code?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          address_line?: string
           city?: string
           country?: string
           created_at?: string
           full_name?: string
           id?: string
           is_default?: boolean
-          line1?: string
-          line2?: string | null
           phone?: string
+          postal_code?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -59,33 +59,45 @@ export type Database = {
       categories: {
         Row: {
           created_at: string
+          description: string | null
           icon: string | null
           id: string
-          image_url: string | null
-          name: string
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          name_ur: string | null
           parent_id: string | null
           slug: string
           sort_order: number
+          updated_at: string
         }
         Insert: {
           created_at?: string
+          description?: string | null
           icon?: string | null
           id?: string
-          image_url?: string | null
-          name: string
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          name_ur?: string | null
           parent_id?: string | null
           slug: string
           sort_order?: number
+          updated_at?: string
         }
         Update: {
           created_at?: string
+          description?: string | null
           icon?: string | null
           id?: string
-          image_url?: string | null
-          name?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          name_ur?: string | null
           parent_id?: string | null
           slug?: string
           sort_order?: number
+          updated_at?: string
         }
         Relationships: [
           {
@@ -97,45 +109,122 @@ export type Database = {
           },
         ]
       }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_total: number | null
+          used_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount_type: string
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_total?: number | null
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_total?: number | null
+          used_count?: number
+        }
+        Relationships: []
+      }
+      digital_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_used: boolean
+          notes: string | null
+          order_item_id: string | null
+          product_id: string
+          used_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_used?: boolean
+          notes?: string | null
+          order_item_id?: string | null
+          product_id: string
+          used_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_used?: boolean
+          notes?: string | null
+          order_item_id?: string | null
+          product_id?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "digital_codes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
+          delivered_codes: Json | null
           id: string
-          image_url: string | null
           order_id: string
-          price: number
-          product_id: string
-          qty: number
-          status: Database["public"]["Enums"]["order_item_status"]
-          title: string
-          updated_at: string
-          vendor_id: string
+          product_id: string | null
+          product_name: string
+          product_type: Database["public"]["Enums"]["product_type"]
+          quantity: number
+          total: number
+          unit_price: number
         }
         Insert: {
           created_at?: string
+          delivered_codes?: Json | null
           id?: string
-          image_url?: string | null
           order_id: string
-          price: number
-          product_id: string
-          qty: number
-          status?: Database["public"]["Enums"]["order_item_status"]
-          title: string
-          updated_at?: string
-          vendor_id: string
+          product_id?: string | null
+          product_name: string
+          product_type: Database["public"]["Enums"]["product_type"]
+          quantity: number
+          total: number
+          unit_price: number
         }
         Update: {
           created_at?: string
+          delivered_codes?: Json | null
           id?: string
-          image_url?: string | null
           order_id?: string
-          price?: number
-          product_id?: string
-          qty?: number
-          status?: Database["public"]["Enums"]["order_item_status"]
-          title?: string
-          updated_at?: string
-          vendor_id?: string
+          product_id?: string | null
+          product_name?: string
+          product_type?: Database["public"]["Enums"]["product_type"]
+          quantity?: number
+          total?: number
+          unit_price?: number
         }
         Relationships: [
           {
@@ -145,96 +234,8 @@ export type Database = {
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      orders: {
-        Row: {
-          buyer_id: string
-          created_at: string
-          currency: string
-          id: string
-          notes: string | null
-          payment_method: string
-          ship_city: string
-          ship_country: string
-          ship_full_name: string
-          ship_line1: string
-          ship_line2: string | null
-          ship_phone: string
-          shipping: number
-          status: Database["public"]["Enums"]["order_status"]
-          subtotal: number
-          total: number
-          updated_at: string
-        }
-        Insert: {
-          buyer_id: string
-          created_at?: string
-          currency?: string
-          id?: string
-          notes?: string | null
-          payment_method?: string
-          ship_city: string
-          ship_country: string
-          ship_full_name: string
-          ship_line1: string
-          ship_line2?: string | null
-          ship_phone: string
-          shipping?: number
-          status?: Database["public"]["Enums"]["order_status"]
-          subtotal?: number
-          total?: number
-          updated_at?: string
-        }
-        Update: {
-          buyer_id?: string
-          created_at?: string
-          currency?: string
-          id?: string
-          notes?: string | null
-          payment_method?: string
-          ship_city?: string
-          ship_country?: string
-          ship_full_name?: string
-          ship_line1?: string
-          ship_line2?: string | null
-          ship_phone?: string
-          shipping?: number
-          status?: Database["public"]["Enums"]["order_status"]
-          subtotal?: number
-          total?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      product_images: {
-        Row: {
-          alt: string | null
-          created_at: string
-          id: string
-          product_id: string
-          sort_order: number
-          url: string
-        }
-        Insert: {
-          alt?: string | null
-          created_at?: string
-          id?: string
-          product_id: string
-          sort_order?: number
-          url: string
-        }
-        Update: {
-          alt?: string | null
-          created_at?: string
-          id?: string
-          product_id?: string
-          sort_order?: number
-          url?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "product_images_product_id_fkey"
+            foreignKeyName: "order_items_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -242,66 +243,147 @@ export type Database = {
           },
         ]
       }
-      products: {
+      orders: {
         Row: {
-          brand: string | null
-          category_id: string | null
+          buyer_email: string
+          buyer_id: string | null
+          buyer_name: string | null
+          buyer_phone: string | null
           created_at: string
           currency: string
-          description: string | null
+          discount: number
           id: string
+          notes: string | null
+          order_number: string
+          paid_at: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          shipping: number
+          shipping_address: Json | null
+          status: Database["public"]["Enums"]["order_status"]
+          stripe_session_id: string | null
+          subtotal: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          buyer_email: string
+          buyer_id?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          created_at?: string
+          currency?: string
+          discount?: number
+          id?: string
+          notes?: string | null
+          order_number?: string
+          paid_at?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          shipping?: number
+          shipping_address?: Json | null
+          status?: Database["public"]["Enums"]["order_status"]
+          stripe_session_id?: string | null
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          buyer_email?: string
+          buyer_id?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          created_at?: string
+          currency?: string
+          discount?: number
+          id?: string
+          notes?: string | null
+          order_number?: string
+          paid_at?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          shipping?: number
+          shipping_address?: Json | null
+          status?: Database["public"]["Enums"]["order_status"]
+          stripe_session_id?: string | null
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category_id: string | null
+          compare_price: number | null
+          created_at: string
+          currency: string
+          description_ar: string | null
+          description_en: string | null
+          description_ur: string | null
+          features: Json
+          id: string
+          images: Json
+          is_featured: boolean
+          name_ar: string
+          name_en: string
+          name_ur: string | null
           price: number
-          rating: number
-          reviews_count: number
-          sale_price: number | null
-          sales_count: number
           sku: string | null
           slug: string
           status: Database["public"]["Enums"]["product_status"]
           stock: number
-          title: string
+          track_stock: boolean
+          type: Database["public"]["Enums"]["product_type"]
           updated_at: string
-          vendor_id: string
+          weight_grams: number | null
         }
         Insert: {
-          brand?: string | null
           category_id?: string | null
+          compare_price?: number | null
           created_at?: string
           currency?: string
-          description?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          description_ur?: string | null
+          features?: Json
           id?: string
+          images?: Json
+          is_featured?: boolean
+          name_ar: string
+          name_en: string
+          name_ur?: string | null
           price: number
-          rating?: number
-          reviews_count?: number
-          sale_price?: number | null
-          sales_count?: number
           sku?: string | null
           slug: string
           status?: Database["public"]["Enums"]["product_status"]
           stock?: number
-          title: string
+          track_stock?: boolean
+          type?: Database["public"]["Enums"]["product_type"]
           updated_at?: string
-          vendor_id: string
+          weight_grams?: number | null
         }
         Update: {
-          brand?: string | null
           category_id?: string | null
+          compare_price?: number | null
           created_at?: string
           currency?: string
-          description?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          description_ur?: string | null
+          features?: Json
           id?: string
+          images?: Json
+          is_featured?: boolean
+          name_ar?: string
+          name_en?: string
+          name_ur?: string | null
           price?: number
-          rating?: number
-          reviews_count?: number
-          sale_price?: number | null
-          sales_count?: number
           sku?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["product_status"]
           stock?: number
-          title?: string
+          track_stock?: boolean
+          type?: Database["public"]["Enums"]["product_type"]
           updated_at?: string
-          vendor_id?: string
+          weight_grams?: number | null
         }
         Relationships: [
           {
@@ -309,13 +391,6 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "products_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
         ]
@@ -347,63 +422,95 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          is_approved: boolean
+          product_id: string
+          rating: number
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          product_id: string
+          rating: number
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          product_id?: string
+          rating?: number
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
-          key: string
+          contact_email: string | null
+          contact_phone: string | null
+          default_currency: string
+          free_shipping_threshold: number | null
+          id: number
+          logo_url: string | null
+          shipping_flat: number
+          site_name: string
+          social_links: Json
+          tagline_ar: string | null
+          tagline_en: string | null
+          tagline_ur: string | null
           updated_at: string
-          updated_by: string | null
-          value: Json
+          whatsapp: string | null
         }
         Insert: {
-          key: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          default_currency?: string
+          free_shipping_threshold?: number | null
+          id?: number
+          logo_url?: string | null
+          shipping_flat?: number
+          site_name?: string
+          social_links?: Json
+          tagline_ar?: string | null
+          tagline_en?: string | null
+          tagline_ur?: string | null
           updated_at?: string
-          updated_by?: string | null
-          value?: Json
+          whatsapp?: string | null
         }
         Update: {
-          key?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          default_currency?: string
+          free_shipping_threshold?: number | null
+          id?: number
+          logo_url?: string | null
+          shipping_flat?: number
+          site_name?: string
+          social_links?: Json
+          tagline_ar?: string | null
+          tagline_en?: string | null
+          tagline_ur?: string | null
           updated_at?: string
-          updated_by?: string | null
-          value?: Json
-        }
-        Relationships: []
-      }
-      support_tickets: {
-        Row: {
-          admin_notes: string | null
-          created_at: string
-          email: string
-          id: string
-          message: string
-          name: string
-          problem_type: string
-          status: Database["public"]["Enums"]["ticket_status"]
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          admin_notes?: string | null
-          created_at?: string
-          email: string
-          id?: string
-          message: string
-          name: string
-          problem_type: string
-          status?: Database["public"]["Enums"]["ticket_status"]
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          admin_notes?: string | null
-          created_at?: string
-          email?: string
-          id?: string
-          message?: string
-          name?: string
-          problem_type?: string
-          status?: Database["public"]["Enums"]["ticket_status"]
-          updated_at?: string
-          user_id?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -428,51 +535,6 @@ export type Database = {
         }
         Relationships: []
       }
-      vendors: {
-        Row: {
-          banner_url: string | null
-          created_at: string
-          description: string | null
-          id: string
-          logo_url: string | null
-          name: string
-          owner_id: string
-          rating: number
-          reviews_count: number
-          slug: string
-          status: Database["public"]["Enums"]["vendor_status"]
-          updated_at: string
-        }
-        Insert: {
-          banner_url?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          logo_url?: string | null
-          name: string
-          owner_id: string
-          rating?: number
-          reviews_count?: number
-          slug: string
-          status?: Database["public"]["Enums"]["vendor_status"]
-          updated_at?: string
-        }
-        Update: {
-          banner_url?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          logo_url?: string | null
-          name?: string
-          owner_id?: string
-          rating?: number
-          reviews_count?: number
-          slug?: string
-          status?: Database["public"]["Enums"]["vendor_status"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -481,7 +543,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      app_role: "admin" | "vendor" | "customer"
+      app_role: "admin" | "customer"
       order_item_status:
         | "pending"
         | "processing"
@@ -493,9 +555,12 @@ export type Database = {
         | "paid"
         | "processing"
         | "shipped"
-        | "completed"
+        | "delivered"
         | "cancelled"
-      product_status: "draft" | "active" | "inactive" | "out_of_stock"
+        | "refunded"
+      payment_status: "pending" | "succeeded" | "failed" | "refunded"
+      product_status: "draft" | "active" | "archived"
+      product_type: "physical" | "digital" | "subscription"
       ticket_status: "open" | "in_progress" | "resolved" | "closed"
       vendor_status: "pending" | "approved" | "suspended"
     }
@@ -625,7 +690,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "vendor", "customer"],
+      app_role: ["admin", "customer"],
       order_item_status: [
         "pending",
         "processing",
@@ -638,10 +703,13 @@ export const Constants = {
         "paid",
         "processing",
         "shipped",
-        "completed",
+        "delivered",
         "cancelled",
+        "refunded",
       ],
-      product_status: ["draft", "active", "inactive", "out_of_stock"],
+      payment_status: ["pending", "succeeded", "failed", "refunded"],
+      product_status: ["draft", "active", "archived"],
+      product_type: ["physical", "digital", "subscription"],
       ticket_status: ["open", "in_progress", "resolved", "closed"],
       vendor_status: ["pending", "approved", "suspended"],
     },

@@ -1,83 +1,67 @@
 import { Link } from "@tanstack/react-router";
-import { Star, Heart } from "lucide-react";
+import { useI18n, localizedName } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
-import { useCurrency, type CurrencyCode } from "@/lib/currency";
+import { formatPrice, firstImage } from "@/lib/format";
+import { Button } from "@/components/ui/button";
+import { ShoppingCart, Package } from "lucide-react";
+import { toast } from "sonner";
 
-type Props = {
-  id?: string;
-  name: string;
-  price: string | number;
-  oldPrice?: string | number;
-  discount?: string;
-  description?: string;
-  image?: string;
-  rating?: number;
-  sold?: number;
-  badge?: string;
-  freeShipping?: boolean;
-  /** Source currency of the numeric prices. Defaults to base currency. */
-  currency?: CurrencyCode;
-};
+interface Product {
+  id: string;
+  slug: string;
+  name_ar: string;
+  name_en: string;
+  name_ur: string | null;
+  price: number;
+  currency: string;
+  stock: number;
+  track_stock: boolean;
+  images: unknown;
+  type: "physical" | "digital" | "subscription";
+  compare_price: number | null;
+}
 
-export function ProductCard({ id, name, price, oldPrice, discount, image, rating = 4.5, sold, badge, freeShipping, currency }: Props) {
-  const { toggleWishlist, isWished } = useCart();
-  const { format } = useCurrency();
-  const wished = id ? isWished(id) : false;
-  const fmt = (v: string | number) => (typeof v === "number" ? format(v, currency) : v);
+export function ProductCard({ p }: { p: Product }) {
+  const { t, lang } = useI18n();
+  const { add } = useCart();
+  const name = localizedName(p, "name", lang);
+  const img = firstImage(p.images);
+  const oos = p.track_stock && p.stock <= 0;
 
-  const inner = (
-    <>
-      {badge && (
-        <span className="absolute top-2 start-2 z-10 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-sale text-white">
-          {badge}
-        </span>
-      )}
-      {id && (
-        <button
-          type="button"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(id); }}
-          aria-label="Wishlist"
-          className="absolute top-2 end-2 z-10 w-8 h-8 grid place-items-center rounded-full bg-white/95 shadow-card hover:bg-white transition-smooth"
-        >
-          <Heart className={`w-4 h-4 ${wished ? "fill-sale text-sale" : "text-muted-foreground"}`} />
-        </button>
-      )}
-      <div className="aspect-square bg-secondary overflow-hidden">
-        {image ? (
-          <img src={image} alt={name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-smooth" />
-        ) : (
-          <div className="w-full h-full grid place-items-center text-muted-foreground text-xs">No image</div>
-        )}
-      </div>
-      <div className="p-3">
-        <h3 className="text-sm text-foreground line-clamp-2 min-h-[2.5rem] group-hover:text-brand transition-smooth">{name}</h3>
-        <div className="mt-2 flex items-baseline gap-2 flex-wrap">
-          <span className="text-base font-bold text-sale">{fmt(price)}</span>
-          {oldPrice && <span className="text-xs text-muted-foreground line-through">{fmt(oldPrice)}</span>}
-          {discount && <span className="text-xs text-sale font-semibold">-{discount}</span>}
+  return (
+    <div className="group relative overflow-hidden rounded-xl border border-cyan-500/10 bg-card transition hover:border-cyan-500/40 hover:shadow-[0_0_30px_rgba(0,217,255,0.15)]">
+      <Link to="/product/$slug" params={{ slug: p.slug }} className="block">
+        <div className="aspect-square w-full overflow-hidden bg-background/50">
+          {img ? (
+            <img src={img} alt={name} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+          ) : (
+            <div className="flex h-full items-center justify-center text-cyan-500/30"><Package className="h-16 w-16" /></div>
+          )}
         </div>
-        {freeShipping && (
-          <div className="mt-1.5 inline-block text-[10px] px-1.5 py-0.5 bg-accent text-brand font-semibold rounded">FREE SHIPPING</div>
-        )}
-        <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-          <div className="flex">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Star key={i} className={`w-3 h-3 ${i <= Math.round(rating) ? "fill-yellow-400 text-yellow-400" : "text-border"}`} />
-            ))}
+        <div className="p-3">
+          <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-medium text-foreground">{name}</h3>
+          <div className="mt-2 flex items-center gap-2">
+            <span className="font-mono text-base font-bold text-cyan-400">{formatPrice(p.price, p.currency)}</span>
+            {p.compare_price && p.compare_price > p.price && (
+              <span className="text-xs text-muted-foreground line-through">{formatPrice(p.compare_price, p.currency)}</span>
+            )}
           </div>
-          {sold !== undefined && <span>| {sold} sold</span>}
         </div>
-      </div>
-    </>
-  );
-
-  const cls = "group relative bg-card rounded-md overflow-hidden border border-border product-card-hover cursor-pointer block";
-  if (id) {
-    return (
-      <Link to="/product/$id" params={{ id }} className={cls}>
-        {inner}
       </Link>
-    );
-  }
-  return <div className={cls}>{inner}</div>;
+      <div className="px-3 pb-3">
+        <Button
+          size="sm"
+          disabled={oos}
+          className="w-full bg-cyan-500 text-background hover:bg-cyan-400"
+          onClick={() => {
+            add({ product_id: p.id, slug: p.slug, name, image: img, price: Number(p.price), type: p.type });
+            toast.success(t("shop.addToCart"));
+          }}
+        >
+          <ShoppingCart className="me-1 h-3 w-3" />
+          {oos ? t("shop.outOfStock") : t("shop.addToCart")}
+        </Button>
+      </div>
+    </div>
+  );
 }

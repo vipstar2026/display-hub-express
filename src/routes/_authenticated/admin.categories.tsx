@@ -1,143 +1,83 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, Edit, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Pencil, X } from "lucide-react";
-import { useAdminI18n } from "@/lib/i18n-admin";
 
 export const Route = createFileRoute("/_authenticated/admin/categories")({
   component: AdminCategories,
 });
 
-type Category = { id: string; name: string; slug: string; icon: string | null; image_url: string | null; sort_order: number };
-
-function slugify(s: string) {
-  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-}
+interface CatForm { id?: string; slug: string; name_ar: string; name_en: string; name_ur: string; icon: string; sort_order: string; }
+const empty: CatForm = { slug: "", name_ar: "", name_en: "", name_ur: "", icon: "satellite", sort_order: "0" };
 
 function AdminCategories() {
-  const { L } = useAdminI18n();
-  const [cats, setCats] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<Partial<Category> | null>(null);
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<CatForm>(empty);
 
-  async function load() {
-    setLoading(true);
-    const { data } = await supabase.from("categories").select("*").order("sort_order");
-    setCats((data as Category[]) || []);
-    setLoading(false);
-  }
+  const { data } = useQuery({
+    queryKey: ["admin-cats"],
+    queryFn: async () => (await supabase.from("categories").select("*").order("sort_order")).data ?? [],
+  });
 
-  useEffect(() => { load(); }, []);
-
-  async function save() {
-    if (!editing?.name) return toast.error(L.catNameReq);
+  const handleSave = async () => {
     const payload = {
-      name: editing.name,
-      slug: editing.slug || slugify(editing.name),
-      icon: editing.icon || null,
-      image_url: editing.image_url || null,
-      sort_order: editing.sort_order ?? 0,
+      slug: form.slug,
+      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null,
+      icon: form.icon || null, sort_order: Number(form.sort_order),
     };
-    const { error } = editing.id
-      ? await supabase.from("categories").update(payload).eq("id", editing.id)
+    const { error } = form.id
+      ? await supabase.from("categories").update(payload).eq("id", form.id)
       : await supabase.from("categories").insert(payload);
-    if (error) return toast.error(error.message);
-    toast.success(L.saved);
-    setEditing(null);
-    load();
-  }
-
-  async function remove(id: string) {
-    if (!confirm(L.confirmDelete)) return;
-    const { error } = await supabase.from("categories").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success(L.deleted);
-    load();
-  }
+    if (error) { toast.error(error.message); return; }
+    toast.success("Saved"); setOpen(false); setForm(empty); qc.invalidateQueries({ queryKey: ["admin-cats"] });
+  };
 
   return (
-    <div>
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{L.catTitle}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{L.catSub}</p>
-        </div>
-        <button onClick={() => setEditing({ name: "", sort_order: cats.length })} className="h-10 px-4 rounded-md bg-brand text-brand-foreground text-sm font-semibold flex items-center gap-2">
-          <Plus className="w-4 h-4" /> {L.new}
-        </button>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="font-display text-2xl font-bold">Categories</h1>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(empty); }}>
+          <DialogTrigger asChild><Button className="bg-cyan-500 text-background hover:bg-cyan-400"><Plus className="me-1 h-4 w-4" />New</Button></DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>{form.id ? "Edit" : "New"} Category</DialogTitle></DialogHeader>
+            <div className="space-y-3">
+              <div><Label>Slug</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} /></div>
+              <div><Label>Name AR</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+              <div><Label>Name EN</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+              <div><Label>Name UR</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+              <div><Label>Icon (lucide name)</Label><Input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} /></div>
+              <div><Label>Sort Order</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} /></div>
+              <Button onClick={handleSave} className="w-full bg-cyan-500 text-background hover:bg-cyan-400">Save</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {loading ? (
-        <div className="grid place-items-center py-16"><Loader2 className="w-6 h-6 animate-spin text-brand" /></div>
-      ) : (
-        <div className="mt-6 bg-card border border-border rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
-              <tr>
-                <th className="text-start p-3 w-16">#</th>
-                <th className="text-start p-3">{L.catName}</th>
-                <th className="text-start p-3 hidden sm:table-cell">{L.catSlug}</th>
-                <th className="text-start p-3 hidden md:table-cell">{L.catIcon}</th>
-                <th className="text-end p-3">{L.actions}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {cats.map((c) => (
-                <tr key={c.id} className="hover:bg-muted/30">
-                  <td className="p-3 text-muted-foreground">{c.sort_order}</td>
-                  <td className="p-3 font-medium text-foreground">{c.name}</td>
-                  <td className="p-3 hidden sm:table-cell text-muted-foreground">{c.slug}</td>
-                  <td className="p-3 hidden md:table-cell text-muted-foreground">{c.icon ?? L.none}</td>
-                  <td className="p-3 text-end">
-                    <button onClick={() => setEditing(c)} className="p-1.5 rounded hover:bg-accent text-brand" title={L.edit}><Pencil className="w-4 h-4" /></button>
-                    <button onClick={() => remove(c.id)} className="p-1.5 rounded hover:bg-rose-100 text-rose-700" title={L.delete}><Trash2 className="w-4 h-4" /></button>
-                  </td>
-                </tr>
-              ))}
-              {cats.length === 0 && (
-                <tr><td colSpan={5} className="p-10 text-center text-muted-foreground">{L.catNo}</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {editing && (
-        <div className="fixed inset-0 bg-black/50 z-50 grid place-items-center p-4" onClick={() => setEditing(null)}>
-          <div className="bg-card rounded-xl border border-border w-full max-w-md p-5" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-foreground">{editing.id ? L.catEditTitle : L.catNewTitle}</h2>
-              <button onClick={() => setEditing(null)} className="p-1 rounded hover:bg-accent"><X className="w-4 h-4" /></button>
+      <div className="rounded-xl border border-cyan-500/10 bg-card divide-y divide-cyan-500/10">
+        {(data ?? []).map((c) => (
+          <div key={c.id} className="flex items-center gap-3 p-3">
+            <div className="flex-1">
+              <div className="font-medium">{c.name_en} <span className="text-muted-foreground">· {c.name_ar}</span></div>
+              <div className="text-xs text-muted-foreground">/{c.slug}</div>
             </div>
-            <div className="mt-4 space-y-3">
-              <div>
-                <label className="text-xs font-medium">{L.catName} *</label>
-                <input value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} className="mt-1 w-full h-10 rounded-md border border-border px-3 text-sm bg-background outline-none focus:border-brand" />
-              </div>
-              <div>
-                <label className="text-xs font-medium">{L.catSlug} ({L.optional})</label>
-                <input value={editing.slug ?? ""} onChange={(e) => setEditing({ ...editing, slug: e.target.value })} placeholder={L.catSlugAuto} className="mt-1 w-full h-10 rounded-md border border-border px-3 text-sm bg-background outline-none focus:border-brand" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium">{L.catIcon}</label>
-                  <input value={editing.icon ?? ""} onChange={(e) => setEditing({ ...editing, icon: e.target.value })} placeholder={L.catIconHint} className="mt-1 w-full h-10 rounded-md border border-border px-3 text-sm bg-background outline-none focus:border-brand" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium">{L.catOrder}</label>
-                  <input type="number" value={editing.sort_order ?? 0} onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) })} className="mt-1 w-full h-10 rounded-md border border-border px-3 text-sm bg-background outline-none focus:border-brand" />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs font-medium">{L.catImage}</label>
-                <input value={editing.image_url ?? ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} placeholder="https://..." className="mt-1 w-full h-10 rounded-md border border-border px-3 text-sm bg-background outline-none focus:border-brand" />
-              </div>
-            </div>
-            <button onClick={save} className="mt-5 w-full h-11 rounded-md bg-brand text-brand-foreground font-semibold">{L.save}</button>
+            <Button size="sm" variant="ghost" onClick={() => { setForm({ id: c.id, slug: c.slug, name_ar: c.name_ar, name_en: c.name_en, name_ur: c.name_ur ?? "", icon: c.icon ?? "", sort_order: String(c.sort_order) }); setOpen(true); }}>
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="ghost" onClick={async () => {
+              if (!confirm("Delete?")) return;
+              const { error } = await supabase.from("categories").delete().eq("id", c.id);
+              if (error) toast.error(error.message); else { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["admin-cats"] }); }
+            }}><Trash2 className="h-4 w-4 text-destructive" /></Button>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 }
