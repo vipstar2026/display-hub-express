@@ -50,7 +50,7 @@ function ShopPage() {
           <h1 className="font-display text-3xl font-bold">{t("nav.shop")}</h1>
           <form
             className="relative md:ms-auto md:w-80"
-            onSubmit={(e) => { e.preventDefault(); nav({ search: (s) => ({ ...s, q: search || undefined }) }); }}
+            onSubmit={(e) => { e.preventDefault(); nav({ search: (s: { category?: string; q?: string }) => ({ ...s, q: search || undefined }) }); }}
           >
             <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input

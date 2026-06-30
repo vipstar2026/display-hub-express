@@ -24,7 +24,7 @@ interface Product {
 export function ProductCard({ p }: { p: Product }) {
   const { t, lang } = useI18n();
   const { add } = useCart();
-  const name = localizedName(p, "name", lang);
+  const name = localizedName(p as unknown as Record<string, unknown>, "name", lang);
   const img = firstImage(p.images);
   const oos = p.track_stock && p.stock <= 0;
 

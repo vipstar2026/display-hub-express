@@ -205,8 +205,7 @@ export function useI18n() {
   return c;
 }
 
-export function localizedName<T extends Record<string, unknown>>(row: T, base: string, lang: Lang): string {
-  const key = `${base}_${lang}` as keyof T;
-  const fallback = `${base}_en` as keyof T;
-  return (row[key] as string) || (row[fallback] as string) || "";
+export function localizedName(row: Record<string, unknown>, base: string, lang: Lang): string {
+  const v = row[`${base}_${lang}`] ?? row[`${base}_en`];
+  return typeof v === "string" ? v : "";
 }
