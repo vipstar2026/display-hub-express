@@ -7,7 +7,7 @@ import { useCart } from "@/lib/cart";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { formatPrice, firstImage } from "@/lib/format";
-import { Package, ShoppingCart } from "lucide-react";
+import { Package, ShoppingCart, Download, Copy, Tv, Calendar, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 
