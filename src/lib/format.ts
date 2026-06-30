@@ -1,8 +1,9 @@
-export function formatPrice(amount: number, currency = "USD"): string {
+export function formatPrice(amount: number, currency = "BHD"): string {
+  const digits = currency === "BHD" ? 3 : 2;
   try {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 2 }).format(amount);
+    return new Intl.NumberFormat("en-BH", { style: "currency", currency, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(amount);
   } catch {
-    return `${amount.toFixed(2)} ${currency}`;
+    return `${amount.toFixed(digits)} ${currency}`;
   }
 }
 
