@@ -60,7 +60,7 @@ function AdminLayout() {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-background via-background to-cyan-950/10">
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 z-40 w-64 transform border-e border-cyan-500/20 bg-card/80 backdrop-blur-xl transition-transform md:static md:translate-x-0 ${open ? "translate-x-0" : "rtl:translate-x-full ltr:-translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 z-40 w-64 border-e border-cyan-500/20 bg-card/80 backdrop-blur-xl transition-transform md:static md:!translate-x-0 ${open ? "translate-x-0" : "rtl:translate-x-full ltr:-translate-x-full"}`}>
         <div className="flex h-16 items-center gap-2 border-b border-cyan-500/20 px-5">
           <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-600 shadow-lg shadow-cyan-500/30">
             <Satellite className="h-5 w-5 text-background" />
