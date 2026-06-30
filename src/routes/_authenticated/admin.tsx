@@ -1,9 +1,10 @@
 import { createFileRoute, Outlet, Link, redirect, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  LayoutDashboard, Package, FolderTree, ShoppingBag, Key, Users, Settings,
+  LayoutDashboard, FolderTree, ShoppingBag, Key, Users, Settings,
   Satellite, ArrowLeft, Search, Bell, Menu, ChevronRight, Store, LogOut, Globe,
 } from "lucide-react";
+
 import { useI18n, type Lang } from "@/lib/i18n";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
