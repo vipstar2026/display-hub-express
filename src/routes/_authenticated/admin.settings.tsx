@@ -43,7 +43,7 @@ function AdminSettings() {
       if (payload[k] === "" || payload[k] === null) payload[k] = k === "free_shipping_threshold" ? null : 0;
       else payload[k] = Number(payload[k]);
     });
-    const { error } = await supabase.from("site_settings").update(payload).eq("id", 1);
+    const { error } = await supabase.from("site_settings").update(payload as any).eq("id", 1);
     setSaving(false);
     if (error) toast.error(error.message);
     else { toast.success("تم الحفظ"); qc.invalidateQueries({ queryKey: ["site-settings"] }); }
