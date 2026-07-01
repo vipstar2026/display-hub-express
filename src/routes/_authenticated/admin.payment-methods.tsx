@@ -61,7 +61,7 @@ function AdminPaymentMethods() {
       instructions_ar: form.instructions_ar || null,
       instructions_en: form.instructions_en || null,
       instructions_ur: form.instructions_ur || null,
-      account_details: account,
+      account_details: account as never,
       requires_proof: form.requires_proof, is_active: form.is_active,
       sort_order: Number(form.sort_order) || 0,
       fee_amount: Number(form.fee_amount) || 0,
@@ -156,7 +156,7 @@ function AdminPaymentMethods() {
                   <div className="font-medium">{m.name_en} <span className="text-muted-foreground">· {m.name_ar}</span></div>
                   <div className="text-xs text-muted-foreground">{m.type} · <code>{m.code}</code></div>
                 </div>
-                <Switch checked={m.is_active} onCheckedChange={(v) => toggle(m.id, v)} />
+                <Switch checked={!!m.is_active} onCheckedChange={(v) => toggle(m.id, v)} />
               </div>
               {m.instructions_en && <p className="mt-3 text-xs text-muted-foreground line-clamp-2">{m.instructions_en}</p>}
               <div className="mt-2 flex flex-wrap gap-1 text-[11px]">
@@ -171,7 +171,7 @@ function AdminPaymentMethods() {
                     type: m.type as PType, icon: m.icon ?? "landmark",
                     instructions_ar: m.instructions_ar ?? "", instructions_en: m.instructions_en ?? "", instructions_ur: m.instructions_ur ?? "",
                     account_details: JSON.stringify(m.account_details ?? {}, null, 2),
-                    requires_proof: m.requires_proof, is_active: m.is_active,
+                    requires_proof: !!m.requires_proof, is_active: !!m.is_active,
                     sort_order: String(m.sort_order), fee_amount: String(m.fee_amount),
                     fee_percent: String(m.fee_percent), min_amount: String(m.min_amount),
                     max_amount: m.max_amount != null ? String(m.max_amount) : "",

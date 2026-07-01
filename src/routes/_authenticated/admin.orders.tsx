@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 
 type OrderStatus = "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled" | "refunded";
-type PayStatus = "pending" | "paid" | "failed" | "refunded";
+type PayStatus = "pending" | "succeeded" | "failed" | "refunded";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({
   component: AdminOrders,
@@ -27,7 +27,7 @@ function AdminOrders() {
     queryFn: async () => (await supabase.from("orders").select("*, order_items(*), payment_methods(name_en, name_ar, type)").order("created_at", { ascending: false })).data ?? [],
   });
 
-  const filtered = (data ?? []).filter((o) => filter === "all" ? true : filter === "pending" ? o.payment_status === "pending" : o.payment_status === "paid");
+  const filtered = (data ?? []).filter((o) => filter === "all" ? true : filter === "pending" ? o.payment_status === "pending" : o.payment_status === "succeeded");
 
   const updateStatus = async (id: string, status: OrderStatus) => {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
@@ -37,7 +37,7 @@ function AdminOrders() {
   const confirmPayment = async (id: string) => {
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("orders").update({
-      payment_status: "paid" as PayStatus,
+      payment_status: "succeeded" as PayStatus,
       status: "processing" as OrderStatus,
       payment_confirmed_at: new Date().toISOString(),
       payment_confirmed_by: u.user?.id ?? null,
@@ -64,7 +64,7 @@ function AdminOrders() {
   const payBadge = (s: string) => {
     const map: Record<string, string> = {
       pending: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-      paid: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+      succeeded: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
       failed: "bg-red-500/20 text-red-300 border-red-500/30",
       refunded: "bg-blue-500/20 text-blue-300 border-blue-500/30",
     };
