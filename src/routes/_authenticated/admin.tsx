@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, FolderTree, ShoppingBag, Users, Settings,
   Satellite, ArrowLeft, Search, Bell, Menu, ChevronRight, Store, LogOut, Globe,
-
+  CreditCard,
 } from "lucide-react";
 
 import { useI18n, type Lang } from "@/lib/i18n";
@@ -45,7 +45,10 @@ function AdminLayout() {
 
     {
       label: t("admin.sales"),
-      items: [{ to: "/admin/orders", icon: ShoppingBag, label: t("admin.orders") }],
+      items: [
+        { to: "/admin/orders", icon: ShoppingBag, label: t("admin.orders") },
+        { to: "/admin/payment-methods", icon: CreditCard, label: "Payment Methods" },
+      ],
     },
     {
       label: t("admin.customers"),
