@@ -546,6 +546,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          admin_notes: string | null
           buyer_email: string
           buyer_id: string | null
           buyer_name: string | null
@@ -553,13 +554,18 @@ export type Database = {
           channel: string
           created_at: string
           currency: string
+          customer_notes: string | null
           discount: number
           id: string
           invoice_id: string | null
           notes: string | null
           order_number: string
           paid_at: string | null
+          payment_confirmed_at: string | null
+          payment_confirmed_by: string | null
           payment_method: string | null
+          payment_method_id: string | null
+          payment_proof_url: string | null
           payment_reference: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           shipping: number
@@ -572,6 +578,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_notes?: string | null
           buyer_email: string
           buyer_id?: string | null
           buyer_name?: string | null
@@ -579,13 +586,18 @@ export type Database = {
           channel?: string
           created_at?: string
           currency?: string
+          customer_notes?: string | null
           discount?: number
           id?: string
           invoice_id?: string | null
           notes?: string | null
           order_number?: string
           paid_at?: string | null
+          payment_confirmed_at?: string | null
+          payment_confirmed_by?: string | null
           payment_method?: string | null
+          payment_method_id?: string | null
+          payment_proof_url?: string | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           shipping?: number
@@ -598,6 +610,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_notes?: string | null
           buyer_email?: string
           buyer_id?: string | null
           buyer_name?: string | null
@@ -605,13 +618,18 @@ export type Database = {
           channel?: string
           created_at?: string
           currency?: string
+          customer_notes?: string | null
           discount?: number
           id?: string
           invoice_id?: string | null
           notes?: string | null
           order_number?: string
           paid_at?: string | null
+          payment_confirmed_at?: string | null
+          payment_confirmed_by?: string | null
           payment_method?: string | null
+          payment_method_id?: string | null
+          payment_proof_url?: string | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           shipping?: number
@@ -621,6 +639,83 @@ export type Database = {
           subtotal?: number
           tax?: number
           total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_methods: {
+        Row: {
+          account_details: Json | null
+          code: string
+          created_at: string
+          fee_amount: number | null
+          fee_percent: number | null
+          icon: string | null
+          id: string
+          instructions_ar: string | null
+          instructions_en: string | null
+          instructions_ur: string | null
+          is_active: boolean | null
+          max_amount: number | null
+          min_amount: number | null
+          name_ar: string
+          name_en: string
+          name_ur: string | null
+          requires_proof: boolean | null
+          sort_order: number | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          account_details?: Json | null
+          code: string
+          created_at?: string
+          fee_amount?: number | null
+          fee_percent?: number | null
+          icon?: string | null
+          id?: string
+          instructions_ar?: string | null
+          instructions_en?: string | null
+          instructions_ur?: string | null
+          is_active?: boolean | null
+          max_amount?: number | null
+          min_amount?: number | null
+          name_ar: string
+          name_en: string
+          name_ur?: string | null
+          requires_proof?: boolean | null
+          sort_order?: number | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          account_details?: Json | null
+          code?: string
+          created_at?: string
+          fee_amount?: number | null
+          fee_percent?: number | null
+          icon?: string | null
+          id?: string
+          instructions_ar?: string | null
+          instructions_en?: string | null
+          instructions_ur?: string | null
+          is_active?: boolean | null
+          max_amount?: number | null
+          min_amount?: number | null
+          name_ar?: string
+          name_en?: string
+          name_ur?: string | null
+          requires_proof?: boolean | null
+          sort_order?: number | null
+          type?: string
           updated_at?: string
         }
         Relationships: []
