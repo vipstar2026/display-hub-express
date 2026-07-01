@@ -1216,52 +1216,160 @@ export type Database = {
       }
       site_settings: {
         Row: {
+          accent_color: string | null
+          allow_guest_checkout: boolean
+          allow_signups: boolean
+          announcement_bar_enabled: boolean
+          announcement_bar_text: string | null
+          business_hours: string | null
+          company_address: string | null
+          company_cr: string | null
+          company_vat_no: string | null
           contact_email: string | null
           contact_phone: string | null
+          custom_head_html: string | null
           default_currency: string
+          default_language: string
+          facebook_url: string | null
+          favicon_url: string | null
           free_shipping_threshold: number | null
+          google_analytics_id: string | null
           id: number
+          instagram_url: string | null
           logo_url: string | null
+          low_stock_threshold: number
+          maintenance_message: string | null
+          maintenance_mode: boolean
+          meta_description_ar: string | null
+          meta_description_en: string | null
+          meta_description_ur: string | null
+          meta_keywords: string | null
+          meta_pixel_id: string | null
+          notify_email_low_stock: boolean
+          notify_email_new_order: boolean
+          og_image_url: string | null
+          prices_include_vat: boolean
+          primary_color: string | null
+          require_email_verification: boolean
           shipping_flat: number
           site_name: string
+          snapchat_url: string | null
           social_links: Json
           tagline_ar: string | null
           tagline_en: string | null
           tagline_ur: string | null
+          telegram_url: string | null
+          tiktok_pixel_id: string | null
+          tiktok_url: string | null
+          twitter_url: string | null
           updated_at: string
+          vat_percent: number
           whatsapp: string | null
+          youtube_url: string | null
         }
         Insert: {
+          accent_color?: string | null
+          allow_guest_checkout?: boolean
+          allow_signups?: boolean
+          announcement_bar_enabled?: boolean
+          announcement_bar_text?: string | null
+          business_hours?: string | null
+          company_address?: string | null
+          company_cr?: string | null
+          company_vat_no?: string | null
           contact_email?: string | null
           contact_phone?: string | null
+          custom_head_html?: string | null
           default_currency?: string
+          default_language?: string
+          facebook_url?: string | null
+          favicon_url?: string | null
           free_shipping_threshold?: number | null
+          google_analytics_id?: string | null
           id?: number
+          instagram_url?: string | null
           logo_url?: string | null
+          low_stock_threshold?: number
+          maintenance_message?: string | null
+          maintenance_mode?: boolean
+          meta_description_ar?: string | null
+          meta_description_en?: string | null
+          meta_description_ur?: string | null
+          meta_keywords?: string | null
+          meta_pixel_id?: string | null
+          notify_email_low_stock?: boolean
+          notify_email_new_order?: boolean
+          og_image_url?: string | null
+          prices_include_vat?: boolean
+          primary_color?: string | null
+          require_email_verification?: boolean
           shipping_flat?: number
           site_name?: string
+          snapchat_url?: string | null
           social_links?: Json
           tagline_ar?: string | null
           tagline_en?: string | null
           tagline_ur?: string | null
+          telegram_url?: string | null
+          tiktok_pixel_id?: string | null
+          tiktok_url?: string | null
+          twitter_url?: string | null
           updated_at?: string
+          vat_percent?: number
           whatsapp?: string | null
+          youtube_url?: string | null
         }
         Update: {
+          accent_color?: string | null
+          allow_guest_checkout?: boolean
+          allow_signups?: boolean
+          announcement_bar_enabled?: boolean
+          announcement_bar_text?: string | null
+          business_hours?: string | null
+          company_address?: string | null
+          company_cr?: string | null
+          company_vat_no?: string | null
           contact_email?: string | null
           contact_phone?: string | null
+          custom_head_html?: string | null
           default_currency?: string
+          default_language?: string
+          facebook_url?: string | null
+          favicon_url?: string | null
           free_shipping_threshold?: number | null
+          google_analytics_id?: string | null
           id?: number
+          instagram_url?: string | null
           logo_url?: string | null
+          low_stock_threshold?: number
+          maintenance_message?: string | null
+          maintenance_mode?: boolean
+          meta_description_ar?: string | null
+          meta_description_en?: string | null
+          meta_description_ur?: string | null
+          meta_keywords?: string | null
+          meta_pixel_id?: string | null
+          notify_email_low_stock?: boolean
+          notify_email_new_order?: boolean
+          og_image_url?: string | null
+          prices_include_vat?: boolean
+          primary_color?: string | null
+          require_email_verification?: boolean
           shipping_flat?: number
           site_name?: string
+          snapchat_url?: string | null
           social_links?: Json
           tagline_ar?: string | null
           tagline_en?: string | null
           tagline_ur?: string | null
+          telegram_url?: string | null
+          tiktok_pixel_id?: string | null
+          tiktok_url?: string | null
+          twitter_url?: string | null
           updated_at?: string
+          vat_percent?: number
           whatsapp?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }
