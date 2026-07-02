@@ -655,15 +655,20 @@ export type Database = {
         Row: {
           account_details: Json | null
           code: string
+          config: Json
           created_at: string
+          credentials: Json
           fee_amount: number | null
           fee_percent: number | null
+          gateway_provider: string | null
           icon: string | null
           id: string
           instructions_ar: string | null
           instructions_en: string | null
           instructions_ur: string | null
           is_active: boolean | null
+          is_gateway: boolean
+          logo_url: string | null
           max_amount: number | null
           min_amount: number | null
           name_ar: string
@@ -671,21 +676,28 @@ export type Database = {
           name_ur: string | null
           requires_proof: boolean | null
           sort_order: number | null
+          supported_currencies: string[]
+          test_mode: boolean
           type: string
           updated_at: string
         }
         Insert: {
           account_details?: Json | null
           code: string
+          config?: Json
           created_at?: string
+          credentials?: Json
           fee_amount?: number | null
           fee_percent?: number | null
+          gateway_provider?: string | null
           icon?: string | null
           id?: string
           instructions_ar?: string | null
           instructions_en?: string | null
           instructions_ur?: string | null
           is_active?: boolean | null
+          is_gateway?: boolean
+          logo_url?: string | null
           max_amount?: number | null
           min_amount?: number | null
           name_ar: string
@@ -693,21 +705,28 @@ export type Database = {
           name_ur?: string | null
           requires_proof?: boolean | null
           sort_order?: number | null
+          supported_currencies?: string[]
+          test_mode?: boolean
           type: string
           updated_at?: string
         }
         Update: {
           account_details?: Json | null
           code?: string
+          config?: Json
           created_at?: string
+          credentials?: Json
           fee_amount?: number | null
           fee_percent?: number | null
+          gateway_provider?: string | null
           icon?: string | null
           id?: string
           instructions_ar?: string | null
           instructions_en?: string | null
           instructions_ur?: string | null
           is_active?: boolean | null
+          is_gateway?: boolean
+          logo_url?: string | null
           max_amount?: number | null
           min_amount?: number | null
           name_ar?: string
@@ -715,6 +734,8 @@ export type Database = {
           name_ur?: string | null
           requires_proof?: boolean | null
           sort_order?: number | null
+          supported_currencies?: string[]
+          test_mode?: boolean
           type?: string
           updated_at?: string
         }
