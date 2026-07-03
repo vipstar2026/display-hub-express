@@ -1456,7 +1456,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      validate_coupon: {
+        Args: { _code: string }
+        Returns: {
+          code: string
+          discount_type: string
+          discount_value: number
+          id: string
+          min_total: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "customer"
