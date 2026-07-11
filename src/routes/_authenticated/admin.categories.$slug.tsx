@@ -101,14 +101,17 @@ function AdminCategoryProducts() {
   };
 
   const handleFileUpload = async (file: File) => {
+    const { data: userData, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !userData.user) { toast.error("Not signed in"); return; }
     const ext = file.name.split(".").pop();
     const name = `${crypto.randomUUID()}.${ext}`;
-    const path = `products/${name}`;
-    const { error } = await supabase.storage.from("vendor-assets").upload(path, file);
+    // RLS requires the first folder to equal auth.uid()
+    const path = `${userData.user.id}/products/${name}`;
+    const { error } = await supabase.storage.from("vendor-assets").upload(path, file, { cacheControl: "3600", upsert: false });
     if (error) { toast.error(error.message); return; }
     const { data: pub } = supabase.storage.from("vendor-assets").getPublicUrl(path);
     setForm((f) => ({ ...f, images: [...f.images, pub.publicUrl] }));
-    toast.success("Image uploaded");
+    toast.success("تم رفع الصورة");
   };
 
   const setFeature = (key: string, value: string | number | boolean) => {
