@@ -42,17 +42,21 @@ function AdminCategoryProducts() {
     queryFn: async () => (await supabase.from("categories").select("*").eq("slug", slug).maybeSingle()).data,
   });
 
+  const preset = CATEGORY_PRESETS[slug];
+  const defaultType = preset?.productType ?? "physical";
+
   const empty: ProductForm = {
     slug: "", sku: "",
     name_ar: "", name_en: "", name_ur: "",
     description_ar: "", description_en: "", description_ur: "",
-    type: "subscription", status: "active",
-    price: "10.000", compare_price: "", currency: "BHD",
-    stock: "999", track_stock: false, weight_grams: "",
+    type: defaultType, status: "active",
+    price: "0.000", compare_price: "", currency: "BHD",
+    stock: defaultType === "subscription" ? "999" : "0",
+    track_stock: defaultType === "physical",
+    weight_grams: "",
     is_featured: false,
     images: [],
-    duration_months: "12", channels: "", quality: "4K/FHD",
-    downloader_code: "", app_download_url: "",
+    features: {},
     extra_features: "",
   };
   const [form, setForm] = useState<ProductForm>(empty);
@@ -64,27 +68,34 @@ function AdminCategoryProducts() {
     queryFn: async () => (await supabase.from("products").select("*").eq("category_id", category!.id).order("created_at", { ascending: false })).data ?? [],
   });
 
-  const handleEdit = (p: any) => {
-    const feats = (p.features ?? {}) as Record<string, any>;
-    const known = new Set(["duration_months", "channels", "quality", "downloader_code", "app_download_url"]);
-    const extras = Object.entries(feats).filter(([k]) => !known.has(k)).map(([k, v]) => `${k}: ${v}`).join("\n");
+  const handleEdit = (p: {
+    id: string; slug: string; sku: string | null;
+    name_ar: string; name_en: string; name_ur: string | null;
+    description_ar: string | null; description_en: string | null; description_ur: string | null;
+    type: string; status: string; price: number; compare_price: number | null; currency: string;
+    stock: number; track_stock: boolean; weight_grams: number | null; is_featured: boolean;
+    images: unknown; features: unknown;
+  }) => {
+    const feats = (p.features && typeof p.features === "object" ? p.features : {}) as Record<string, string | number | boolean>;
+    const known: Record<string, string | number | boolean> = {};
+    const extrasArr: string[] = [];
+    for (const [k, v] of Object.entries(feats)) {
+      if (RESERVED_FEATURE_KEYS.has(k)) known[k] = v;
+      else extrasArr.push(`${k}: ${v}`);
+    }
     setForm({
       id: p.id, slug: p.slug, sku: p.sku ?? "",
       name_ar: p.name_ar, name_en: p.name_en, name_ur: p.name_ur ?? "",
       description_ar: p.description_ar ?? "", description_en: p.description_en ?? "", description_ur: p.description_ur ?? "",
-      type: p.type, status: p.status,
+      type: p.type as ProductForm["type"], status: p.status as ProductForm["status"],
       price: String(p.price), compare_price: p.compare_price ? String(p.compare_price) : "",
       currency: p.currency,
       stock: String(p.stock), track_stock: !!p.track_stock,
       weight_grams: p.weight_grams ? String(p.weight_grams) : "",
       is_featured: p.is_featured,
-      images: Array.isArray(p.images) ? p.images : (p.images ? [p.images] : []),
-      duration_months: feats.duration_months ? String(feats.duration_months) : "",
-      channels: feats.channels ?? "",
-      quality: feats.quality ?? "",
-      downloader_code: feats.downloader_code ?? "",
-      app_download_url: feats.app_download_url ?? "",
-      extra_features: extras,
+      images: Array.isArray(p.images) ? (p.images as string[]) : [],
+      features: known,
+      extra_features: extrasArr.join("\n"),
     });
     setOpen(true);
   };
@@ -100,14 +111,13 @@ function AdminCategoryProducts() {
     toast.success("Image uploaded");
   };
 
+  const setFeature = (key: string, value: string | number | boolean) => {
+    setForm((f) => ({ ...f, features: { ...f.features, [key]: value } }));
+  };
+
   const handleSave = async () => {
     if (!category) return;
-    const features: Record<string, any> = {};
-    if (form.duration_months) features.duration_months = Number(form.duration_months);
-    if (form.channels) features.channels = form.channels;
-    if (form.quality) features.quality = form.quality;
-    if (form.downloader_code) features.downloader_code = form.downloader_code;
-    if (form.app_download_url) features.app_download_url = form.app_download_url;
+    const features: Record<string, string | number | boolean> = { ...form.features };
     form.extra_features.split("\n").forEach((line) => {
       const idx = line.indexOf(":");
       if (idx > 0) {
@@ -141,6 +151,7 @@ function AdminCategoryProducts() {
     setOpen(false); setForm(empty); setNewImage("");
     qc.invalidateQueries({ queryKey: ["admin-cat-products", category.id] });
   };
+
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this product?")) return;
