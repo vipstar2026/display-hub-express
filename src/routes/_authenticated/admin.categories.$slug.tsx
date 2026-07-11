@@ -191,57 +191,41 @@ function AdminCategoryProducts() {
             <div className="space-y-5">
               {/* Names */}
               <section className="grid gap-3 md:grid-cols-3">
-                <div><Label>Name (AR) *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+                <div><Label>الاسم (عربي) *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
                 <div><Label>Name (EN) *</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
-                <div><Label>Name (UR)</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
-                <div><Label>Slug</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="auto-from-en" /></div>
-                <div><Label>SKU</Label><Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} /></div>
+                <div><Label>الاسم (اردو)</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
               </section>
 
               {/* Descriptions */}
               <section className="grid gap-3">
-                <div><Label>Description (AR)</Label><Textarea rows={2} value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
+                <div><Label>الوصف (عربي)</Label><Textarea rows={2} value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
                 <div><Label>Description (EN)</Label><Textarea rows={2} value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
-                <div><Label>Description (UR)</Label><Textarea rows={2} value={form.description_ur} onChange={(e) => setForm({ ...form, description_ur: e.target.value })} /></div>
               </section>
 
-              {/* Type / Status / Pricing */}
+              {/* Pricing / Stock */}
               <section className="grid gap-3 md:grid-cols-3">
-                <div><Label>Type</Label>
-                  <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as ProductForm["type"] })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="physical">Physical</SelectItem>
-                      <SelectItem value="digital">Digital</SelectItem>
-                      <SelectItem value="subscription">Subscription (IPTV)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div><Label>Status</Label>
+                <div><Label>السعر *</Label><Input type="number" step="0.001" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
+                <div><Label>السعر قبل الخصم</Label><Input type="number" step="0.001" value={form.compare_price} onChange={(e) => setForm({ ...form, compare_price: e.target.value })} /></div>
+                <div><Label>الحالة</Label>
                   <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as ProductForm["status"] })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="archived">Archived</SelectItem>
+                      <SelectItem value="draft">مسودة</SelectItem>
+                      <SelectItem value="active">مفعّل</SelectItem>
+                      <SelectItem value="archived">مؤرشف</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div><Label>Currency</Label><Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} /></div>
-                <div><Label>Price *</Label><Input type="number" step="0.001" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
-                <div><Label>Compare Price</Label><Input type="number" step="0.001" value={form.compare_price} onChange={(e) => setForm({ ...form, compare_price: e.target.value })} /></div>
-                <div><Label>Stock</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
-                <div className="flex items-center gap-2 pt-6">
-                  <input type="checkbox" id="track" checked={form.track_stock} onChange={(e) => setForm({ ...form, track_stock: e.target.checked })} />
-                  <Label htmlFor="track">Track stock</Label>
-                </div>
+                {form.type === "physical" && (
+                  <>
+                    <div><Label>المخزون</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
+                    <div><Label>الوزن (جرام)</Label><Input type="number" value={form.weight_grams} onChange={(e) => setForm({ ...form, weight_grams: e.target.value })} /></div>
+                  </>
+                )}
                 <div className="flex items-center gap-2 pt-6">
                   <input type="checkbox" id="feat" checked={form.is_featured} onChange={(e) => setForm({ ...form, is_featured: e.target.checked })} />
-                  <Label htmlFor="feat">Featured</Label>
+                  <Label htmlFor="feat">منتج مميز</Label>
                 </div>
-                {form.type === "physical" && (
-                  <div><Label>Weight (g)</Label><Input type="number" value={form.weight_grams} onChange={(e) => setForm({ ...form, weight_grams: e.target.value })} /></div>
-                )}
               </section>
 
               {/* Category-specific fields */}
@@ -258,37 +242,7 @@ function AdminCategoryProducts() {
                             <Label htmlFor={`f-${fd.key}`}>{fd.label}</Label>
                           </div>
                         );
-                      }
-                      if (fd.type === "select") {
-                        return (
-                          <div key={fd.key}>
-                            <Label>{fd.label}</Label>
-                            <Select value={String(v ?? "")} onValueChange={(val) => setFeature(fd.key, val)}>
-                              <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                              <SelectContent>{(fd.options ?? []).map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                            </Select>
-                          </div>
-                        );
-                      }
-                      if (fd.type === "textarea") {
-                        return (
-                          <div key={fd.key} className="md:col-span-3">
-                            <Label>{fd.label}</Label>
-                            <Textarea rows={2} value={String(v ?? "")} onChange={(e) => setFeature(fd.key, e.target.value)} placeholder={fd.placeholder} />
-                          </div>
-                        );
-                      }
-                      return (
-                        <div key={fd.key}>
-                          <Label>{fd.label}</Label>
-                          <Input
-                            type={fd.type === "number" ? "number" : "text"}
-                            value={String(v ?? "")}
-                            onChange={(e) => setFeature(fd.key, fd.type === "number" ? Number(e.target.value) : e.target.value)}
-                            placeholder={fd.placeholder}
-                          />
-                        </div>
-                      );
+
                     })}
                   </div>
                 </section>
