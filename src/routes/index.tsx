@@ -93,7 +93,7 @@ function HomePage() {
       {featured && featured.length > 0 && (
         <section className="container mx-auto px-4 py-8">
           <h2 className="mb-6 font-display text-2xl font-bold">{t("home.featured")}</h2>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {featured.map((p) => <ProductCard key={p.id} p={p} />)}
           </div>
         </section>
@@ -103,7 +103,7 @@ function HomePage() {
       {latest && latest.length > 0 && (
         <section className="container mx-auto px-4 py-8">
           <h2 className="mb-6 font-display text-2xl font-bold">{t("shop.all")}</h2>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {latest.map((p) => <ProductCard key={p.id} p={p} />)}
           </div>
         </section>
