@@ -218,7 +218,7 @@ function AdminCategoryProducts() {
                 {form.type === "physical" && (
                   <>
                     <div><Label>المخزون</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
-                    <div><Label>الوزن (جرام)</Label><Input type="number" value={form.weight_grams} onChange={(e) => setForm({ ...form, weight_grams: e.target.value })} /></div>
+                    {preset?.showWeight && <div><Label>الوزن (جرام)</Label><Input type="number" value={form.weight_grams} onChange={(e) => setForm({ ...form, weight_grams: e.target.value })} /></div>}
                   </>
                 )}
                 <div className="flex items-center gap-2 pt-6">
