@@ -11,6 +11,7 @@ import { Plus, Edit, Trash2, Package, ArrowLeft, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { formatPrice, firstImage } from "@/lib/format";
+import { CATEGORY_PRESETS, RESERVED_FEATURE_KEYS } from "@/lib/category-presets";
 
 export const Route = createFileRoute("/_authenticated/admin/categories/$slug")({
   component: AdminCategoryProducts,
@@ -27,10 +28,7 @@ interface ProductForm {
   stock: string; track_stock: boolean; weight_grams: string;
   is_featured: boolean;
   images: string[];
-  // features (IPTV-specific)
-  duration_months: string; channels: string; quality: string;
-  downloader_code: string; app_download_url: string;
-  // extra features as key:value lines
+  features: Record<string, string | number | boolean>;
   extra_features: string;
 }
 
@@ -44,17 +42,21 @@ function AdminCategoryProducts() {
     queryFn: async () => (await supabase.from("categories").select("*").eq("slug", slug).maybeSingle()).data,
   });
 
+  const preset = CATEGORY_PRESETS[slug];
+  const defaultType = preset?.productType ?? "physical";
+
   const empty: ProductForm = {
     slug: "", sku: "",
     name_ar: "", name_en: "", name_ur: "",
     description_ar: "", description_en: "", description_ur: "",
-    type: "subscription", status: "active",
-    price: "10.000", compare_price: "", currency: "BHD",
-    stock: "999", track_stock: false, weight_grams: "",
+    type: defaultType, status: "active",
+    price: "0.000", compare_price: "", currency: "BHD",
+    stock: defaultType === "subscription" ? "999" : "0",
+    track_stock: defaultType === "physical",
+    weight_grams: "",
     is_featured: false,
     images: [],
-    duration_months: "12", channels: "", quality: "4K/FHD",
-    downloader_code: "", app_download_url: "",
+    features: {},
     extra_features: "",
   };
   const [form, setForm] = useState<ProductForm>(empty);
@@ -66,27 +68,34 @@ function AdminCategoryProducts() {
     queryFn: async () => (await supabase.from("products").select("*").eq("category_id", category!.id).order("created_at", { ascending: false })).data ?? [],
   });
 
-  const handleEdit = (p: any) => {
-    const feats = (p.features ?? {}) as Record<string, any>;
-    const known = new Set(["duration_months", "channels", "quality", "downloader_code", "app_download_url"]);
-    const extras = Object.entries(feats).filter(([k]) => !known.has(k)).map(([k, v]) => `${k}: ${v}`).join("\n");
+  const handleEdit = (p: {
+    id: string; slug: string; sku: string | null;
+    name_ar: string; name_en: string; name_ur: string | null;
+    description_ar: string | null; description_en: string | null; description_ur: string | null;
+    type: string; status: string; price: number; compare_price: number | null; currency: string;
+    stock: number; track_stock: boolean; weight_grams: number | null; is_featured: boolean;
+    images: unknown; features: unknown;
+  }) => {
+    const feats = (p.features && typeof p.features === "object" ? p.features : {}) as Record<string, string | number | boolean>;
+    const known: Record<string, string | number | boolean> = {};
+    const extrasArr: string[] = [];
+    for (const [k, v] of Object.entries(feats)) {
+      if (RESERVED_FEATURE_KEYS.has(k)) known[k] = v;
+      else extrasArr.push(`${k}: ${v}`);
+    }
     setForm({
       id: p.id, slug: p.slug, sku: p.sku ?? "",
       name_ar: p.name_ar, name_en: p.name_en, name_ur: p.name_ur ?? "",
       description_ar: p.description_ar ?? "", description_en: p.description_en ?? "", description_ur: p.description_ur ?? "",
-      type: p.type, status: p.status,
+      type: p.type as ProductForm["type"], status: p.status as ProductForm["status"],
       price: String(p.price), compare_price: p.compare_price ? String(p.compare_price) : "",
       currency: p.currency,
       stock: String(p.stock), track_stock: !!p.track_stock,
       weight_grams: p.weight_grams ? String(p.weight_grams) : "",
       is_featured: p.is_featured,
-      images: Array.isArray(p.images) ? p.images : (p.images ? [p.images] : []),
-      duration_months: feats.duration_months ? String(feats.duration_months) : "",
-      channels: feats.channels ?? "",
-      quality: feats.quality ?? "",
-      downloader_code: feats.downloader_code ?? "",
-      app_download_url: feats.app_download_url ?? "",
-      extra_features: extras,
+      images: Array.isArray(p.images) ? (p.images as string[]) : [],
+      features: known,
+      extra_features: extrasArr.join("\n"),
     });
     setOpen(true);
   };
@@ -102,14 +111,13 @@ function AdminCategoryProducts() {
     toast.success("Image uploaded");
   };
 
+  const setFeature = (key: string, value: string | number | boolean) => {
+    setForm((f) => ({ ...f, features: { ...f.features, [key]: value } }));
+  };
+
   const handleSave = async () => {
     if (!category) return;
-    const features: Record<string, any> = {};
-    if (form.duration_months) features.duration_months = Number(form.duration_months);
-    if (form.channels) features.channels = form.channels;
-    if (form.quality) features.quality = form.quality;
-    if (form.downloader_code) features.downloader_code = form.downloader_code;
-    if (form.app_download_url) features.app_download_url = form.app_download_url;
+    const features: Record<string, string | number | boolean> = { ...form.features };
     form.extra_features.split("\n").forEach((line) => {
       const idx = line.indexOf(":");
       if (idx > 0) {
@@ -144,6 +152,7 @@ function AdminCategoryProducts() {
     qc.invalidateQueries({ queryKey: ["admin-cat-products", category.id] });
   };
 
+
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this product?")) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
@@ -154,7 +163,8 @@ function AdminCategoryProducts() {
 
   if (!category) return <div className="p-8 text-center text-muted-foreground">Loading…</div>;
 
-  const isSubscription = form.type === "subscription";
+  const presetFields = preset?.fields ?? [];
+  const presetTitle = preset?.sectionTitle ?? "";
 
   return (
     <div className="space-y-4">
@@ -231,19 +241,56 @@ function AdminCategoryProducts() {
                 )}
               </section>
 
-              {/* Subscription / IPTV details */}
-              {isSubscription && (
+              {/* Category-specific fields */}
+              {presetFields.length > 0 && (
                 <section className="space-y-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
-                  <div className="text-sm font-semibold text-cyan-400">IPTV / Subscription details</div>
+                  <div className="text-sm font-semibold text-cyan-400">{presetTitle}</div>
                   <div className="grid gap-3 md:grid-cols-3">
-                    <div><Label>Duration (months)</Label><Input type="number" value={form.duration_months} onChange={(e) => setForm({ ...form, duration_months: e.target.value })} /></div>
-                    <div><Label>Channels</Label><Input value={form.channels} onChange={(e) => setForm({ ...form, channels: e.target.value })} placeholder="25,000+" /></div>
-                    <div><Label>Quality</Label><Input value={form.quality} onChange={(e) => setForm({ ...form, quality: e.target.value })} placeholder="4K/FHD" /></div>
-                    <div><Label>Downloader Code</Label><Input value={form.downloader_code} onChange={(e) => setForm({ ...form, downloader_code: e.target.value })} placeholder="123456" /></div>
-                    <div className="md:col-span-2"><Label>App Download URL (APK)</Label><Input value={form.app_download_url} onChange={(e) => setForm({ ...form, app_download_url: e.target.value })} placeholder="https://..." /></div>
+                    {presetFields.map((fd) => {
+                      const v = form.features[fd.key];
+                      if (fd.type === "boolean") {
+                        return (
+                          <div key={fd.key} className="flex items-center gap-2 pt-6">
+                            <input type="checkbox" id={`f-${fd.key}`} checked={Boolean(v)} onChange={(e) => setFeature(fd.key, e.target.checked)} />
+                            <Label htmlFor={`f-${fd.key}`}>{fd.label}</Label>
+                          </div>
+                        );
+                      }
+                      if (fd.type === "select") {
+                        return (
+                          <div key={fd.key}>
+                            <Label>{fd.label}</Label>
+                            <Select value={String(v ?? "")} onValueChange={(val) => setFeature(fd.key, val)}>
+                              <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                              <SelectContent>{(fd.options ?? []).map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                        );
+                      }
+                      if (fd.type === "textarea") {
+                        return (
+                          <div key={fd.key} className="md:col-span-3">
+                            <Label>{fd.label}</Label>
+                            <Textarea rows={2} value={String(v ?? "")} onChange={(e) => setFeature(fd.key, e.target.value)} placeholder={fd.placeholder} />
+                          </div>
+                        );
+                      }
+                      return (
+                        <div key={fd.key}>
+                          <Label>{fd.label}</Label>
+                          <Input
+                            type={fd.type === "number" ? "number" : "text"}
+                            value={String(v ?? "")}
+                            onChange={(e) => setFeature(fd.key, fd.type === "number" ? Number(e.target.value) : e.target.value)}
+                            placeholder={fd.placeholder}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
                 </section>
               )}
+
 
               {/* Extra features */}
               <section>
