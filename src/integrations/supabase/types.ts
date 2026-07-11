@@ -1462,6 +1462,7 @@ export type Database = {
     Views: {
       payment_methods_public: {
         Row: {
+          account_details: Json | null
           code: string | null
           created_at: string | null
           fee_amount: number | null
@@ -1488,6 +1489,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          account_details?: Json | null
           code?: string | null
           created_at?: string | null
           fee_amount?: number | null
@@ -1514,6 +1516,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          account_details?: Json | null
           code?: string | null
           created_at?: string | null
           fee_amount?: number | null
