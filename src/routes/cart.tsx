@@ -46,8 +46,8 @@ function CartPage() {
   const fee = method ? Number(method.fee_amount) + (subtotal * Number(method.fee_percent)) / 100 : 0;
   const total = subtotal + fee;
 
-  const nameOf = (m: { name_ar: string; name_en: string; name_ur: string | null }) =>
-    lang === "ar" ? m.name_ar : lang === "ur" ? (m.name_ur || m.name_en) : m.name_en;
+  const nameOf = (m: { name_ar: string | null; name_en: string | null; name_ur: string | null }) =>
+    (lang === "ar" ? m.name_ar : lang === "ur" ? (m.name_ur || m.name_en) : m.name_en) ?? "";
   const instrOf = (m: { instructions_ar: string | null; instructions_en: string | null; instructions_ur: string | null }) =>
     (lang === "ar" ? m.instructions_ar : lang === "ur" ? m.instructions_ur : m.instructions_en) ?? m.instructions_en ?? "";
 
