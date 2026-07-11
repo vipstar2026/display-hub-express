@@ -649,6 +649,13 @@ export type Database = {
             referencedRelation: "payment_methods"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "orders_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       payment_methods: {
@@ -1453,7 +1460,90 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      payment_methods_public: {
+        Row: {
+          account_details: Json | null
+          code: string | null
+          created_at: string | null
+          fee_amount: number | null
+          fee_percent: number | null
+          gateway_provider: string | null
+          icon: string | null
+          id: string | null
+          instructions_ar: string | null
+          instructions_en: string | null
+          instructions_ur: string | null
+          is_active: boolean | null
+          is_gateway: boolean | null
+          logo_url: string | null
+          max_amount: number | null
+          min_amount: number | null
+          name_ar: string | null
+          name_en: string | null
+          name_ur: string | null
+          requires_proof: boolean | null
+          sort_order: number | null
+          supported_currencies: string[] | null
+          test_mode: boolean | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_details?: Json | null
+          code?: string | null
+          created_at?: string | null
+          fee_amount?: number | null
+          fee_percent?: number | null
+          gateway_provider?: string | null
+          icon?: string | null
+          id?: string | null
+          instructions_ar?: string | null
+          instructions_en?: string | null
+          instructions_ur?: string | null
+          is_active?: boolean | null
+          is_gateway?: boolean | null
+          logo_url?: string | null
+          max_amount?: number | null
+          min_amount?: number | null
+          name_ar?: string | null
+          name_en?: string | null
+          name_ur?: string | null
+          requires_proof?: boolean | null
+          sort_order?: number | null
+          supported_currencies?: string[] | null
+          test_mode?: boolean | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_details?: Json | null
+          code?: string | null
+          created_at?: string | null
+          fee_amount?: number | null
+          fee_percent?: number | null
+          gateway_provider?: string | null
+          icon?: string | null
+          id?: string | null
+          instructions_ar?: string | null
+          instructions_en?: string | null
+          instructions_ur?: string | null
+          is_active?: boolean | null
+          is_gateway?: boolean | null
+          logo_url?: string | null
+          max_amount?: number | null
+          min_amount?: number | null
+          name_ar?: string | null
+          name_en?: string | null
+          name_ur?: string | null
+          requires_proof?: boolean | null
+          sort_order?: number | null
+          supported_currencies?: string[] | null
+          test_mode?: boolean | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       validate_coupon: {
