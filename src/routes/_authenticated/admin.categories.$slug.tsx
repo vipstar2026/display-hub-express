@@ -28,10 +28,7 @@ interface ProductForm {
   stock: string; track_stock: boolean; weight_grams: string;
   is_featured: boolean;
   images: string[];
-  // features (IPTV-specific)
-  duration_months: string; channels: string; quality: string;
-  downloader_code: string; app_download_url: string;
-  // extra features as key:value lines
+  features: Record<string, string | number | boolean>;
   extra_features: string;
 }
 
