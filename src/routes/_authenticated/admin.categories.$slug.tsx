@@ -281,7 +281,7 @@ function AdminCategoryProducts() {
 
               {/* Images */}
               <section className="space-y-2">
-                <Label>Images</Label>
+                <Label>الصور</Label>
                 <div className="flex flex-wrap gap-2">
                   {form.images.map((url, i) => (
                     <div key={i} className="group relative h-20 w-20 overflow-hidden rounded border border-cyan-500/20">
@@ -293,14 +293,15 @@ function AdminCategoryProducts() {
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <Input value={newImage} onChange={(e) => setNewImage(e.target.value)} placeholder="Paste image URL…" />
-                  <Button type="button" variant="outline" onClick={() => { if (newImage) { setForm({ ...form, images: [...form.images, newImage] }); setNewImage(""); } }}>Add URL</Button>
+                  <Input value={newImage} onChange={(e) => setNewImage(e.target.value)} placeholder="الصق رابط صورة…" />
+                  <Button type="button" variant="outline" onClick={() => { if (newImage) { setForm({ ...form, images: [...form.images, newImage] }); setNewImage(""); } }}>إضافة رابط</Button>
                   <Input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); e.target.value = ""; }} className="max-w-[180px]" />
                 </div>
               </section>
             </div>
 
-            <Button onClick={handleSave} className="mt-4 w-full bg-cyan-500 text-background hover:bg-cyan-400">Save Product</Button>
+            <Button onClick={handleSave} className="mt-4 w-full bg-cyan-500 text-background hover:bg-cyan-400">حفظ المنتج</Button>
+
           </DialogContent>
         </Dialog>
       </div>
