@@ -241,19 +241,56 @@ function AdminCategoryProducts() {
                 )}
               </section>
 
-              {/* Subscription / IPTV details */}
-              {isSubscription && (
+              {/* Category-specific fields */}
+              {presetFields.length > 0 && (
                 <section className="space-y-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
-                  <div className="text-sm font-semibold text-cyan-400">IPTV / Subscription details</div>
+                  <div className="text-sm font-semibold text-cyan-400">{presetTitle}</div>
                   <div className="grid gap-3 md:grid-cols-3">
-                    <div><Label>Duration (months)</Label><Input type="number" value={form.duration_months} onChange={(e) => setForm({ ...form, duration_months: e.target.value })} /></div>
-                    <div><Label>Channels</Label><Input value={form.channels} onChange={(e) => setForm({ ...form, channels: e.target.value })} placeholder="25,000+" /></div>
-                    <div><Label>Quality</Label><Input value={form.quality} onChange={(e) => setForm({ ...form, quality: e.target.value })} placeholder="4K/FHD" /></div>
-                    <div><Label>Downloader Code</Label><Input value={form.downloader_code} onChange={(e) => setForm({ ...form, downloader_code: e.target.value })} placeholder="123456" /></div>
-                    <div className="md:col-span-2"><Label>App Download URL (APK)</Label><Input value={form.app_download_url} onChange={(e) => setForm({ ...form, app_download_url: e.target.value })} placeholder="https://..." /></div>
+                    {presetFields.map((fd) => {
+                      const v = form.features[fd.key];
+                      if (fd.type === "boolean") {
+                        return (
+                          <div key={fd.key} className="flex items-center gap-2 pt-6">
+                            <input type="checkbox" id={`f-${fd.key}`} checked={Boolean(v)} onChange={(e) => setFeature(fd.key, e.target.checked)} />
+                            <Label htmlFor={`f-${fd.key}`}>{fd.label}</Label>
+                          </div>
+                        );
+                      }
+                      if (fd.type === "select") {
+                        return (
+                          <div key={fd.key}>
+                            <Label>{fd.label}</Label>
+                            <Select value={String(v ?? "")} onValueChange={(val) => setFeature(fd.key, val)}>
+                              <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                              <SelectContent>{(fd.options ?? []).map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                        );
+                      }
+                      if (fd.type === "textarea") {
+                        return (
+                          <div key={fd.key} className="md:col-span-3">
+                            <Label>{fd.label}</Label>
+                            <Textarea rows={2} value={String(v ?? "")} onChange={(e) => setFeature(fd.key, e.target.value)} placeholder={fd.placeholder} />
+                          </div>
+                        );
+                      }
+                      return (
+                        <div key={fd.key}>
+                          <Label>{fd.label}</Label>
+                          <Input
+                            type={fd.type === "number" ? "number" : "text"}
+                            value={String(v ?? "")}
+                            onChange={(e) => setFeature(fd.key, fd.type === "number" ? Number(e.target.value) : e.target.value)}
+                            placeholder={fd.placeholder}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
                 </section>
               )}
+
 
               {/* Extra features */}
               <section>
