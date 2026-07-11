@@ -20,6 +20,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "iptv": {
     productType: "subscription",
     sectionTitle: "تفاصيل اشتراك IPTV",
+    showWeight: false,
     fields: [
       { key: "duration_months", label: "المدة (شهور)", type: "number", placeholder: "12" },
       { key: "channels", label: "عدد القنوات", type: "text", placeholder: "25,000+" },
@@ -34,6 +35,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "satellite-receivers": {
     productType: "physical",
     sectionTitle: "مواصفات الرسيفر",
+    showWeight: true,
     fields: [
       { key: "brand", label: "الماركة", type: "text", placeholder: "Tiger, Starsat..." },
       { key: "model", label: "الموديل", type: "text" },
@@ -48,6 +50,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "bein-ranwel": {
     productType: "physical",
     sectionTitle: "مواصفات BeIN / Ranwel",
+    showWeight: true,
     fields: [
       { key: "brand", label: "الماركة", type: "select", options: ["BeIN", "Ranwel", "Other"] },
       { key: "model", label: "الموديل", type: "text" },
@@ -60,6 +63,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "android-tv-boxes": {
     productType: "physical",
     sectionTitle: "مواصفات Android TV Box",
+    showWeight: true,
     fields: [
       { key: "brand", label: "الماركة", type: "text" },
       { key: "model", label: "الموديل", type: "text" },
@@ -74,6 +78,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "mobile-accessories": {
     productType: "physical",
     sectionTitle: "تفاصيل الإكسسوار",
+    showWeight: false,
     fields: [
       { key: "brand", label: "الماركة", type: "text" },
       { key: "type", label: "النوع", type: "text", placeholder: "شاحن، كيبل، حامل..." },
@@ -85,6 +90,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "tp-link": {
     productType: "physical",
     sectionTitle: "مواصفات TP-Link",
+    showWeight: false,
     fields: [
       { key: "model", label: "الموديل", type: "text" },
       { key: "device_type", label: "نوع الجهاز", type: "select", options: ["Router", "Extender", "Switch", "Access Point", "Powerline"] },
@@ -97,6 +103,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "cctv": {
     productType: "physical",
     sectionTitle: "مواصفات نظام CCTV",
+    showWeight: true,
     fields: [
       { key: "brand", label: "الماركة", type: "text" },
       { key: "channels", label: "عدد القنوات", type: "number", placeholder: "4/8/16/32" },
@@ -110,6 +117,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "ip-cameras": {
     productType: "physical",
     sectionTitle: "مواصفات كاميرا IP",
+    showWeight: true,
     fields: [
       { key: "brand", label: "الماركة", type: "text" },
       { key: "resolution", label: "الدقة", type: "select", options: ["1080p", "2K", "4MP", "5MP", "4K", "8MP"] },
@@ -123,6 +131,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "keyboards-mice": {
     productType: "physical",
     sectionTitle: "تفاصيل الكيبورد/الماوس",
+    showWeight: false,
     fields: [
       { key: "brand", label: "الماركة", type: "text" },
       { key: "type", label: "النوع", type: "select", options: ["Keyboard", "Mouse", "Combo"] },
@@ -135,6 +144,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "power-adapters": {
     productType: "physical",
     sectionTitle: "مواصفات المحوّل",
+    showWeight: false,
     fields: [
       { key: "brand", label: "الماركة", type: "text" },
       { key: "input_voltage", label: "الجهد الداخل", type: "text", placeholder: "100-240V" },
@@ -147,6 +157,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "new-tvs": {
     productType: "physical",
     sectionTitle: "مواصفات التلفزيون",
+    showWeight: true,
     fields: [
       { key: "brand", label: "الماركة", type: "text" },
       { key: "model", label: "الموديل", type: "text" },
@@ -161,6 +172,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "video-intercom": {
     productType: "physical",
     sectionTitle: "مواصفات الإنتركم",
+    showWeight: true,
     fields: [
       { key: "brand", label: "الماركة", type: "text" },
       { key: "monitor_size", label: "حجم الشاشة", type: "text", placeholder: "7 inch" },
@@ -173,6 +185,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "multiswitches": {
     productType: "physical",
     sectionTitle: "مواصفات Multiswitch",
+    showWeight: true,
     fields: [
       { key: "brand", label: "الماركة", type: "text" },
       { key: "inputs", label: "عدد المداخل", type: "number", placeholder: "5" },
@@ -183,6 +196,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
   "remote-controls": {
     productType: "physical",
     sectionTitle: "مواصفات الريموت",
+    showWeight: false,
     fields: [
       { key: "brand", label: "الماركة", type: "text" },
       { key: "compatible_with", label: "متوافق مع", type: "text", placeholder: "Tiger T8, Starsat..." },
