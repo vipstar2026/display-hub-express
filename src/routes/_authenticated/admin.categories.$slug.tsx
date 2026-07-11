@@ -242,18 +242,42 @@ function AdminCategoryProducts() {
                             <Label htmlFor={`f-${fd.key}`}>{fd.label}</Label>
                           </div>
                         );
-
+                      }
+                      if (fd.type === "select") {
+                        return (
+                          <div key={fd.key}>
+                            <Label>{fd.label}</Label>
+                            <Select value={String(v ?? "")} onValueChange={(val) => setFeature(fd.key, val)}>
+                              <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                              <SelectContent>{(fd.options ?? []).map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                        );
+                      }
+                      if (fd.type === "textarea") {
+                        return (
+                          <div key={fd.key} className="md:col-span-3">
+                            <Label>{fd.label}</Label>
+                            <Textarea rows={2} value={String(v ?? "")} onChange={(e) => setFeature(fd.key, e.target.value)} placeholder={fd.placeholder} />
+                          </div>
+                        );
+                      }
+                      return (
+                        <div key={fd.key}>
+                          <Label>{fd.label}</Label>
+                          <Input
+                            type={fd.type === "number" ? "number" : "text"}
+                            value={String(v ?? "")}
+                            onChange={(e) => setFeature(fd.key, fd.type === "number" ? Number(e.target.value) : e.target.value)}
+                            placeholder={fd.placeholder}
+                          />
+                        </div>
+                      );
                     })}
                   </div>
                 </section>
               )}
 
-
-              {/* Extra features */}
-              <section>
-                <Label>Extra features (one per line, key: value)</Label>
-                <Textarea rows={3} value={form.extra_features} onChange={(e) => setForm({ ...form, extra_features: e.target.value })} placeholder="warranty: 1 year&#10;color: black" />
-              </section>
 
               {/* Images */}
               <section className="space-y-2">
