@@ -12,6 +12,8 @@ export interface CategoryPreset {
   productType: "physical" | "digital" | "subscription";
   sectionTitle: string;
   fields: FieldDef[];
+  /** Show the weight (grams) field in the product form. */
+  showWeight?: boolean;
 }
 
 export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
