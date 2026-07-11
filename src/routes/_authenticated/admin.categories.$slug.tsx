@@ -103,15 +103,26 @@ function AdminCategoryProducts() {
   const handleFileUpload = async (file: File) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
     if (userErr || !userData.user) { toast.error("Not signed in"); return; }
-    const ext = file.name.split(".").pop();
+    const tId = toast.loading("جاري تحسين الصورة…");
+    let uploadBlob: Blob = file;
+    let ext = file.name.split(".").pop() || "jpg";
+    let note = "";
+    try {
+      const { processProductImage, } = await import("@/lib/image-processor");
+      const res = await processProductImage(file, 1000);
+      uploadBlob = res.blob;
+      ext = "jpg";
+      note = ` (${res.originalW}×${res.originalH} → 1000×1000)`;
+    } catch {
+      // fallback: upload original
+    }
     const name = `${crypto.randomUUID()}.${ext}`;
-    // RLS requires the first folder to equal auth.uid()
     const path = `${userData.user.id}/products/${name}`;
-    const { error } = await supabase.storage.from("vendor-assets").upload(path, file, { cacheControl: "3600", upsert: false });
-    if (error) { toast.error(error.message); return; }
+    const { error } = await supabase.storage.from("vendor-assets").upload(path, uploadBlob, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
+    if (error) { toast.error(error.message, { id: tId }); return; }
     const { data: pub } = supabase.storage.from("vendor-assets").getPublicUrl(path);
     setForm((f) => ({ ...f, images: [...f.images, pub.publicUrl] }));
-    toast.success("تم رفع الصورة");
+    toast.success("تم رفع الصورة" + note, { id: tId });
   };
 
   const setFeature = (key: string, value: string | number | boolean) => {
