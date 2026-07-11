@@ -163,7 +163,8 @@ function AdminCategoryProducts() {
 
   if (!category) return <div className="p-8 text-center text-muted-foreground">Loading…</div>;
 
-  const isSubscription = form.type === "subscription";
+  const presetFields = preset?.fields ?? [];
+  const presetTitle = preset?.sectionTitle ?? "";
 
   return (
     <div className="space-y-4">
