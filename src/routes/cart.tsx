@@ -39,7 +39,7 @@ function CartPage() {
 
   const { data: methods } = useQuery({
     queryKey: ["payment-methods-active"],
-    queryFn: async () => (await supabase.from("payment_methods").select("*").eq("is_active", true).order("sort_order")).data ?? [],
+    queryFn: async () => (await supabase.from("payment_methods_public").select("*").order("sort_order")).data ?? [],
   });
 
   const method = methods?.find((m) => m.id === selectedMethod) ?? null;
