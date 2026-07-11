@@ -291,7 +291,10 @@ function AdminCategoryProducts() {
 
               {/* Images */}
               <section className="space-y-2">
-                <Label>الصور</Label>
+                <div className="flex items-center justify-between">
+                  <Label>الصور</Label>
+                  <span className="text-[11px] text-cyan-400/80">مقاس مقترح: مربع 1000×1000 · سيتم تحسين الصورة تلقائياً</span>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {form.images.map((url, i) => (
                     <div key={i} className="group relative h-20 w-20 overflow-hidden rounded border border-cyan-500/20">
