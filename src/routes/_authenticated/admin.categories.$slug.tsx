@@ -35,6 +35,7 @@ interface ProductForm {
 
 function AdminCategoryProducts() {
   const { slug } = Route.useParams();
+  const { t, lang } = useI18n();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
 
