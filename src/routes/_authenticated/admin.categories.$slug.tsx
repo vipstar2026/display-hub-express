@@ -205,39 +205,39 @@ function AdminCategoryProducts() {
             <div className="space-y-5">
               {/* Names */}
               <section className="grid gap-3 md:grid-cols-2">
-                <div><Label>الاسم (عربي) *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
-                <div><Label>Name (EN) *</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+                <div><Label>{t("form.name_ar")}</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+                <div><Label>{t("form.name_en")}</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
               </section>
 
               {/* Descriptions */}
               <section className="grid gap-3">
-                <div><Label>الوصف (عربي)</Label><Textarea rows={2} value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
-                <div><Label>Description (EN)</Label><Textarea rows={2} value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
+                <div><Label>{t("form.desc_ar")}</Label><Textarea rows={2} value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
+                <div><Label>{t("form.desc_en")}</Label><Textarea rows={2} value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
               </section>
 
               {/* Pricing / Stock */}
               <section className="grid gap-3 md:grid-cols-3">
-                <div><Label>السعر *</Label><Input type="number" step="0.001" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
-                <div><Label>السعر قبل الخصم</Label><Input type="number" step="0.001" value={form.compare_price} onChange={(e) => setForm({ ...form, compare_price: e.target.value })} /></div>
-                <div><Label>الحالة</Label>
+                <div><Label>{t("form.price")}</Label><Input type="number" step="0.001" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
+                <div><Label>{t("form.compare_price")}</Label><Input type="number" step="0.001" value={form.compare_price} onChange={(e) => setForm({ ...form, compare_price: e.target.value })} /></div>
+                <div><Label>{t("form.status")}</Label>
                   <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as ProductForm["status"] })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="draft">مسودة</SelectItem>
-                      <SelectItem value="active">مفعّل</SelectItem>
-                      <SelectItem value="archived">مؤرشف</SelectItem>
+                      <SelectItem value="draft">{t("form.status.draft")}</SelectItem>
+                      <SelectItem value="active">{t("form.status.active")}</SelectItem>
+                      <SelectItem value="archived">{t("form.status.archived")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 {form.type === "physical" && (
                   <>
-                    <div><Label>المخزون</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
-                    {preset?.showWeight && <div><Label>الوزن (جرام)</Label><Input type="number" value={form.weight_grams} onChange={(e) => setForm({ ...form, weight_grams: e.target.value })} /></div>}
+                    <div><Label>{t("form.stock")}</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
+                    {preset?.showWeight && <div><Label>{t("form.weight")}</Label><Input type="number" value={form.weight_grams} onChange={(e) => setForm({ ...form, weight_grams: e.target.value })} /></div>}
                   </>
                 )}
                 <div className="flex items-center gap-2 pt-6">
                   <input type="checkbox" id="feat" checked={form.is_featured} onChange={(e) => setForm({ ...form, is_featured: e.target.checked })} />
-                  <Label htmlFor="feat">منتج مميز</Label>
+                  <Label htmlFor="feat">{t("form.featured")}</Label>
                 </div>
               </section>
 
