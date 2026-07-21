@@ -248,18 +248,19 @@ function AdminCategoryProducts() {
                   <div className="grid gap-3 md:grid-cols-3">
                     {presetFields.map((fd) => {
                       const v = form.features[fd.key];
+                      const label = translatePresetLabel(fd.label, lang);
                       if (fd.type === "boolean") {
                         return (
                           <div key={fd.key} className="flex items-center gap-2 pt-6">
                             <input type="checkbox" id={`f-${fd.key}`} checked={Boolean(v)} onChange={(e) => setFeature(fd.key, e.target.checked)} />
-                            <Label htmlFor={`f-${fd.key}`}>{fd.label}</Label>
+                            <Label htmlFor={`f-${fd.key}`}>{label}</Label>
                           </div>
                         );
                       }
                       if (fd.type === "select") {
                         return (
                           <div key={fd.key}>
-                            <Label>{fd.label}</Label>
+                            <Label>{label}</Label>
                             <Select value={String(v ?? "")} onValueChange={(val) => setFeature(fd.key, val)}>
                               <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                               <SelectContent>{(fd.options ?? []).map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
@@ -270,14 +271,14 @@ function AdminCategoryProducts() {
                       if (fd.type === "textarea") {
                         return (
                           <div key={fd.key} className="md:col-span-3">
-                            <Label>{fd.label}</Label>
+                            <Label>{label}</Label>
                             <Textarea rows={2} value={String(v ?? "")} onChange={(e) => setFeature(fd.key, e.target.value)} placeholder={fd.placeholder} />
                           </div>
                         );
                       }
                       return (
                         <div key={fd.key}>
-                          <Label>{fd.label}</Label>
+                          <Label>{label}</Label>
                           <Input
                             type={fd.type === "number" ? "number" : "text"}
                             value={String(v ?? "")}
