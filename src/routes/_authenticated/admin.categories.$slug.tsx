@@ -334,7 +334,7 @@ function AdminCategoryProducts() {
                   {img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-5 w-5 text-cyan-500/30" /></div>}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-medium">{p.name_en}</div>
+                  <div className="truncate font-medium">{localizedName(p as unknown as Record<string, unknown>, "name", lang) || p.name_en}</div>
                   <div className="truncate text-xs text-muted-foreground">{p.slug} · {p.type} · {p.status} · stock: {p.stock}</div>
                 </div>
                 <div className="shrink-0 font-mono text-cyan-400">{formatPrice(Number(p.price), p.currency)}</div>
