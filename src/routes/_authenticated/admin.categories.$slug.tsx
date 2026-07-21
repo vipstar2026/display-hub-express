@@ -11,7 +11,8 @@ import { Plus, Edit, Trash2, Package, ArrowLeft, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { formatPrice, firstImage } from "@/lib/format";
-import { CATEGORY_PRESETS, RESERVED_FEATURE_KEYS } from "@/lib/category-presets";
+import { CATEGORY_PRESETS, RESERVED_FEATURE_KEYS, translatePresetLabel } from "@/lib/category-presets";
+import { useI18n, localizedName } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/categories/$slug")({
   component: AdminCategoryProducts,
