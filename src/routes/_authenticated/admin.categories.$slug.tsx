@@ -191,16 +191,16 @@ function AdminCategoryProducts() {
             <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
           </Link>
           <div className="min-w-0">
-            <h1 className="font-display truncate text-2xl font-bold">{category.name_ar} · {category.name_en}</h1>
-            <div className="text-xs text-muted-foreground">/{category.slug} · {products?.length ?? 0} products</div>
+            <h1 className="font-display truncate text-2xl font-bold">{catName}</h1>
+            <div className="text-xs text-muted-foreground">/{category.slug} · {products?.length ?? 0} {t("form.products_count")}</div>
           </div>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setForm(empty); setNewImage(""); } }}>
           <DialogTrigger asChild>
-            <Button className="bg-cyan-500 text-background hover:bg-cyan-400"><Plus className="me-1 h-4 w-4" />Add product</Button>
+            <Button className="bg-cyan-500 text-background hover:bg-cyan-400"><Plus className="me-1 h-4 w-4" />{t("form.add_product")}</Button>
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-            <DialogHeader><DialogTitle>{form.id ? "Edit" : "New"} Product in {category.name_en}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{form.id ? t("form.edit_product") : t("form.new_product")} {catName}</DialogTitle></DialogHeader>
 
             <div className="space-y-5">
               {/* Names */}
