@@ -296,8 +296,8 @@ function AdminCategoryProducts() {
               {/* Images */}
               <section className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>الصور</Label>
-                  <span className="text-[11px] text-cyan-400/80">مقاس مقترح: مربع 1000×1000 · سيتم تحسين الصورة تلقائياً</span>
+                  <Label>{t("form.images")}</Label>
+                  <span className="text-[11px] text-cyan-400/80">{t("form.image_hint")}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {form.images.map((url, i) => (
@@ -310,21 +310,21 @@ function AdminCategoryProducts() {
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <Input value={newImage} onChange={(e) => setNewImage(e.target.value)} placeholder="الصق رابط صورة…" />
-                  <Button type="button" variant="outline" onClick={() => { if (newImage) { setForm({ ...form, images: [...form.images, newImage] }); setNewImage(""); } }}>إضافة رابط</Button>
+                  <Input value={newImage} onChange={(e) => setNewImage(e.target.value)} placeholder={t("form.paste_url")} />
+                  <Button type="button" variant="outline" onClick={() => { if (newImage) { setForm({ ...form, images: [...form.images, newImage] }); setNewImage(""); } }}>{t("form.add_url")}</Button>
                   <Input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); e.target.value = ""; }} className="max-w-[180px]" />
                 </div>
               </section>
             </div>
 
-            <Button onClick={handleSave} className="mt-4 w-full bg-cyan-500 text-background hover:bg-cyan-400">حفظ المنتج</Button>
+            <Button onClick={handleSave} className="mt-4 w-full bg-cyan-500 text-background hover:bg-cyan-400">{t("form.save_product")}</Button>
 
           </DialogContent>
         </Dialog>
       </div>
 
       <div className="rounded-xl border border-cyan-500/10 bg-card">
-        {(products ?? []).length === 0 && <div className="p-8 text-center text-muted-foreground">No products in this category yet</div>}
+        {(products ?? []).length === 0 && <div className="p-8 text-center text-muted-foreground">{t("form.no_products")}</div>}
         <div className="divide-y divide-cyan-500/10">
           {(products ?? []).map((p) => {
             const img = firstImage(p.images);
