@@ -104,8 +104,8 @@ function AdminCategoryProducts() {
 
   const handleFileUpload = async (file: File) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !userData.user) { toast.error("Not signed in"); return; }
-    const tId = toast.loading("جاري تحسين الصورة…");
+    if (userErr || !userData.user) { toast.error(t("toast.not_signed_in")); return; }
+    const tId = toast.loading(t("toast.optimizing"));
     let uploadBlob: Blob = file;
     let ext = file.name.split(".").pop() || "jpg";
     let note = "";
@@ -124,7 +124,7 @@ function AdminCategoryProducts() {
     if (error) { toast.error(error.message, { id: tId }); return; }
     const { data: pub } = supabase.storage.from("vendor-assets").getPublicUrl(path);
     setForm((f) => ({ ...f, images: [...f.images, pub.publicUrl] }));
-    toast.success("تم رفع الصورة" + note, { id: tId });
+    toast.success(t("toast.image_uploaded") + note, { id: tId });
   };
 
   const setFeature = (key: string, value: string | number | boolean) => {
