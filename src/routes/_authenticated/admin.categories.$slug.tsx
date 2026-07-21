@@ -163,24 +163,25 @@ function AdminCategoryProducts() {
       ? await supabase.from("products").update(payload).eq("id", form.id)
       : await supabase.from("products").insert(payload);
     if (error) { toast.error(error.message); return; }
-    toast.success("Saved");
+    toast.success(t("toast.saved"));
     setOpen(false); setForm(empty); setNewImage("");
     qc.invalidateQueries({ queryKey: ["admin-cat-products", category.id] });
   };
 
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this product?")) return;
+    if (!confirm(t("confirm.delete_product"))) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
-    toast.success("Deleted");
+    toast.success(t("toast.deleted"));
     qc.invalidateQueries({ queryKey: ["admin-cat-products", category?.id] });
   };
 
-  if (!category) return <div className="p-8 text-center text-muted-foreground">Loading…</div>;
+  if (!category) return <div className="p-8 text-center text-muted-foreground">{t("form.loading")}</div>;
 
   const presetFields = preset?.fields ?? [];
-  const presetTitle = preset?.sectionTitle ?? "";
+  const presetTitle = preset?.sectionTitle ? translatePresetLabel(preset.sectionTitle, lang) : "";
+  const catName = localizedName(category as unknown as Record<string, unknown>, "name", lang) || category.name_en;
 
   return (
     <div className="space-y-4">
