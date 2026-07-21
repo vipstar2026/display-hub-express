@@ -11,7 +11,8 @@ import { Plus, Edit, Trash2, Package, ArrowLeft, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { formatPrice, firstImage } from "@/lib/format";
-import { CATEGORY_PRESETS, RESERVED_FEATURE_KEYS } from "@/lib/category-presets";
+import { CATEGORY_PRESETS, RESERVED_FEATURE_KEYS, translatePresetLabel } from "@/lib/category-presets";
+import { useI18n, localizedName } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/categories/$slug")({
   component: AdminCategoryProducts,
@@ -34,6 +35,7 @@ interface ProductForm {
 
 function AdminCategoryProducts() {
   const { slug } = Route.useParams();
+  const { t, lang } = useI18n();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
 
@@ -102,8 +104,8 @@ function AdminCategoryProducts() {
 
   const handleFileUpload = async (file: File) => {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !userData.user) { toast.error("Not signed in"); return; }
-    const tId = toast.loading("جاري تحسين الصورة…");
+    if (userErr || !userData.user) { toast.error(t("toast.not_signed_in")); return; }
+    const tId = toast.loading(t("toast.optimizing"));
     let uploadBlob: Blob = file;
     let ext = file.name.split(".").pop() || "jpg";
     let note = "";
@@ -122,7 +124,7 @@ function AdminCategoryProducts() {
     if (error) { toast.error(error.message, { id: tId }); return; }
     const { data: pub } = supabase.storage.from("vendor-assets").getPublicUrl(path);
     setForm((f) => ({ ...f, images: [...f.images, pub.publicUrl] }));
-    toast.success("تم رفع الصورة" + note, { id: tId });
+    toast.success(t("toast.image_uploaded") + note, { id: tId });
   };
 
   const setFeature = (key: string, value: string | number | boolean) => {
@@ -161,24 +163,25 @@ function AdminCategoryProducts() {
       ? await supabase.from("products").update(payload).eq("id", form.id)
       : await supabase.from("products").insert(payload);
     if (error) { toast.error(error.message); return; }
-    toast.success("Saved");
+    toast.success(t("toast.saved"));
     setOpen(false); setForm(empty); setNewImage("");
     qc.invalidateQueries({ queryKey: ["admin-cat-products", category.id] });
   };
 
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this product?")) return;
+    if (!confirm(t("confirm.delete_product"))) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
-    toast.success("Deleted");
+    toast.success(t("toast.deleted"));
     qc.invalidateQueries({ queryKey: ["admin-cat-products", category?.id] });
   };
 
-  if (!category) return <div className="p-8 text-center text-muted-foreground">Loading…</div>;
+  if (!category) return <div className="p-8 text-center text-muted-foreground">{t("form.loading")}</div>;
 
   const presetFields = preset?.fields ?? [];
-  const presetTitle = preset?.sectionTitle ?? "";
+  const presetTitle = preset?.sectionTitle ? translatePresetLabel(preset.sectionTitle, lang) : "";
+  const catName = localizedName(category as unknown as Record<string, unknown>, "name", lang) || category.name_en;
 
   return (
     <div className="space-y-4">
@@ -188,53 +191,53 @@ function AdminCategoryProducts() {
             <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
           </Link>
           <div className="min-w-0">
-            <h1 className="font-display truncate text-2xl font-bold">{category.name_ar} · {category.name_en}</h1>
-            <div className="text-xs text-muted-foreground">/{category.slug} · {products?.length ?? 0} products</div>
+            <h1 className="font-display truncate text-2xl font-bold">{catName}</h1>
+            <div className="text-xs text-muted-foreground">/{category.slug} · {products?.length ?? 0} {t("form.products_count")}</div>
           </div>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setForm(empty); setNewImage(""); } }}>
           <DialogTrigger asChild>
-            <Button className="bg-cyan-500 text-background hover:bg-cyan-400"><Plus className="me-1 h-4 w-4" />Add product</Button>
+            <Button className="bg-cyan-500 text-background hover:bg-cyan-400"><Plus className="me-1 h-4 w-4" />{t("form.add_product")}</Button>
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-            <DialogHeader><DialogTitle>{form.id ? "Edit" : "New"} Product in {category.name_en}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{form.id ? t("form.edit_product") : t("form.new_product")} {catName}</DialogTitle></DialogHeader>
 
             <div className="space-y-5">
               {/* Names */}
               <section className="grid gap-3 md:grid-cols-2">
-                <div><Label>الاسم (عربي) *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
-                <div><Label>Name (EN) *</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+                <div><Label>{t("form.name_ar")}</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+                <div><Label>{t("form.name_en")}</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
               </section>
 
               {/* Descriptions */}
               <section className="grid gap-3">
-                <div><Label>الوصف (عربي)</Label><Textarea rows={2} value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
-                <div><Label>Description (EN)</Label><Textarea rows={2} value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
+                <div><Label>{t("form.desc_ar")}</Label><Textarea rows={2} value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
+                <div><Label>{t("form.desc_en")}</Label><Textarea rows={2} value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
               </section>
 
               {/* Pricing / Stock */}
               <section className="grid gap-3 md:grid-cols-3">
-                <div><Label>السعر *</Label><Input type="number" step="0.001" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
-                <div><Label>السعر قبل الخصم</Label><Input type="number" step="0.001" value={form.compare_price} onChange={(e) => setForm({ ...form, compare_price: e.target.value })} /></div>
-                <div><Label>الحالة</Label>
+                <div><Label>{t("form.price")}</Label><Input type="number" step="0.001" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
+                <div><Label>{t("form.compare_price")}</Label><Input type="number" step="0.001" value={form.compare_price} onChange={(e) => setForm({ ...form, compare_price: e.target.value })} /></div>
+                <div><Label>{t("form.status")}</Label>
                   <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as ProductForm["status"] })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="draft">مسودة</SelectItem>
-                      <SelectItem value="active">مفعّل</SelectItem>
-                      <SelectItem value="archived">مؤرشف</SelectItem>
+                      <SelectItem value="draft">{t("form.status.draft")}</SelectItem>
+                      <SelectItem value="active">{t("form.status.active")}</SelectItem>
+                      <SelectItem value="archived">{t("form.status.archived")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 {form.type === "physical" && (
                   <>
-                    <div><Label>المخزون</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
-                    {preset?.showWeight && <div><Label>الوزن (جرام)</Label><Input type="number" value={form.weight_grams} onChange={(e) => setForm({ ...form, weight_grams: e.target.value })} /></div>}
+                    <div><Label>{t("form.stock")}</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
+                    {preset?.showWeight && <div><Label>{t("form.weight")}</Label><Input type="number" value={form.weight_grams} onChange={(e) => setForm({ ...form, weight_grams: e.target.value })} /></div>}
                   </>
                 )}
                 <div className="flex items-center gap-2 pt-6">
                   <input type="checkbox" id="feat" checked={form.is_featured} onChange={(e) => setForm({ ...form, is_featured: e.target.checked })} />
-                  <Label htmlFor="feat">منتج مميز</Label>
+                  <Label htmlFor="feat">{t("form.featured")}</Label>
                 </div>
               </section>
 
@@ -245,18 +248,19 @@ function AdminCategoryProducts() {
                   <div className="grid gap-3 md:grid-cols-3">
                     {presetFields.map((fd) => {
                       const v = form.features[fd.key];
+                      const label = translatePresetLabel(fd.label, lang);
                       if (fd.type === "boolean") {
                         return (
                           <div key={fd.key} className="flex items-center gap-2 pt-6">
                             <input type="checkbox" id={`f-${fd.key}`} checked={Boolean(v)} onChange={(e) => setFeature(fd.key, e.target.checked)} />
-                            <Label htmlFor={`f-${fd.key}`}>{fd.label}</Label>
+                            <Label htmlFor={`f-${fd.key}`}>{label}</Label>
                           </div>
                         );
                       }
                       if (fd.type === "select") {
                         return (
                           <div key={fd.key}>
-                            <Label>{fd.label}</Label>
+                            <Label>{label}</Label>
                             <Select value={String(v ?? "")} onValueChange={(val) => setFeature(fd.key, val)}>
                               <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                               <SelectContent>{(fd.options ?? []).map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
@@ -267,14 +271,14 @@ function AdminCategoryProducts() {
                       if (fd.type === "textarea") {
                         return (
                           <div key={fd.key} className="md:col-span-3">
-                            <Label>{fd.label}</Label>
+                            <Label>{label}</Label>
                             <Textarea rows={2} value={String(v ?? "")} onChange={(e) => setFeature(fd.key, e.target.value)} placeholder={fd.placeholder} />
                           </div>
                         );
                       }
                       return (
                         <div key={fd.key}>
-                          <Label>{fd.label}</Label>
+                          <Label>{label}</Label>
                           <Input
                             type={fd.type === "number" ? "number" : "text"}
                             value={String(v ?? "")}
@@ -292,8 +296,8 @@ function AdminCategoryProducts() {
               {/* Images */}
               <section className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>الصور</Label>
-                  <span className="text-[11px] text-cyan-400/80">مقاس مقترح: مربع 1000×1000 · سيتم تحسين الصورة تلقائياً</span>
+                  <Label>{t("form.images")}</Label>
+                  <span className="text-[11px] text-cyan-400/80">{t("form.image_hint")}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {form.images.map((url, i) => (
@@ -306,21 +310,21 @@ function AdminCategoryProducts() {
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <Input value={newImage} onChange={(e) => setNewImage(e.target.value)} placeholder="الصق رابط صورة…" />
-                  <Button type="button" variant="outline" onClick={() => { if (newImage) { setForm({ ...form, images: [...form.images, newImage] }); setNewImage(""); } }}>إضافة رابط</Button>
+                  <Input value={newImage} onChange={(e) => setNewImage(e.target.value)} placeholder={t("form.paste_url")} />
+                  <Button type="button" variant="outline" onClick={() => { if (newImage) { setForm({ ...form, images: [...form.images, newImage] }); setNewImage(""); } }}>{t("form.add_url")}</Button>
                   <Input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); e.target.value = ""; }} className="max-w-[180px]" />
                 </div>
               </section>
             </div>
 
-            <Button onClick={handleSave} className="mt-4 w-full bg-cyan-500 text-background hover:bg-cyan-400">حفظ المنتج</Button>
+            <Button onClick={handleSave} className="mt-4 w-full bg-cyan-500 text-background hover:bg-cyan-400">{t("form.save_product")}</Button>
 
           </DialogContent>
         </Dialog>
       </div>
 
       <div className="rounded-xl border border-cyan-500/10 bg-card">
-        {(products ?? []).length === 0 && <div className="p-8 text-center text-muted-foreground">No products in this category yet</div>}
+        {(products ?? []).length === 0 && <div className="p-8 text-center text-muted-foreground">{t("form.no_products")}</div>}
         <div className="divide-y divide-cyan-500/10">
           {(products ?? []).map((p) => {
             const img = firstImage(p.images);
@@ -330,7 +334,7 @@ function AdminCategoryProducts() {
                   {img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-5 w-5 text-cyan-500/30" /></div>}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-medium">{p.name_en}</div>
+                  <div className="truncate font-medium">{localizedName(p as unknown as Record<string, unknown>, "name", lang) || p.name_en}</div>
                   <div className="truncate text-xs text-muted-foreground">{p.slug} · {p.type} · {p.status} · stock: {p.stock}</div>
                 </div>
                 <div className="shrink-0 font-mono text-cyan-400">{formatPrice(Number(p.price), p.currency)}</div>
