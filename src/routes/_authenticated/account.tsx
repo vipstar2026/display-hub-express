@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { Copy, ShoppingBag, Heart, Package } from "lucide-react";
+import { Copy, ShoppingBag, Heart, Package, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account")({
@@ -25,6 +25,16 @@ function AccountPage() {
     },
   });
 
+  const { data: loyalty } = useQuery({
+    queryKey: ["my-loyalty"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return { balance: 0 };
+      const { data } = await supabase.from("loyalty_balance").select("balance").eq("buyer_id", u.user.id).maybeSingle();
+      return { balance: data?.balance ?? 0 };
+    },
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -32,6 +42,17 @@ function AccountPage() {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-display text-3xl font-bold">{t("nav.account")}</h1>
           <Link to="/wishlist"><Button variant="outline"><Heart className="me-2 h-4 w-4" />{t("wishlist.title")}</Button></Link>
+        </div>
+
+        <div className="mb-6 flex items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-5">
+          <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/20 text-primary">
+            <Sparkles className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">{t("loyalty.balance")}</div>
+            <div className="font-mono text-2xl font-bold text-primary">{loyalty?.balance ?? 0} <span className="text-sm font-normal text-muted-foreground">{t("loyalty.points")}</span></div>
+          </div>
+          <div className="hidden text-end text-xs text-muted-foreground md:block">{t("loyalty.hint")}</div>
         </div>
 
         <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold"><ShoppingBag className="h-5 w-5 text-primary" />{t("admin.orders")}</h2>

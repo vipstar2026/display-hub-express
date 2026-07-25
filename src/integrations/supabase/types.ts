@@ -496,6 +496,41 @@ export type Database = {
           },
         ]
       }
+      loyalty_points: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          id: string
+          order_id: string | null
+          points: number
+          reason: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          points: number
+          reason: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          points?: number
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_points_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -1577,6 +1612,13 @@ export type Database = {
       }
     }
     Views: {
+      loyalty_balance: {
+        Row: {
+          balance: number | null
+          buyer_id: string | null
+        }
+        Relationships: []
+      }
       payment_methods_public: {
         Row: {
           account_details: Json | null
@@ -1767,6 +1809,19 @@ export type Database = {
           code: string
           coupon_id: string
           discount: number
+        }[]
+      }
+      track_order: {
+        Args: { _email: string; _order_number: string }
+        Returns: {
+          created_at: string
+          currency: string
+          items: Json
+          order_number: string
+          payment_status: string
+          status: string
+          total: number
+          updated_at: string
         }[]
       }
       update_site_settings_admin: {
