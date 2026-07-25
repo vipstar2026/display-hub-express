@@ -123,6 +123,41 @@ function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="brand" className="mt-0 space-y-4">
+            <Section title="ثيم الموقع (Theme)" cols={1}>
+              <div className="text-xs text-muted-foreground">
+                اختر لوحة ألوان جاهزة — يتم تطبيقها فوراً على كل صفحات الموقع.
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {THEME_LIST.map((t) => {
+                  const active = (form.theme_preset ?? DEFAULT_THEME) === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => { set("theme_preset", t.id); applyTheme(t.id); }}
+                      className={`group relative overflow-hidden rounded-xl border p-3 text-start transition ${
+                        active ? "border-primary ring-2 ring-primary/40" : "border-primary/15 hover:border-primary/40"
+                      }`}
+                      style={{ background: t.vars["--card"] }}
+                    >
+                      <div className="flex h-14 gap-1.5 overflow-hidden rounded-lg">
+                        {t.swatches.map((c, i) => (
+                          <div key={i} className="flex-1" style={{ background: c }} />
+                        ))}
+                      </div>
+                      <div className="mt-2 flex items-center justify-between">
+                        <span className="text-sm font-semibold" style={{ color: t.vars["--foreground"] }}>{t.name}</span>
+                        {active && (
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-background">
+                            <Check className="h-3 w-3" />
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Section>
             <Section title="الصور" cols={1}>
               <Field k="logo_url" label="رابط الشعار (Logo URL)" />
               <Field k="favicon_url" label="رابط الأيقونة (Favicon URL)" />
