@@ -66,6 +66,7 @@ function AdminLayout() {
       items: [
         { to: "/admin/messages", icon: MessageSquare, label: t("admin.messages") },
         { to: "/admin/notifications", icon: Bell, label: t("admin.notifications") },
+        { to: "/admin/activity", icon: Activity, label: t("admin.activity") },
         { to: "/admin/settings", icon: Settings, label: t("admin.settings") },
       ],
     },
