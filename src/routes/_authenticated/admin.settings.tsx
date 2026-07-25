@@ -11,8 +11,9 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Store, Palette, Globe, CreditCard, Share2, Search, Bell,
-  Shield, Wrench, Building2, Megaphone,
+  Shield, Wrench, Building2, Megaphone, Check,
 } from "lucide-react";
+import { THEME_LIST, applyTheme, DEFAULT_THEME } from "@/lib/themes";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   component: AdminSettings,
