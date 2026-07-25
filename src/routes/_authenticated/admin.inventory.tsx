@@ -85,7 +85,7 @@ function InventoryPage() {
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="truncate font-medium">{localizedName(p, lang)}</div>
+          <div className="truncate font-medium">{localizedName(p, "name", lang)}</div>
           <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
             {p.sku && <span className="font-mono">SKU: {p.sku}</span>}
             <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${critical ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"}`}>
