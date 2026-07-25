@@ -158,6 +158,7 @@ function AdminSettings() {
                 })}
               </div>
             </Section>
+            <ThemePreview themeId={form.theme_preset ?? DEFAULT_THEME} savedId={data?.theme_preset ?? DEFAULT_THEME} onReset={() => { set("theme_preset", data?.theme_preset ?? DEFAULT_THEME); applyTheme(data?.theme_preset ?? DEFAULT_THEME); }} />
             <Section title="الصور" cols={1}>
               <Field k="logo_url" label="رابط الشعار (Logo URL)" />
               <Field k="favicon_url" label="رابط الأيقونة (Favicon URL)" />
