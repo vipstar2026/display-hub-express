@@ -44,7 +44,7 @@ export function RelatedProducts({ productId, categoryId }: { productId: string; 
     <section className="mt-12">
       <h2 className="mb-6 font-display text-2xl font-bold">{t("product.related")}</h2>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {data.map((p) => <ProductCard key={p.id} product={p as never} />)}
+        {data.map((p) => <ProductCard key={p.id} p={p as never} />)}
       </div>
     </section>
   );
@@ -76,7 +76,7 @@ export function RecentlyViewed({ excludeId }: { excludeId?: string }) {
     <section className="mt-12">
       <h2 className="mb-6 font-display text-2xl font-bold">{t("product.recently_viewed")}</h2>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
-        {data.map((p: any) => <ProductCard key={p.id} product={p as never} />)}
+        {data.map((p: any) => <ProductCard key={p.id} p={p as never} />)}
       </div>
     </section>
   );
