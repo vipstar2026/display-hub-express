@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle2, XCircle, FileImage, Eye, Clock } from "lucide-react";
+import { CheckCircle2, XCircle, FileImage, Eye, Clock, Download } from "lucide-react";
+import { generateInvoicePDF } from "@/lib/invoice-pdf";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -176,6 +177,9 @@ function OrderCard({ order: o, onConfirm, onReject, onStatus, onNotes, payBadge 
         <Textarea placeholder="Admin notes..." value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="text-sm" />
         <div className="mt-2 flex flex-wrap gap-2">
           <Button size="sm" variant="outline" onClick={() => onNotes(o.id, notes)}>Save notes</Button>
+          <Button size="sm" variant="outline" onClick={() => generateInvoicePDF(o as unknown as Parameters<typeof generateInvoicePDF>[0])}>
+            <Download className="me-1 h-4 w-4" />Invoice PDF
+          </Button>
           {o.payment_status === "pending" && (
             <>
               <Button size="sm" className="bg-emerald-500 text-background hover:bg-emerald-400" onClick={() => onConfirm(o.id)}>

@@ -6,7 +6,8 @@ import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Copy, Package, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Copy, Package, ShieldCheck, Download } from "lucide-react";
+import { generateInvoicePDF } from "@/lib/invoice-pdf";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/order/success/$id")({
@@ -99,6 +100,9 @@ function OrderSuccess() {
         </div>
 
         <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Button onClick={() => generateInvoicePDF(order as unknown as Parameters<typeof generateInvoicePDF>[0])} variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />{t("orders.downloadInvoice")}
+          </Button>
           <Link to="/account"><Button className="bg-primary text-background hover:bg-primary">{t("order.view_orders")}</Button></Link>
           <Link to="/shop"><Button variant="outline">{t("shop.continueShopping")}</Button></Link>
         </div>
