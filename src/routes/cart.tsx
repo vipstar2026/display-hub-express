@@ -32,6 +32,9 @@ function CartPage() {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [reference, setReference] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
+  const [selectedRate, setSelectedRate] = useState<string | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const [manualAddress, setManualAddress] = useState({ full_name: "", phone: "", address_line: "", city: "", country: "Bahrain" });
 
   // Coupon state
   const [couponInput, setCouponInput] = useState("");
@@ -47,10 +50,36 @@ function CartPage() {
     queryFn: async () => (await supabase.from("payment_methods_public").select("*").order("sort_order")).data ?? [],
   });
 
+  const { data: shippingRates } = useQuery({
+    queryKey: ["shipping-rates-public"],
+    queryFn: async () => (await supabase.from("shipping_rates").select("*, shipping_zones(name_ar,name_en,name_ur)").eq("is_active", true).order("sort_order")).data ?? [],
+  });
+
+  const { data: addresses } = useQuery({
+    queryKey: ["cart-addresses", userId],
+    enabled: !!userId,
+    queryFn: async () => (await supabase.from("addresses").select("*").eq("user_id", userId!).order("is_default", { ascending: false })).data ?? [],
+  });
+
+  // Auto-select default address on load
+  useEffect(() => {
+    if (!selectedAddress && addresses && addresses.length > 0) {
+      const def = addresses.find((a) => a.is_default) ?? addresses[0];
+      setSelectedAddress(def.id);
+    }
+  }, [addresses, selectedAddress]);
+
+  const rate = useMemo(() => shippingRates?.find((r) => r.id === selectedRate) ?? null, [shippingRates, selectedRate]);
+  const shippingCost = useMemo(() => {
+    if (!rate) return 0;
+    if (rate.free_over && subtotal >= Number(rate.free_over)) return 0;
+    return Number(rate.price);
+  }, [rate, subtotal]);
+
   const method = methods?.find((m) => m.id === selectedMethod) ?? null;
   const fee = method ? Number(method.fee_amount) + (subtotal * Number(method.fee_percent)) / 100 : 0;
   const discount = coupon?.discount ?? 0;
-  const total = Math.max(0, subtotal + fee - discount);
+  const total = Math.max(0, subtotal + shippingCost + fee - discount);
 
   const nameOf = (m: { name_ar: string | null; name_en: string | null; name_ur: string | null }) =>
     (lang === "ar" ? m.name_ar : lang === "ur" ? (m.name_ur || m.name_en) : m.name_en) ?? "";
