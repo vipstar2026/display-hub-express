@@ -62,7 +62,8 @@ function ProductPage() {
           {description && <p className="mt-6 whitespace-pre-line leading-relaxed text-foreground/80">{description}</p>}
 
           {(() => {
-            const w = warrantyLabel((p.features as Record<string, unknown> | null)?.warranty, lang);
+            const feats = (p.features as Record<string, unknown> | null) ?? {};
+            const w = warrantyLabel(feats.warranty, lang, feats.warranty_custom);
             if (!w) return null;
             return (
               <div className="mt-6 flex items-center gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3">

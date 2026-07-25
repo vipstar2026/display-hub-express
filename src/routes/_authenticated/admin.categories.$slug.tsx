@@ -11,7 +11,7 @@ import { Plus, Edit, Trash2, Package, ArrowLeft, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { formatPrice, firstImage } from "@/lib/format";
-import { CATEGORY_PRESETS, RESERVED_FEATURE_KEYS, translatePresetLabel, WARRANTY_OPTIONS, WARRANTY_LABEL_I18N } from "@/lib/category-presets";
+import { CATEGORY_PRESETS, RESERVED_FEATURE_KEYS, translatePresetLabel, WARRANTY_OPTIONS, WARRANTY_LABEL_I18N, WARRANTY_CUSTOM_PLACEHOLDER_I18N } from "@/lib/category-presets";
 import { useI18n, localizedName } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/categories/$slug")({
@@ -309,7 +309,18 @@ function AdminCategoryProducts() {
                     </SelectContent>
                   </Select>
                 </div>
+                {form.features.warranty === "custom" && (
+                  <div>
+                    <Label>{WARRANTY_LABEL_I18N[lang]}</Label>
+                    <Input
+                      value={String(form.features.warranty_custom ?? "")}
+                      onChange={(e) => setFeature("warranty_custom", e.target.value)}
+                      placeholder={WARRANTY_CUSTOM_PLACEHOLDER_I18N[lang]}
+                    />
+                  </div>
+                )}
               </section>
+
 
 
 
