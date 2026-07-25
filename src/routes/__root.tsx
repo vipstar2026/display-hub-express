@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 import logoUrl from "@/assets/logo.png";
 import { ThemeApplier } from "@/components/ThemeApplier";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { PWAInstaller } from "@/components/PWAInstaller";
 
 function NotFoundComponent() {
   return (
@@ -54,6 +55,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: logoUrl },
+      { rel: "apple-touch-icon", href: "/icon-192.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@500;700&display=swap" },
@@ -84,6 +87,7 @@ export function App() {
             <ThemeApplier />
             <Outlet />
             <MobileBottomNav />
+            <PWAInstaller />
             <Toaster position="top-center" theme="dark" richColors />
           </WishlistProvider>
         </CartProvider>
