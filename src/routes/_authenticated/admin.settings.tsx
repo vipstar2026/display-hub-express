@@ -123,10 +123,29 @@ function AdminSettings() {
               <Field k="tagline_en" label={t("settings.f.tagline_en")} />
               <Field k="tagline_ur" label={t("settings.f.tagline_ur")} />
             </Section>
+            <Section title={t("settings.sec.hero")} cols={1}>
+              <Field k="hero_badge_text" label={t("settings.f.hero_badge")} placeholder="VIPSTAR.CC" />
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Field k="hero_title_ar" label={t("settings.f.hero_title_ar")} />
+                <Field k="hero_title_en" label={t("settings.f.hero_title_en")} />
+                <Field k="hero_title_ur" label={t("settings.f.hero_title_ur")} />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Area k="hero_subtitle_ar" label={t("settings.f.hero_sub_ar")} rows={2} />
+                <Area k="hero_subtitle_en" label={t("settings.f.hero_sub_en")} rows={2} />
+                <Area k="hero_subtitle_ur" label={t("settings.f.hero_sub_ur")} rows={2} />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Field k="hero_cta_ar" label={t("settings.f.hero_cta_ar")} />
+                <Field k="hero_cta_en" label={t("settings.f.hero_cta_en")} />
+                <Field k="hero_cta_ur" label={t("settings.f.hero_cta_ur")} />
+              </div>
+            </Section>
             <Section title={t("settings.sec.banner")} cols={1}>
               <Toggle k="announcement_bar_enabled" label={t("settings.f.banner_enabled")} desc={t("settings.f.banner_enabled_desc")} />
               <Area k="announcement_bar_text" label={t("settings.f.banner_text")} rows={2} />
             </Section>
+
           </TabsContent>
 
           <TabsContent value="brand" className="mt-0 space-y-4">

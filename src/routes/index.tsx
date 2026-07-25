@@ -42,12 +42,19 @@ function HomePage() {
   const { data: settings } = useQuery({
     queryKey: ["home-settings"],
     queryFn: async () => {
-      const { data } = await supabase.from("site_settings").select("site_name,tagline_ar,tagline_en,tagline_ur,company_address,company_cr,business_hours,instagram_url").limit(1).maybeSingle();
+      const { data } = await supabase.from("site_settings").select("site_name,tagline_ar,tagline_en,tagline_ur,company_address,company_cr,business_hours,instagram_url,hero_badge_text,hero_title_ar,hero_title_en,hero_title_ur,hero_subtitle_ar,hero_subtitle_en,hero_subtitle_ur,hero_cta_ar,hero_cta_en,hero_cta_ur").limit(1).maybeSingle();
       return data;
     },
   });
 
   const tagline = settings ? (lang === "ar" ? settings.tagline_ar : lang === "ur" ? settings.tagline_ur : settings.tagline_en) : "";
+  const pick = (ar?: string | null, en?: string | null, ur?: string | null) =>
+    (lang === "ar" ? ar : lang === "ur" ? ur : en) || en || ar || ur || "";
+  const heroBadge = settings?.hero_badge_text || "VIPSTAR.CC";
+  const heroTitle = pick(settings?.hero_title_ar, settings?.hero_title_en, settings?.hero_title_ur) || t("home.hero.title");
+  const heroSub = pick(settings?.hero_subtitle_ar, settings?.hero_subtitle_en, settings?.hero_subtitle_ur) || t("home.hero.sub");
+  const heroCta = pick(settings?.hero_cta_ar, settings?.hero_cta_en, settings?.hero_cta_ur) || t("home.hero.cta");
+
 
 
   return (
@@ -62,16 +69,16 @@ function HomePage() {
           <div className="flex flex-col justify-center">
             <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-mono text-primary">
               <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
-              VIPSTAR.CC
+              {heroBadge}
             </div>
             <h1 className="font-display text-4xl font-bold leading-tight md:text-6xl">
-              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">{t("home.hero.title")}</span>
+              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">{heroTitle}</span>
             </h1>
-            <p className="mt-4 text-base text-muted-foreground md:text-lg">{t("home.hero.sub")}</p>
+            <p className="mt-4 text-base text-muted-foreground md:text-lg">{heroSub}</p>
             <div className="mt-6 flex gap-3">
               <Link to="/shop">
                 <Button size="lg" className="bg-primary text-background hover:bg-primary">
-                  {t("home.hero.cta")} <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
+                  {heroCta} <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
                 </Button>
               </Link>
             </div>

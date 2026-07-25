@@ -1262,6 +1262,16 @@ export type Database = {
           favicon_url: string | null
           free_shipping_threshold: number | null
           google_analytics_id: string | null
+          hero_badge_text: string | null
+          hero_cta_ar: string | null
+          hero_cta_en: string | null
+          hero_cta_ur: string | null
+          hero_subtitle_ar: string | null
+          hero_subtitle_en: string | null
+          hero_subtitle_ur: string | null
+          hero_title_ar: string | null
+          hero_title_en: string | null
+          hero_title_ur: string | null
           id: number
           instagram_url: string | null
           logo_url: string | null
@@ -1315,6 +1325,16 @@ export type Database = {
           favicon_url?: string | null
           free_shipping_threshold?: number | null
           google_analytics_id?: string | null
+          hero_badge_text?: string | null
+          hero_cta_ar?: string | null
+          hero_cta_en?: string | null
+          hero_cta_ur?: string | null
+          hero_subtitle_ar?: string | null
+          hero_subtitle_en?: string | null
+          hero_subtitle_ur?: string | null
+          hero_title_ar?: string | null
+          hero_title_en?: string | null
+          hero_title_ur?: string | null
           id?: number
           instagram_url?: string | null
           logo_url?: string | null
@@ -1368,6 +1388,16 @@ export type Database = {
           favicon_url?: string | null
           free_shipping_threshold?: number | null
           google_analytics_id?: string | null
+          hero_badge_text?: string | null
+          hero_cta_ar?: string | null
+          hero_cta_en?: string | null
+          hero_cta_ur?: string | null
+          hero_subtitle_ar?: string | null
+          hero_subtitle_en?: string | null
+          hero_subtitle_ur?: string | null
+          hero_title_ar?: string | null
+          hero_title_en?: string | null
+          hero_title_ur?: string | null
           id?: number
           instagram_url?: string | null
           logo_url?: string | null
@@ -1570,6 +1600,16 @@ export type Database = {
           favicon_url: string | null
           free_shipping_threshold: number | null
           google_analytics_id: string | null
+          hero_badge_text: string | null
+          hero_cta_ar: string | null
+          hero_cta_en: string | null
+          hero_cta_ur: string | null
+          hero_subtitle_ar: string | null
+          hero_subtitle_en: string | null
+          hero_subtitle_ur: string | null
+          hero_title_ar: string | null
+          hero_title_en: string | null
+          hero_title_ur: string | null
           id: number
           instagram_url: string | null
           logo_url: string | null
@@ -1632,6 +1672,16 @@ export type Database = {
           favicon_url: string | null
           free_shipping_threshold: number | null
           google_analytics_id: string | null
+          hero_badge_text: string | null
+          hero_cta_ar: string | null
+          hero_cta_en: string | null
+          hero_cta_ur: string | null
+          hero_subtitle_ar: string | null
+          hero_subtitle_en: string | null
+          hero_subtitle_ur: string | null
+          hero_title_ar: string | null
+          hero_title_en: string | null
+          hero_title_ur: string | null
           id: number
           instagram_url: string | null
           logo_url: string | null
