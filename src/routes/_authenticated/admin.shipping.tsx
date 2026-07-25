@@ -82,7 +82,7 @@ function AdminShippingPage() {
   const saveRate = async (form: Partial<Rate> & { zone_id: string }) => {
     const payload = {
       zone_id: form.zone_id,
-      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null,
+      name_ar: form.name_ar ?? "", name_en: form.name_en ?? "", name_ur: form.name_ur || null,
       method: form.method || "standard",
       price: Number(form.price ?? 0),
       free_over: form.free_over === null || form.free_over === undefined || String(form.free_over) === "" ? null : Number(form.free_over),
