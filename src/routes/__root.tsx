@@ -3,6 +3,7 @@ import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scrip
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/lib/i18n";
 import { CartProvider } from "@/lib/cart";
+import { WishlistProvider } from "@/lib/wishlist";
 import { Toaster } from "sonner";
 import logoUrl from "@/assets/logo.png";
 import { ThemeApplier } from "@/components/ThemeApplier";
@@ -78,9 +79,11 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <CartProvider>
-          <ThemeApplier />
-          <Outlet />
-          <Toaster position="top-center" theme="dark" richColors />
+          <WishlistProvider>
+            <ThemeApplier />
+            <Outlet />
+            <Toaster position="top-center" theme="dark" richColors />
+          </WishlistProvider>
         </CartProvider>
       </I18nProvider>
     </QueryClientProvider>
