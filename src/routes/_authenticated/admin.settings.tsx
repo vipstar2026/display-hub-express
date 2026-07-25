@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { THEME_LIST, applyTheme, DEFAULT_THEME } from "@/lib/themes";
 import { ThemePreview } from "@/components/ThemePreview";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   component: AdminSettings,
@@ -24,6 +25,7 @@ type Row = Record<string, any>;
 
 function AdminSettings() {
   const qc = useQueryClient();
+  const { t } = useI18n();
   const [form, setForm] = useState<Row | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -51,11 +53,11 @@ function AdminSettings() {
     const { error } = await (supabase as any).rpc("update_site_settings_admin", { payload });
     setSaving(false);
     if (error) toast.error(error.message);
-    else { toast.success("تم الحفظ"); qc.invalidateQueries({ queryKey: ["site-settings-admin"] }); qc.invalidateQueries({ queryKey: ["site-settings"] }); }
+    else { toast.success(t("toast.saved")); qc.invalidateQueries({ queryKey: ["site-settings-admin"] }); qc.invalidateQueries({ queryKey: ["site-settings"] }); }
   };
 
-  if (loadError) return <div className="text-destructive">تعذر تحميل الإعدادات: {(loadError as any).message}</div>;
-  if (!form) return <div className="text-muted-foreground">Loading...</div>;
+  if (loadError) return <div className="text-destructive">{t("settings.load_error")}: {(loadError as any).message}</div>;
+  if (!form) return <div className="text-muted-foreground">{t("settings.loading")}</div>;
 
   const Field = ({ k, label, type = "text", placeholder }: { k: string; label: string; type?: string; placeholder?: string }) => (
     <div className="space-y-1.5">
@@ -89,69 +91,67 @@ function AdminSettings() {
     <div className="mx-auto max-w-5xl space-y-4 pb-24">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold">إعدادات الموقع</h1>
-          <p className="text-xs text-muted-foreground">تحكم كامل بكل ما يخص الموقع من مكان واحد</p>
+          <h1 className="font-display text-2xl font-bold">{t("settings.title")}</h1>
+          <p className="text-xs text-muted-foreground">{t("settings.subtitle")}</p>
         </div>
         <Button onClick={handleSave} disabled={saving} className="bg-primary text-background hover:bg-primary">
-          {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
+          {saving ? t("settings.saving") : t("settings.save")}
         </Button>
       </div>
 
       <Tabs defaultValue="general" className="w-full">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-card/60 p-1">
-          <TabsTrigger value="general" className="gap-1.5"><Store className="h-3.5 w-3.5" />عام</TabsTrigger>
-          <TabsTrigger value="brand" className="gap-1.5"><Palette className="h-3.5 w-3.5" />الهوية</TabsTrigger>
-          <TabsTrigger value="contact" className="gap-1.5"><Building2 className="h-3.5 w-3.5" />التواصل</TabsTrigger>
-          <TabsTrigger value="social" className="gap-1.5"><Share2 className="h-3.5 w-3.5" />التواصل الاجتماعي</TabsTrigger>
-          <TabsTrigger value="commerce" className="gap-1.5"><CreditCard className="h-3.5 w-3.5" />المتجر</TabsTrigger>
-          <TabsTrigger value="seo" className="gap-1.5"><Search className="h-3.5 w-3.5" />SEO</TabsTrigger>
-          <TabsTrigger value="notifications" className="gap-1.5"><Bell className="h-3.5 w-3.5" />الإشعارات</TabsTrigger>
-          <TabsTrigger value="security" className="gap-1.5"><Shield className="h-3.5 w-3.5" />الأمان</TabsTrigger>
-          <TabsTrigger value="advanced" className="gap-1.5"><Wrench className="h-3.5 w-3.5" />متقدم</TabsTrigger>
+          <TabsTrigger value="general" className="gap-1.5"><Store className="h-3.5 w-3.5" />{t("settings.tab.general")}</TabsTrigger>
+          <TabsTrigger value="brand" className="gap-1.5"><Palette className="h-3.5 w-3.5" />{t("settings.tab.brand")}</TabsTrigger>
+          <TabsTrigger value="contact" className="gap-1.5"><Building2 className="h-3.5 w-3.5" />{t("settings.tab.contact")}</TabsTrigger>
+          <TabsTrigger value="social" className="gap-1.5"><Share2 className="h-3.5 w-3.5" />{t("settings.tab.social")}</TabsTrigger>
+          <TabsTrigger value="commerce" className="gap-1.5"><CreditCard className="h-3.5 w-3.5" />{t("settings.tab.commerce")}</TabsTrigger>
+          <TabsTrigger value="seo" className="gap-1.5"><Search className="h-3.5 w-3.5" />{t("settings.tab.seo")}</TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-1.5"><Bell className="h-3.5 w-3.5" />{t("settings.tab.notifications")}</TabsTrigger>
+          <TabsTrigger value="security" className="gap-1.5"><Shield className="h-3.5 w-3.5" />{t("settings.tab.security")}</TabsTrigger>
+          <TabsTrigger value="advanced" className="gap-1.5"><Wrench className="h-3.5 w-3.5" />{t("settings.tab.advanced")}</TabsTrigger>
         </TabsList>
 
         <div className="mt-4 space-y-4 rounded-xl border border-primary/10 bg-card/60 p-4">
           <TabsContent value="general" className="mt-0 space-y-4">
-            <Section title="الاسم والشعار" cols={2}>
-              <Field k="site_name" label="اسم الموقع" />
-              <Field k="default_language" label="اللغة الافتراضية (ar / en / ur)" />
+            <Section title={t("settings.sec.name_logo")} cols={2}>
+              <Field k="site_name" label={t("settings.f.site_name")} />
+              <Field k="default_language" label={t("settings.f.default_lang")} />
             </Section>
-            <Section title="الشعار (Slogan) ثلاثي اللغة" cols={1}>
-              <Field k="tagline_ar" label="عربي" />
-              <Field k="tagline_en" label="English" />
-              <Field k="tagline_ur" label="اردو" />
+            <Section title={t("settings.sec.tagline")} cols={1}>
+              <Field k="tagline_ar" label={t("settings.f.tagline_ar")} />
+              <Field k="tagline_en" label={t("settings.f.tagline_en")} />
+              <Field k="tagline_ur" label={t("settings.f.tagline_ur")} />
             </Section>
-            <Section title="بانر إعلاني علوي" cols={1}>
-              <Toggle k="announcement_bar_enabled" label="تفعيل البانر" desc="يظهر أعلى كل صفحة" />
-              <Area k="announcement_bar_text" label="نص البانر" rows={2} />
+            <Section title={t("settings.sec.banner")} cols={1}>
+              <Toggle k="announcement_bar_enabled" label={t("settings.f.banner_enabled")} desc={t("settings.f.banner_enabled_desc")} />
+              <Area k="announcement_bar_text" label={t("settings.f.banner_text")} rows={2} />
             </Section>
           </TabsContent>
 
           <TabsContent value="brand" className="mt-0 space-y-4">
-            <Section title="ثيم الموقع (Theme)" cols={1}>
-              <div className="text-xs text-muted-foreground">
-                اختر لوحة ألوان جاهزة — يتم تطبيقها فوراً على كل صفحات الموقع.
-              </div>
+            <Section title={t("settings.sec.theme")} cols={1}>
+              <div className="text-xs text-muted-foreground">{t("settings.theme.desc")}</div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {THEME_LIST.map((t) => {
-                  const active = (form.theme_preset ?? DEFAULT_THEME) === t.id;
+                {THEME_LIST.map((th) => {
+                  const active = (form.theme_preset ?? DEFAULT_THEME) === th.id;
                   return (
                     <button
-                      key={t.id}
+                      key={th.id}
                       type="button"
-                      onClick={() => { set("theme_preset", t.id); applyTheme(t.id); }}
+                      onClick={() => { set("theme_preset", th.id); applyTheme(th.id); }}
                       className={`group relative overflow-hidden rounded-xl border p-3 text-start transition ${
                         active ? "border-primary ring-2 ring-primary/40" : "border-primary/15 hover:border-primary/40"
                       }`}
-                      style={{ background: t.vars["--card"] }}
+                      style={{ background: th.vars["--card"] }}
                     >
                       <div className="flex h-14 gap-1.5 overflow-hidden rounded-lg">
-                        {t.swatches.map((c, i) => (
+                        {th.swatches.map((c, i) => (
                           <div key={i} className="flex-1" style={{ background: c }} />
                         ))}
                       </div>
                       <div className="mt-2 flex items-center justify-between">
-                        <span className="text-sm font-semibold" style={{ color: t.vars["--foreground"] }}>{t.name}</span>
+                        <span className="text-sm font-semibold" style={{ color: th.vars["--foreground"] }}>{th.name}</span>
                         {active && (
                           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-background">
                             <Check className="h-3 w-3" />
@@ -164,21 +164,21 @@ function AdminSettings() {
               </div>
             </Section>
             <ThemePreview themeId={form.theme_preset ?? DEFAULT_THEME} savedId={data?.theme_preset ?? DEFAULT_THEME} onReset={() => { set("theme_preset", data?.theme_preset ?? DEFAULT_THEME); applyTheme(data?.theme_preset ?? DEFAULT_THEME); }} />
-            <Section title="الصور" cols={1}>
-              <Field k="logo_url" label="رابط الشعار (Logo URL)" />
-              <Field k="favicon_url" label="رابط الأيقونة (Favicon URL)" />
-              <Field k="og_image_url" label="صورة المشاركة الاجتماعية (Open Graph)" />
+            <Section title={t("settings.sec.images")} cols={1}>
+              <Field k="logo_url" label={t("settings.f.logo_url")} />
+              <Field k="favicon_url" label={t("settings.f.favicon_url")} />
+              <Field k="og_image_url" label={t("settings.f.og_url")} />
             </Section>
-            <Section title="الألوان" cols={2}>
+            <Section title={t("settings.sec.colors")} cols={2}>
               <div className="space-y-1.5">
-                <Label className="text-xs">اللون الأساسي</Label>
+                <Label className="text-xs">{t("settings.f.primary_color")}</Label>
                 <div className="flex gap-2">
                   <input type="color" value={form.primary_color ?? "#22d3ee"} onChange={(e) => set("primary_color", e.target.value)} className="h-10 w-14 cursor-pointer rounded border border-primary/20 bg-background" />
                   <Input value={form.primary_color ?? ""} onChange={(e) => set("primary_color", e.target.value)} />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">اللون الثانوي</Label>
+                <Label className="text-xs">{t("settings.f.accent_color")}</Label>
                 <div className="flex gap-2">
                   <input type="color" value={form.accent_color ?? "#0ea5e9"} onChange={(e) => set("accent_color", e.target.value)} className="h-10 w-14 cursor-pointer rounded border border-primary/20 bg-background" />
                   <Input value={form.accent_color ?? ""} onChange={(e) => set("accent_color", e.target.value)} />
@@ -188,23 +188,23 @@ function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="contact" className="mt-0 space-y-4">
-            <Section title="بيانات التواصل" cols={2}>
-              <Field k="contact_email" label="البريد الإلكتروني" type="email" />
-              <Field k="contact_phone" label="رقم الهاتف" />
-              <Field k="whatsapp" label="واتساب" />
-              <Field k="business_hours" label="ساعات العمل" placeholder="السبت - الخميس 9ص - 10م" />
+            <Section title={t("settings.sec.contact_info")} cols={2}>
+              <Field k="contact_email" label={t("settings.f.email")} type="email" />
+              <Field k="contact_phone" label={t("settings.f.phone")} />
+              <Field k="whatsapp" label={t("settings.f.whatsapp")} />
+              <Field k="business_hours" label={t("settings.f.hours")} placeholder={t("settings.f.hours_placeholder")} />
             </Section>
-            <Section title="بيانات الشركة" cols={1}>
-              <Area k="company_address" label="العنوان" rows={2} />
+            <Section title={t("settings.sec.company")} cols={1}>
+              <Area k="company_address" label={t("settings.f.address")} rows={2} />
               <div className="grid gap-3 sm:grid-cols-2">
-                <Field k="company_cr" label="السجل التجاري (CR)" />
-                <Field k="company_vat_no" label="الرقم الضريبي (VAT)" />
+                <Field k="company_cr" label={t("settings.f.cr")} />
+                <Field k="company_vat_no" label={t("settings.f.vat_no")} />
               </div>
             </Section>
           </TabsContent>
 
           <TabsContent value="social" className="mt-0 space-y-4">
-            <Section title="روابط منصات التواصل" cols={2}>
+            <Section title={t("settings.sec.social_links")} cols={2}>
               <Field k="instagram_url" label="Instagram" placeholder="https://instagram.com/..." />
               <Field k="twitter_url" label="X / Twitter" />
               <Field k="facebook_url" label="Facebook" />
@@ -216,31 +216,31 @@ function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="commerce" className="mt-0 space-y-4">
-            <Section title="العملة والشحن" cols={3}>
-              <Field k="default_currency" label="العملة الافتراضية" placeholder="BHD" />
-              <Field k="shipping_flat" label="سعر الشحن الثابت" type="number" />
-              <Field k="free_shipping_threshold" label="الشحن مجاناً فوق" type="number" />
+            <Section title={t("settings.sec.currency_shipping")} cols={3}>
+              <Field k="default_currency" label={t("settings.f.currency")} placeholder="BHD" />
+              <Field k="shipping_flat" label={t("settings.f.shipping_flat")} type="number" />
+              <Field k="free_shipping_threshold" label={t("settings.f.free_shipping")} type="number" />
             </Section>
-            <Section title="الضريبة" cols={2}>
-              <Field k="vat_percent" label="نسبة ضريبة القيمة المضافة %" type="number" />
-              <Toggle k="prices_include_vat" label="الأسعار شاملة الضريبة" />
+            <Section title={t("settings.sec.tax")} cols={2}>
+              <Field k="vat_percent" label={t("settings.f.vat_pct")} type="number" />
+              <Toggle k="prices_include_vat" label={t("settings.f.prices_incl_vat")} />
             </Section>
-            <Section title="المخزون والطلبات" cols={2}>
-              <Field k="low_stock_threshold" label="حد التنبيه للمخزون المنخفض" type="number" />
-              <Toggle k="allow_guest_checkout" label="السماح بالشراء كضيف" desc="بدون تسجيل حساب" />
+            <Section title={t("settings.sec.inventory")} cols={2}>
+              <Field k="low_stock_threshold" label={t("settings.f.low_stock")} type="number" />
+              <Toggle k="allow_guest_checkout" label={t("settings.f.guest_checkout")} desc={t("settings.f.guest_checkout_desc")} />
             </Section>
           </TabsContent>
 
           <TabsContent value="seo" className="mt-0 space-y-4">
-            <Section title="الوصف (Meta Description)" cols={1}>
-              <Area k="meta_description_ar" label="عربي" />
-              <Area k="meta_description_en" label="English" />
-              <Area k="meta_description_ur" label="اردو" />
+            <Section title={t("settings.sec.meta_desc")} cols={1}>
+              <Area k="meta_description_ar" label={t("settings.f.tagline_ar")} />
+              <Area k="meta_description_en" label={t("settings.f.tagline_en")} />
+              <Area k="meta_description_ur" label={t("settings.f.tagline_ur")} />
             </Section>
-            <Section title="الكلمات المفتاحية" cols={1}>
-              <Area k="meta_keywords" label="افصل بينها بفواصل" rows={2} />
+            <Section title={t("settings.sec.keywords")} cols={1}>
+              <Area k="meta_keywords" label={t("settings.f.keywords_hint")} rows={2} />
             </Section>
-            <Section title="أكواد التتبع" cols={1}>
+            <Section title={t("settings.sec.tracking")} cols={1}>
               <Field k="google_analytics_id" label="Google Analytics (G-XXXX)" />
               <Field k="meta_pixel_id" label="Meta / Facebook Pixel ID" />
               <Field k="tiktok_pixel_id" label="TikTok Pixel ID" />
@@ -248,23 +248,23 @@ function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="notifications" className="mt-0 space-y-3">
-            <Toggle k="notify_email_new_order" label="إشعار بريدي عند وصول طلب جديد" />
-            <Toggle k="notify_email_low_stock" label="إشعار بريدي عند انخفاض المخزون" />
+            <Toggle k="notify_email_new_order" label={t("settings.notify.new_order")} />
+            <Toggle k="notify_email_low_stock" label={t("settings.notify.low_stock")} />
           </TabsContent>
 
           <TabsContent value="security" className="mt-0 space-y-3">
-            <Toggle k="allow_signups" label="السماح بإنشاء حسابات جديدة" desc="أوقفها لإغلاق التسجيل مؤقتاً" />
-            <Toggle k="require_email_verification" label="اشتراط تفعيل البريد الإلكتروني" />
-            <Toggle k="maintenance_mode" label="وضع الصيانة" desc="إخفاء الموقع عن الزوار مؤقتاً" />
-            <Area k="maintenance_message" label="رسالة الصيانة" rows={3} />
+            <Toggle k="allow_signups" label={t("settings.sec.signups")} desc={t("settings.sec.signups_desc")} />
+            <Toggle k="require_email_verification" label={t("settings.sec.email_verify")} />
+            <Toggle k="maintenance_mode" label={t("settings.sec.maintenance")} desc={t("settings.sec.maintenance_desc")} />
+            <Area k="maintenance_message" label={t("settings.f.maintenance_msg")} rows={3} />
           </TabsContent>
 
           <TabsContent value="advanced" className="mt-0 space-y-4">
-            <Section title="حقن كود مخصص" cols={1}>
+            <Section title={t("settings.adv.custom")} cols={1}>
               <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-3 text-xs text-yellow-300/90">
-                <Megaphone className="mb-1 inline h-3.5 w-3.5" /> يُضاف هذا الكود داخل &lt;head&gt; في كل الصفحات. استخدمه بحذر.
+                <Megaphone className="mb-1 inline h-3.5 w-3.5" /> {t("settings.adv.warning")}
               </div>
-              <Area k="custom_head_html" label="كود HTML/JS مخصص (Head)" rows={8} />
+              <Area k="custom_head_html" label={t("settings.adv.head_html")} rows={8} />
             </Section>
           </TabsContent>
         </div>
@@ -272,7 +272,7 @@ function AdminSettings() {
 
       <div className="sticky bottom-4 flex justify-end">
         <Button onClick={handleSave} disabled={saving} size="lg" className="bg-primary text-background shadow-lg shadow-primary/30 hover:bg-primary">
-          {saving ? "جاري الحفظ..." : "حفظ كل التغييرات"}
+          {saving ? t("settings.saving") : t("settings.save_all")}
         </Button>
       </div>
     </div>
