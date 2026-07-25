@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatPrice } from "@/lib/format";
-import { Trash2, ShoppingBag, Package, Upload, CheckCircle2, Landmark, Smartphone, Banknote, Wallet, CreditCard } from "lucide-react";
+import { Trash2, ShoppingBag, Package, Upload, CheckCircle2, Landmark, Smartphone, Banknote, Wallet, CreditCard, Tag, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -33,6 +33,11 @@ function CartPage() {
   const [reference, setReference] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
 
+  // Coupon state
+  const [couponInput, setCouponInput] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+  const [coupon, setCoupon] = useState<{ id: string; code: string; discount: number } | null>(null);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
   }, []);
@@ -44,12 +49,29 @@ function CartPage() {
 
   const method = methods?.find((m) => m.id === selectedMethod) ?? null;
   const fee = method ? Number(method.fee_amount) + (subtotal * Number(method.fee_percent)) / 100 : 0;
-  const total = subtotal + fee;
+  const discount = coupon?.discount ?? 0;
+  const total = Math.max(0, subtotal + fee - discount);
 
   const nameOf = (m: { name_ar: string | null; name_en: string | null; name_ur: string | null }) =>
     (lang === "ar" ? m.name_ar : lang === "ur" ? (m.name_ur || m.name_en) : m.name_en) ?? "";
   const instrOf = (m: { instructions_ar: string | null; instructions_en: string | null; instructions_ur: string | null }) =>
     (lang === "ar" ? m.instructions_ar : lang === "ur" ? m.instructions_ur : m.instructions_en) ?? m.instructions_en ?? "";
+
+  const applyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setApplyingCoupon(true);
+    try {
+      const { data, error } = await supabase.rpc("redeem_coupon", { _code: couponInput.trim(), _subtotal: subtotal });
+      if (error || !data || (data as unknown[]).length === 0) throw new Error(t("cart.coupon_invalid"));
+      const row = (data as { coupon_id: string; code: string; discount: number }[])[0];
+      setCoupon({ id: row.coupon_id, code: row.code, discount: Number(row.discount) });
+      toast.success(t("cart.coupon_applied"));
+    } catch (e) {
+      toast.error((e as Error).message || t("cart.coupon_invalid"));
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
 
   const handleCheckout = async () => {
     if (!userId) { nav({ to: "/auth" }); return; }
@@ -74,6 +96,7 @@ function CartPage() {
         buyer_email: user.user?.email ?? "",
         buyer_name: user.user?.user_metadata?.display_name ?? null,
         subtotal,
+        discount,
         total,
         currency: "BHD",
         status: "pending",
@@ -82,6 +105,8 @@ function CartPage() {
         payment_proof_url: proofUrl,
         payment_reference: reference || null,
         customer_notes: customerNotes || null,
+        coupon_id: coupon?.id ?? null,
+        coupon_code: coupon?.code ?? null,
       }).select().single();
       if (error) throw error;
 
@@ -98,9 +123,13 @@ function CartPage() {
       );
       if (itemsError) throw itemsError;
 
+      if (coupon) {
+        await supabase.rpc("finalize_coupon_use", { _coupon_id: coupon.id, _order_id: order.id, _discount: discount });
+      }
+
       clear();
       toast.success(t("cart.order_placed"));
-      nav({ to: "/account" });
+      nav({ to: "/order/success/$id", params: { id: order.id } });
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -146,6 +175,24 @@ function CartPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Coupon */}
+              <div className="rounded-xl border border-primary/20 bg-card p-5">
+                <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold"><Tag className="h-4 w-4 text-primary" />{t("cart.coupon")}</h2>
+                {coupon ? (
+                  <div className="flex items-center gap-3 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span className="font-mono font-bold text-primary">{coupon.code}</span>
+                    <span className="text-sm text-muted-foreground">−{formatPrice(coupon.discount)}</span>
+                    <button onClick={() => { setCoupon(null); setCouponInput(""); }} className="ms-auto text-muted-foreground hover:text-destructive"><X className="h-4 w-4" /></button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Input value={couponInput} onChange={(e) => setCouponInput(e.target.value.toUpperCase())} placeholder={t("cart.coupon_placeholder")} />
+                    <Button onClick={applyCoupon} disabled={applyingCoupon || !couponInput.trim()} className="bg-primary text-background hover:bg-primary">{t("cart.apply")}</Button>
+                  </div>
+                )}
               </div>
 
               {/* Payment methods */}
@@ -231,6 +278,12 @@ function CartPage() {
                 <div className="flex justify-between py-2 text-sm text-muted-foreground">
                   <span>{t("cart.payment_fee")}</span>
                   <span className="font-mono">{formatPrice(fee)}</span>
+                </div>
+              )}
+              {discount > 0 && (
+                <div className="flex justify-between py-2 text-sm text-primary">
+                  <span>{t("cart.discount")}</span>
+                  <span className="font-mono">−{formatPrice(discount)}</span>
                 </div>
               )}
               <div className="my-3 border-t border-primary/20" />
