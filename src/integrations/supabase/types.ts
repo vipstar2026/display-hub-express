@@ -218,6 +218,7 @@ export type Database = {
         Row: {
           code: string
           created_at: string
+          description: string | null
           discount_type: string
           discount_value: number
           expires_at: string | null
@@ -225,11 +226,13 @@ export type Database = {
           is_active: boolean
           max_uses: number | null
           min_total: number | null
+          starts_at: string | null
           used_count: number
         }
         Insert: {
           code: string
           created_at?: string
+          description?: string | null
           discount_type: string
           discount_value: number
           expires_at?: string | null
@@ -237,11 +240,13 @@ export type Database = {
           is_active?: boolean
           max_uses?: number | null
           min_total?: number | null
+          starts_at?: string | null
           used_count?: number
         }
         Update: {
           code?: string
           created_at?: string
+          description?: string | null
           discount_type?: string
           discount_value?: number
           expires_at?: string | null
@@ -249,6 +254,7 @@ export type Database = {
           is_active?: boolean
           max_uses?: number | null
           min_total?: number | null
+          starts_at?: string | null
           used_count?: number
         }
         Relationships: []
@@ -1726,6 +1732,64 @@ export type Database = {
       }
     }
     Functions: {
+      admin_customer_analytics: {
+        Args: never
+        Returns: {
+          buyer_email: string
+          buyer_name: string
+          first_order_at: string
+          last_order_at: string
+          orders_count: number
+          total_spent: number
+        }[]
+      }
+      admin_delete_coupon: { Args: { _id: string }; Returns: undefined }
+      admin_list_coupons: {
+        Args: never
+        Returns: {
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_total: number | null
+          starts_at: string | null
+          used_count: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "coupons"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_upsert_coupon: {
+        Args: { _data: Json }
+        Returns: {
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_total: number | null
+          starts_at: string | null
+          used_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "coupons"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       assign_digital_codes: { Args: { _order_id: string }; Returns: undefined }
       finalize_coupon_use: {
         Args: { _coupon_id: string; _discount: number; _order_id: string }
@@ -1896,16 +1960,28 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      validate_coupon: {
-        Args: { _code: string }
-        Returns: {
-          code: string
-          discount_type: string
-          discount_value: number
-          id: string
-          min_total: number
-        }[]
-      }
+      validate_coupon:
+        | {
+            Args: { _code: string }
+            Returns: {
+              code: string
+              discount_type: string
+              discount_value: number
+              id: string
+              min_total: number
+            }[]
+          }
+        | {
+            Args: { _code: string; _subtotal: number }
+            Returns: {
+              coupon_id: string
+              discount_amount: number
+              discount_type: string
+              discount_value: number
+              message: string
+              valid: boolean
+            }[]
+          }
     }
     Enums: {
       app_role: "admin" | "customer"
