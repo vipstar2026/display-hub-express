@@ -14,6 +14,7 @@ import {
   Shield, Wrench, Building2, Megaphone, Check,
 } from "lucide-react";
 import { THEME_LIST, applyTheme, DEFAULT_THEME } from "@/lib/themes";
+import { ThemePreview } from "@/components/ThemePreview";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   component: AdminSettings,
