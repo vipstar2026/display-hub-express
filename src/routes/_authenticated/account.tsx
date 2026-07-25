@@ -41,7 +41,10 @@ function AccountPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-display text-3xl font-bold">{t("nav.account")}</h1>
-          <Link to="/wishlist"><Button variant="outline"><Heart className="me-2 h-4 w-4" />{t("wishlist.title")}</Button></Link>
+          <div className="flex gap-2">
+            <Link to="/account/addresses"><Button variant="outline"><MapPin className="me-2 h-4 w-4" />{t("account.addresses")}</Button></Link>
+            <Link to="/wishlist"><Button variant="outline"><Heart className="me-2 h-4 w-4" />{t("wishlist.title")}</Button></Link>
+          </div>
         </div>
 
         <div className="mb-6 flex items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-5">
