@@ -14,6 +14,7 @@ import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { CookieConsent } from "@/components/CookieConsent";
 import { CompareBar } from "@/components/CompareBar";
+import { LiveChatWidget } from "@/components/LiveChatWidget";
 
 function NotFoundComponent() {
   return (
@@ -98,6 +99,7 @@ export function App() {
               <ScrollToTop />
               <CookieConsent />
               <CompareBar />
+              <LiveChatWidget />
               <Toaster position="top-center" theme="dark" richColors />
             </CompareProvider>
           </WishlistProvider>
