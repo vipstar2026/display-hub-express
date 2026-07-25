@@ -440,6 +440,9 @@ const AR: Dict = {
   "loyalty.balance": "رصيد نقاط الولاء",
   "loyalty.points": "نقطة",
   "loyalty.hint": "تربح نقطة واحدة عن كل دينار تنفقه",
+  "pwa.install_title": "ثبّت تطبيق VIPSTAR",
+  "pwa.install_desc": "أضِف المتجر إلى شاشتك الرئيسية للوصول السريع وتجربة كتطبيق.",
+  "pwa.install_cta": "تثبيت التطبيق",
 };
 
 const EN: Dict = {
