@@ -33,11 +33,11 @@ function AdminNotifications() {
     if (!title.trim()) { toast.error(t("notif.titleRequired")); return; }
     setSending(true);
     const { data, error } = await supabase.rpc("admin_broadcast_notification", {
-      _title: title, _message: message || null, _severity: severity, _link: link || null, _target: target,
+      _title: title, _message: message || "", _severity: severity, _link: link || "", _target: target,
     });
     setSending(false);
     if (error) { toast.error(error.message); return; }
-    toast.success(t("notif.sent", { n: String(data ?? 0) }));
+    toast.success(`${t("notif.sent")} (${data ?? 0})`);
     setTitle(""); setMessage(""); setLink("");
     qc.invalidateQueries({ queryKey: ["admin-notifs-recent"] });
   };
