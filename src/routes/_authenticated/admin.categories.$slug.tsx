@@ -309,7 +309,18 @@ function AdminCategoryProducts() {
                     </SelectContent>
                   </Select>
                 </div>
+                {form.features.warranty === "custom" && (
+                  <div>
+                    <Label>{WARRANTY_LABEL_I18N[lang]}</Label>
+                    <Input
+                      value={String(form.features.warranty_custom ?? "")}
+                      onChange={(e) => setFeature("warranty_custom", e.target.value)}
+                      placeholder={WARRANTY_CUSTOM_PLACEHOLDER_I18N[lang]}
+                    />
+                  </div>
+                )}
               </section>
+
 
 
 
