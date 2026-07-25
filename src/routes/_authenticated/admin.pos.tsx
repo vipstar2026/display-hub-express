@@ -55,7 +55,7 @@ function POSPage() {
   useEffect(() => {
     (async () => {
       const [{ data: p }, { data: c }, { data: s }] = await Promise.all([
-        supabase.from("products").select("id,name_en,name_ar,sku,price,stock,images,category_id").eq("is_active", true).order("name_en"),
+        supabase.from("products").select("id,name_en,name_ar,sku,price,stock,images,category_id").eq("status", "active").order("name_en"),
         supabase.from("categories").select("id,name_en,name_ar").eq("is_active", true).order("sort_order"),
         supabase.from("pos_sessions").select("*").eq("status", "open").maybeSingle(),
       ]);
