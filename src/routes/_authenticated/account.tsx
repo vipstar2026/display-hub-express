@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { Copy, ShoppingBag, Heart, Package } from "lucide-react";
+import { Copy, ShoppingBag, Heart, Package, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account")({
@@ -22,6 +22,16 @@ function AccountPage() {
       if (!u.user) return [];
       const { data } = await supabase.from("orders").select("*, order_items(*)").eq("buyer_id", u.user.id).order("created_at", { ascending: false });
       return data ?? [];
+    },
+  });
+
+  const { data: loyalty } = useQuery({
+    queryKey: ["my-loyalty"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return { balance: 0 };
+      const { data } = await supabase.from("loyalty_balance").select("balance").eq("buyer_id", u.user.id).maybeSingle();
+      return { balance: data?.balance ?? 0 };
     },
   });
 
