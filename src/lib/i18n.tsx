@@ -1314,6 +1314,9 @@ const UR: Dict = {
   "loyalty.balance": "لائلٹی پوائنٹس",
   "loyalty.points": "پوائنٹس",
   "loyalty.hint": "ہر BHD خرچ پر 1 پوائنٹ کمائیں",
+  "pwa.install_title": "VIPSTAR ایپ انسٹال کریں",
+  "pwa.install_desc": "تیز رسائی کے لیے اسٹور کو ہوم اسکرین پر شامل کریں۔",
+  "pwa.install_cta": "ایپ انسٹال کریں",
 };
 
 const dictionaries: Record<Lang, Dict> = { ar: AR, en: EN, ur: UR };
