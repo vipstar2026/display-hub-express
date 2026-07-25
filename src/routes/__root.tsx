@@ -7,6 +7,7 @@ import { WishlistProvider } from "@/lib/wishlist";
 import { Toaster } from "sonner";
 import logoUrl from "@/assets/logo.png";
 import { ThemeApplier } from "@/components/ThemeApplier";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 function NotFoundComponent() {
   return (
@@ -82,6 +83,7 @@ export function App() {
           <WishlistProvider>
             <ThemeApplier />
             <Outlet />
+            <MobileBottomNav />
             <Toaster position="top-center" theme="dark" richColors />
           </WishlistProvider>
         </CartProvider>
