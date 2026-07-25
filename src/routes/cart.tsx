@@ -390,6 +390,12 @@ function CartPage() {
             {/* Summary */}
             <div className="h-fit rounded-xl border border-primary/20 bg-card p-6">
               <div className="flex justify-between py-2"><span>{t("shop.subtotal")}</span><span className="font-mono">{formatPrice(subtotal)}</span></div>
+              {rate && (
+                <div className="flex justify-between py-2 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1"><Truck className="h-3.5 w-3.5" />{t("cart.select_shipping")}</span>
+                  <span className="font-mono">{shippingCost === 0 ? t("cart.shipping_free") : formatPrice(shippingCost)}</span>
+                </div>
+              )}
               {fee > 0 && (
                 <div className="flex justify-between py-2 text-sm text-muted-foreground">
                   <span>{t("cart.payment_fee")}</span>
