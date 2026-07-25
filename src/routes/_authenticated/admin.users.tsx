@@ -35,7 +35,7 @@ function AdminUsers() {
   return (
     <div className="space-y-4">
       <h1 className="font-display text-2xl font-bold">Users</h1>
-      <div className="rounded-xl border border-primary/10 bg-card divide-y divide-cyan-500/10">
+      <div className="rounded-xl border border-primary/10 bg-card divide-y divide-primary/10">
         {(profiles ?? []).map((u) => (
           <div key={u.id} className="flex items-center gap-3 p-3">
             <div className="flex-1">

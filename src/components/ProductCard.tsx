@@ -33,11 +33,11 @@ export function ProductCard({ p }: { p: Product }) {
     : 0;
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-primary/10 bg-gradient-to-b from-card to-card/40 transition duration-300 hover:-translate-y-1 hover:border-cyan-400/50 hover:shadow-[0_12px_36px_-14px_rgba(0,217,255,0.45)]">
+    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-primary/10 bg-gradient-to-b from-card to-card/40 transition duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_12px_36px_-14px_rgba(230,80,40,0.45)]">
       <Link to="/product/$slug" params={{ slug: p.slug }} className="block">
         <div className="relative aspect-square w-full overflow-hidden">
           {/* layered backdrop */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(0,217,255,0.10),transparent_65%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(230,80,40,0.45),transparent_65%)]" />
           <div className="absolute inset-0 bg-gradient-to-br from-background/60 via-background/20 to-background/60" />
           {/* framed image */}
           <div className="absolute inset-3 overflow-hidden rounded-lg ring-1 ring-primary/10 bg-background/40 backdrop-blur-[2px]">
@@ -53,7 +53,7 @@ export function ProductCard({ p }: { p: Product }) {
             )}
           </div>
           {/* shine */}
-          <div className="pointer-events-none absolute -inset-x-4 -top-1/2 h-40 rotate-12 bg-gradient-to-r from-transparent via-cyan-300/10 to-transparent opacity-0 transition duration-700 group-hover:translate-y-[220%] group-hover:opacity-100" />
+          <div className="pointer-events-none absolute -inset-x-4 -top-1/2 h-40 rotate-12 bg-gradient-to-r from-transparent via-primary/10 to-transparent opacity-0 transition duration-700 group-hover:translate-y-[220%] group-hover:opacity-100" />
           {discount > 0 && (
             <span className="absolute start-2 top-2 rounded-full bg-gradient-to-r from-red-500 to-rose-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-md">
               -{discount}%

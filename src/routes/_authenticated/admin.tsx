@@ -64,11 +64,11 @@ function AdminLayout() {
   const current = allItems.find((i) => (i.exact ? pathname === i.to : pathname.startsWith(i.to) && i.to !== "/admin")) ?? allItems[0];
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-background via-background to-cyan-950/10">
+    <div className="flex min-h-screen bg-gradient-to-br from-background via-background to-primary/10">
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 z-40 w-64 border-e border-primary/20 bg-card/80 backdrop-blur-xl transition-transform md:static md:!translate-x-0 ${open ? "translate-x-0" : "rtl:translate-x-full ltr:-translate-x-full"}`}>
         <div className="flex h-16 items-center gap-2 border-b border-primary/20 px-5">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-cyan-600 shadow-lg shadow-primary/30">
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary/70 shadow-lg shadow-primary/30">
             <Satellite className="h-5 w-5 text-background" />
           </div>
           <div>
@@ -151,7 +151,7 @@ function AdminLayout() {
                 <select
                   value={lang}
                   onChange={(e) => setLang(e.target.value as Lang)}
-                  className="h-9 appearance-none rounded-md border border-primary/20 bg-background/50 ps-7 pe-3 text-xs font-medium outline-none focus:border-cyan-500"
+                  className="h-9 appearance-none rounded-md border border-primary/20 bg-background/50 ps-7 pe-3 text-xs font-medium outline-none focus:border-primary"
                 >
                   <option value="ar">AR</option>
                   <option value="en">EN</option>
@@ -163,7 +163,7 @@ function AdminLayout() {
                 <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
               </Button>
               <div className="hidden items-center gap-2 rounded-full border border-primary/20 bg-background/50 py-1 ps-1 pe-3 sm:flex">
-                <div className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-primary to-cyan-600 text-xs font-bold text-background">
+                <div className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-xs font-bold text-background">
                   {(user.email?.[0] ?? "A").toUpperCase()}
                 </div>
                 <span className="max-w-[140px] truncate text-xs text-muted-foreground">{user.email}</span>

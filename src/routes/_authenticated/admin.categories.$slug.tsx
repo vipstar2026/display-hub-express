@@ -356,7 +356,7 @@ function AdminCategoryProducts() {
 
       <div className="rounded-xl border border-primary/10 bg-card">
         {(products ?? []).length === 0 && <div className="p-8 text-center text-muted-foreground">{t("form.no_products")}</div>}
-        <div className="divide-y divide-cyan-500/10">
+        <div className="divide-y divide-primary/10">
           {(products ?? []).map((p) => {
             const img = firstImage(p.images);
             return (

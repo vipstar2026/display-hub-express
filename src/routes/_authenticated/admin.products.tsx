@@ -349,7 +349,7 @@ function AdminProducts() {
             <button
               key={c.id}
               onClick={() => openForCategory(c)}
-              className="group flex items-center gap-3 rounded-xl border border-primary/20 bg-card p-3 text-start transition hover:-translate-y-0.5 hover:border-cyan-400/60 hover:bg-primary/5"
+              className="group flex items-center gap-3 rounded-xl border border-primary/20 bg-card p-3 text-start transition hover:-translate-y-0.5 hover:border-primary/60 hover:bg-primary/5"
             >
               <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
                 <Icon className="h-5 w-5" />
@@ -502,7 +502,7 @@ function AdminProducts() {
           <div className="text-sm font-semibold">جميع المنتجات ({(products ?? []).length})</div>
         </div>
         {(products ?? []).length === 0 && <div className="p-8 text-center text-muted-foreground">لا توجد منتجات بعد — اختر قسمًا أعلاه للبدء</div>}
-        <div className="divide-y divide-cyan-500/10">
+        <div className="divide-y divide-primary/10">
           {(products ?? []).map((p) => {
             const img = firstImage(p.images);
             const catName = (p as { categories?: { name_ar?: string } }).categories?.name_ar;

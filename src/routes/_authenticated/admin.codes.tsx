@@ -60,7 +60,7 @@ function AdminCodes() {
       </div>
 
       {productId && (
-        <div className="rounded-xl border border-primary/10 bg-card divide-y divide-cyan-500/10">
+        <div className="rounded-xl border border-primary/10 bg-card divide-y divide-primary/10">
           {(codes ?? []).length === 0 && <div className="p-6 text-center text-muted-foreground">No codes yet</div>}
           {(codes ?? []).map((c) => (
             <div key={c.id} className="flex items-center gap-3 p-3 text-sm">

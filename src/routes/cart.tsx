@@ -168,7 +168,7 @@ function CartPage() {
                         type="button"
                         onClick={() => setSelectedMethod(m.id)}
                         className={`flex items-center gap-3 rounded-lg border p-3 text-start transition-all ${
-                          active ? "border-cyan-500 bg-primary/10 shadow-lg shadow-primary/10" : "border-primary/20 hover:border-primary/50"
+                          active ? "border-primary bg-primary/10 shadow-lg shadow-primary/10" : "border-primary/20 hover:border-primary/50"
                         }`}
                       >
                         <div className={`grid h-9 w-9 place-items-center rounded-md ${active ? "bg-primary text-background" : "bg-primary/10 text-primary"}`}>

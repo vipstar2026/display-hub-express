@@ -283,7 +283,7 @@ function AdminDashboard() {
           {(recent ?? []).length === 0 ? (
             <div className="p-12 text-center text-sm text-muted-foreground">{t("admin.noData")}</div>
           ) : (
-            <div className="divide-y divide-cyan-500/10">
+            <div className="divide-y divide-primary/10">
               {(recent ?? []).map((o) => (
                 <div key={o.id} className="flex flex-wrap items-center gap-3 p-4 text-sm hover:bg-primary/5">
                   <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
@@ -315,7 +315,7 @@ function AdminDashboard() {
             {(topProducts ?? []).length === 0 ? (
               <div className="p-6 text-center text-xs text-muted-foreground">{t("admin.noData")}</div>
             ) : (
-              <div className="divide-y divide-cyan-500/10">
+              <div className="divide-y divide-primary/10">
                 {(topProducts ?? []).map((p, i) => (
                   <div key={i} className="flex items-center gap-3 p-3 text-sm">
                     <span className="grid h-7 w-7 place-items-center rounded-full bg-primary/10 font-mono text-xs font-bold text-primary">

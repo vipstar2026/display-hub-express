@@ -61,7 +61,7 @@ function AdminCategories() {
         </Dialog>
       </div>
 
-      <div className="rounded-xl border border-primary/10 bg-card divide-y divide-cyan-500/10">
+      <div className="rounded-xl border border-primary/10 bg-card divide-y divide-primary/10">
         {(data ?? []).map((c) => (
           <div key={c.id} className="flex items-center gap-3 p-3 transition-colors hover:bg-primary/5">
             <Link
