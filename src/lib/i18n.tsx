@@ -1843,6 +1843,18 @@ const UR: Dict = {
   "common.confirm_delete": "کیا آپ واقعی حذف کرنا چاہتے ہیں؟",
   "common.active": "فعال",
   "common.inactive": "غیر فعال",
+  "common.actions": "اقدامات",
+  "admin.invoices": "ٹیکس انوائسز",
+  "invoices.title": "ٹیکس انوائسز",
+  "invoices.subtitle": "اسٹور اور POS سے جاری کردہ تمام انوائسز",
+  "invoices.search": "انوائس نمبر یا کسٹمر تلاش کریں",
+  "invoices.number": "انوائس #",
+  "invoices.customer": "کسٹمر",
+  "invoices.date": "تاریخ",
+  "invoices.subtotal": "سب ٹوٹل",
+  "invoices.vat": "VAT",
+  "invoices.total": "کل",
+  "invoices.empty": "ابھی کوئی انوائس نہیں",
 };
 
 const dictionaries: Record<Lang, Dict> = { ar: AR, en: EN, ur: UR };
