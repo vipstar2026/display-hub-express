@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatPrice } from "@/lib/format";
-import { Trash2, ShoppingBag, Package, Upload, CheckCircle2, Landmark, Smartphone, Banknote, Wallet, CreditCard, Tag, X } from "lucide-react";
+import { Trash2, ShoppingBag, Package, Upload, CheckCircle2, Landmark, Smartphone, Banknote, Wallet, CreditCard, Tag, X, Truck, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -32,6 +32,9 @@ function CartPage() {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [reference, setReference] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
+  const [selectedRate, setSelectedRate] = useState<string | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const [manualAddress, setManualAddress] = useState({ full_name: "", phone: "", address_line: "", city: "", country: "Bahrain" });
 
   // Coupon state
   const [couponInput, setCouponInput] = useState("");
@@ -47,10 +50,36 @@ function CartPage() {
     queryFn: async () => (await supabase.from("payment_methods_public").select("*").order("sort_order")).data ?? [],
   });
 
+  const { data: shippingRates } = useQuery({
+    queryKey: ["shipping-rates-public"],
+    queryFn: async () => (await supabase.from("shipping_rates").select("*, shipping_zones(name_ar,name_en,name_ur)").eq("is_active", true).order("sort_order")).data ?? [],
+  });
+
+  const { data: addresses } = useQuery({
+    queryKey: ["cart-addresses", userId],
+    enabled: !!userId,
+    queryFn: async () => (await supabase.from("addresses").select("*").eq("user_id", userId!).order("is_default", { ascending: false })).data ?? [],
+  });
+
+  // Auto-select default address on load
+  useEffect(() => {
+    if (!selectedAddress && addresses && addresses.length > 0) {
+      const def = addresses.find((a) => a.is_default) ?? addresses[0];
+      setSelectedAddress(def.id);
+    }
+  }, [addresses, selectedAddress]);
+
+  const rate = useMemo(() => shippingRates?.find((r) => r.id === selectedRate) ?? null, [shippingRates, selectedRate]);
+  const shippingCost = useMemo(() => {
+    if (!rate) return 0;
+    if (rate.free_over && subtotal >= Number(rate.free_over)) return 0;
+    return Number(rate.price);
+  }, [rate, subtotal]);
+
   const method = methods?.find((m) => m.id === selectedMethod) ?? null;
   const fee = method ? Number(method.fee_amount) + (subtotal * Number(method.fee_percent)) / 100 : 0;
   const discount = coupon?.discount ?? 0;
-  const total = Math.max(0, subtotal + fee - discount);
+  const total = Math.max(0, subtotal + shippingCost + fee - discount);
 
   const nameOf = (m: { name_ar: string | null; name_en: string | null; name_ur: string | null }) =>
     (lang === "ar" ? m.name_ar : lang === "ur" ? (m.name_ur || m.name_en) : m.name_en) ?? "";
@@ -90,6 +119,14 @@ function CartPage() {
         proofUrl = up.data.path;
       }
 
+      // Resolve shipping address snapshot
+      const addr = selectedAddress ? addresses?.find((a) => a.id === selectedAddress) : null;
+      const shipping_address = addr
+        ? { full_name: addr.full_name, phone: addr.phone, address_line: addr.address_line, city: addr.city, country: addr.country, postal_code: addr.postal_code }
+        : (manualAddress.full_name || manualAddress.address_line
+            ? manualAddress
+            : null);
+
       const { data: user } = await supabase.auth.getUser();
       const { data: order, error } = await supabase.from("orders").insert({
         buyer_id: userId,
@@ -107,6 +144,11 @@ function CartPage() {
         customer_notes: customerNotes || null,
         coupon_id: coupon?.id ?? null,
         coupon_code: coupon?.code ?? null,
+        shipping_rate_id: rate?.id ?? null,
+        shipping_method: rate?.method ?? null,
+        shipping_cost: shippingCost,
+        address_id: selectedAddress,
+        shipping_address: shipping_address as never,
       }).select().single();
       if (error) throw error;
 
@@ -195,7 +237,81 @@ function CartPage() {
                 )}
               </div>
 
-              {/* Payment methods */}
+              {/* Shipping Address */}
+              <div className="rounded-xl border border-primary/20 bg-card p-5">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <h2 className="flex items-center gap-2 font-display text-lg font-bold"><MapPin className="h-4 w-4 text-primary" />{t("cart.saved_address")}</h2>
+                  <Link to="/account/addresses" className="text-xs text-primary hover:underline">{t("cart.manage_addresses")}</Link>
+                </div>
+                {(addresses ?? []).length > 0 ? (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {(addresses ?? []).map((a) => {
+                      const active = a.id === selectedAddress;
+                      return (
+                        <button
+                          key={a.id}
+                          type="button"
+                          onClick={() => setSelectedAddress(a.id)}
+                          className={`rounded-lg border p-3 text-start text-sm transition-all ${active ? "border-primary bg-primary/10" : "border-primary/20 hover:border-primary/50"}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{a.full_name}</span>
+                            {a.is_default && <span className="rounded-full bg-primary/15 px-1.5 py-0 text-[10px] text-primary">{t("addresses.default")}</span>}
+                            {active && <CheckCircle2 className="ms-auto h-3.5 w-3.5 text-primary" />}
+                          </div>
+                          <div className="mt-1 text-xs text-muted-foreground">{a.phone}</div>
+                          <div className="text-xs text-muted-foreground">{a.address_line}, {a.city}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <Input placeholder={t("addresses.full_name")} value={manualAddress.full_name} onChange={(e) => setManualAddress({ ...manualAddress, full_name: e.target.value })} />
+                    <Input placeholder={t("addresses.phone")} value={manualAddress.phone} onChange={(e) => setManualAddress({ ...manualAddress, phone: e.target.value })} />
+                    <Input className="sm:col-span-2" placeholder={t("addresses.address_line")} value={manualAddress.address_line} onChange={(e) => setManualAddress({ ...manualAddress, address_line: e.target.value })} />
+                    <Input placeholder={t("addresses.city")} value={manualAddress.city} onChange={(e) => setManualAddress({ ...manualAddress, city: e.target.value })} />
+                    <Input placeholder={t("addresses.country")} value={manualAddress.country} onChange={(e) => setManualAddress({ ...manualAddress, country: e.target.value })} />
+                  </div>
+                )}
+              </div>
+
+              {/* Shipping methods */}
+              <div className="rounded-xl border border-primary/20 bg-card p-5">
+                <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold"><Truck className="h-4 w-4 text-primary" />{t("cart.select_shipping")}</h2>
+                {(shippingRates ?? []).length === 0 ? (
+                  <p className="text-sm text-muted-foreground">{t("cart.no_shipping")}</p>
+                ) : (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {(shippingRates ?? []).map((r) => {
+                      const active = r.id === selectedRate;
+                      const isFree = r.free_over && subtotal >= Number(r.free_over);
+                      const rname = lang === "ar" ? r.name_ar : lang === "ur" ? (r.name_ur || r.name_en) : r.name_en;
+                      return (
+                        <button
+                          key={r.id}
+                          type="button"
+                          onClick={() => setSelectedRate(r.id)}
+                          className={`flex items-center gap-3 rounded-lg border p-3 text-start transition-all ${active ? "border-primary bg-primary/10 shadow-lg shadow-primary/10" : "border-primary/20 hover:border-primary/50"}`}
+                        >
+                          <div className={`grid h-9 w-9 place-items-center rounded-md ${active ? "bg-primary text-background" : "bg-primary/10 text-primary"}`}>
+                            <Truck className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-sm font-medium">{rname}</div>
+                            <div className="text-[11px] text-muted-foreground">{r.min_delivery_days}-{r.max_delivery_days} {t("shipping.days")}</div>
+                          </div>
+                          <div className="font-mono text-sm font-bold text-primary">
+                            {isFree ? t("cart.shipping_free") : formatPrice(Number(r.price))}
+                          </div>
+                          {active && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               <div className="rounded-xl border border-primary/20 bg-card p-5">
                 <h2 className="mb-3 font-display text-lg font-bold">{t("cart.payment_method")}</h2>
                 {(methods ?? []).length === 0 && (
@@ -274,6 +390,12 @@ function CartPage() {
             {/* Summary */}
             <div className="h-fit rounded-xl border border-primary/20 bg-card p-6">
               <div className="flex justify-between py-2"><span>{t("shop.subtotal")}</span><span className="font-mono">{formatPrice(subtotal)}</span></div>
+              {rate && (
+                <div className="flex justify-between py-2 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1"><Truck className="h-3.5 w-3.5" />{t("cart.select_shipping")}</span>
+                  <span className="font-mono">{shippingCost === 0 ? t("cart.shipping_free") : formatPrice(shippingCost)}</span>
+                </div>
+              )}
               {fee > 0 && (
                 <div className="flex justify-between py-2 text-sm text-muted-foreground">
                   <span>{t("cart.payment_fee")}</span>

@@ -830,6 +830,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          address_id: string | null
           admin_notes: string | null
           buyer_email: string
           buyer_id: string | null
@@ -856,6 +857,9 @@ export type Database = {
           payment_status: Database["public"]["Enums"]["payment_status"]
           shipping: number
           shipping_address: Json | null
+          shipping_cost: number
+          shipping_method: string | null
+          shipping_rate_id: string | null
           status: Database["public"]["Enums"]["order_status"]
           stripe_session_id: string | null
           subtotal: number
@@ -864,6 +868,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address_id?: string | null
           admin_notes?: string | null
           buyer_email: string
           buyer_id?: string | null
@@ -890,6 +895,9 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["payment_status"]
           shipping?: number
           shipping_address?: Json | null
+          shipping_cost?: number
+          shipping_method?: string | null
+          shipping_rate_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           stripe_session_id?: string | null
           subtotal?: number
@@ -898,6 +906,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address_id?: string | null
           admin_notes?: string | null
           buyer_email?: string
           buyer_id?: string | null
@@ -924,6 +933,9 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["payment_status"]
           shipping?: number
           shipping_address?: Json | null
+          shipping_cost?: number
+          shipping_method?: string | null
+          shipping_rate_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           stripe_session_id?: string | null
           subtotal?: number
@@ -932,6 +944,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_address_id_fkey"
+            columns: ["address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_coupon_id_fkey"
             columns: ["coupon_id"]
@@ -951,6 +970,13 @@ export type Database = {
             columns: ["payment_method_id"]
             isOneToOne: false
             referencedRelation: "payment_methods_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_shipping_rate_id_fkey"
+            columns: ["shipping_rate_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_rates"
             referencedColumns: ["id"]
           },
         ]
@@ -1538,6 +1564,104 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      shipping_rates: {
+        Row: {
+          created_at: string
+          free_over: number | null
+          id: string
+          is_active: boolean
+          max_delivery_days: number
+          method: string
+          min_delivery_days: number
+          name_ar: string
+          name_en: string
+          name_ur: string | null
+          price: number
+          sort_order: number
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          free_over?: number | null
+          id?: string
+          is_active?: boolean
+          max_delivery_days?: number
+          method?: string
+          min_delivery_days?: number
+          name_ar: string
+          name_en: string
+          name_ur?: string | null
+          price?: number
+          sort_order?: number
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          free_over?: number | null
+          id?: string
+          is_active?: boolean
+          max_delivery_days?: number
+          method?: string
+          min_delivery_days?: number
+          name_ar?: string
+          name_en?: string
+          name_ur?: string | null
+          price?: number
+          sort_order?: number
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipping_rates_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipping_zones: {
+        Row: {
+          country_code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          name_ur: string | null
+          regions: Json
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          name_ur?: string | null
+          regions?: Json
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          name_ur?: string | null
+          regions?: Json
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       site_settings: {
         Row: {
