@@ -610,6 +610,18 @@ const AR: Dict = {
   "common.confirm_delete": "هل أنت متأكد من الحذف؟",
   "common.active": "مفعّل",
   "common.inactive": "معطّل",
+  "common.actions": "إجراءات",
+  "admin.invoices": "الفواتير الضريبية",
+  "invoices.title": "الفواتير الضريبية",
+  "invoices.subtitle": "جميع الفواتير الصادرة من المتجر ونقاط البيع",
+  "invoices.search": "ابحث برقم الفاتورة أو العميل",
+  "invoices.number": "رقم الفاتورة",
+  "invoices.customer": "العميل",
+  "invoices.date": "التاريخ",
+  "invoices.subtotal": "المجموع",
+  "invoices.vat": "الضريبة",
+  "invoices.total": "الإجمالي",
+  "invoices.empty": "لا توجد فواتير بعد",
 };
 
 const EN: Dict = {
@@ -1215,6 +1227,18 @@ const EN: Dict = {
   "common.confirm_delete": "Are you sure you want to delete?",
   "common.active": "Active",
   "common.inactive": "Inactive",
+  "common.actions": "Actions",
+  "admin.invoices": "Tax Invoices",
+  "invoices.title": "Tax Invoices",
+  "invoices.subtitle": "All invoices issued from the store and POS",
+  "invoices.search": "Search by invoice number or customer",
+  "invoices.number": "Invoice #",
+  "invoices.customer": "Customer",
+  "invoices.date": "Date",
+  "invoices.subtotal": "Subtotal",
+  "invoices.vat": "VAT",
+  "invoices.total": "Total",
+  "invoices.empty": "No invoices yet",
 };
 
 const UR: Dict = {
@@ -1819,6 +1843,18 @@ const UR: Dict = {
   "common.confirm_delete": "کیا آپ واقعی حذف کرنا چاہتے ہیں؟",
   "common.active": "فعال",
   "common.inactive": "غیر فعال",
+  "common.actions": "اقدامات",
+  "admin.invoices": "ٹیکس انوائسز",
+  "invoices.title": "ٹیکس انوائسز",
+  "invoices.subtitle": "اسٹور اور POS سے جاری کردہ تمام انوائسز",
+  "invoices.search": "انوائس نمبر یا کسٹمر تلاش کریں",
+  "invoices.number": "انوائس #",
+  "invoices.customer": "کسٹمر",
+  "invoices.date": "تاریخ",
+  "invoices.subtotal": "سب ٹوٹل",
+  "invoices.vat": "VAT",
+  "invoices.total": "کل",
+  "invoices.empty": "ابھی کوئی انوائس نہیں",
 };
 
 const dictionaries: Record<Lang, Dict> = { ar: AR, en: EN, ur: UR };
