@@ -16,6 +16,65 @@ import { ReviewSection } from "@/components/ReviewSection";
 
 export const Route = createFileRoute("/product/$slug")({
   component: ProductPage,
+  loader: async ({ params, context }) =>
+    context.queryClient.ensureQueryData({
+      queryKey: ["product-meta", params.slug],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from("products")
+          .select("name_en, name_ar, description_en, description_ar, images, price, currency, stock, track_stock")
+          .eq("slug", params.slug)
+          .eq("status", "active")
+          .maybeSingle();
+        return data;
+      },
+    }),
+  head: ({ params, loaderData }) => {
+    const p = loaderData as { name_en?: string; name_ar?: string; description_en?: string; description_ar?: string; images?: unknown; price?: number | string; currency?: string; stock?: number; track_stock?: boolean } | null;
+    if (!p) {
+      return { meta: [{ title: "Product — VIPSTAR" }, { name: "robots", content: "noindex" }] };
+    }
+    const title = `${p.name_en || p.name_ar || "Product"} — VIPSTAR`;
+    const desc = (p.description_en || p.description_ar || "").toString().slice(0, 160) || "VIPSTAR product.";
+    const imgs = Array.isArray(p.images) ? (p.images as string[]) : [];
+    const img = imgs[0] ?? "";
+    const url = `https://vipstar.cc/product/${params.slug}`;
+    const inStock = !p.track_stock || (p.stock ?? 0) > 0;
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: desc },
+      { property: "og:title", content: title },
+      { property: "og:description", content: desc },
+      { property: "og:type", content: "product" },
+      { property: "og:url", content: url },
+      { name: "twitter:card", content: "summary_large_image" },
+    ];
+    if (img) {
+      meta.push({ property: "og:image", content: img });
+      meta.push({ name: "twitter:image", content: img });
+    }
+    return {
+      meta,
+      links: [{ rel: "canonical", href: url }],
+      scripts: [{
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: p.name_en || p.name_ar,
+          description: desc,
+          image: img || undefined,
+          offers: {
+            "@type": "Offer",
+            price: p.price,
+            priceCurrency: p.currency || "BHD",
+            availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            url,
+          },
+        }),
+      }],
+    };
+  },
 });
 
 function ProductPage() {
