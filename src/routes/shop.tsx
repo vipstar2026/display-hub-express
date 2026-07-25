@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import { fallback } from "@tanstack/zod-adapter";
+
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
@@ -12,12 +12,13 @@ import { Button } from "@/components/ui/button";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
+type ShopSearch = { category: string; q: string; sort: string; min: string; max: string };
 const search = z.object({
-  category: fallback(z.string(), "").default(""),
-  q: fallback(z.string(), "").default(""),
-  sort: fallback(z.string(), "newest").default("newest"),
-  min: fallback(z.string(), "").default(""),
-  max: fallback(z.string(), "").default(""),
+  category: z.string().optional().default(""),
+  q: z.string().optional().default(""),
+  sort: z.string().optional().default("newest"),
+  min: z.string().optional().default(""),
+  max: z.string().optional().default(""),
 });
 
 export const Route = createFileRoute("/shop")({
