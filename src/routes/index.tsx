@@ -42,12 +42,19 @@ function HomePage() {
   const { data: settings } = useQuery({
     queryKey: ["home-settings"],
     queryFn: async () => {
-      const { data } = await supabase.from("site_settings").select("site_name,tagline_ar,tagline_en,tagline_ur,company_address,company_cr,business_hours,instagram_url").limit(1).maybeSingle();
+      const { data } = await supabase.from("site_settings").select("site_name,tagline_ar,tagline_en,tagline_ur,company_address,company_cr,business_hours,instagram_url,hero_badge_text,hero_title_ar,hero_title_en,hero_title_ur,hero_subtitle_ar,hero_subtitle_en,hero_subtitle_ur,hero_cta_ar,hero_cta_en,hero_cta_ur").limit(1).maybeSingle();
       return data;
     },
   });
 
   const tagline = settings ? (lang === "ar" ? settings.tagline_ar : lang === "ur" ? settings.tagline_ur : settings.tagline_en) : "";
+  const pick = (ar?: string | null, en?: string | null, ur?: string | null) =>
+    (lang === "ar" ? ar : lang === "ur" ? ur : en) || en || ar || ur || "";
+  const heroBadge = settings?.hero_badge_text || "VIPSTAR.CC";
+  const heroTitle = pick(settings?.hero_title_ar, settings?.hero_title_en, settings?.hero_title_ur) || t("home.hero.title");
+  const heroSub = pick(settings?.hero_subtitle_ar, settings?.hero_subtitle_en, settings?.hero_subtitle_ur) || t("home.hero.sub");
+  const heroCta = pick(settings?.hero_cta_ar, settings?.hero_cta_en, settings?.hero_cta_ur) || t("home.hero.cta");
+
 
 
   return (
