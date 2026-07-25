@@ -78,22 +78,22 @@ function ProductPage() {
             <div className="mt-6 space-y-3 rounded-xl border border-primary/20 bg-card/50 p-5">
               <div className="grid grid-cols-2 gap-3 text-sm">
                 {(p.features as any).channels && (
-                  <div className="flex items-center gap-2"><Tv className="h-4 w-4 text-primary" /><span className="text-muted-foreground">{lang === "ar" ? "القنوات" : lang === "ur" ? "چینلز" : "Channels"}:</span><span className="font-mono">{(p.features as any).channels}</span></div>
+                  <div className="flex items-center gap-2"><Tv className="h-4 w-4 text-primary" /><span className="text-muted-foreground">{t("product.channels")}:</span><span className="font-mono">{(p.features as any).channels}</span></div>
                 )}
                 {(p.features as any).quality && (
-                  <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /><span className="text-muted-foreground">{lang === "ar" ? "الجودة" : lang === "ur" ? "معیار" : "Quality"}:</span><span className="font-mono">{(p.features as any).quality}</span></div>
+                  <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /><span className="text-muted-foreground">{t("product.quality")}:</span><span className="font-mono">{(p.features as any).quality}</span></div>
                 )}
                 {(p.features as any).duration_months && (
-                  <div className="flex items-center gap-2 col-span-2"><Calendar className="h-4 w-4 text-primary" /><span className="text-muted-foreground">{lang === "ar" ? "المدة" : lang === "ur" ? "مدت" : "Duration"}:</span><span className="font-mono">{(p.features as any).duration_months} {lang === "ar" ? "شهر" : lang === "ur" ? "ماہ" : "months"}</span></div>
+                  <div className="flex items-center gap-2 col-span-2"><Calendar className="h-4 w-4 text-primary" /><span className="text-muted-foreground">{t("product.duration")}:</span><span className="font-mono">{(p.features as any).duration_months} {t("product.months")}</span></div>
                 )}
               </div>
 
               {(p.features as any).downloader_code && (
                 <div className="rounded-lg border border-primary/30 bg-background/60 p-3">
-                  <div className="mb-1 text-xs uppercase tracking-wider text-primary/80">{lang === "ar" ? "كود Downloader" : lang === "ur" ? "Downloader کوڈ" : "Downloader Code"}</div>
+                  <div className="mb-1 text-xs uppercase tracking-wider text-primary/80">{t("product.downloader_code")}</div>
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-mono text-2xl font-bold tracking-widest text-primary">{(p.features as any).downloader_code}</span>
-                    <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText((p.features as any).downloader_code); toast.success(lang === "ar" ? "تم النسخ" : "Copied"); }}><Copy className="h-4 w-4" /></Button>
+                    <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText((p.features as any).downloader_code); toast.success(t("product.copied")); }}><Copy className="h-4 w-4" /></Button>
                   </div>
                 </div>
               )}
@@ -101,7 +101,7 @@ function ProductPage() {
               {(p.features as any).app_download_url && (
                 <a href={(p.features as any).app_download_url} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary transition hover:bg-primary/20">
                   <Download className="h-4 w-4" />
-                  {lang === "ar" ? "تحميل التطبيق (APK)" : lang === "ur" ? "ایپ ڈاؤن لوڈ کریں" : "Download App (APK)"}
+                  {t("product.download_app")}
                 </a>
               )}
             </div>
