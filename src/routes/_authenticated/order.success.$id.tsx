@@ -20,7 +20,7 @@ function OrderSuccess() {
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", id],
     queryFn: async () => (await supabase.from("orders").select("*, order_items(*)").eq("id", id).maybeSingle()).data,
-    refetchInterval: (q) => (q.state.data?.payment_status === "paid" ? false : 5000),
+    refetchInterval: (q) => (q.state.data?.payment_status === "succeeded" ? false : 5000),
   });
 
   if (isLoading) {

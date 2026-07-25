@@ -86,7 +86,7 @@ export function ReviewSection({ productId }: { productId: string }) {
               <div key={r.id} className="rounded-xl border border-primary/10 bg-card p-4">
                 <div className="flex items-center gap-2">
                   <Stars value={r.rating ?? 0} size={14} />
-                  <span className="ms-auto text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span>
+                  <span className="ms-auto text-xs text-muted-foreground">{new Date(r.created_at ?? Date.now()).toLocaleDateString()}</span>
                 </div>
                 {r.title && <div className="mt-2 font-semibold">{r.title}</div>}
                 <p className="mt-1 whitespace-pre-line text-sm text-foreground/80">{r.body}</p>
