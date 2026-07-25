@@ -25,7 +25,7 @@ function Reports() {
       const since = subDays(startOfDay(new Date()), range - 1).toISOString();
       const [orders, items] = await Promise.all([
         supabase.from("orders").select("id, total, subtotal, discount, tax, shipping, payment_status, status, buyer_email, created_at, payment_method").gte("created_at", since),
-        supabase.from("order_items").select("product_id, product_name_snapshot, quantity, total, unit_price, created_at").gte("created_at", since),
+        supabase.from("order_items").select("product_id, product_name, quantity, total, unit_price, created_at").gte("created_at", since),
       ]);
       return { orders: orders.data ?? [], items: items.data ?? [] };
     },
@@ -59,8 +59,8 @@ function Reports() {
     // Top products
     const productMap = new Map<string, { name: string; qty: number; revenue: number }>();
     items.forEach((it) => {
-      const key = it.product_id || it.product_name_snapshot || "unknown";
-      const cur = productMap.get(key) ?? { name: it.product_name_snapshot ?? "—", qty: 0, revenue: 0 };
+      const key = it.product_id || it.product_name || "unknown";
+      const cur = productMap.get(key) ?? { name: it.product_name ?? "—", qty: 0, revenue: 0 };
       cur.qty += Number(it.quantity);
       cur.revenue += Number(it.total ?? Number(it.unit_price) * Number(it.quantity));
       productMap.set(key, cur);

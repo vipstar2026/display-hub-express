@@ -3,7 +3,7 @@ import autoTable from "jspdf-autotable";
 import { formatPrice } from "./format";
 
 type Item = {
-  product_name_snapshot?: string | null;
+  product_name?: string | null;
   name?: string | null;
   quantity: number;
   unit_price: number | string;
@@ -82,7 +82,7 @@ export function generateInvoicePDF(order: Order, company: Company = {}) {
     const price = Number(it.unit_price);
     const total = it.total !== undefined ? Number(it.total) : price * it.quantity;
     return [
-      it.product_name_snapshot || it.name || "-",
+      it.product_name || it.name || "-",
       String(it.quantity),
       formatPrice(price, currency),
       formatPrice(total, currency),
