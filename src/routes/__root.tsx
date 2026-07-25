@@ -4,6 +4,7 @@ import appCss from "../styles.css?url";
 import { I18nProvider } from "@/lib/i18n";
 import { CartProvider } from "@/lib/cart";
 import { WishlistProvider } from "@/lib/wishlist";
+import { CompareProvider } from "@/lib/compare";
 import { Toaster } from "sonner";
 import logoUrl from "@/assets/logo.png";
 import { ThemeApplier } from "@/components/ThemeApplier";
@@ -12,6 +13,7 @@ import { PWAInstaller } from "@/components/PWAInstaller";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { CookieConsent } from "@/components/CookieConsent";
+import { CompareBar } from "@/components/CompareBar";
 
 function NotFoundComponent() {
   return (
