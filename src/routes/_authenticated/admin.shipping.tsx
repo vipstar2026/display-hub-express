@@ -53,9 +53,11 @@ function AdminShippingPage() {
 
   const saveZone = async (form: Partial<Zone>) => {
     const payload = {
-      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null,
+      name_ar: form.name_ar ?? "",
+      name_en: form.name_en ?? "",
+      name_ur: form.name_ur || null,
       country_code: form.country_code || "BH",
-      regions: Array.isArray(form.regions) ? form.regions : String(form.regions || "").split(",").map(s => s.trim()).filter(Boolean),
+      regions: (Array.isArray(form.regions) ? form.regions : String(form.regions || "").split(",").map(s => s.trim()).filter(Boolean)) as unknown as never,
       is_active: form.is_active ?? true,
       sort_order: form.sort_order ?? 0,
     };

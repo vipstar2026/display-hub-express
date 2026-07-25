@@ -28,6 +28,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
+import { Route as AuthenticatedAdminShippingRouteImport } from './routes/_authenticated/admin.shipping'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin.reports'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
@@ -44,6 +45,7 @@ import { Route as AuthenticatedAdminCodesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminBlogRouteImport } from './routes/_authenticated/admin.blog'
 import { Route as AuthenticatedAdminBannersRouteImport } from './routes/_authenticated/admin.banners'
 import { Route as AuthenticatedAdminActivityRouteImport } from './routes/_authenticated/admin.activity'
+import { Route as AuthenticatedAccountAddressesRouteImport } from './routes/_authenticated/account.addresses'
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
 import { Route as AuthenticatedOrderSuccessIdRouteImport } from './routes/_authenticated/order.success.$id'
 import { Route as AuthenticatedAdminCategoriesSlugRouteImport } from './routes/_authenticated/admin.categories.$slug'
@@ -142,6 +144,12 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminShippingRoute =
+  AuthenticatedAdminShippingRouteImport.update({
+    id: '/shipping',
+    path: '/shipping',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminSettingsRoute =
   AuthenticatedAdminSettingsRouteImport.update({
     id: '/settings',
@@ -235,6 +243,12 @@ const AuthenticatedAdminActivityRoute =
     path: '/activity',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAccountAddressesRoute =
+  AuthenticatedAccountAddressesRouteImport.update({
+    id: '/addresses',
+    path: '/addresses',
+    getParentRoute: () => AuthenticatedAccountRoute,
+  } as any)
 const AuthenticatedAdminCategoriesIndexRoute =
   AuthenticatedAdminCategoriesIndexRouteImport.update({
     id: '/categories/',
@@ -265,12 +279,13 @@ export interface FileRoutesByFullPath {
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
-  '/account': typeof AuthenticatedAccountRoute
+  '/account': typeof AuthenticatedAccountRouteWithChildren
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/blog/': typeof BlogIndexRoute
+  '/account/addresses': typeof AuthenticatedAccountAddressesRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/admin/blog': typeof AuthenticatedAdminBlogRoute
@@ -287,6 +302,7 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/shipping': typeof AuthenticatedAdminShippingRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
@@ -304,11 +320,12 @@ export interface FileRoutesByTo {
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
-  '/account': typeof AuthenticatedAccountRoute
+  '/account': typeof AuthenticatedAccountRouteWithChildren
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/blog': typeof BlogIndexRoute
+  '/account/addresses': typeof AuthenticatedAccountAddressesRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/admin/blog': typeof AuthenticatedAdminBlogRoute
@@ -325,6 +342,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/shipping': typeof AuthenticatedAdminShippingRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
@@ -344,12 +362,13 @@ export interface FileRoutesById {
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
-  '/_authenticated/account': typeof AuthenticatedAccountRoute
+  '/_authenticated/account': typeof AuthenticatedAccountRouteWithChildren
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/product/$slug': typeof ProductSlugRoute
   '/blog/': typeof BlogIndexRoute
+  '/_authenticated/account/addresses': typeof AuthenticatedAccountAddressesRoute
   '/_authenticated/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/_authenticated/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/_authenticated/admin/blog': typeof AuthenticatedAdminBlogRoute
@@ -366,6 +385,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/_authenticated/admin/shipping': typeof AuthenticatedAdminShippingRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
@@ -391,6 +411,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/product/$slug'
     | '/blog/'
+    | '/account/addresses'
     | '/admin/activity'
     | '/admin/banners'
     | '/admin/blog'
@@ -407,6 +428,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/reports'
     | '/admin/settings'
+    | '/admin/shipping'
     | '/admin/users'
     | '/admin/'
     | '/admin/categories/$slug'
@@ -429,6 +451,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/product/$slug'
     | '/blog'
+    | '/account/addresses'
     | '/admin/activity'
     | '/admin/banners'
     | '/admin/blog'
@@ -445,6 +468,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/reports'
     | '/admin/settings'
+    | '/admin/shipping'
     | '/admin/users'
     | '/admin'
     | '/admin/categories/$slug'
@@ -469,6 +493,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/product/$slug'
     | '/blog/'
+    | '/_authenticated/account/addresses'
     | '/_authenticated/admin/activity'
     | '/_authenticated/admin/banners'
     | '/_authenticated/admin/blog'
@@ -485,6 +510,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/reports'
     | '/_authenticated/admin/settings'
+    | '/_authenticated/admin/shipping'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/categories/$slug'
@@ -644,6 +670,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/shipping': {
+      id: '/_authenticated/admin/shipping'
+      path: '/shipping'
+      fullPath: '/admin/shipping'
+      preLoaderRoute: typeof AuthenticatedAdminShippingRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/settings': {
       id: '/_authenticated/admin/settings'
       path: '/settings'
@@ -756,6 +789,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminActivityRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/account/addresses': {
+      id: '/_authenticated/account/addresses'
+      path: '/addresses'
+      fullPath: '/account/addresses'
+      preLoaderRoute: typeof AuthenticatedAccountAddressesRouteImport
+      parentRoute: typeof AuthenticatedAccountRoute
+    }
     '/_authenticated/admin/categories/': {
       id: '/_authenticated/admin/categories/'
       path: '/categories'
@@ -780,6 +820,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAccountRouteChildren {
+  AuthenticatedAccountAddressesRoute: typeof AuthenticatedAccountAddressesRoute
+}
+
+const AuthenticatedAccountRouteChildren: AuthenticatedAccountRouteChildren = {
+  AuthenticatedAccountAddressesRoute: AuthenticatedAccountAddressesRoute,
+}
+
+const AuthenticatedAccountRouteWithChildren =
+  AuthenticatedAccountRoute._addFileChildren(AuthenticatedAccountRouteChildren)
+
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminActivityRoute: typeof AuthenticatedAdminActivityRoute
   AuthenticatedAdminBannersRoute: typeof AuthenticatedAdminBannersRoute
@@ -797,6 +848,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
+  AuthenticatedAdminShippingRoute: typeof AuthenticatedAdminShippingRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminCategoriesSlugRoute: typeof AuthenticatedAdminCategoriesSlugRoute
@@ -820,6 +872,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
+  AuthenticatedAdminShippingRoute: AuthenticatedAdminShippingRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminCategoriesSlugRoute: AuthenticatedAdminCategoriesSlugRoute,
@@ -831,14 +884,14 @@ const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
+  AuthenticatedAccountRoute: typeof AuthenticatedAccountRouteWithChildren
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
   AuthenticatedOrderSuccessIdRoute: typeof AuthenticatedOrderSuccessIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAccountRoute: AuthenticatedAccountRoute,
+  AuthenticatedAccountRoute: AuthenticatedAccountRouteWithChildren,
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
   AuthenticatedOrderSuccessIdRoute: AuthenticatedOrderSuccessIdRoute,
