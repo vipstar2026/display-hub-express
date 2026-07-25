@@ -9,6 +9,9 @@ import logoUrl from "@/assets/logo.png";
 import { ThemeApplier } from "@/components/ThemeApplier";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PWAInstaller } from "@/components/PWAInstaller";
+import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
+import { ScrollToTop } from "@/components/ScrollToTop";
+import { CookieConsent } from "@/components/CookieConsent";
 
 function NotFoundComponent() {
   return (
@@ -88,6 +91,9 @@ export function App() {
             <Outlet />
             <MobileBottomNav />
             <PWAInstaller />
+            <FloatingWhatsApp />
+            <ScrollToTop />
+            <CookieConsent />
             <Toaster position="top-center" theme="dark" richColors />
           </WishlistProvider>
         </CartProvider>
