@@ -23,25 +23,35 @@ function Reports() {
     queryKey: ["admin-reports", range],
     queryFn: async () => {
       const since = subDays(startOfDay(new Date()), range - 1).toISOString();
-      const [orders, items] = await Promise.all([
+      const [orders, items, posSales, posItems] = await Promise.all([
         supabase.from("orders").select("id, total, subtotal, discount, tax, shipping, payment_status, status, buyer_email, created_at, payment_method").gte("created_at", since),
         supabase.from("order_items").select("product_id, product_name, quantity, total, unit_price, created_at").gte("created_at", since),
+        supabase.from("pos_sales").select("id, total, subtotal, discount, tax, customer_name, customer_phone, created_at, payment_method, status").gte("created_at", since),
+        supabase.from("pos_sale_items").select("product_id, product_name, quantity, total, unit_price").gte("created_at", since),
       ]);
-      return { orders: orders.data ?? [], items: items.data ?? [] };
+      return { orders: orders.data ?? [], items: items.data ?? [], posSales: posSales.data ?? [], posItems: posItems.data ?? [] };
     },
   });
 
   const stats = useMemo(() => {
     const orders = data?.orders ?? [];
     const items = data?.items ?? [];
+    const posSales = data?.posSales ?? [];
+    const posItems = data?.posItems ?? [];
     const paid = orders.filter((o) => o.payment_status === "succeeded");
-    const revenue = paid.reduce((s, o) => s + Number(o.total), 0);
-    const discount = paid.reduce((s, o) => s + Number(o.discount ?? 0), 0);
-    const tax = paid.reduce((s, o) => s + Number(o.tax ?? 0), 0);
-    const buyers = new Set(paid.map((o) => o.buyer_email)).size;
-    const aov = paid.length ? revenue / paid.length : 0;
+    const posOk = posSales.filter((s) => s.status === "completed");
 
-    // Time series
+    const revenue = paid.reduce((s, o) => s + Number(o.total), 0) + posOk.reduce((s, o) => s + Number(o.total), 0);
+    const discount = paid.reduce((s, o) => s + Number(o.discount ?? 0), 0) + posOk.reduce((s, o) => s + Number(o.discount ?? 0), 0);
+    const tax = paid.reduce((s, o) => s + Number(o.tax ?? 0), 0) + posOk.reduce((s, o) => s + Number(o.tax ?? 0), 0);
+    const buyers = new Set([
+      ...paid.map((o) => o.buyer_email),
+      ...posOk.map((s) => s.customer_phone || s.customer_name || `walk-in-${s.id}`),
+    ]).size;
+    const orderCount = paid.length + posOk.length;
+    const aov = orderCount ? revenue / orderCount : 0;
+
+    // Time series (online + POS)
     const days: { d: string; label: string; revenue: number; orders: number }[] = [];
     for (let i = range - 1; i >= 0; i--) {
       const d = subDays(startOfDay(new Date()), i);
@@ -49,16 +59,21 @@ function Reports() {
     }
     const byDay = new Map(days.map((x) => [x.d, x]));
     orders.forEach((o) => {
-      const k = o.created_at.slice(0, 10);
-      const bucket = byDay.get(k);
-      if (!bucket) return;
-      bucket.orders += 1;
-      if (o.payment_status === "succeeded") bucket.revenue += Number(o.total);
+      const b = byDay.get(o.created_at.slice(0, 10));
+      if (!b) return;
+      b.orders += 1;
+      if (o.payment_status === "succeeded") b.revenue += Number(o.total);
+    });
+    posOk.forEach((s) => {
+      const b = byDay.get(s.created_at.slice(0, 10));
+      if (!b) return;
+      b.orders += 1;
+      b.revenue += Number(s.total);
     });
 
-    // Top products
+    // Top products (online + POS combined)
     const productMap = new Map<string, { name: string; qty: number; revenue: number }>();
-    items.forEach((it) => {
+    [...items, ...posItems].forEach((it: any) => {
       const key = it.product_id || it.product_name || "unknown";
       const cur = productMap.get(key) ?? { name: it.product_name ?? "—", qty: 0, revenue: 0 };
       cur.qty += Number(it.quantity);
@@ -67,15 +82,19 @@ function Reports() {
     });
     const topProducts = Array.from(productMap.values()).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
 
-    // Payment methods breakdown
+    // Payment methods (online + POS)
     const pmMap = new Map<string, number>();
     paid.forEach((o) => {
       const k = o.payment_method || "other";
       pmMap.set(k, (pmMap.get(k) ?? 0) + Number(o.total));
     });
+    posOk.forEach((s) => {
+      const k = `pos-${s.payment_method || "cash"}`;
+      pmMap.set(k, (pmMap.get(k) ?? 0) + Number(s.total));
+    });
     const paymentMethods = Array.from(pmMap.entries()).map(([name, value]) => ({ name, value }));
 
-    return { revenue, discount, tax, buyers, aov, orders: paid.length, days, topProducts, paymentMethods };
+    return { revenue, discount, tax, buyers, aov, orders: orderCount, days, topProducts, paymentMethods };
   }, [data, range]);
 
   const exportCSV = () => {
