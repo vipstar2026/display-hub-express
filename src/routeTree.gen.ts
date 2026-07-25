@@ -47,6 +47,7 @@ import { Route as AuthenticatedAdminCodesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminBlogRouteImport } from './routes/_authenticated/admin.blog'
 import { Route as AuthenticatedAdminBannersRouteImport } from './routes/_authenticated/admin.banners'
 import { Route as AuthenticatedAdminBackupsRouteImport } from './routes/_authenticated/admin.backups'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as AuthenticatedAdminActivityRouteImport } from './routes/_authenticated/admin.activity'
 import { Route as AuthenticatedAccountAddressesRouteImport } from './routes/_authenticated/account.addresses'
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
@@ -258,6 +259,12 @@ const AuthenticatedAdminBackupsRoute =
     path: '/backups',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminActivityRoute =
   AuthenticatedAdminActivityRouteImport.update({
     id: '/activity',
@@ -308,6 +315,7 @@ export interface FileRoutesByFullPath {
   '/blog/': typeof BlogIndexRoute
   '/account/addresses': typeof AuthenticatedAccountAddressesRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/backups': typeof AuthenticatedAdminBackupsRoute
   '/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/admin/blog': typeof AuthenticatedAdminBlogRoute
@@ -351,6 +359,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogIndexRoute
   '/account/addresses': typeof AuthenticatedAccountAddressesRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/backups': typeof AuthenticatedAdminBackupsRoute
   '/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/admin/blog': typeof AuthenticatedAdminBlogRoute
@@ -397,6 +406,7 @@ export interface FileRoutesById {
   '/blog/': typeof BlogIndexRoute
   '/_authenticated/account/addresses': typeof AuthenticatedAccountAddressesRoute
   '/_authenticated/admin/activity': typeof AuthenticatedAdminActivityRoute
+  '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/backups': typeof AuthenticatedAdminBackupsRoute
   '/_authenticated/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/_authenticated/admin/blog': typeof AuthenticatedAdminBlogRoute
@@ -443,6 +453,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/account/addresses'
     | '/admin/activity'
+    | '/admin/analytics'
     | '/admin/backups'
     | '/admin/banners'
     | '/admin/blog'
@@ -486,6 +497,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/account/addresses'
     | '/admin/activity'
+    | '/admin/analytics'
     | '/admin/backups'
     | '/admin/banners'
     | '/admin/blog'
@@ -531,6 +543,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/_authenticated/account/addresses'
     | '/_authenticated/admin/activity'
+    | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/backups'
     | '/_authenticated/admin/banners'
     | '/_authenticated/admin/blog'
@@ -842,6 +855,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBackupsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/activity': {
       id: '/_authenticated/admin/activity'
       path: '/activity'
@@ -893,6 +913,7 @@ const AuthenticatedAccountRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminActivityRoute: typeof AuthenticatedAdminActivityRoute
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminBackupsRoute: typeof AuthenticatedAdminBackupsRoute
   AuthenticatedAdminBannersRoute: typeof AuthenticatedAdminBannersRoute
   AuthenticatedAdminBlogRoute: typeof AuthenticatedAdminBlogRoute
@@ -920,6 +941,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminActivityRoute: AuthenticatedAdminActivityRoute,
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminBackupsRoute: AuthenticatedAdminBackupsRoute,
   AuthenticatedAdminBannersRoute: AuthenticatedAdminBannersRoute,
   AuthenticatedAdminBlogRoute: AuthenticatedAdminBlogRoute,
