@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { Copy, ShoppingBag, Heart, Package, Sparkles } from "lucide-react";
+import { Copy, ShoppingBag, Heart, Package, Sparkles, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account")({
