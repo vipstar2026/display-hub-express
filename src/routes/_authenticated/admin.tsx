@@ -72,6 +72,7 @@ function AdminLayout() {
         { to: "/admin/newsletter", icon: Mail, label: t("admin.newsletter") },
         { to: "/admin/notifications", icon: Bell, label: t("admin.notifications") },
         { to: "/admin/activity", icon: Activity, label: t("admin.activity") },
+        { to: "/admin/backups", icon: Database, label: t("admin.backups") },
         { to: "/admin/settings", icon: Settings, label: t("admin.settings") },
       ],
     },
