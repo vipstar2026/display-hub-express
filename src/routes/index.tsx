@@ -10,6 +10,28 @@ import { ArrowRight, ShieldCheck, Truck, Headphones, Satellite, Phone, Mail, Map
 
 export const Route = createFileRoute("/")({
   component: HomePage,
+  head: () => ({
+    meta: [
+      { title: "VIPSTAR — Satellite Receivers, Dishes & IPTV Subscriptions" },
+      { name: "description", content: "متجر VIPSTAR للأقمار الصناعية و IPTV في البحرين. رسيفرات، أطباق، LNB، اشتراكات IPTV، برمجيات، وقطع غيار — بأسعار الجملة والتجزئة." },
+      { property: "og:title", content: "VIPSTAR — Satellite & IPTV Store" },
+      { property: "og:description", content: "Premium satellite receivers, dishes, LNB, IPTV subscriptions and accessories in Bahrain." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://vipstar.cc/" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "https://vipstar.cc/" }],
+    scripts: [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: "VIPSTAR",
+        url: "https://vipstar.cc",
+        address: { "@type": "PostalAddress", addressCountry: "BH" },
+      }),
+    }],
+  }),
 });
 
 function HomePage() {

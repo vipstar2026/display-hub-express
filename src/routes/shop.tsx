@@ -24,6 +24,17 @@ const search = z.object({
 export const Route = createFileRoute("/shop")({
   validateSearch: search,
   component: ShopPage,
+  head: () => ({
+    meta: [
+      { title: "Shop — VIPSTAR Satellite & IPTV" },
+      { name: "description", content: "تسوق رسيفرات، أطباق، LNB، اشتراكات IPTV، وقطع غيار من VIPSTAR البحرين." },
+      { property: "og:title", content: "Shop — VIPSTAR" },
+      { property: "og:description", content: "Full catalog of satellite and IPTV products." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://vipstar.cc/shop" },
+    ],
+    links: [{ rel: "canonical", href: "https://vipstar.cc/shop" }],
+  }),
 });
 
 function ShopPage() {
