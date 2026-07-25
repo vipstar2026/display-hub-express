@@ -42,85 +42,86 @@
 
 :root {
   --radius: 0.875rem;
-  /* Modern tech: deep midnight base with cyan/violet neon accents */
-  --background: oklch(0.16 0.02 265);
-  --foreground: oklch(0.97 0.01 250);
-  --card: oklch(0.21 0.025 265);
-  --card-foreground: oklch(0.97 0.01 250);
-  --popover: oklch(0.21 0.025 265);
-  --popover-foreground: oklch(0.97 0.01 250);
+  /* VIP STAR brand — inspired by shop business card: deep crimson base, vivid red-orange brand, beIN violet accent */
+  --background: oklch(0.18 0.06 25);
+  --foreground: oklch(0.98 0.01 60);
+  --card: oklch(0.23 0.08 25);
+  --card-foreground: oklch(0.98 0.01 60);
+  --popover: oklch(0.23 0.08 25);
+  --popover-foreground: oklch(0.98 0.01 60);
 
-  /* Electric cyan brand */
-  --brand: oklch(0.82 0.16 200);
-  --brand-foreground: oklch(0.15 0.03 260);
-  --brand-dark: oklch(0.66 0.17 210);
-  --primary: oklch(0.82 0.16 200);
-  --primary-foreground: oklch(0.15 0.03 260);
+  /* Signature red-orange (matches card background) */
+  --brand: oklch(0.65 0.24 32);
+  --brand-foreground: oklch(1 0 0);
+  --brand-dark: oklch(0.55 0.22 30);
+  --primary: oklch(0.65 0.24 32);
+  --primary-foreground: oklch(1 0 0);
 
-  /* Violet secondary accent */
-  --accent2: oklch(0.70 0.20 305);
-  --sale: oklch(0.72 0.22 25);
+  /* beIN Sports violet secondary + gold sale */
+  --accent2: oklch(0.55 0.20 290);
+  --sale: oklch(0.85 0.17 90);
 
-  --secondary: oklch(0.27 0.03 265);
-  --secondary-foreground: oklch(0.95 0.01 250);
-  --muted: oklch(0.25 0.025 265);
-  --muted-foreground: oklch(0.70 0.02 260);
-  --accent: oklch(0.30 0.06 265);
-  --accent-foreground: oklch(0.92 0.05 200);
-  --destructive: oklch(0.65 0.24 25);
+  --secondary: oklch(0.30 0.09 25);
+  --secondary-foreground: oklch(0.98 0.01 60);
+  --muted: oklch(0.27 0.06 25);
+  --muted-foreground: oklch(0.78 0.03 40);
+  --accent: oklch(0.34 0.10 25);
+  --accent-foreground: oklch(0.98 0.05 60);
+  --destructive: oklch(0.60 0.24 20);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.30 0.03 265);
-  --input: oklch(0.27 0.03 265);
-  --ring: oklch(0.82 0.16 200);
+  --border: oklch(0.36 0.08 25);
+  --input: oklch(0.30 0.08 25);
+  --ring: oklch(0.65 0.24 32);
 
-  --gradient-brand: linear-gradient(135deg, oklch(0.82 0.16 200), oklch(0.70 0.20 305));
-  --gradient-topbar: linear-gradient(90deg, oklch(0.20 0.04 270), oklch(0.24 0.06 240));
-  --gradient-flash: linear-gradient(90deg, oklch(0.70 0.20 305), oklch(0.82 0.16 200));
-  --gradient-hero: radial-gradient(ellipse at top, oklch(0.30 0.10 265) 0%, oklch(0.16 0.02 265) 70%);
+  --gradient-brand: linear-gradient(135deg, oklch(0.65 0.24 32), oklch(0.55 0.20 290));
+  --gradient-topbar: linear-gradient(90deg, oklch(0.28 0.10 25), oklch(0.22 0.08 20));
+  --gradient-flash: linear-gradient(90deg, oklch(0.65 0.24 32), oklch(0.85 0.17 90));
+  --gradient-hero: radial-gradient(ellipse at top, oklch(0.40 0.16 30) 0%, oklch(0.18 0.06 25) 70%);
   --shadow-card: 0 1px 3px oklch(0 0 0 / 35%), 0 8px 24px oklch(0 0 0 / 25%);
-  --shadow-hover: 0 10px 40px oklch(0.82 0.16 200 / 22%), 0 0 0 1px oklch(0.82 0.16 200 / 30%);
-  --shadow-glow: 0 0 32px oklch(0.82 0.16 200 / 35%);
+  --shadow-hover: 0 10px 40px oklch(0.65 0.24 32 / 32%), 0 0 0 1px oklch(0.65 0.24 32 / 40%);
+  --shadow-glow: 0 0 32px oklch(0.65 0.24 32 / 45%);
   --transition-smooth: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Light mode overrides — applied when <html class="light"> */
 .light {
-  --background: oklch(0.99 0.005 250);
-  --foreground: oklch(0.18 0.03 265);
+  --background: oklch(0.99 0.01 60);
+  --foreground: oklch(0.20 0.06 25);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.03 265);
+  --card-foreground: oklch(0.20 0.06 25);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.03 265);
+  --popover-foreground: oklch(0.20 0.06 25);
 
-  --brand: oklch(0.62 0.17 210);
+  --brand: oklch(0.60 0.24 32);
   --brand-foreground: oklch(1 0 0);
-  --brand-dark: oklch(0.50 0.17 215);
-  --primary: oklch(0.62 0.17 210);
+  --brand-dark: oklch(0.50 0.22 30);
+  --primary: oklch(0.60 0.24 32);
   --primary-foreground: oklch(1 0 0);
 
-  --accent2: oklch(0.58 0.22 305);
-  --sale: oklch(0.62 0.24 25);
+  --accent2: oklch(0.50 0.22 290);
+  --sale: oklch(0.72 0.20 85);
 
-  --secondary: oklch(0.95 0.01 250);
-  --secondary-foreground: oklch(0.20 0.03 265);
-  --muted: oklch(0.96 0.008 250);
-  --muted-foreground: oklch(0.45 0.02 260);
-  --accent: oklch(0.94 0.02 215);
-  --accent-foreground: oklch(0.25 0.06 215);
-  --destructive: oklch(0.60 0.24 25);
+  --secondary: oklch(0.96 0.02 40);
+  --secondary-foreground: oklch(0.22 0.06 25);
+  --muted: oklch(0.97 0.015 40);
+  --muted-foreground: oklch(0.48 0.04 30);
+  --accent: oklch(0.95 0.04 30);
+  --accent-foreground: oklch(0.30 0.14 30);
+  --destructive: oklch(0.58 0.24 20);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.90 0.01 250);
-  --input: oklch(0.94 0.01 250);
-  --ring: oklch(0.62 0.17 210);
+  --border: oklch(0.90 0.02 40);
+  --input: oklch(0.94 0.02 40);
+  --ring: oklch(0.60 0.24 32);
 
-  --gradient-brand: linear-gradient(135deg, oklch(0.62 0.17 210), oklch(0.58 0.22 305));
-  --gradient-topbar: linear-gradient(90deg, oklch(0.30 0.06 265), oklch(0.38 0.08 240));
-  --gradient-flash: linear-gradient(90deg, oklch(0.58 0.22 305), oklch(0.62 0.17 210));
-  --gradient-hero: radial-gradient(ellipse at top, oklch(0.92 0.04 215) 0%, oklch(0.99 0.005 250) 70%);
-  --shadow-card: 0 1px 2px oklch(0 0 0 / 6%), 0 6px 20px oklch(0.20 0.05 265 / 10%);
-  --shadow-hover: 0 10px 30px oklch(0.62 0.17 210 / 18%), 0 0 0 1px oklch(0.62 0.17 210 / 20%);
-  --shadow-glow: 0 0 28px oklch(0.62 0.17 210 / 25%);
+  --gradient-brand: linear-gradient(135deg, oklch(0.60 0.24 32), oklch(0.50 0.22 290));
+  --gradient-topbar: linear-gradient(90deg, oklch(0.60 0.24 32), oklch(0.50 0.22 290));
+  --gradient-flash: linear-gradient(90deg, oklch(0.60 0.24 32), oklch(0.72 0.20 85));
+  --gradient-hero: radial-gradient(ellipse at top, oklch(0.92 0.06 40) 0%, oklch(0.99 0.01 60) 70%);
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 6%), 0 6px 20px oklch(0.30 0.14 30 / 12%);
+  --shadow-hover: 0 10px 30px oklch(0.60 0.24 32 / 22%), 0 0 0 1px oklch(0.60 0.24 32 / 25%);
+  --shadow-glow: 0 0 28px oklch(0.60 0.24 32 / 30%);
 }
+
 
 @layer base {
   * { border-color: var(--color-border); }

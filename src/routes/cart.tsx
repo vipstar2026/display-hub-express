@@ -115,10 +115,10 @@ function CartPage() {
         <h1 className="mb-6 font-display text-3xl font-bold">{t("nav.cart")}</h1>
 
         {items.length === 0 ? (
-          <div className="rounded-xl border border-cyan-500/10 bg-card p-12 text-center">
-            <ShoppingBag className="mx-auto mb-4 h-16 w-16 text-cyan-500/30" />
+          <div className="rounded-xl border border-primary/10 bg-card p-12 text-center">
+            <ShoppingBag className="mx-auto mb-4 h-16 w-16 text-primary/30" />
             <p className="text-muted-foreground">{t("shop.emptyCart")}</p>
-            <Link to="/shop"><Button className="mt-4 bg-cyan-500 text-background hover:bg-cyan-400">{t("shop.continueShopping")}</Button></Link>
+            <Link to="/shop"><Button className="mt-4 bg-primary text-background hover:bg-primary">{t("shop.continueShopping")}</Button></Link>
           </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-3">
@@ -126,18 +126,18 @@ function CartPage() {
               {/* Items */}
               <div className="space-y-3">
                 {items.map((i) => (
-                  <div key={i.product_id} className="flex gap-3 rounded-xl border border-cyan-500/10 bg-card p-3">
+                  <div key={i.product_id} className="flex gap-3 rounded-xl border border-primary/10 bg-card p-3">
                     <div className="h-20 w-20 shrink-0 overflow-hidden rounded-md bg-background/50">
-                      {i.image ? <img src={i.image} alt={i.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-8 w-8 text-cyan-500/30" /></div>}
+                      {i.image ? <img src={i.image} alt={i.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-8 w-8 text-primary/30" /></div>}
                     </div>
                     <div className="flex flex-1 flex-col">
-                      <Link to="/product/$slug" params={{ slug: i.slug }} className="font-medium hover:text-cyan-400">{i.name}</Link>
-                      <div className="mt-1 font-mono text-cyan-400">{formatPrice(i.price)}</div>
+                      <Link to="/product/$slug" params={{ slug: i.slug }} className="font-medium hover:text-primary">{i.name}</Link>
+                      <div className="mt-1 font-mono text-primary">{formatPrice(i.price)}</div>
                       <div className="mt-auto flex items-center gap-2">
-                        <div className="flex items-center rounded-md border border-cyan-500/20">
-                          <button onClick={() => setQty(i.product_id, i.quantity - 1)} className="px-2 py-1 hover:bg-cyan-500/10">−</button>
+                        <div className="flex items-center rounded-md border border-primary/20">
+                          <button onClick={() => setQty(i.product_id, i.quantity - 1)} className="px-2 py-1 hover:bg-primary/10">−</button>
                           <span className="w-8 text-center text-sm">{i.quantity}</span>
-                          <button onClick={() => setQty(i.product_id, i.quantity + 1)} className="px-2 py-1 hover:bg-cyan-500/10">+</button>
+                          <button onClick={() => setQty(i.product_id, i.quantity + 1)} className="px-2 py-1 hover:bg-primary/10">+</button>
                         </div>
                         <button onClick={() => remove(i.product_id)} className="ms-auto text-muted-foreground hover:text-destructive">
                           <Trash2 className="h-4 w-4" />
@@ -149,7 +149,7 @@ function CartPage() {
               </div>
 
               {/* Payment methods */}
-              <div className="rounded-xl border border-cyan-500/20 bg-card p-5">
+              <div className="rounded-xl border border-primary/20 bg-card p-5">
                 <h2 className="mb-3 font-display text-lg font-bold">
                   {lang === "ar" ? "طريقة الدفع" : lang === "ur" ? "طریقہ ادائیگی" : "Payment Method"}
                 </h2>
@@ -168,10 +168,10 @@ function CartPage() {
                         type="button"
                         onClick={() => setSelectedMethod(m.id)}
                         className={`flex items-center gap-3 rounded-lg border p-3 text-start transition-all ${
-                          active ? "border-cyan-500 bg-cyan-500/10 shadow-lg shadow-cyan-500/10" : "border-cyan-500/20 hover:border-cyan-500/50"
+                          active ? "border-primary bg-primary/10 shadow-lg shadow-primary/10" : "border-primary/20 hover:border-primary/50"
                         }`}
                       >
-                        <div className={`grid h-9 w-9 place-items-center rounded-md ${active ? "bg-cyan-500 text-background" : "bg-cyan-500/10 text-cyan-400"}`}>
+                        <div className={`grid h-9 w-9 place-items-center rounded-md ${active ? "bg-primary text-background" : "bg-primary/10 text-primary"}`}>
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="flex-1">
@@ -182,14 +182,14 @@ function CartPage() {
                             </div>
                           ) : null}
                         </div>
-                        {active && <CheckCircle2 className="h-4 w-4 text-cyan-400" />}
+                        {active && <CheckCircle2 className="h-4 w-4 text-primary" />}
                       </button>
                     );
                   })}
                 </div>
 
                 {method && (
-                  <div className="mt-4 space-y-3 rounded-lg border border-cyan-500/20 bg-background/50 p-4">
+                  <div className="mt-4 space-y-3 rounded-lg border border-primary/20 bg-background/50 p-4">
                     {instrOf(method) && <p className="text-sm text-muted-foreground whitespace-pre-line">{instrOf(method)}</p>}
                     {Object.keys((method.account_details ?? {}) as Record<string, unknown>).length > 0 && (
                       <div className="space-y-1.5">
@@ -213,8 +213,8 @@ function CartPage() {
                           <Label className="text-xs">
                             {lang === "ar" ? "صورة إيصال الدفع *" : "Payment proof screenshot *"}
                           </Label>
-                          <label className="mt-1 flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-cyan-500/40 bg-card/50 p-3 text-sm hover:bg-cyan-500/5">
-                            <Upload className="h-4 w-4 text-cyan-400" />
+                          <label className="mt-1 flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-primary/40 bg-card/50 p-3 text-sm hover:bg-primary/5">
+                            <Upload className="h-4 w-4 text-primary" />
                             <span className="flex-1 truncate">
                               {proofFile ? proofFile.name : (lang === "ar" ? "اختر صورة..." : "Choose image...")}
                             </span>
@@ -235,7 +235,7 @@ function CartPage() {
             </div>
 
             {/* Summary */}
-            <div className="h-fit rounded-xl border border-cyan-500/20 bg-card p-6">
+            <div className="h-fit rounded-xl border border-primary/20 bg-card p-6">
               <div className="flex justify-between py-2"><span>{t("shop.subtotal")}</span><span className="font-mono">{formatPrice(subtotal)}</span></div>
               {fee > 0 && (
                 <div className="flex justify-between py-2 text-sm text-muted-foreground">
@@ -243,9 +243,9 @@ function CartPage() {
                   <span className="font-mono">{formatPrice(fee)}</span>
                 </div>
               )}
-              <div className="my-3 border-t border-cyan-500/20" />
-              <div className="flex justify-between py-2 text-lg font-bold"><span>{t("shop.total")}</span><span className="font-mono text-cyan-400">{formatPrice(total)}</span></div>
-              <Button onClick={handleCheckout} disabled={placing || !method} className="mt-4 w-full bg-cyan-500 text-background hover:bg-cyan-400">
+              <div className="my-3 border-t border-primary/20" />
+              <div className="flex justify-between py-2 text-lg font-bold"><span>{t("shop.total")}</span><span className="font-mono text-primary">{formatPrice(total)}</span></div>
+              <Button onClick={handleCheckout} disabled={placing || !method} className="mt-4 w-full bg-primary text-background hover:bg-primary">
                 {placing ? "..." : t("shop.checkout")}
               </Button>
               {!method && <p className="mt-2 text-center text-xs text-muted-foreground">

@@ -40,7 +40,7 @@ function AdminCodes() {
     <div className="space-y-4">
       <h1 className="font-display text-2xl font-bold">IPTV / Digital Codes</h1>
 
-      <div className="space-y-3 rounded-xl border border-cyan-500/10 bg-card p-4">
+      <div className="space-y-3 rounded-xl border border-primary/10 bg-card p-4">
         <div>
           <Label>Product</Label>
           <Select value={productId} onValueChange={setProductId}>
@@ -54,17 +54,17 @@ function AdminCodes() {
               <Label>Bulk codes (one per line)</Label>
               <Textarea rows={6} value={bulk} onChange={(e) => setBulk(e.target.value)} placeholder="ABC123&#10;DEF456&#10;GHI789" />
             </div>
-            <Button onClick={handleAdd} className="bg-cyan-500 text-background hover:bg-cyan-400">Add codes</Button>
+            <Button onClick={handleAdd} className="bg-primary text-background hover:bg-primary">Add codes</Button>
           </>
         )}
       </div>
 
       {productId && (
-        <div className="rounded-xl border border-cyan-500/10 bg-card divide-y divide-cyan-500/10">
+        <div className="rounded-xl border border-primary/10 bg-card divide-y divide-primary/10">
           {(codes ?? []).length === 0 && <div className="p-6 text-center text-muted-foreground">No codes yet</div>}
           {(codes ?? []).map((c) => (
             <div key={c.id} className="flex items-center gap-3 p-3 text-sm">
-              <code className="font-mono text-cyan-400">{c.code}</code>
+              <code className="font-mono text-primary">{c.code}</code>
               <span className={`text-xs ${c.is_used ? "text-orange-400" : "text-green-400"}`}>{c.is_used ? "USED" : "AVAILABLE"}</span>
               <Button size="sm" variant="ghost" className="ms-auto" onClick={async () => {
                 if (!confirm("Delete?")) return;

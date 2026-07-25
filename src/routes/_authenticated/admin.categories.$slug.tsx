@@ -187,7 +187,7 @@ function AdminCategoryProducts() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <Link to="/admin/categories" className="rounded-md p-2 text-muted-foreground hover:bg-cyan-500/10 hover:text-cyan-400">
+          <Link to="/admin/categories" className="rounded-md p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary">
             <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
           </Link>
           <div className="min-w-0">
@@ -197,7 +197,7 @@ function AdminCategoryProducts() {
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setForm(empty); setNewImage(""); } }}>
           <DialogTrigger asChild>
-            <Button className="bg-cyan-500 text-background hover:bg-cyan-400"><Plus className="me-1 h-4 w-4" />{t("form.add_product")}</Button>
+            <Button className="bg-primary text-background hover:bg-primary"><Plus className="me-1 h-4 w-4" />{t("form.add_product")}</Button>
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
             <DialogHeader><DialogTitle>{form.id ? t("form.edit_product") : t("form.new_product")} {catName}</DialogTitle></DialogHeader>
@@ -243,8 +243,8 @@ function AdminCategoryProducts() {
 
               {/* Category-specific fields */}
               {presetFields.length > 0 && (
-                <section className="space-y-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
-                  <div className="text-sm font-semibold text-cyan-400">{presetTitle}</div>
+                <section className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                  <div className="text-sm font-semibold text-primary">{presetTitle}</div>
                   <div className="grid gap-3 md:grid-cols-3">
                     {presetFields.map((fd) => {
                       const v = form.features[fd.key];
@@ -293,8 +293,8 @@ function AdminCategoryProducts() {
               )}
 
               {/* Warranty (global) */}
-              <section className="grid gap-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3 md:grid-cols-2">
-                <div className="md:col-span-2 text-sm font-semibold text-cyan-400">{WARRANTY_LABEL_I18N[lang]}</div>
+              <section className="grid gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3 md:grid-cols-2">
+                <div className="md:col-span-2 text-sm font-semibold text-primary">{WARRANTY_LABEL_I18N[lang]}</div>
                 <div>
                   <Label>{WARRANTY_LABEL_I18N[lang]}</Label>
                   <Select
@@ -328,11 +328,11 @@ function AdminCategoryProducts() {
               <section className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label>{t("form.images")}</Label>
-                  <span className="text-[11px] text-cyan-400/80">{t("form.image_hint")}</span>
+                  <span className="text-[11px] text-primary/80">{t("form.image_hint")}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {form.images.map((url, i) => (
-                    <div key={i} className="group relative h-20 w-20 overflow-hidden rounded border border-cyan-500/20">
+                    <div key={i} className="group relative h-20 w-20 overflow-hidden rounded border border-primary/20">
                       <img src={url} alt="" className="h-full w-full object-cover" />
                       <button onClick={() => setForm({ ...form, images: form.images.filter((_, j) => j !== i) })} className="absolute right-0 top-0 rounded-bl bg-destructive p-0.5 text-destructive-foreground opacity-0 group-hover:opacity-100">
                         <X className="h-3 w-3" />
@@ -348,27 +348,27 @@ function AdminCategoryProducts() {
               </section>
             </div>
 
-            <Button onClick={handleSave} className="mt-4 w-full bg-cyan-500 text-background hover:bg-cyan-400">{t("form.save_product")}</Button>
+            <Button onClick={handleSave} className="mt-4 w-full bg-primary text-background hover:bg-primary">{t("form.save_product")}</Button>
 
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="rounded-xl border border-cyan-500/10 bg-card">
+      <div className="rounded-xl border border-primary/10 bg-card">
         {(products ?? []).length === 0 && <div className="p-8 text-center text-muted-foreground">{t("form.no_products")}</div>}
-        <div className="divide-y divide-cyan-500/10">
+        <div className="divide-y divide-primary/10">
           {(products ?? []).map((p) => {
             const img = firstImage(p.images);
             return (
               <div key={p.id} className="flex items-center gap-3 p-3">
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded bg-background/50">
-                  {img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-5 w-5 text-cyan-500/30" /></div>}
+                  {img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-5 w-5 text-primary/30" /></div>}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-medium">{localizedName(p as unknown as Record<string, unknown>, "name", lang) || p.name_en}</div>
                   <div className="truncate text-xs text-muted-foreground">{p.slug} · {p.type} · {p.status} · stock: {p.stock}</div>
                 </div>
-                <div className="shrink-0 font-mono text-cyan-400">{formatPrice(Number(p.price), p.currency)}</div>
+                <div className="shrink-0 font-mono text-primary">{formatPrice(Number(p.price), p.currency)}</div>
                 <Button size="sm" variant="ghost" onClick={() => handleEdit(p)}><Edit className="h-4 w-4" /></Button>
                 <Button size="sm" variant="ghost" onClick={() => handleDelete(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
               </div>

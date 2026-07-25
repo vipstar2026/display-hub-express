@@ -155,7 +155,7 @@ function AdminPaymentMethods() {
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(empty); }}>
           <DialogTrigger asChild>
-            <Button className="bg-cyan-500 text-background hover:bg-cyan-400"><Plus className="me-1 h-4 w-4" />New Method</Button>
+            <Button className="bg-primary text-background hover:bg-primary"><Plus className="me-1 h-4 w-4" />New Method</Button>
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
             <DialogHeader><DialogTitle>{form.id ? "Edit" : "New"} Payment Method</DialogTitle></DialogHeader>
@@ -180,9 +180,9 @@ function AdminPaymentMethods() {
               <div className="md:col-span-2"><Label>Logo URL (optional)</Label><Input value={form.logo_url} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} placeholder="https://..." /></div>
 
               {/* Gateway section */}
-              <div className="md:col-span-2 rounded-lg border border-cyan-500/20 bg-background/40 p-3 space-y-3">
+              <div className="md:col-span-2 rounded-lg border border-primary/20 bg-background/40 p-3 space-y-3">
                 <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-cyan-400" />
+                  <Zap className="h-4 w-4 text-primary" />
                   <Label className="text-base font-semibold">Electronic Gateway</Label>
                   <div className="ms-auto flex items-center gap-2">
                     <Switch checked={form.is_gateway} onCheckedChange={(v) => setForm({ ...form, is_gateway: v, requires_proof: v ? false : form.requires_proof })} />
@@ -242,7 +242,7 @@ function AdminPaymentMethods() {
               <div><Label>Max amount</Label><Input type="number" step="0.001" value={form.max_amount} onChange={(e) => setForm({ ...form, max_amount: e.target.value })} /></div>
               <div className="flex items-center gap-2 md:col-span-2"><Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} /><Label>Active (visible at checkout)</Label></div>
             </div>
-            <Button onClick={save} className="mt-3 w-full bg-cyan-500 text-background hover:bg-cyan-400">Save</Button>
+            <Button onClick={save} className="mt-3 w-full bg-primary text-background hover:bg-primary">Save</Button>
           </DialogContent>
         </Dialog>
       </div>
@@ -254,9 +254,9 @@ function AdminPaymentMethods() {
           const creds = (m as { credentials?: Record<string, unknown> }).credentials;
           const ready = !isGw || hasCreds(creds);
           return (
-            <div key={m.id} className={`rounded-xl border p-4 transition-colors ${m.is_active ? "border-cyan-500/20 bg-card" : "border-muted/20 bg-card/50 opacity-70"}`}>
+            <div key={m.id} className={`rounded-xl border p-4 transition-colors ${m.is_active ? "border-primary/20 bg-card" : "border-muted/20 bg-card/50 opacity-70"}`}>
               <div className="flex items-start gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-lg bg-cyan-500/10 text-cyan-400">
+                <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
                   {(m as { logo_url?: string }).logo_url
                     ? <img src={(m as { logo_url?: string }).logo_url} alt="" className="h-6 w-6 object-contain" />
                     : <Icon className="h-5 w-5" />}
@@ -265,7 +265,7 @@ function AdminPaymentMethods() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium">{m.name_en}</span>
                     <span className="text-muted-foreground">· {m.name_ar}</span>
-                    {isGw && <Badge variant="outline" className="border-cyan-500/40 text-cyan-400 text-[10px]"><Zap className="me-0.5 h-3 w-3" />Gateway</Badge>}
+                    {isGw && <Badge variant="outline" className="border-primary/40 text-primary text-[10px]"><Zap className="me-0.5 h-3 w-3" />Gateway</Badge>}
                     {isGw && (m as { test_mode?: boolean }).test_mode && <Badge variant="outline" className="text-[10px]">TEST</Badge>}
                     {isGw && !ready && <Badge variant="outline" className="border-amber-500/40 text-amber-400 text-[10px]">Needs API keys</Badge>}
                   </div>
@@ -300,7 +300,7 @@ function AdminPaymentMethods() {
           );
         })}
         {(data ?? []).length === 0 && (
-          <div className="col-span-full rounded-xl border border-cyan-500/10 bg-card p-8 text-center text-muted-foreground">
+          <div className="col-span-full rounded-xl border border-primary/10 bg-card p-8 text-center text-muted-foreground">
             No payment methods yet.
           </div>
         )}

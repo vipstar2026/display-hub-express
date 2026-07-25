@@ -349,16 +349,16 @@ function AdminProducts() {
             <button
               key={c.id}
               onClick={() => openForCategory(c)}
-              className="group flex items-center gap-3 rounded-xl border border-cyan-500/20 bg-card p-3 text-start transition hover:-translate-y-0.5 hover:border-cyan-400/60 hover:bg-cyan-500/5"
+              className="group flex items-center gap-3 rounded-xl border border-primary/20 bg-card p-3 text-start transition hover:-translate-y-0.5 hover:border-primary/60 hover:bg-primary/5"
             >
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-cyan-500/10 text-cyan-400">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
                 <Icon className="h-5 w-5" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-semibold">{c.name_ar}</div>
                 <div className="truncate text-[10px] text-muted-foreground">{hasPreset ? `+ حقول مخصصة` : "حقول أساسية"}</div>
               </div>
-              <Plus className="h-4 w-4 text-cyan-400 opacity-70 group-hover:opacity-100" />
+              <Plus className="h-4 w-4 text-primary opacity-70 group-hover:opacity-100" />
             </button>
           );
         })}
@@ -370,14 +370,14 @@ function AdminProducts() {
           <DialogHeader>
             <DialogTitle>
               {form.id ? "تعديل" : "إضافة"} منتج
-              {currentCategoryName && <span className="ms-2 text-sm font-normal text-cyan-400">— {currentCategoryName}</span>}
+              {currentCategoryName && <span className="ms-2 text-sm font-normal text-primary">— {currentCategoryName}</span>}
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-5">
             {/* Basics */}
             <section className="grid gap-3 md:grid-cols-2">
-              <div className="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-cyan-400/80">الأساسيات</div>
+              <div className="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-primary/80">الأساسيات</div>
               <div><Label>الاسم (AR) *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
               <div><Label>الاسم (EN) *</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
               <div><Label>الاسم (UR)</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
@@ -411,7 +411,7 @@ function AdminProducts() {
 
             {/* Pricing */}
             <section className="grid gap-3 md:grid-cols-2">
-              <div className="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-cyan-400/80">السعر والمخزون</div>
+              <div className="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-primary/80">السعر والمخزون</div>
               <div><Label>السعر</Label><Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
               <div><Label>السعر قبل الخصم</Label><Input type="number" step="0.01" value={form.compare_price} onChange={(e) => setForm({ ...form, compare_price: e.target.value })} /></div>
               <div><Label>العملة</Label><Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} /></div>
@@ -435,8 +435,8 @@ function AdminProducts() {
 
             {/* Category-specific fields */}
             {dynamicFields.length > 0 && (
-              <section className="grid gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 md:grid-cols-2">
-                <div className="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
+              <section className="grid gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 md:grid-cols-2">
+                <div className="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-primary">
                   حقول القسم: {currentCategoryName}
                 </div>
                 {dynamicFields.map((f) => {
@@ -485,37 +485,37 @@ function AdminProducts() {
 
             {/* Descriptions */}
             <section className="grid gap-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">الوصف</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-primary/80">الوصف</div>
               <div><Label>الوصف (AR)</Label><Textarea value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
               <div><Label>الوصف (EN)</Label><Textarea value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
               <div><Label>رابط الصورة</Label><Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." /></div>
             </section>
 
-            <Button onClick={handleSave} className="w-full bg-cyan-500 text-background hover:bg-cyan-400">حفظ</Button>
+            <Button onClick={handleSave} className="w-full bg-primary text-background hover:bg-primary">حفظ</Button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Products list */}
-      <div className="rounded-xl border border-cyan-500/10 bg-card">
-        <div className="flex items-center justify-between border-b border-cyan-500/10 p-3">
+      <div className="rounded-xl border border-primary/10 bg-card">
+        <div className="flex items-center justify-between border-b border-primary/10 p-3">
           <div className="text-sm font-semibold">جميع المنتجات ({(products ?? []).length})</div>
         </div>
         {(products ?? []).length === 0 && <div className="p-8 text-center text-muted-foreground">لا توجد منتجات بعد — اختر قسمًا أعلاه للبدء</div>}
-        <div className="divide-y divide-cyan-500/10">
+        <div className="divide-y divide-primary/10">
           {(products ?? []).map((p) => {
             const img = firstImage(p.images);
             const catName = (p as { categories?: { name_ar?: string } }).categories?.name_ar;
             return (
               <div key={p.id} className="flex items-center gap-3 p-3">
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded bg-background/50">
-                  {img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-5 w-5 text-cyan-500/30" /></div>}
+                  {img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-5 w-5 text-primary/30" /></div>}
                 </div>
                 <div className="flex-1">
                   <div className="font-medium">{p.name_ar}</div>
                   <div className="text-xs text-muted-foreground">{catName ?? "—"} · {p.type} · {p.status} · مخزون: {p.stock}</div>
                 </div>
-                <div className="font-mono text-cyan-400">{formatPrice(Number(p.price), p.currency)}</div>
+                <div className="font-mono text-primary">{formatPrice(Number(p.price), p.currency)}</div>
                 <Button size="sm" variant="ghost" onClick={() => handleEdit(p)}><Edit className="h-4 w-4" /></Button>
                 <Button size="sm" variant="ghost" onClick={() => handleDelete(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
               </div>

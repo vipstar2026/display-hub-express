@@ -45,7 +45,7 @@ function AdminCategories() {
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-bold">Categories</h1>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(empty); }}>
-          <DialogTrigger asChild><Button className="bg-cyan-500 text-background hover:bg-cyan-400"><Plus className="me-1 h-4 w-4" />New</Button></DialogTrigger>
+          <DialogTrigger asChild><Button className="bg-primary text-background hover:bg-primary"><Plus className="me-1 h-4 w-4" />New</Button></DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>{form.id ? "Edit" : "New"} Category</DialogTitle></DialogHeader>
             <div className="space-y-3">
@@ -55,15 +55,15 @@ function AdminCategories() {
               <div><Label>Name UR</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
               <div><Label>Icon (lucide name)</Label><Input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} /></div>
               <div><Label>Sort Order</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} /></div>
-              <Button onClick={handleSave} className="w-full bg-cyan-500 text-background hover:bg-cyan-400">Save</Button>
+              <Button onClick={handleSave} className="w-full bg-primary text-background hover:bg-primary">Save</Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="rounded-xl border border-cyan-500/10 bg-card divide-y divide-cyan-500/10">
+      <div className="rounded-xl border border-primary/10 bg-card divide-y divide-primary/10">
         {(data ?? []).map((c) => (
-          <div key={c.id} className="flex items-center gap-3 p-3 transition-colors hover:bg-cyan-500/5">
+          <div key={c.id} className="flex items-center gap-3 p-3 transition-colors hover:bg-primary/5">
             <Link
               to="/admin/categories/$slug"
               params={{ slug: c.slug }}

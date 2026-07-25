@@ -35,14 +35,14 @@ function AdminUsers() {
   return (
     <div className="space-y-4">
       <h1 className="font-display text-2xl font-bold">Users</h1>
-      <div className="rounded-xl border border-cyan-500/10 bg-card divide-y divide-cyan-500/10">
+      <div className="rounded-xl border border-primary/10 bg-card divide-y divide-primary/10">
         {(profiles ?? []).map((u) => (
           <div key={u.id} className="flex items-center gap-3 p-3">
             <div className="flex-1">
               <div className="font-medium">{u.display_name ?? "—"}</div>
               <div className="text-xs text-muted-foreground">{u.id}</div>
             </div>
-            {isAdmin(u.id) && <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-xs text-cyan-400">ADMIN</span>}
+            {isAdmin(u.id) && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">ADMIN</span>}
             <Button size="sm" variant="outline" onClick={() => toggleAdmin(u.id)}>
               {isAdmin(u.id) ? "Revoke admin" : "Make admin"}
             </Button>
