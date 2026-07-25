@@ -610,6 +610,18 @@ const AR: Dict = {
   "common.confirm_delete": "هل أنت متأكد من الحذف؟",
   "common.active": "مفعّل",
   "common.inactive": "معطّل",
+  "common.actions": "إجراءات",
+  "admin.invoices": "الفواتير الضريبية",
+  "invoices.title": "الفواتير الضريبية",
+  "invoices.subtitle": "جميع الفواتير الصادرة من المتجر ونقاط البيع",
+  "invoices.search": "ابحث برقم الفاتورة أو العميل",
+  "invoices.number": "رقم الفاتورة",
+  "invoices.customer": "العميل",
+  "invoices.date": "التاريخ",
+  "invoices.subtotal": "المجموع",
+  "invoices.vat": "الضريبة",
+  "invoices.total": "الإجمالي",
+  "invoices.empty": "لا توجد فواتير بعد",
 };
 
 const EN: Dict = {
