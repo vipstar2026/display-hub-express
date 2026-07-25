@@ -374,6 +374,8 @@ const AR: Dict = {
   "product.downloader_code": "كود Downloader",
   "product.download_app": "تحميل التطبيق (APK)",
   "product.copied": "تم النسخ",
+  "product.related": "منتجات مقترحة",
+  "product.recently_viewed": "شاهدت مؤخراً",
 
   "lang.ar": "العربية",
   "lang.en": "الإنجليزية",
@@ -811,6 +813,8 @@ const EN: Dict = {
   "product.downloader_code": "Downloader Code",
   "product.download_app": "Download App (APK)",
   "product.copied": "Copied",
+  "product.related": "Related products",
+  "product.recently_viewed": "Recently viewed",
 
   "lang.ar": "Arabic",
   "lang.en": "English",
@@ -1248,6 +1252,8 @@ const UR: Dict = {
   "product.downloader_code": "Downloader کوڈ",
   "product.download_app": "ایپ ڈاؤن لوڈ کریں (APK)",
   "product.copied": "کاپی ہو گیا",
+  "product.related": "متعلقہ مصنوعات",
+  "product.recently_viewed": "حال ہی میں دیکھی گئی",
 
   "lang.ar": "عربی",
   "lang.en": "انگریزی",
