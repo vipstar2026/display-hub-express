@@ -1227,6 +1227,18 @@ const EN: Dict = {
   "common.confirm_delete": "Are you sure you want to delete?",
   "common.active": "Active",
   "common.inactive": "Inactive",
+  "common.actions": "Actions",
+  "admin.invoices": "Tax Invoices",
+  "invoices.title": "Tax Invoices",
+  "invoices.subtitle": "All invoices issued from the store and POS",
+  "invoices.search": "Search by invoice number or customer",
+  "invoices.number": "Invoice #",
+  "invoices.customer": "Customer",
+  "invoices.date": "Date",
+  "invoices.subtotal": "Subtotal",
+  "invoices.vat": "VAT",
+  "invoices.total": "Total",
+  "invoices.empty": "No invoices yet",
 };
 
 const UR: Dict = {
