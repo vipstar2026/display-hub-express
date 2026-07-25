@@ -6,7 +6,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { useI18n, localizedName } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ShieldCheck, Truck, Headphones, Satellite } from "lucide-react";
+import { ArrowRight, ShieldCheck, Truck, Headphones, Satellite, Phone, Mail, MapPin, Instagram, MessageCircle, BadgeCheck } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
