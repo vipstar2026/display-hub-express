@@ -11,7 +11,7 @@ import { Plus, Edit, Trash2, Package, ArrowLeft, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { formatPrice, firstImage } from "@/lib/format";
-import { CATEGORY_PRESETS, RESERVED_FEATURE_KEYS, translatePresetLabel } from "@/lib/category-presets";
+import { CATEGORY_PRESETS, RESERVED_FEATURE_KEYS, translatePresetLabel, WARRANTY_OPTIONS, WARRANTY_LABEL_I18N } from "@/lib/category-presets";
 import { useI18n, localizedName } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/categories/$slug")({
@@ -291,6 +291,26 @@ function AdminCategoryProducts() {
                   </div>
                 </section>
               )}
+
+              {/* Warranty (global) */}
+              <section className="grid gap-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3 md:grid-cols-2">
+                <div className="md:col-span-2 text-sm font-semibold text-cyan-400">{WARRANTY_LABEL_I18N[lang]}</div>
+                <div>
+                  <Label>{WARRANTY_LABEL_I18N[lang]}</Label>
+                  <Select
+                    value={String(form.features.warranty ?? "")}
+                    onValueChange={(v) => setFeature("warranty", v)}
+                  >
+                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>
+                      {WARRANTY_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o[lang]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </section>
+
 
 
               {/* Images */}
