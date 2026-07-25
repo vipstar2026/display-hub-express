@@ -7,6 +7,7 @@ import { useI18n, localizedName } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Truck, Headphones, Satellite, Phone, Mail, MapPin, Instagram, MessageCircle, BadgeCheck } from "lucide-react";
+import { HeroBanners } from "@/components/HeroBanners";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -82,6 +83,10 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+
+      <HeroBanners />
+
+
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-primary/20">
