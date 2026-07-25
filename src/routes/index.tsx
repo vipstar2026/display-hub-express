@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Truck, Headphones, Satellite, Phone, Mail, MapPin, Instagram, MessageCircle, BadgeCheck } from "lucide-react";
 import { HeroBanners } from "@/components/HeroBanners";
+import { FlashSalesSection } from "@/components/FlashSalesSection";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -118,6 +119,8 @@ function HomePage() {
           </div>
         </div>
       </section>
+
+      <FlashSalesSection />
 
       {/* Categories */}
       <section className="container mx-auto px-4 py-12">
