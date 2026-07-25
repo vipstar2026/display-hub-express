@@ -53,7 +53,10 @@ function ProductPage() {
           )}
         </div>
         <div>
-          <h1 className="font-display text-3xl font-bold">{name}</h1>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="font-display text-3xl font-bold">{name}</h1>
+            <WishlistButton productId={p.id} className="h-10 w-10 shrink-0" size={18} />
+          </div>
           <div className="mt-4 flex items-baseline gap-3">
             <span className="font-mono text-3xl font-bold text-primary">{formatPrice(Number(p.price), p.currency)}</span>
             {p.compare_price && Number(p.compare_price) > Number(p.price) && (
