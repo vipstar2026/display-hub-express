@@ -119,6 +119,14 @@ function CartPage() {
         proofUrl = up.data.path;
       }
 
+      // Resolve shipping address snapshot
+      const addr = selectedAddress ? addresses?.find((a) => a.id === selectedAddress) : null;
+      const shipping_address = addr
+        ? { full_name: addr.full_name, phone: addr.phone, address_line: addr.address_line, city: addr.city, country: addr.country, postal_code: addr.postal_code }
+        : (manualAddress.full_name || manualAddress.address_line
+            ? manualAddress
+            : null);
+
       const { data: user } = await supabase.auth.getUser();
       const { data: order, error } = await supabase.from("orders").insert({
         buyer_id: userId,
@@ -136,6 +144,11 @@ function CartPage() {
         customer_notes: customerNotes || null,
         coupon_id: coupon?.id ?? null,
         coupon_code: coupon?.code ?? null,
+        shipping_rate_id: rate?.id ?? null,
+        shipping_method: rate?.method ?? null,
+        shipping_cost: shippingCost,
+        address_id: selectedAddress,
+        shipping_address: shipping_address as never,
       }).select().single();
       if (error) throw error;
 
