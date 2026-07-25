@@ -41,7 +41,7 @@ export function MobileBottomNav() {
                 >
                   <span className="relative">
                     <it.icon className="h-5 w-5" />
-                    {"badge" in it && (it.badge ?? 0) > 0 && (
+                    {(it.badge ?? 0) > 0 && (
                       <span className="absolute -end-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-background">
                         {(it.badge as number) > 9 ? "9+" : it.badge}
                       </span>
