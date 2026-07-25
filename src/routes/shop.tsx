@@ -79,7 +79,7 @@ function ShopPage() {
         <div className="mb-8 flex flex-wrap gap-2">
           <button
             onClick={() => nav({ search: { q } })}
-            className={`rounded-full border px-3 py-1 text-sm transition ${!category ? "border-cyan-500 bg-cyan-500/10 text-cyan-400" : "border-cyan-500/20 hover:border-cyan-500/50"}`}
+            className={`rounded-full border px-3 py-1 text-sm transition ${!category ? "border-cyan-500 bg-primary/10 text-primary" : "border-primary/20 hover:border-primary/50"}`}
           >
             {t("shop.all")}
           </button>
@@ -87,7 +87,7 @@ function ShopPage() {
             <button
               key={c.id}
               onClick={() => nav({ search: { category: c.slug, q } })}
-              className={`rounded-full border px-3 py-1 text-sm transition ${category === c.slug ? "border-cyan-500 bg-cyan-500/10 text-cyan-400" : "border-cyan-500/20 hover:border-cyan-500/50"}`}
+              className={`rounded-full border px-3 py-1 text-sm transition ${category === c.slug ? "border-cyan-500 bg-primary/10 text-primary" : "border-primary/20 hover:border-primary/50"}`}
             >
               {localizedName(c, "name", lang)}
             </button>
@@ -98,20 +98,20 @@ function ShopPage() {
           <div className="space-y-12">
             {grouped.map(({ cat, items }) => (
               <section key={cat.id} id={cat.slug} className="scroll-mt-24">
-                <div className="mb-5 flex items-end justify-between gap-3 border-b border-cyan-500/20 pb-3">
+                <div className="mb-5 flex items-end justify-between gap-3 border-b border-primary/20 pb-3">
                   <div className="flex items-center gap-3">
-                    <span className="h-6 w-1 rounded-full bg-gradient-to-b from-cyan-400 to-cyan-600" />
+                    <span className="h-6 w-1 rounded-full bg-gradient-to-b from-primary to-cyan-600" />
                     <h2 className="font-display text-2xl font-bold tracking-tight">
                       {localizedName(cat, "name", lang)}
                     </h2>
-                    <span className="rounded-full border border-cyan-500/20 bg-cyan-500/5 px-2 py-0.5 text-xs text-cyan-300">
+                    <span className="rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-xs text-primary">
                       {items.length}
                     </span>
                   </div>
                   {!category && cat.slug && (
                     <button
                       onClick={() => nav({ search: { category: cat.slug, q } })}
-                      className="text-xs text-cyan-400 hover:text-cyan-300"
+                      className="text-xs text-primary hover:text-primary"
                     >
                       {t("shop.all")} →
                     </button>
@@ -124,7 +124,7 @@ function ShopPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-xl border border-cyan-500/10 bg-card p-12 text-center text-muted-foreground">
+          <div className="rounded-xl border border-primary/10 bg-card p-12 text-center text-muted-foreground">
             {t("shop.empty")}
           </div>
         )}

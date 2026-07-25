@@ -62,19 +62,19 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="mb-6 flex items-center justify-center gap-2 font-display text-xl font-bold text-cyan-400">
+        <Link to="/" className="mb-6 flex items-center justify-center gap-2 font-display text-xl font-bold text-primary">
           <Satellite className="h-6 w-6" /> VIPSTAR
         </Link>
-        <Card className="border-cyan-500/20 bg-card p-6">
+        <Card className="border-primary/20 bg-card p-6">
           <h1 className="mb-1 text-2xl font-bold">{mode === "signin" ? t("auth.signin") : t("auth.signup")}</h1>
           <p className="mb-6 text-sm text-muted-foreground">{t("site.tagline")}</p>
 
-          <Button variant="outline" className="mb-4 w-full border-cyan-500/30" onClick={handleGoogle} disabled={loading}>
+          <Button variant="outline" className="mb-4 w-full border-primary/30" onClick={handleGoogle} disabled={loading}>
             {t("auth.continueGoogle")}
           </Button>
 
           <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-cyan-500/20" /></div>
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-primary/20" /></div>
             <div className="relative flex justify-center text-xs"><span className="bg-card px-2 text-muted-foreground">OR</span></div>
           </div>
 
@@ -93,14 +93,14 @@ function AuthPage() {
               <Label htmlFor="password">{t("auth.password")}</Label>
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
             </div>
-            <Button type="submit" disabled={loading} className="w-full bg-cyan-500 text-background hover:bg-cyan-400">
+            <Button type="submit" disabled={loading} className="w-full bg-primary text-background hover:bg-primary">
               {mode === "signin" ? t("auth.signin") : t("auth.signup")}
             </Button>
           </form>
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {mode === "signin" ? t("auth.noAccount") : t("auth.haveAccount")}{" "}
-            <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="font-medium text-cyan-400 hover:underline">
+            <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="font-medium text-primary hover:underline">
               {mode === "signin" ? t("auth.signup") : t("auth.signin")}
             </button>
           </p>

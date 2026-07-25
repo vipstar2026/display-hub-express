@@ -64,7 +64,7 @@ function AdminSettings() {
     </div>
   );
   const Toggle = ({ k, label, desc }: { k: string; label: string; desc?: string }) => (
-    <div className="flex items-start justify-between gap-4 rounded-lg border border-cyan-500/10 bg-background/40 p-3">
+    <div className="flex items-start justify-between gap-4 rounded-lg border border-primary/10 bg-background/40 p-3">
       <div>
         <div className="text-sm font-medium">{label}</div>
         {desc && <div className="text-xs text-muted-foreground">{desc}</div>}
@@ -74,7 +74,7 @@ function AdminSettings() {
   );
   const Section = ({ title, children, cols = 2 }: { title?: string; children: React.ReactNode; cols?: 1 | 2 | 3 }) => (
     <div className="space-y-3">
-      {title && <h3 className="text-sm font-semibold text-cyan-300">{title}</h3>}
+      {title && <h3 className="text-sm font-semibold text-primary">{title}</h3>}
       <div className={`grid gap-3 ${cols === 1 ? "grid-cols-1" : cols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>{children}</div>
     </div>
   );
@@ -86,7 +86,7 @@ function AdminSettings() {
           <h1 className="font-display text-2xl font-bold">إعدادات الموقع</h1>
           <p className="text-xs text-muted-foreground">تحكم كامل بكل ما يخص الموقع من مكان واحد</p>
         </div>
-        <Button onClick={handleSave} disabled={saving} className="bg-cyan-500 text-background hover:bg-cyan-400">
+        <Button onClick={handleSave} disabled={saving} className="bg-primary text-background hover:bg-primary">
           {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
         </Button>
       </div>
@@ -104,7 +104,7 @@ function AdminSettings() {
           <TabsTrigger value="advanced" className="gap-1.5"><Wrench className="h-3.5 w-3.5" />متقدم</TabsTrigger>
         </TabsList>
 
-        <div className="mt-4 space-y-4 rounded-xl border border-cyan-500/10 bg-card/60 p-4">
+        <div className="mt-4 space-y-4 rounded-xl border border-primary/10 bg-card/60 p-4">
           <TabsContent value="general" className="mt-0 space-y-4">
             <Section title="الاسم والشعار" cols={2}>
               <Field k="site_name" label="اسم الموقع" />
@@ -131,14 +131,14 @@ function AdminSettings() {
               <div className="space-y-1.5">
                 <Label className="text-xs">اللون الأساسي</Label>
                 <div className="flex gap-2">
-                  <input type="color" value={form.primary_color ?? "#22d3ee"} onChange={(e) => set("primary_color", e.target.value)} className="h-10 w-14 cursor-pointer rounded border border-cyan-500/20 bg-background" />
+                  <input type="color" value={form.primary_color ?? "#22d3ee"} onChange={(e) => set("primary_color", e.target.value)} className="h-10 w-14 cursor-pointer rounded border border-primary/20 bg-background" />
                   <Input value={form.primary_color ?? ""} onChange={(e) => set("primary_color", e.target.value)} />
                 </div>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">اللون الثانوي</Label>
                 <div className="flex gap-2">
-                  <input type="color" value={form.accent_color ?? "#0ea5e9"} onChange={(e) => set("accent_color", e.target.value)} className="h-10 w-14 cursor-pointer rounded border border-cyan-500/20 bg-background" />
+                  <input type="color" value={form.accent_color ?? "#0ea5e9"} onChange={(e) => set("accent_color", e.target.value)} className="h-10 w-14 cursor-pointer rounded border border-primary/20 bg-background" />
                   <Input value={form.accent_color ?? ""} onChange={(e) => set("accent_color", e.target.value)} />
                 </div>
               </div>
@@ -229,7 +229,7 @@ function AdminSettings() {
       </Tabs>
 
       <div className="sticky bottom-4 flex justify-end">
-        <Button onClick={handleSave} disabled={saving} size="lg" className="bg-cyan-500 text-background shadow-lg shadow-cyan-500/30 hover:bg-cyan-400">
+        <Button onClick={handleSave} disabled={saving} size="lg" className="bg-primary text-background shadow-lg shadow-primary/30 hover:bg-primary">
           {saving ? "جاري الحفظ..." : "حفظ كل التغييرات"}
         </Button>
       </div>

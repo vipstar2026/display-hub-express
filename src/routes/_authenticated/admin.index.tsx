@@ -144,8 +144,8 @@ function AdminDashboard() {
       label: t("admin.todayOrders"),
       value: stats?.todayOrders ?? 0,
       sub: `${stats?.orders ?? 0} ${t("admin.orders").toLowerCase()}`,
-      gradient: "from-cyan-500/20 to-cyan-500/0",
-      iconBg: "bg-cyan-500/15 text-cyan-400",
+      gradient: "from-primary/20 to-primary/0",
+      iconBg: "bg-primary/15 text-primary",
     },
     {
       icon: Clock,
@@ -167,19 +167,19 @@ function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Welcome bar */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 via-card to-card p-6 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-6 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold md:text-3xl">{t("admin.welcome")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("admin.welcomeSub")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link to="/admin/products" className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-background shadow-lg shadow-cyan-500/30 transition hover:bg-cyan-400">
+          <Link to="/admin/products" className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-background shadow-lg shadow-primary/30 transition hover:bg-primary">
             <Plus className="h-4 w-4" /> {t("admin.addProduct")}
           </Link>
-          <Link to="/admin/categories" className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/30 px-4 py-2 text-sm font-medium hover:bg-cyan-500/10">
+          <Link to="/admin/categories" className="inline-flex items-center gap-2 rounded-lg border border-primary/30 px-4 py-2 text-sm font-medium hover:bg-primary/10">
             <FolderTree className="h-4 w-4" /> {t("admin.addCategory")}
           </Link>
-          <Link to="/" className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/20 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+          <Link to="/" className="inline-flex items-center gap-2 rounded-lg border border-primary/20 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
             <Eye className="h-4 w-4" /> {t("admin.viewStore")}
           </Link>
         </div>
@@ -188,7 +188,7 @@ function AdminDashboard() {
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {cards.map((c) => (
-          <div key={c.label} className={`group relative overflow-hidden rounded-2xl border border-cyan-500/10 bg-gradient-to-br ${c.gradient} bg-card p-5 transition hover:border-cyan-500/30`}>
+          <div key={c.label} className={`group relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br ${c.gradient} bg-card p-5 transition hover:border-primary/30`}>
             <div className="flex items-start justify-between">
               <div className={`grid h-10 w-10 place-items-center rounded-xl ${c.iconBg}`}>
                 <c.icon className="h-5 w-5" />
@@ -209,7 +209,7 @@ function AdminDashboard() {
 
       {/* Revenue chart + Status pie */}
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-cyan-500/10 bg-card p-5 lg:col-span-2">
+        <div className="rounded-2xl border border-primary/10 bg-card p-5 lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="font-display text-lg font-bold">{t("admin.revenue")}</h2>
@@ -237,7 +237,7 @@ function AdminDashboard() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-cyan-500/10 bg-card p-5">
+        <div className="rounded-2xl border border-primary/10 bg-card p-5">
           <h2 className="mb-4 font-display text-lg font-bold">{t("admin.ordersByStatus")}</h2>
           {(stats?.statusData ?? []).length === 0 ? (
             <div className="grid h-64 place-items-center text-sm text-muted-foreground">{t("admin.noData")}</div>
@@ -273,10 +273,10 @@ function AdminDashboard() {
 
       {/* Recent orders + Top products / low stock */}
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-cyan-500/10 bg-card lg:col-span-2">
-          <div className="flex items-center justify-between border-b border-cyan-500/10 p-5">
+        <div className="rounded-2xl border border-primary/10 bg-card lg:col-span-2">
+          <div className="flex items-center justify-between border-b border-primary/10 p-5">
             <h2 className="font-display text-lg font-bold">{t("admin.recentOrders")}</h2>
-            <Link to="/admin/orders" className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300">
+            <Link to="/admin/orders" className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary">
               {t("admin.viewAll")} <ArrowRight className="h-3 w-3 rtl:rotate-180" />
             </Link>
           </div>
@@ -285,12 +285,12 @@ function AdminDashboard() {
           ) : (
             <div className="divide-y divide-cyan-500/10">
               {(recent ?? []).map((o) => (
-                <div key={o.id} className="flex flex-wrap items-center gap-3 p-4 text-sm hover:bg-cyan-500/5">
-                  <div className="grid h-9 w-9 place-items-center rounded-lg bg-cyan-500/10 text-cyan-400">
+                <div key={o.id} className="flex flex-wrap items-center gap-3 p-4 text-sm hover:bg-primary/5">
+                  <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
                     <ShoppingBag className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-mono text-xs text-cyan-400">{o.order_number}</div>
+                    <div className="truncate font-mono text-xs text-primary">{o.order_number}</div>
                     <div className="truncate text-xs text-muted-foreground">{o.buyer_email}</div>
                   </div>
                   <span
@@ -308,8 +308,8 @@ function AdminDashboard() {
 
         <div className="space-y-4">
           {/* Top products */}
-          <div className="rounded-2xl border border-cyan-500/10 bg-card">
-            <div className="border-b border-cyan-500/10 p-5">
+          <div className="rounded-2xl border border-primary/10 bg-card">
+            <div className="border-b border-primary/10 p-5">
               <h2 className="font-display text-lg font-bold">{t("admin.topProducts")}</h2>
             </div>
             {(topProducts ?? []).length === 0 ? (
@@ -318,7 +318,7 @@ function AdminDashboard() {
               <div className="divide-y divide-cyan-500/10">
                 {(topProducts ?? []).map((p, i) => (
                   <div key={i} className="flex items-center gap-3 p-3 text-sm">
-                    <span className="grid h-7 w-7 place-items-center rounded-full bg-cyan-500/10 font-mono text-xs font-bold text-cyan-400">
+                    <span className="grid h-7 w-7 place-items-center rounded-full bg-primary/10 font-mono text-xs font-bold text-primary">
                       {i + 1}
                     </span>
                     <div className="min-w-0 flex-1">

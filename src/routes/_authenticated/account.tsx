@@ -29,12 +29,12 @@ function AccountPage() {
         <h1 className="mb-6 font-display text-3xl font-bold">{t("nav.account")}</h1>
         <h2 className="mb-4 text-lg font-semibold">{t("admin.orders")}</h2>
         <div className="space-y-3">
-          {(orders ?? []).length === 0 && <div className="rounded-xl border border-cyan-500/10 bg-card p-8 text-center text-muted-foreground">—</div>}
+          {(orders ?? []).length === 0 && <div className="rounded-xl border border-primary/10 bg-card p-8 text-center text-muted-foreground">—</div>}
           {(orders ?? []).map((o) => (
-            <div key={o.id} className="rounded-xl border border-cyan-500/10 bg-card p-4">
+            <div key={o.id} className="rounded-xl border border-primary/10 bg-card p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-mono text-sm text-cyan-400">{o.order_number}</span>
-                <span className="rounded-full border border-cyan-500/20 px-2 py-0.5 text-xs">{o.status}</span>
+                <span className="font-mono text-sm text-primary">{o.order_number}</span>
+                <span className="rounded-full border border-primary/20 px-2 py-0.5 text-xs">{o.status}</span>
                 <span className="font-mono font-bold">{formatPrice(Number(o.total), o.currency)}</span>
               </div>
               <div className="mt-2 text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()}</div>

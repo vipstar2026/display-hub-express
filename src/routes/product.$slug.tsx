@@ -43,17 +43,17 @@ function ProductPage() {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto grid gap-8 px-4 py-8 md:grid-cols-2">
-        <div className="aspect-square overflow-hidden rounded-2xl border border-cyan-500/20 bg-card">
+        <div className="aspect-square overflow-hidden rounded-2xl border border-primary/20 bg-card">
           {img ? (
             <img src={img} alt={name} className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full items-center justify-center text-cyan-500/30"><Package className="h-32 w-32" /></div>
+            <div className="flex h-full items-center justify-center text-primary/30"><Package className="h-32 w-32" /></div>
           )}
         </div>
         <div>
           <h1 className="font-display text-3xl font-bold">{name}</h1>
           <div className="mt-4 flex items-baseline gap-3">
-            <span className="font-mono text-3xl font-bold text-cyan-400">{formatPrice(Number(p.price), p.currency)}</span>
+            <span className="font-mono text-3xl font-bold text-primary">{formatPrice(Number(p.price), p.currency)}</span>
             {p.compare_price && Number(p.compare_price) > Number(p.price) && (
               <span className="text-lg text-muted-foreground line-through">{formatPrice(Number(p.compare_price), p.currency)}</span>
             )}
@@ -66,40 +66,40 @@ function ProductPage() {
             const w = warrantyLabel(feats.warranty, lang, feats.warranty_custom);
             if (!w) return null;
             return (
-              <div className="mt-6 flex items-center gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3">
-                <ShieldCheck className="h-5 w-5 text-cyan-400" />
+              <div className="mt-6 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+                <ShieldCheck className="h-5 w-5 text-primary" />
                 <span className="text-sm text-muted-foreground">{WARRANTY_LABEL_I18N[lang]}:</span>
-                <span className="font-semibold text-cyan-300">{w}</span>
+                <span className="font-semibold text-primary">{w}</span>
               </div>
             );
           })()}
 
           {p.type === "subscription" && p.features && typeof p.features === "object" && (
-            <div className="mt-6 space-y-3 rounded-xl border border-cyan-500/20 bg-card/50 p-5">
+            <div className="mt-6 space-y-3 rounded-xl border border-primary/20 bg-card/50 p-5">
               <div className="grid grid-cols-2 gap-3 text-sm">
                 {(p.features as any).channels && (
-                  <div className="flex items-center gap-2"><Tv className="h-4 w-4 text-cyan-400" /><span className="text-muted-foreground">{lang === "ar" ? "القنوات" : lang === "ur" ? "چینلز" : "Channels"}:</span><span className="font-mono">{(p.features as any).channels}</span></div>
+                  <div className="flex items-center gap-2"><Tv className="h-4 w-4 text-primary" /><span className="text-muted-foreground">{lang === "ar" ? "القنوات" : lang === "ur" ? "چینلز" : "Channels"}:</span><span className="font-mono">{(p.features as any).channels}</span></div>
                 )}
                 {(p.features as any).quality && (
-                  <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-cyan-400" /><span className="text-muted-foreground">{lang === "ar" ? "الجودة" : lang === "ur" ? "معیار" : "Quality"}:</span><span className="font-mono">{(p.features as any).quality}</span></div>
+                  <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /><span className="text-muted-foreground">{lang === "ar" ? "الجودة" : lang === "ur" ? "معیار" : "Quality"}:</span><span className="font-mono">{(p.features as any).quality}</span></div>
                 )}
                 {(p.features as any).duration_months && (
-                  <div className="flex items-center gap-2 col-span-2"><Calendar className="h-4 w-4 text-cyan-400" /><span className="text-muted-foreground">{lang === "ar" ? "المدة" : lang === "ur" ? "مدت" : "Duration"}:</span><span className="font-mono">{(p.features as any).duration_months} {lang === "ar" ? "شهر" : lang === "ur" ? "ماہ" : "months"}</span></div>
+                  <div className="flex items-center gap-2 col-span-2"><Calendar className="h-4 w-4 text-primary" /><span className="text-muted-foreground">{lang === "ar" ? "المدة" : lang === "ur" ? "مدت" : "Duration"}:</span><span className="font-mono">{(p.features as any).duration_months} {lang === "ar" ? "شهر" : lang === "ur" ? "ماہ" : "months"}</span></div>
                 )}
               </div>
 
               {(p.features as any).downloader_code && (
-                <div className="rounded-lg border border-cyan-500/30 bg-background/60 p-3">
-                  <div className="mb-1 text-xs uppercase tracking-wider text-cyan-400/80">{lang === "ar" ? "كود Downloader" : lang === "ur" ? "Downloader کوڈ" : "Downloader Code"}</div>
+                <div className="rounded-lg border border-primary/30 bg-background/60 p-3">
+                  <div className="mb-1 text-xs uppercase tracking-wider text-primary/80">{lang === "ar" ? "كود Downloader" : lang === "ur" ? "Downloader کوڈ" : "Downloader Code"}</div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-2xl font-bold tracking-widest text-cyan-300">{(p.features as any).downloader_code}</span>
+                    <span className="font-mono text-2xl font-bold tracking-widest text-primary">{(p.features as any).downloader_code}</span>
                     <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText((p.features as any).downloader_code); toast.success(lang === "ar" ? "تم النسخ" : "Copied"); }}><Copy className="h-4 w-4" /></Button>
                   </div>
                 </div>
               )}
 
               {(p.features as any).app_download_url && (
-                <a href={(p.features as any).app_download_url} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:bg-cyan-500/20">
+                <a href={(p.features as any).app_download_url} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary transition hover:bg-primary/20">
                   <Download className="h-4 w-4" />
                   {lang === "ar" ? "تحميل التطبيق (APK)" : lang === "ur" ? "ایپ ڈاؤن لوڈ کریں" : "Download App (APK)"}
                 </a>
@@ -108,10 +108,10 @@ function ProductPage() {
           )}
 
           <div className="mt-6 flex items-center gap-4">
-            <div className="flex items-center rounded-md border border-cyan-500/20">
-              <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-3 py-2 hover:bg-cyan-500/10">−</button>
+            <div className="flex items-center rounded-md border border-primary/20">
+              <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-3 py-2 hover:bg-primary/10">−</button>
               <span className="w-12 text-center font-mono">{qty}</span>
-              <button onClick={() => setQty(qty + 1)} className="px-3 py-2 hover:bg-cyan-500/10">+</button>
+              <button onClick={() => setQty(qty + 1)} className="px-3 py-2 hover:bg-primary/10">+</button>
             </div>
             <Button
               size="lg"
@@ -120,7 +120,7 @@ function ProductPage() {
                 add({ product_id: p.id, slug: p.slug, name, image: img, price: Number(p.price), type: p.type }, qty);
                 toast.success(t("shop.addToCart"));
               }}
-              className="flex-1 bg-cyan-500 text-background hover:bg-cyan-400"
+              className="flex-1 bg-primary text-background hover:bg-primary"
             >
               <ShoppingCart className="me-2 h-4 w-4" />
               {oos ? t("shop.outOfStock") : t("shop.addToCart")}

@@ -75,10 +75,10 @@ function AdminOrders() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="font-display text-2xl font-bold">Orders</h1>
-        <div className="ms-auto flex gap-1 rounded-lg border border-cyan-500/20 p-1">
+        <div className="ms-auto flex gap-1 rounded-lg border border-primary/20 p-1">
           {(["all", "pending", "paid"] as const).map((f) => (
             <button key={f} onClick={() => setFilter(f)}
-              className={`rounded px-3 py-1 text-xs font-medium capitalize transition-colors ${filter === f ? "bg-cyan-500 text-background" : "text-muted-foreground hover:text-foreground"}`}>
+              className={`rounded px-3 py-1 text-xs font-medium capitalize transition-colors ${filter === f ? "bg-primary text-background" : "text-muted-foreground hover:text-foreground"}`}>
               {f}
               {f === "pending" && (data ?? []).some((o) => o.payment_status === "pending") &&
                 <span className="ms-1 inline-block h-1.5 w-1.5 rounded-full bg-amber-400" />}
@@ -88,7 +88,7 @@ function AdminOrders() {
       </div>
 
       <div className="space-y-3">
-        {filtered.length === 0 && <div className="rounded-xl border border-cyan-500/10 bg-card p-8 text-center text-muted-foreground">No orders</div>}
+        {filtered.length === 0 && <div className="rounded-xl border border-primary/10 bg-card p-8 text-center text-muted-foreground">No orders</div>}
         {filtered.map((o) => <OrderCard key={o.id} order={o} onConfirm={confirmPayment} onReject={rejectPayment} onStatus={updateStatus} onNotes={saveNotes} payBadge={payBadge} />)}
       </div>
     </div>
@@ -122,9 +122,9 @@ function OrderCard({ order: o, onConfirm, onReject, onStatus, onNotes, payBadge 
   };
 
   return (
-    <div className="rounded-xl border border-cyan-500/10 bg-card p-4">
+    <div className="rounded-xl border border-primary/10 bg-card p-4">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="font-mono text-cyan-400">{o.order_number}</span>
+        <span className="font-mono text-primary">{o.order_number}</span>
         <Badge className={payBadge(o.payment_status)}>{o.payment_status}</Badge>
         <span className="text-sm text-muted-foreground">{o.buyer_email}</span>
         <span className="text-xs text-muted-foreground"><Clock className="me-1 inline h-3 w-3" />{new Date(o.created_at).toLocaleString()}</span>

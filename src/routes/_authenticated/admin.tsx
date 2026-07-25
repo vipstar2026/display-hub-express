@@ -66,13 +66,13 @@ function AdminLayout() {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-background via-background to-cyan-950/10">
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 z-40 w-64 border-e border-cyan-500/20 bg-card/80 backdrop-blur-xl transition-transform md:static md:!translate-x-0 ${open ? "translate-x-0" : "rtl:translate-x-full ltr:-translate-x-full"}`}>
-        <div className="flex h-16 items-center gap-2 border-b border-cyan-500/20 px-5">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-600 shadow-lg shadow-cyan-500/30">
+      <aside className={`fixed inset-y-0 z-40 w-64 border-e border-primary/20 bg-card/80 backdrop-blur-xl transition-transform md:static md:!translate-x-0 ${open ? "translate-x-0" : "rtl:translate-x-full ltr:-translate-x-full"}`}>
+        <div className="flex h-16 items-center gap-2 border-b border-primary/20 px-5">
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-cyan-600 shadow-lg shadow-primary/30">
             <Satellite className="h-5 w-5 text-background" />
           </div>
           <div>
-            <div className="font-display text-base font-bold text-cyan-400 leading-tight">VIPSTAR</div>
+            <div className="font-display text-base font-bold text-primary leading-tight">VIPSTAR</div>
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Admin</div>
           </div>
         </div>
@@ -92,12 +92,12 @@ function AdminLayout() {
                     onClick={() => setOpen(false)}
                     className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all ${
                       active
-                        ? "bg-gradient-to-r from-cyan-500/15 to-transparent text-cyan-300 shadow-inner"
-                        : "text-muted-foreground hover:bg-cyan-500/5 hover:text-foreground"
+                        ? "bg-gradient-to-r from-primary/15 to-transparent text-primary shadow-inner"
+                        : "text-muted-foreground hover:bg-primary/5 hover:text-foreground"
                     }`}
                   >
-                    {active && <span className="absolute start-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-e bg-cyan-400" />}
-                    <n.icon className={`h-4 w-4 ${active ? "text-cyan-400" : ""}`} />
+                    {active && <span className="absolute start-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-e bg-primary" />}
+                    <n.icon className={`h-4 w-4 ${active ? "text-primary" : ""}`} />
                     <span className="flex-1">{n.label}</span>
                   </Link>
                 );
@@ -105,8 +105,8 @@ function AdminLayout() {
             </div>
           ))}
 
-          <div className="mt-auto space-y-1 border-t border-cyan-500/10 pt-3">
-            <Link to="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-cyan-500/5 hover:text-foreground">
+          <div className="mt-auto space-y-1 border-t border-primary/10 pt-3">
+            <Link to="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-primary/5 hover:text-foreground">
               <Store className="h-4 w-4" /> {t("admin.viewStore")}
             </Link>
             <button
@@ -124,14 +124,14 @@ function AdminLayout() {
       {/* Main */}
       <div className="flex min-h-screen flex-1 flex-col">
         {/* Header */}
-        <header className="sticky top-0 z-20 border-b border-cyan-500/20 bg-card/60 backdrop-blur-xl">
+        <header className="sticky top-0 z-20 border-b border-primary/20 bg-card/60 backdrop-blur-xl">
           <div className="flex h-16 items-center gap-3 px-4 md:px-6">
             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen(true)}>
               <Menu className="h-5 w-5" />
             </Button>
 
             <div className="hidden items-center gap-1.5 text-sm text-muted-foreground md:flex">
-              <Link to="/admin" className="hover:text-cyan-400">{t("admin.dashboard")}</Link>
+              <Link to="/admin" className="hover:text-primary">{t("admin.dashboard")}</Link>
               {current && current.to !== "/admin" && (
                 <>
                   <ChevronRight className="h-4 w-4 rtl:rotate-180" />
@@ -142,7 +142,7 @@ function AdminLayout() {
 
             <div className="relative ms-auto hidden md:block md:w-72">
               <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder={t("admin.search")} className="h-9 border-cyan-500/20 bg-background/50 ps-9" />
+              <Input placeholder={t("admin.search")} className="h-9 border-primary/20 bg-background/50 ps-9" />
             </div>
 
             <div className="ms-auto flex items-center gap-2 md:ms-0">
@@ -151,7 +151,7 @@ function AdminLayout() {
                 <select
                   value={lang}
                   onChange={(e) => setLang(e.target.value as Lang)}
-                  className="h-9 appearance-none rounded-md border border-cyan-500/20 bg-background/50 ps-7 pe-3 text-xs font-medium outline-none focus:border-cyan-500"
+                  className="h-9 appearance-none rounded-md border border-primary/20 bg-background/50 ps-7 pe-3 text-xs font-medium outline-none focus:border-cyan-500"
                 >
                   <option value="ar">AR</option>
                   <option value="en">EN</option>
@@ -160,10 +160,10 @@ function AdminLayout() {
               </div>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-4 w-4" />
-                <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
               </Button>
-              <div className="hidden items-center gap-2 rounded-full border border-cyan-500/20 bg-background/50 py-1 ps-1 pe-3 sm:flex">
-                <div className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 text-xs font-bold text-background">
+              <div className="hidden items-center gap-2 rounded-full border border-primary/20 bg-background/50 py-1 ps-1 pe-3 sm:flex">
+                <div className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-primary to-cyan-600 text-xs font-bold text-background">
                   {(user.email?.[0] ?? "A").toUpperCase()}
                 </div>
                 <span className="max-w-[140px] truncate text-xs text-muted-foreground">{user.email}</span>
