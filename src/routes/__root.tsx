@@ -78,6 +78,7 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <CartProvider>
+          <ThemeApplier />
           <Outlet />
           <Toaster position="top-center" theme="dark" richColors />
         </CartProvider>
