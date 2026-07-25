@@ -32,6 +32,7 @@ export function Header() {
   const links = [
     { to: "/", label: t("nav.home") },
     { to: "/shop", label: t("nav.shop") },
+    { to: "/blog", label: lang === "en" ? "Blog" : lang === "ur" ? "بلاگ" : "المدونة" },
     { to: "/track", label: t("nav.track") },
     { to: "/about", label: t("nav.about") },
     { to: "/faq", label: t("nav.faq") },
