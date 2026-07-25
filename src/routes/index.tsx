@@ -39,6 +39,17 @@ function HomePage() {
     },
   });
 
+  const { data: settings } = useQuery({
+    queryKey: ["home-settings"],
+    queryFn: async () => {
+      const { data } = await supabase.from("site_settings").select("site_name,tagline_ar,tagline_en,tagline_ur,company_address,company_cr,business_hours,instagram_url").limit(1).maybeSingle();
+      return data;
+    },
+  });
+
+  const tagline = settings ? (lang === "ar" ? settings.tagline_ar : lang === "ur" ? settings.tagline_ur : settings.tagline_en) : "";
+
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
