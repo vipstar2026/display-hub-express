@@ -71,7 +71,7 @@ function ShopPage() {
     return Array.from(buckets.values()).filter((g) => g.items.length > 0);
   })();
 
-  const applyPriceFilter = () => nav({ search: (s) => ({ ...s, min: minPrice, max: maxPrice }) });
+  const applyPriceFilter = () => nav({ search: (s: ShopSearch) => ({ ...s, min: minPrice, max: maxPrice }) });
   const clearFilters = () => { setSearchText(""); setMinPrice(""); setMaxPrice(""); nav({ search: { category: "", q: "", sort: "newest", min: "", max: "" } }); };
 
   return (
@@ -82,7 +82,7 @@ function ShopPage() {
           <h1 className="font-display text-3xl font-bold">{t("nav.shop")}</h1>
           <form
             className="relative ms-auto flex-1 md:max-w-md"
-            onSubmit={(e) => { e.preventDefault(); nav({ search: (s) => ({ ...s, q: searchText }) }); }}
+            onSubmit={(e) => { e.preventDefault(); nav({ search: (s: ShopSearch) => ({ ...s, q: searchText }) }); }}
           >
             <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -94,7 +94,7 @@ function ShopPage() {
           </form>
           <select
             value={sort}
-            onChange={(e) => nav({ search: (s) => ({ ...s, sort: e.target.value }) })}
+            onChange={(e) => nav({ search: (s: ShopSearch) => ({ ...s, sort: e.target.value }) })}
             className="h-9 rounded-md border border-primary/20 bg-card px-3 text-sm"
           >
             <option value="newest">{t("shop.sort.newest")}</option>
@@ -120,7 +120,7 @@ function ShopPage() {
 
         <div className="mb-8 flex flex-wrap gap-2">
           <button
-            onClick={() => nav({ search: (s) => ({ ...s, category: "" }) })}
+            onClick={() => nav({ search: (s: ShopSearch) => ({ ...s, category: "" }) })}
             className={`rounded-full border px-3 py-1 text-sm transition ${!category ? "border-primary bg-primary/10 text-primary" : "border-primary/20 hover:border-primary/50"}`}
           >
             {t("shop.all")}
@@ -128,7 +128,7 @@ function ShopPage() {
           {(categories ?? []).map((c) => (
             <button
               key={c.id}
-              onClick={() => nav({ search: (s) => ({ ...s, category: c.slug }) })}
+              onClick={() => nav({ search: (s: ShopSearch) => ({ ...s, category: c.slug }) })}
               className={`rounded-full border px-3 py-1 text-sm transition ${category === c.slug ? "border-primary bg-primary/10 text-primary" : "border-primary/20 hover:border-primary/50"}`}
             >
               {localizedName(c, "name", lang)}
@@ -148,7 +148,7 @@ function ShopPage() {
                       <span className="rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-xs text-primary">{items.length}</span>
                     </div>
                     {cat.slug && (
-                      <button onClick={() => nav({ search: (s) => ({ ...s, category: cat.slug }) })} className="text-xs text-primary hover:text-primary">{t("shop.all")} →</button>
+                      <button onClick={() => nav({ search: (s: ShopSearch) => ({ ...s, category: cat.slug }) })} className="text-xs text-primary hover:text-primary">{t("shop.all")} →</button>
                     )}
                   </div>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
