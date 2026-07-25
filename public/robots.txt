@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /wishlist
+Disallow: /order/success
+
+Sitemap: https://vipstar.cc/sitemap.xml
