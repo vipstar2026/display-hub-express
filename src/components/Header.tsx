@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ShoppingCart, User, Menu, X, Globe, Satellite, Heart } from "lucide-react";
+import { NotificationBell } from "@/components/NotificationBell";
 import { useEffect, useState } from "react";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
@@ -67,14 +68,17 @@ export function Header() {
           </DropdownMenu>
 
           {userId && (
-            <Link to="/wishlist" className="relative">
-              <Button variant="ghost" size="icon" aria-label="Wishlist">
-                <Heart className="h-4 w-4" />
-                {wishCount > 0 && (
-                  <span className="absolute -top-1 -end-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-background">{wishCount}</span>
-                )}
-              </Button>
-            </Link>
+            <>
+              <NotificationBell userId={userId} />
+              <Link to="/wishlist" className="relative">
+                <Button variant="ghost" size="icon" aria-label="Wishlist">
+                  <Heart className="h-4 w-4" />
+                  {wishCount > 0 && (
+                    <span className="absolute -top-1 -end-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-background">{wishCount}</span>
+                  )}
+                </Button>
+              </Link>
+            </>
           )}
 
           <Link to="/cart" className="relative">

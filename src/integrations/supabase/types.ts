@@ -1732,6 +1732,16 @@ export type Database = {
       }
     }
     Functions: {
+      admin_broadcast_notification: {
+        Args: {
+          _link?: string
+          _message: string
+          _severity?: string
+          _target?: string
+          _title: string
+        }
+        Returns: number
+      }
       admin_customer_analytics: {
         Args: never
         Returns: {
