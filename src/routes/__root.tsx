@@ -89,14 +89,17 @@ export function App() {
       <I18nProvider>
         <CartProvider>
           <WishlistProvider>
-            <ThemeApplier />
-            <Outlet />
-            <MobileBottomNav />
-            <PWAInstaller />
-            <FloatingWhatsApp />
-            <ScrollToTop />
-            <CookieConsent />
-            <Toaster position="top-center" theme="dark" richColors />
+            <CompareProvider>
+              <ThemeApplier />
+              <Outlet />
+              <MobileBottomNav />
+              <PWAInstaller />
+              <FloatingWhatsApp />
+              <ScrollToTop />
+              <CookieConsent />
+              <CompareBar />
+              <Toaster position="top-center" theme="dark" richColors />
+            </CompareProvider>
           </WishlistProvider>
         </CartProvider>
       </I18nProvider>
