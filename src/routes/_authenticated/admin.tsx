@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, FolderTree, ShoppingBag, Users, Settings,
   Satellite, ArrowLeft, Search, Bell, Menu, ChevronRight, Store, LogOut, Globe,
-  CreditCard, BarChart3, Calculator, Ticket, UsersRound,
+  CreditCard, BarChart3, Calculator, Ticket, UsersRound, Boxes,
 } from "lucide-react";
 
 import { useI18n, type Lang } from "@/lib/i18n";
