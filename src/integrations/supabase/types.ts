@@ -119,6 +119,69 @@ export type Database = {
         }
         Relationships: []
       }
+      banners: {
+        Row: {
+          created_at: string
+          cta_label_ar: string | null
+          cta_label_en: string | null
+          cta_label_ur: string | null
+          ends_at: string | null
+          id: string
+          image_url: string
+          is_active: boolean
+          link_url: string | null
+          sort_order: number
+          starts_at: string | null
+          subtitle_ar: string | null
+          subtitle_en: string | null
+          subtitle_ur: string | null
+          title_ar: string | null
+          title_en: string | null
+          title_ur: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cta_label_ar?: string | null
+          cta_label_en?: string | null
+          cta_label_ur?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url: string
+          is_active?: boolean
+          link_url?: string | null
+          sort_order?: number
+          starts_at?: string | null
+          subtitle_ar?: string | null
+          subtitle_en?: string | null
+          subtitle_ur?: string | null
+          title_ar?: string | null
+          title_en?: string | null
+          title_ur?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cta_label_ar?: string | null
+          cta_label_en?: string | null
+          cta_label_ur?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          link_url?: string | null
+          sort_order?: number
+          starts_at?: string | null
+          subtitle_ar?: string | null
+          subtitle_en?: string | null
+          subtitle_ur?: string | null
+          title_ar?: string | null
+          title_en?: string | null
+          title_ur?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string | null
