@@ -468,6 +468,68 @@ export type Database = {
           },
         ]
       }
+      flash_sales: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          name_ur: string | null
+          original_price: number | null
+          product_id: string
+          sale_price: number
+          sold_count: number
+          sort_order: number
+          starts_at: string
+          stock_limit: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          name_ur?: string | null
+          original_price?: number | null
+          product_id: string
+          sale_price: number
+          sold_count?: number
+          sort_order?: number
+          starts_at?: string
+          stock_limit?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          name_ur?: string | null
+          original_price?: number | null
+          product_id?: string
+          sale_price?: number
+          sold_count?: number
+          sort_order?: number
+          starts_at?: string
+          stock_limit?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flash_sales_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_movements: {
         Row: {
           cost_per_unit: number
