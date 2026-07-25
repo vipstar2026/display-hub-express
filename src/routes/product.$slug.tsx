@@ -7,7 +7,8 @@ import { useCart } from "@/lib/cart";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { formatPrice, firstImage } from "@/lib/format";
-import { Package, ShoppingCart, Download, Copy, Tv, Calendar, Sparkles } from "lucide-react";
+import { Package, ShoppingCart, Download, Copy, Tv, Calendar, Sparkles, ShieldCheck } from "lucide-react";
+import { warrantyLabel, WARRANTY_LABEL_I18N } from "@/lib/category-presets";
 import { toast } from "sonner";
 import { useState } from "react";
 
