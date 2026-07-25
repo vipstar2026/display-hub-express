@@ -27,9 +27,13 @@ function AdminSettings() {
   const [form, setForm] = useState<Row | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const { data } = useQuery({
-    queryKey: ["site-settings"],
-    queryFn: async () => (await supabase.from("site_settings").select("*").eq("id", 1).single()).data,
+  const { data, error: loadError } = useQuery({
+    queryKey: ["site-settings-admin"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).rpc("get_site_settings_admin");
+      if (error) throw error;
+      return Array.isArray(data) ? data[0] : data;
+    },
   });
 
   useEffect(() => { if (data && !form) setForm({ ...data }); }, [data, form]);
@@ -39,18 +43,18 @@ function AdminSettings() {
   const handleSave = async () => {
     if (!form) return;
     setSaving(true);
-    const { id, updated_at, ...payload } = form;
-    // Normalize numeric fields
+    const { id, updated_at, created_at, ...payload } = form;
     ["shipping_flat", "free_shipping_threshold", "vat_percent", "low_stock_threshold"].forEach((k) => {
       if (payload[k] === "" || payload[k] === null) payload[k] = k === "free_shipping_threshold" ? null : 0;
       else payload[k] = Number(payload[k]);
     });
-    const { error } = await supabase.from("site_settings").update(payload as any).eq("id", 1);
+    const { error } = await (supabase as any).rpc("update_site_settings_admin", { payload });
     setSaving(false);
     if (error) toast.error(error.message);
-    else { toast.success("تم الحفظ"); qc.invalidateQueries({ queryKey: ["site-settings"] }); }
+    else { toast.success("تم الحفظ"); qc.invalidateQueries({ queryKey: ["site-settings-admin"] }); qc.invalidateQueries({ queryKey: ["site-settings"] }); }
   };
 
+  if (loadError) return <div className="text-destructive">تعذر تحميل الإعدادات: {(loadError as any).message}</div>;
   if (!form) return <div className="text-muted-foreground">Loading...</div>;
 
   const Field = ({ k, label, type = "text", placeholder }: { k: string; label: string; type?: string; placeholder?: string }) => (
