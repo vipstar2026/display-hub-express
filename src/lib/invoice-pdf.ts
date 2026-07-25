@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import QRCode from "qrcode";
 import { formatPrice } from "./format";
 
 type Item = {
@@ -38,7 +39,28 @@ type Company = {
   phone?: string;
 };
 
-export function generateInvoicePDF(order: Order, company: Company = {}) {
+// Build a ZATCA/GCC-style TLV Base64 payload for the QR code.
+// Tags: 1=seller, 2=vat, 3=timestamp, 4=total, 5=vat amount.
+function buildTlvBase64(fields: { seller: string; vat: string; timestamp: string; total: string; vatAmount: string }) {
+  const enc = new TextEncoder();
+  const parts: Uint8Array[] = [];
+  const values = [fields.seller, fields.vat, fields.timestamp, fields.total, fields.vatAmount];
+  values.forEach((val, idx) => {
+    const tag = idx + 1;
+    const bytes = enc.encode(val);
+    const header = new Uint8Array([tag, bytes.length]);
+    parts.push(header, bytes);
+  });
+  const total = parts.reduce((n, p) => n + p.length, 0);
+  const merged = new Uint8Array(total);
+  let offset = 0;
+  for (const p of parts) { merged.set(p, offset); offset += p.length; }
+  let binary = "";
+  for (const b of merged) binary += String.fromCharCode(b);
+  return typeof btoa !== "undefined" ? btoa(binary) : Buffer.from(binary, "binary").toString("base64");
+}
+
+export async function generateInvoicePDF(order: Order, company: Company = {}) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const currency = order.currency || "BHD";
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -62,7 +84,7 @@ export function generateInvoicePDF(order: Order, company: Company = {}) {
   // Company + customer
   doc.setTextColor(60, 60, 60);
   doc.setFontSize(9);
-  let y = 110;
+  const y = 110;
   const left: string[] = [];
   if (company.address) left.push(company.address);
   if (company.cr) left.push(`CR: ${company.cr}`);
@@ -102,7 +124,6 @@ export function generateInvoicePDF(order: Order, company: Company = {}) {
   // @ts-expect-error jspdf-autotable extends
   const finalY = doc.lastAutoTable.finalY as number;
 
-  // Totals
   const totals: [string, string][] = [
     ["Subtotal", formatPrice(Number(order.subtotal), currency)],
   ];
@@ -126,14 +147,28 @@ export function generateInvoicePDF(order: Order, company: Company = {}) {
   doc.text("TOTAL", pageWidth - 200, ty);
   doc.text(formatPrice(Number(order.total), currency), pageWidth - 40, ty, { align: "right" });
 
-  // Payment info
+  // QR (ZATCA/GCC TLV)
+  try {
+    const qrPayload = buildTlvBase64({
+      seller: company.name || "VIPSTAR",
+      vat: company.vat || "",
+      timestamp: new Date(order.created_at).toISOString(),
+      total: Number(order.total).toFixed(3),
+      vatAmount: Number(order.tax).toFixed(3),
+    });
+    const dataUrl = await QRCode.toDataURL(qrPayload, { margin: 0, width: 220 });
+    doc.addImage(dataUrl, "PNG", 40, finalY + 20, 90, 90);
+    doc.setFontSize(7);
+    doc.setTextColor(120);
+    doc.text("Scan for tax details", 40, finalY + 122);
+  } catch { /* ignore QR failure */ }
+
   ty += 30;
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100);
-  doc.text(`Payment: ${order.payment_method || "—"} • Status: ${order.payment_status} • Order: ${order.status}`, 40, ty);
+  doc.text(`Payment: ${order.payment_method || "—"} • Status: ${order.payment_status} • Order: ${order.status}`, 40, Math.max(ty, finalY + 140));
 
-  // Footer
   doc.setFontSize(8);
   doc.setTextColor(140);
   doc.text("Thank you for your business • شكراً لتعاملكم معنا", pageWidth / 2, doc.internal.pageSize.getHeight() - 24, { align: "center" });
