@@ -877,6 +877,9 @@ const EN: Dict = {
   "loyalty.balance": "Loyalty Points",
   "loyalty.points": "pts",
   "loyalty.hint": "Earn 1 point for every BHD you spend",
+  "pwa.install_title": "Install VIPSTAR app",
+  "pwa.install_desc": "Add the store to your home screen for a native-app experience.",
+  "pwa.install_cta": "Install app",
 };
 
 const UR: Dict = {
