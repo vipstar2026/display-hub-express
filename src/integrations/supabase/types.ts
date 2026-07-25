@@ -1539,6 +1539,104 @@ export type Database = {
           },
         ]
       }
+      shipping_rates: {
+        Row: {
+          created_at: string
+          free_over: number | null
+          id: string
+          is_active: boolean
+          max_delivery_days: number
+          method: string
+          min_delivery_days: number
+          name_ar: string
+          name_en: string
+          name_ur: string | null
+          price: number
+          sort_order: number
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          free_over?: number | null
+          id?: string
+          is_active?: boolean
+          max_delivery_days?: number
+          method?: string
+          min_delivery_days?: number
+          name_ar: string
+          name_en: string
+          name_ur?: string | null
+          price?: number
+          sort_order?: number
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          free_over?: number | null
+          id?: string
+          is_active?: boolean
+          max_delivery_days?: number
+          method?: string
+          min_delivery_days?: number
+          name_ar?: string
+          name_en?: string
+          name_ur?: string | null
+          price?: number
+          sort_order?: number
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipping_rates_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipping_zones: {
+        Row: {
+          country_code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          name_ur: string | null
+          regions: Json
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          name_ur?: string | null
+          regions?: Json
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          name_ur?: string | null
+          regions?: Json
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           accent_color: string | null
