@@ -1287,6 +1287,7 @@ export type Database = {
           tagline_en: string | null
           tagline_ur: string | null
           telegram_url: string | null
+          theme_preset: string
           tiktok_pixel_id: string | null
           tiktok_url: string | null
           twitter_url: string | null
@@ -1339,6 +1340,7 @@ export type Database = {
           tagline_en?: string | null
           tagline_ur?: string | null
           telegram_url?: string | null
+          theme_preset?: string
           tiktok_pixel_id?: string | null
           tiktok_url?: string | null
           twitter_url?: string | null
@@ -1391,6 +1393,7 @@ export type Database = {
           tagline_en?: string | null
           tagline_ur?: string | null
           telegram_url?: string | null
+          theme_preset?: string
           tiktok_pixel_id?: string | null
           tiktok_url?: string | null
           twitter_url?: string | null
