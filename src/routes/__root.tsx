@@ -5,6 +5,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { CartProvider } from "@/lib/cart";
 import { Toaster } from "sonner";
 import logoUrl from "@/assets/logo.png";
+import { ThemeApplier } from "@/components/ThemeApplier";
 
 function NotFoundComponent() {
   return (
@@ -77,6 +78,7 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <CartProvider>
+          <ThemeApplier />
           <Outlet />
           <Toaster position="top-center" theme="dark" richColors />
         </CartProvider>
