@@ -139,7 +139,59 @@ function HomePage() {
         </div>
       </section>
 
+      {/* Business Info / Contact */}
+      <section className="border-t border-cyan-500/20 bg-gradient-to-b from-background to-cyan-500/5 py-16">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-cyan-500/20 bg-card/60 shadow-[0_0_60px_-15px_rgba(0,217,255,0.3)] backdrop-blur">
+            <div className="grid gap-0 md:grid-cols-[1.1fr_1fr]">
+              {/* Left brand panel */}
+              <div className="relative flex flex-col justify-center gap-4 bg-gradient-to-br from-cyan-500/15 via-transparent to-purple-500/10 p-8 md:p-10">
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-mono text-cyan-300">
+                  <BadgeCheck className="h-3 w-3" /> {settings?.company_cr ?? "CR-158814-1"}
+                </div>
+                <h2 className="font-display text-3xl font-bold leading-tight md:text-4xl">
+                  <span className="bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent">
+                    {settings?.site_name ?? "VIP STAR Satellite & Electronics W.L.L"}
+                  </span>
+                </h2>
+                {tagline && <p className="text-sm text-muted-foreground md:text-base">{tagline}</p>}
+                <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                  {["CCTV", "Dish Repair", "IPTV", "beIN Sports", "Satellite"].map((tag) => (
+                    <span key={tag} className="rounded-full border border-cyan-500/20 bg-cyan-500/5 px-3 py-1 text-cyan-300">{tag}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right contact panel */}
+              <div className="grid gap-3 p-8 md:p-10">
+                <a href="https://wa.me/97333161049" target="_blank" rel="noreferrer" className="group flex items-center gap-3 rounded-lg border border-cyan-500/10 bg-background/40 p-3 transition hover:border-emerald-500/40 hover:bg-emerald-500/5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400"><MessageCircle className="h-5 w-5" /></div>
+                  <div className="flex-1"><div className="text-xs text-muted-foreground">WhatsApp — Ahmed</div><div className="font-mono text-sm font-semibold" dir="ltr">+973 3316 1049</div></div>
+                </a>
+                <a href="tel:+97377082893" className="group flex items-center gap-3 rounded-lg border border-cyan-500/10 bg-background/40 p-3 transition hover:border-cyan-500/40 hover:bg-cyan-500/5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400"><Phone className="h-5 w-5" /></div>
+                  <div className="flex-1"><div className="text-xs text-muted-foreground">Phone</div><div className="font-mono text-sm font-semibold" dir="ltr">+973 7708 2893</div></div>
+                </a>
+                <a href="mailto:pppahmed71@gmail.com" className="group flex items-center gap-3 rounded-lg border border-cyan-500/10 bg-background/40 p-3 transition hover:border-cyan-500/40 hover:bg-cyan-500/5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400"><Mail className="h-5 w-5" /></div>
+                  <div className="flex-1"><div className="text-xs text-muted-foreground">Email</div><div className="font-mono text-sm font-semibold" dir="ltr">pppahmed71@gmail.com</div></div>
+                </a>
+                <a href={settings?.instagram_url ?? "https://www.instagram.com/vipstar449/"} target="_blank" rel="noreferrer" className="group flex items-center gap-3 rounded-lg border border-cyan-500/10 bg-background/40 p-3 transition hover:border-pink-500/40 hover:bg-pink-500/5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500/15 text-pink-400"><Instagram className="h-5 w-5" /></div>
+                  <div className="flex-1"><div className="text-xs text-muted-foreground">Instagram</div><div className="font-mono text-sm font-semibold" dir="ltr">@vipstar449</div></div>
+                </a>
+                <div className="flex items-start gap-3 rounded-lg border border-cyan-500/10 bg-background/40 p-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400"><MapPin className="h-5 w-5" /></div>
+                  <div className="flex-1"><div className="text-xs text-muted-foreground">Address</div><div className="text-sm font-medium leading-snug">{settings?.company_address ?? "Building 62, Shop 62, Block 935, Road 35, Riffa Alhajiyat, Bahrain"}</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <Footer />
+
     </div>
   );
 }
