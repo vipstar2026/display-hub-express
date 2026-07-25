@@ -54,8 +54,8 @@ function CartPage() {
   const handleCheckout = async () => {
     if (!userId) { nav({ to: "/auth" }); return; }
     if (items.length === 0) return;
-    if (!method) { toast.error("Select a payment method"); return; }
-    if (method.requires_proof && !proofFile) { toast.error("Upload payment proof"); return; }
+    if (!method) { toast.error(t("cart.select_method_err")); return; }
+    if (method.requires_proof && !proofFile) { toast.error(t("cart.upload_proof_err")); return; }
 
     setPlacing(true);
     try {
@@ -99,7 +99,7 @@ function CartPage() {
       if (itemsError) throw itemsError;
 
       clear();
-      toast.success("Order placed! We will review your payment shortly.");
+      toast.success(t("cart.order_placed"));
       nav({ to: "/account" });
     } catch (e) {
       toast.error((e as Error).message);
@@ -150,13 +150,9 @@ function CartPage() {
 
               {/* Payment methods */}
               <div className="rounded-xl border border-primary/20 bg-card p-5">
-                <h2 className="mb-3 font-display text-lg font-bold">
-                  {lang === "ar" ? "طريقة الدفع" : lang === "ur" ? "طریقہ ادائیگی" : "Payment Method"}
-                </h2>
+                <h2 className="mb-3 font-display text-lg font-bold">{t("cart.payment_method")}</h2>
                 {(methods ?? []).length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    {lang === "ar" ? "لا توجد طرق دفع متاحة حالياً." : "No payment methods available."}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t("cart.no_methods")}</p>
                 )}
                 <div className="grid gap-2 sm:grid-cols-2">
                   {(methods ?? []).map((m) => {
@@ -203,29 +199,23 @@ function CartPage() {
                     )}
                     <div className="grid gap-3 pt-2">
                       <div>
-                        <Label className="text-xs">
-                          {lang === "ar" ? "رقم مرجع التحويل (اختياري)" : "Payment reference (optional)"}
-                        </Label>
+                        <Label className="text-xs">{t("cart.reference")}</Label>
                         <Input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="TXN123..." />
                       </div>
                       {method.requires_proof && (
                         <div>
-                          <Label className="text-xs">
-                            {lang === "ar" ? "صورة إيصال الدفع *" : "Payment proof screenshot *"}
-                          </Label>
+                          <Label className="text-xs">{t("cart.proof")}</Label>
                           <label className="mt-1 flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-primary/40 bg-card/50 p-3 text-sm hover:bg-primary/5">
                             <Upload className="h-4 w-4 text-primary" />
                             <span className="flex-1 truncate">
-                              {proofFile ? proofFile.name : (lang === "ar" ? "اختر صورة..." : "Choose image...")}
+                              {proofFile ? proofFile.name : t("cart.choose_image")}
                             </span>
                             <input type="file" accept="image/*" className="hidden" onChange={(e) => setProofFile(e.target.files?.[0] ?? null)} />
                           </label>
                         </div>
                       )}
                       <div>
-                        <Label className="text-xs">
-                          {lang === "ar" ? "ملاحظات (اختياري)" : "Notes (optional)"}
-                        </Label>
+                        <Label className="text-xs">{t("cart.notes")}</Label>
                         <Textarea rows={2} value={customerNotes} onChange={(e) => setCustomerNotes(e.target.value)} />
                       </div>
                     </div>
@@ -239,7 +229,7 @@ function CartPage() {
               <div className="flex justify-between py-2"><span>{t("shop.subtotal")}</span><span className="font-mono">{formatPrice(subtotal)}</span></div>
               {fee > 0 && (
                 <div className="flex justify-between py-2 text-sm text-muted-foreground">
-                  <span>{lang === "ar" ? "رسوم الدفع" : "Payment fee"}</span>
+                  <span>{t("cart.payment_fee")}</span>
                   <span className="font-mono">{formatPrice(fee)}</span>
                 </div>
               )}
@@ -248,9 +238,7 @@ function CartPage() {
               <Button onClick={handleCheckout} disabled={placing || !method} className="mt-4 w-full bg-primary text-background hover:bg-primary">
                 {placing ? "..." : t("shop.checkout")}
               </Button>
-              {!method && <p className="mt-2 text-center text-xs text-muted-foreground">
-                {lang === "ar" ? "اختر طريقة دفع للمتابعة" : "Select a payment method to continue"}
-              </p>}
+              {!method && <p className="mt-2 text-center text-xs text-muted-foreground">{t("cart.select_method")}</p>}
             </div>
           </div>
         )}
