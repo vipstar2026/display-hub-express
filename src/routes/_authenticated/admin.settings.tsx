@@ -54,6 +54,7 @@ function AdminSettings() {
     else { toast.success("تم الحفظ"); qc.invalidateQueries({ queryKey: ["site-settings-admin"] }); qc.invalidateQueries({ queryKey: ["site-settings"] }); }
   };
 
+  if (loadError) return <div className="text-destructive">تعذر تحميل الإعدادات: {(loadError as any).message}</div>;
   if (!form) return <div className="text-muted-foreground">Loading...</div>;
 
   const Field = ({ k, label, type = "text", placeholder }: { k: string; label: string; type?: string; placeholder?: string }) => (
