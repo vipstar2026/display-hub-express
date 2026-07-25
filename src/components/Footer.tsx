@@ -3,6 +3,7 @@ import { Satellite, Mail, Phone, MessageCircle, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
+import { NewsletterSignup } from "./NewsletterSignup";
 
 export function Footer() {
   const { t } = useI18n();
@@ -26,7 +27,7 @@ export function Footer() {
 
   return (
     <footer className="mt-20 border-t border-primary/20 bg-card/40">
-      <div className="container mx-auto grid gap-10 px-4 py-12 md:grid-cols-4">
+      <div className="container mx-auto grid gap-10 px-4 py-12 md:grid-cols-5">
         <div className="md:col-span-1">
           <div className="mb-3 flex items-center gap-2 font-display text-lg font-bold text-primary">
             <Satellite className="h-5 w-5" /> VIPSTAR
@@ -62,6 +63,10 @@ export function Footer() {
               <li className="inline-flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0" /> {s.company_address}</li>
             )}
           </ul>
+        </div>
+
+        <div className="md:col-span-2">
+          <NewsletterSignup />
         </div>
       </div>
 
