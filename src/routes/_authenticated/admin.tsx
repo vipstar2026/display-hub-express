@@ -63,7 +63,10 @@ function AdminLayout() {
     },
     {
       label: t("admin.system"),
-      items: [{ to: "/admin/settings", icon: Settings, label: t("admin.settings") }],
+      items: [
+        { to: "/admin/notifications", icon: Bell, label: t("admin.notifications") },
+        { to: "/admin/settings", icon: Settings, label: t("admin.settings") },
+      ],
     },
   ];
 
