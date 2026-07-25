@@ -119,6 +119,72 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          author_id: string | null
+          content_ar: string | null
+          content_en: string | null
+          content_ur: string | null
+          cover_url: string | null
+          created_at: string
+          excerpt_ar: string | null
+          excerpt_en: string | null
+          excerpt_ur: string | null
+          id: string
+          published_at: string | null
+          slug: string
+          status: string
+          tags: string[]
+          title_ar: string | null
+          title_en: string | null
+          title_ur: string | null
+          updated_at: string
+          views: number
+        }
+        Insert: {
+          author_id?: string | null
+          content_ar?: string | null
+          content_en?: string | null
+          content_ur?: string | null
+          cover_url?: string | null
+          created_at?: string
+          excerpt_ar?: string | null
+          excerpt_en?: string | null
+          excerpt_ur?: string | null
+          id?: string
+          published_at?: string | null
+          slug: string
+          status?: string
+          tags?: string[]
+          title_ar?: string | null
+          title_en?: string | null
+          title_ur?: string | null
+          updated_at?: string
+          views?: number
+        }
+        Update: {
+          author_id?: string | null
+          content_ar?: string | null
+          content_en?: string | null
+          content_ur?: string | null
+          cover_url?: string | null
+          created_at?: string
+          excerpt_ar?: string | null
+          excerpt_en?: string | null
+          excerpt_ur?: string | null
+          id?: string
+          published_at?: string | null
+          slug?: string
+          status?: string
+          tags?: string[]
+          title_ar?: string | null
+          title_en?: string | null
+          title_ur?: string | null
+          updated_at?: string
+          views?: number
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -1949,6 +2015,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      increment_blog_views: { Args: { _slug: string }; Returns: undefined }
       redeem_coupon: {
         Args: { _code: string; _subtotal: number }
         Returns: {
