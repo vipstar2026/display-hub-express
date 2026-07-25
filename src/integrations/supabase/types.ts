@@ -1685,6 +1685,10 @@ export type Database = {
     }
     Functions: {
       assign_digital_codes: { Args: { _order_id: string }; Returns: undefined }
+      finalize_coupon_use: {
+        Args: { _coupon_id: string; _discount: number; _order_id: string }
+        Returns: undefined
+      }
       get_site_settings_admin: {
         Args: never
         Returns: {
