@@ -172,6 +172,48 @@ export type Database = {
           },
         ]
       }
+      coupon_usage: {
+        Row: {
+          coupon_id: string
+          created_at: string
+          discount_amount: number
+          id: string
+          order_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          coupon_id: string
+          created_at?: string
+          discount_amount?: number
+          id?: string
+          order_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          coupon_id?: string
+          created_at?: string
+          discount_amount?: number
+          id?: string
+          order_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_usage_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_usage_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupons: {
         Row: {
           code: string
@@ -552,6 +594,8 @@ export type Database = {
           buyer_name: string | null
           buyer_phone: string | null
           channel: string
+          coupon_code: string | null
+          coupon_id: string | null
           created_at: string
           currency: string
           customer_notes: string | null
@@ -584,6 +628,8 @@ export type Database = {
           buyer_name?: string | null
           buyer_phone?: string | null
           channel?: string
+          coupon_code?: string | null
+          coupon_id?: string | null
           created_at?: string
           currency?: string
           customer_notes?: string | null
@@ -616,6 +662,8 @@ export type Database = {
           buyer_name?: string | null
           buyer_phone?: string | null
           channel?: string
+          coupon_code?: string | null
+          coupon_id?: string | null
           created_at?: string
           currency?: string
           customer_notes?: string | null
@@ -642,6 +690,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_payment_method_id_fkey"
             columns: ["payment_method_id"]
@@ -1491,6 +1546,35 @@ export type Database = {
         }
         Relationships: []
       }
+      wishlist: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       payment_methods_public: {
@@ -1577,8 +1661,34 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews_public: {
+        Row: {
+          author_avatar: string | null
+          author_name: string | null
+          body: string | null
+          created_at: string | null
+          id: string | null
+          product_id: string | null
+          rating: number | null
+          title: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      assign_digital_codes: { Args: { _order_id: string }; Returns: undefined }
+      finalize_coupon_use: {
+        Args: { _coupon_id: string; _discount: number; _order_id: string }
+        Returns: undefined
+      }
       get_site_settings_admin: {
         Args: never
         Returns: {
@@ -1650,6 +1760,14 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      redeem_coupon: {
+        Args: { _code: string; _subtotal: number }
+        Returns: {
+          code: string
+          coupon_id: string
+          discount: number
+        }[]
       }
       update_site_settings_admin: {
         Args: { payload: Json }

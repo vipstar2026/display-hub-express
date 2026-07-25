@@ -11,6 +11,8 @@ import { Package, ShoppingCart, Download, Copy, Tv, Calendar, Sparkles, ShieldCh
 import { warrantyLabel, WARRANTY_LABEL_I18N } from "@/lib/category-presets";
 import { toast } from "sonner";
 import { useState } from "react";
+import { WishlistButton } from "@/components/WishlistButton";
+import { ReviewSection } from "@/components/ReviewSection";
 
 export const Route = createFileRoute("/product/$slug")({
   component: ProductPage,
@@ -51,7 +53,10 @@ function ProductPage() {
           )}
         </div>
         <div>
-          <h1 className="font-display text-3xl font-bold">{name}</h1>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="font-display text-3xl font-bold">{name}</h1>
+            <WishlistButton productId={p.id} className="h-10 w-10 shrink-0" size={18} />
+          </div>
           <div className="mt-4 flex items-baseline gap-3">
             <span className="font-mono text-3xl font-bold text-primary">{formatPrice(Number(p.price), p.currency)}</span>
             {p.compare_price && Number(p.compare_price) > Number(p.price) && (
@@ -125,7 +130,8 @@ function ProductPage() {
               <ShoppingCart className="me-2 h-4 w-4" />
               {oos ? t("shop.outOfStock") : t("shop.addToCart")}
             </Button>
-          </div>
+      </div>
+      <div className="container mx-auto px-4 pb-12"><ReviewSection productId={p.id} /></div>
         </div>
       </div>
       <Footer />

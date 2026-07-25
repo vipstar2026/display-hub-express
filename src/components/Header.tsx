@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingCart, User, Menu, X, Globe, Satellite } from "lucide-react";
+import { ShoppingCart, User, Menu, X, Globe, Satellite, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
+import { useWishlist } from "@/lib/wishlist";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -10,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 export function Header() {
   const { t, lang, setLang } = useI18n();
   const { count } = useCart();
+  const { count: wishCount } = useWishlist();
   const [open, setOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -62,6 +64,17 @@ export function Header() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {userId && (
+            <Link to="/wishlist" className="relative">
+              <Button variant="ghost" size="icon" aria-label="Wishlist">
+                <Heart className="h-4 w-4" />
+                {wishCount > 0 && (
+                  <span className="absolute -top-1 -end-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-background">{wishCount}</span>
+                )}
+              </Button>
+            </Link>
+          )}
 
           <Link to="/cart" className="relative">
             <Button variant="ghost" size="icon" aria-label="Cart">
