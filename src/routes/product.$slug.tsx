@@ -130,7 +130,8 @@ function ProductPage() {
               <ShoppingCart className="me-2 h-4 w-4" />
               {oos ? t("shop.outOfStock") : t("shop.addToCart")}
             </Button>
-          </div>
+      </div>
+      <div className="container mx-auto px-4 pb-12"><ReviewSection productId={p.id} /></div>
         </div>
       </div>
       <Footer />
