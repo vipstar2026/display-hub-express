@@ -11,10 +11,6 @@ export function PWAInstaller() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    // Register SW
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
-    }
     const dismissed = localStorage.getItem("pwa-install-dismissed");
     const handler = (e: Event) => {
       e.preventDefault();
