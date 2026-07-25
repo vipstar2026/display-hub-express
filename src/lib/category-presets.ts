@@ -210,6 +210,7 @@ export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
 export const RESERVED_FEATURE_KEYS = new Set<string>([
   ...Object.values(CATEGORY_PRESETS).flatMap((p) => p.fields.map((f) => f.key)),
   "warranty",
+  "warranty_custom",
 ]);
 
 // Translations for preset labels & section titles (Arabic → EN/UR).
