@@ -4,6 +4,7 @@ import appCss from "../styles.css?url";
 import { I18nProvider } from "@/lib/i18n";
 import { CartProvider } from "@/lib/cart";
 import { WishlistProvider } from "@/lib/wishlist";
+import { CompareProvider } from "@/lib/compare";
 import { Toaster } from "sonner";
 import logoUrl from "@/assets/logo.png";
 import { ThemeApplier } from "@/components/ThemeApplier";
@@ -12,6 +13,7 @@ import { PWAInstaller } from "@/components/PWAInstaller";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { CookieConsent } from "@/components/CookieConsent";
+import { CompareBar } from "@/components/CompareBar";
 
 function NotFoundComponent() {
   return (
@@ -87,14 +89,17 @@ export function App() {
       <I18nProvider>
         <CartProvider>
           <WishlistProvider>
-            <ThemeApplier />
-            <Outlet />
-            <MobileBottomNav />
-            <PWAInstaller />
-            <FloatingWhatsApp />
-            <ScrollToTop />
-            <CookieConsent />
-            <Toaster position="top-center" theme="dark" richColors />
+            <CompareProvider>
+              <ThemeApplier />
+              <Outlet />
+              <MobileBottomNav />
+              <PWAInstaller />
+              <FloatingWhatsApp />
+              <ScrollToTop />
+              <CookieConsent />
+              <CompareBar />
+              <Toaster position="top-center" theme="dark" richColors />
+            </CompareProvider>
           </WishlistProvider>
         </CartProvider>
       </I18nProvider>

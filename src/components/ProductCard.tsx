@@ -3,9 +3,10 @@ import { useI18n, localizedName } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
 import { formatPrice, firstImage } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Package } from "lucide-react";
+import { ShoppingCart, Package, GitCompareArrows } from "lucide-react";
 import { toast } from "sonner";
 import { WishlistButton } from "@/components/WishlistButton";
+import { useCompare } from "@/lib/compare";
 
 interface Product {
   id: string;
@@ -25,6 +26,8 @@ interface Product {
 export function ProductCard({ p }: { p: Product }) {
   const { t, lang } = useI18n();
   const { add } = useCart();
+  const compare = useCompare();
+  const inCompare = compare.has(p.id);
   const name = localizedName(p as unknown as Record<string, unknown>, "name", lang);
   const img = firstImage(p.images);
   const oos = p.track_stock && p.stock <= 0;
@@ -36,6 +39,19 @@ export function ProductCard({ p }: { p: Product }) {
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-xl border border-primary/10 bg-gradient-to-b from-card to-card/40 transition duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_12px_36px_-14px_rgba(230,80,40,0.45)]">
       <WishlistButton productId={p.id} className="absolute end-2 top-2 z-10 h-8 w-8" size={14} />
+      <button
+        type="button"
+        aria-label="compare"
+        onClick={(e) => {
+          e.preventDefault();
+          const { added, full } = compare.toggle(p.id);
+          if (full) toast.error(t("compare.full"));
+          else toast.success(added ? t("compare.added") : t("compare.removed"));
+        }}
+        className={`absolute end-2 top-11 z-10 grid h-8 w-8 place-items-center rounded-full border transition ${inCompare ? "border-primary bg-primary text-background" : "border-primary/20 bg-background/70 text-muted-foreground hover:text-primary"}`}
+      >
+        <GitCompareArrows className="h-3.5 w-3.5" />
+      </button>
       <Link to="/product/$slug" params={{ slug: p.slug }} className="block">
         <div className="relative aspect-square w-full overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(230,80,40,0.45),transparent_65%)]" />
