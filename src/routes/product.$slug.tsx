@@ -11,6 +11,8 @@ import { Package, ShoppingCart, Download, Copy, Tv, Calendar, Sparkles, ShieldCh
 import { warrantyLabel, WARRANTY_LABEL_I18N } from "@/lib/category-presets";
 import { toast } from "sonner";
 import { useState } from "react";
+import { WishlistButton } from "@/components/WishlistButton";
+import { ReviewSection } from "@/components/ReviewSection";
 
 export const Route = createFileRoute("/product/$slug")({
   component: ProductPage,
