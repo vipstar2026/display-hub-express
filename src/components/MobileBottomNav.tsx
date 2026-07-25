@@ -13,13 +13,13 @@ export function MobileBottomNav() {
   // Hide on admin routes
   if (pathname.startsWith("/admin")) return null;
 
-  const items = [
+  const items: { to: string; icon: typeof Home; label: string; exact?: boolean; badge?: number }[] = [
     { to: "/", icon: Home, label: t("nav.home"), exact: true },
     { to: "/shop", icon: Store, label: t("nav.shop") },
     { to: "/wishlist", icon: Heart, label: t("wishlist.title") ?? "Wishlist", badge: wishCount },
     { to: "/cart", icon: ShoppingCart, label: t("nav.cart") ?? "Cart", badge: count },
     { to: "/account", icon: User, label: t("nav.account") },
-  ] as const;
+  ];
 
   return (
     <>
