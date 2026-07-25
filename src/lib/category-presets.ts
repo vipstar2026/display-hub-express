@@ -291,3 +291,36 @@ export function translatePresetLabel(label: string, lang: "ar" | "en" | "ur"): s
   return PRESET_TRANSLATIONS[label]?.[lang] ?? label;
 }
 
+/* ============ Warranty (global for every product) ============ */
+
+export interface WarrantyOption {
+  value: string;
+  ar: string;
+  en: string;
+  ur: string;
+}
+
+export const WARRANTY_OPTIONS: WarrantyOption[] = [
+  { value: "none",     ar: "بدون ضمان",        en: "No warranty",       ur: "کوئی وارنٹی نہیں" },
+  { value: "1d",       ar: "يوم واحد",          en: "1 day",             ur: "1 دن" },
+  { value: "3d",       ar: "3 أيام",            en: "3 days",            ur: "3 دن" },
+  { value: "7d",       ar: "7 أيام",            en: "7 days",            ur: "7 دن" },
+  { value: "14d",      ar: "14 يوم",            en: "14 days",           ur: "14 دن" },
+  { value: "30d",      ar: "30 يوم",            en: "30 days",           ur: "30 دن" },
+  { value: "3m",       ar: "3 شهور",            en: "3 months",          ur: "3 مہینے" },
+  { value: "6m",       ar: "6 شهور",            en: "6 months",          ur: "6 مہینے" },
+  { value: "1y",       ar: "سنة واحدة",          en: "1 year",            ur: "1 سال" },
+  { value: "2y",       ar: "سنتان",             en: "2 years",           ur: "2 سال" },
+  { value: "3y",       ar: "3 سنوات",           en: "3 years",           ur: "3 سال" },
+  { value: "over_1y",  ar: "أكثر من سنة",       en: "More than 1 year",  ur: "ایک سال سے زیادہ" },
+  { value: "lifetime", ar: "ضمان مدى الحياة",   en: "Lifetime",          ur: "تاحیات وارنٹی" },
+];
+
+export function warrantyLabel(value: unknown, lang: "ar" | "en" | "ur"): string | null {
+  if (!value || typeof value !== "string") return null;
+  const opt = WARRANTY_OPTIONS.find((o) => o.value === value);
+  return opt ? opt[lang] : null;
+}
+
+export const WARRANTY_LABEL_I18N = { ar: "الضمان", en: "Warranty", ur: "وارنٹی" } as const;
+
