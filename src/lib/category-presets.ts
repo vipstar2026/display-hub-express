@@ -316,13 +316,27 @@ export const WARRANTY_OPTIONS: WarrantyOption[] = [
   { value: "3y",       ar: "3 سنوات",           en: "3 years",           ur: "3 سال" },
   { value: "over_1y",  ar: "أكثر من سنة",       en: "More than 1 year",  ur: "ایک سال سے زیادہ" },
   { value: "lifetime", ar: "ضمان مدى الحياة",   en: "Lifetime",          ur: "تاحیات وارنٹی" },
+  { value: "custom",   ar: "إدخال يدوي",        en: "Custom",            ur: "دستی اندراج" },
 ];
 
-export function warrantyLabel(value: unknown, lang: "ar" | "en" | "ur"): string | null {
+export function warrantyLabel(
+  value: unknown,
+  lang: "ar" | "en" | "ur",
+  custom?: unknown,
+): string | null {
   if (!value || typeof value !== "string") return null;
+  if (value === "custom") {
+    const c = typeof custom === "string" ? custom.trim() : "";
+    return c || null;
+  }
   const opt = WARRANTY_OPTIONS.find((o) => o.value === value);
   return opt ? opt[lang] : null;
 }
 
 export const WARRANTY_LABEL_I18N = { ar: "الضمان", en: "Warranty", ur: "وارنٹی" } as const;
+export const WARRANTY_CUSTOM_PLACEHOLDER_I18N = {
+  ar: "مثال: 45 يوم / 18 شهر",
+  en: "e.g. 45 days / 18 months",
+  ur: "مثال: 45 دن / 18 مہینے",
+} as const;
 
