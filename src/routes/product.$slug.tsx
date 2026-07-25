@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { WishlistButton } from "@/components/WishlistButton";
 import { ReviewSection } from "@/components/ReviewSection";
+import { RelatedProducts, RecentlyViewed, trackRecentlyViewed } from "@/components/RelatedProducts";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/product/$slug")({
   component: ProductPage,
@@ -91,6 +93,8 @@ function ProductPage() {
       return data;
     },
   });
+
+  useEffect(() => { if (p?.id) trackRecentlyViewed(p.id); }, [p?.id]);
 
   if (isLoading) return <div className="min-h-screen bg-background"><Header /><div className="container mx-auto py-20 text-center text-muted-foreground">...</div></div>;
   if (!p) return null;
@@ -192,6 +196,10 @@ function ProductPage() {
       </div>
       <div className="container mx-auto px-4 pb-12"><ReviewSection productId={p.id} /></div>
         </div>
+      </div>
+      <div className="container mx-auto px-4 pb-12">
+        <RelatedProducts productId={p.id} categoryId={p.category_id} />
+        <RecentlyViewed excludeId={p.id} />
       </div>
       <Footer />
     </div>
