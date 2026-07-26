@@ -53,6 +53,7 @@ function AdminLayout() {
         { to: "/admin/reports", icon: BarChart3, label: t("admin.reports") },
         { to: "/admin/analytics", icon: Activity, label: "Analytics" },
         { to: "/admin/coupons", icon: Ticket, label: t("admin.coupons") },
+        { to: "/admin/coupon-usage", icon: Ticket, label: "Coupon Usage" },
         { to: "/admin/flash-sales", icon: Zap, label: "Flash Sales" },
         { to: "/admin/shipping", icon: Truck, label: t("admin.shipping") },
         { to: "/admin/invoices", icon: FileText, label: t("admin.invoices") },
