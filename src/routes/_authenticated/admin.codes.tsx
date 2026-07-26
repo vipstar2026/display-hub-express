@@ -167,11 +167,44 @@ function AdminCodes() {
                   </Button>
                 </div>
                 <div>
-                  <Label>Bulk add (one code per line)</Label>
-                  <Textarea rows={5} value={bulk} onChange={(e) => setBulk(e.target.value)} placeholder="ABC-123&#10;DEF-456&#10;GHI-789" className="font-mono" />
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <Label>Bulk add codes</Label>
+                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-primary/20 bg-background/60 px-2.5 py-1 text-xs hover:bg-primary/10">
+                      <Upload className="h-3 w-3" /> Import file (.txt / .csv)
+                      <input
+                        type="file"
+                        accept=".txt,.csv,text/plain,text/csv"
+                        className="hidden"
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }}
+                      />
+                    </label>
+                  </div>
+                  <Textarea
+                    rows={6}
+                    value={bulk}
+                    onChange={(e) => setBulk(e.target.value)}
+                    placeholder="One code per line, or paste CSV / comma-separated&#10;ABC-123&#10;DEF-456&#10;GHI-789"
+                    className="font-mono text-xs"
+                  />
+                  {parsedInput.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-2 text-[11px]">
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary">
+                        <FileText className="me-1 inline h-3 w-3" />
+                        {parsedInput.length} parsed
+                      </span>
+                      <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-emerald-400">
+                        {newCodes.length} new
+                      </span>
+                      {dupCount > 0 && (
+                        <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-amber-400">
+                          {dupCount} already exist (will skip)
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <Button onClick={handleAdd} disabled={!bulk.trim()} className="bg-primary text-background hover:bg-primary">
-                  Add {bulk.split("\n").filter((l) => l.trim()).length} codes
+                <Button onClick={handleAdd} disabled={newCodes.length === 0} className="bg-primary text-background hover:bg-primary">
+                  Add {newCodes.length} codes
                 </Button>
               </div>
 
