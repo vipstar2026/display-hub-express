@@ -16,6 +16,7 @@ import {
 import { THEME_LIST, applyTheme, DEFAULT_THEME } from "@/lib/themes";
 import { ThemePreview } from "@/components/ThemePreview";
 import { useI18n } from "@/lib/i18n";
+import { SITE_SETTINGS_QUERY_KEY } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   component: AdminSettings,
@@ -50,10 +51,17 @@ function AdminSettings() {
       if (payload[k] === "" || payload[k] === null) payload[k] = k === "free_shipping_threshold" ? null : 0;
       else payload[k] = Number(payload[k]);
     });
-    const { error } = await (supabase as any).rpc("update_site_settings_admin", { payload });
+    const { data: saved, error } = await (supabase as any).rpc("update_site_settings_admin", { payload });
     setSaving(false);
     if (error) toast.error(error.message);
-    else { toast.success(t("toast.saved")); qc.invalidateQueries({ queryKey: ["site-settings-admin"] }); qc.invalidateQueries({ queryKey: ["site-settings"] }); }
+    else {
+      if (saved) setForm({ ...saved });
+      toast.success(t("toast.saved"));
+      qc.setQueryData(["site-settings-admin"], saved);
+      qc.setQueryData(SITE_SETTINGS_QUERY_KEY, saved);
+      qc.invalidateQueries({ queryKey: ["site-settings-admin"] });
+      qc.invalidateQueries({ queryKey: SITE_SETTINGS_QUERY_KEY });
+    }
   };
 
   if (loadError) return <div className="text-destructive">{t("settings.load_error")}: {(loadError as any).message}</div>;

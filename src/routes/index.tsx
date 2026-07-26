@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Truck, Headphones, Satellite, Phone, Mail, MapPin, Instagram, MessageCircle, BadgeCheck } from "lucide-react";
 import { HeroBanners } from "@/components/HeroBanners";
 import { FlashSalesSection } from "@/components/FlashSalesSection";
+import { cleanPhoneNumber, pickLocalized, socialHandle, useSiteSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -63,21 +64,15 @@ function HomePage() {
     },
   });
 
-  const { data: settings } = useQuery({
-    queryKey: ["home-settings"],
-    queryFn: async () => {
-      const { data } = await supabase.from("site_settings").select("site_name,tagline_ar,tagline_en,tagline_ur,company_address,company_cr,business_hours,instagram_url,hero_badge_text,hero_title_ar,hero_title_en,hero_title_ur,hero_subtitle_ar,hero_subtitle_en,hero_subtitle_ur,hero_cta_ar,hero_cta_en,hero_cta_ur").limit(1).maybeSingle();
-      return data;
-    },
-  });
+  const { data: settings } = useSiteSettings();
 
-  const tagline = settings ? (lang === "ar" ? settings.tagline_ar : lang === "ur" ? settings.tagline_ur : settings.tagline_en) : "";
-  const pick = (ar?: string | null, en?: string | null, ur?: string | null) =>
-    (lang === "ar" ? ar : lang === "ur" ? ur : en) || en || ar || ur || "";
+  const tagline = pickLocalized(lang, { ar: settings?.tagline_ar, en: settings?.tagline_en, ur: settings?.tagline_ur });
   const heroBadge = settings?.hero_badge_text || "VIPSTAR.CC";
-  const heroTitle = pick(settings?.hero_title_ar, settings?.hero_title_en, settings?.hero_title_ur) || t("home.hero.title");
-  const heroSub = pick(settings?.hero_subtitle_ar, settings?.hero_subtitle_en, settings?.hero_subtitle_ur) || t("home.hero.sub");
-  const heroCta = pick(settings?.hero_cta_ar, settings?.hero_cta_en, settings?.hero_cta_ur) || t("home.hero.cta");
+  const heroTitle = pickLocalized(lang, { ar: settings?.hero_title_ar, en: settings?.hero_title_en, ur: settings?.hero_title_ur }) || t("home.hero.title");
+  const heroSub = pickLocalized(lang, { ar: settings?.hero_subtitle_ar, en: settings?.hero_subtitle_en, ur: settings?.hero_subtitle_ur }) || t("home.hero.sub");
+  const heroCta = pickLocalized(lang, { ar: settings?.hero_cta_ar, en: settings?.hero_cta_en, ur: settings?.hero_cta_ur }) || t("home.hero.cta");
+  const whatsappNumber = cleanPhoneNumber(settings?.whatsapp);
+  const instagramLabel = socialHandle(settings?.instagram_url, "Instagram");
 
 
 
@@ -188,7 +183,7 @@ function HomePage() {
                 </div>
                 <h2 className="font-display text-3xl font-bold leading-tight md:text-4xl">
                   <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                    {settings?.site_name ?? "VIP STAR Satellite & Electronics W.L.L"}
+                    {settings?.site_name ?? "VIPSTAR"}
                   </span>
                 </h2>
                 {tagline && <p className="text-sm text-muted-foreground md:text-base">{tagline}</p>}
@@ -201,26 +196,36 @@ function HomePage() {
 
               {/* Right contact panel */}
               <div className="grid gap-3 p-8 md:p-10">
-                <a href="https://wa.me/97333161049" target="_blank" rel="noreferrer" className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/40 p-3 transition hover:border-emerald-500/40 hover:bg-emerald-500/5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400"><MessageCircle className="h-5 w-5" /></div>
-                  <div className="flex-1"><div className="text-xs text-muted-foreground">WhatsApp — Ahmed</div><div className="font-mono text-sm font-semibold" dir="ltr">+973 3316 1049</div></div>
-                </a>
-                <a href="tel:+97377082893" className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/40 p-3 transition hover:border-primary/40 hover:bg-primary/5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary"><Phone className="h-5 w-5" /></div>
-                  <div className="flex-1"><div className="text-xs text-muted-foreground">Phone</div><div className="font-mono text-sm font-semibold" dir="ltr">+973 7708 2893</div></div>
-                </a>
-                <a href="mailto:pppahmed71@gmail.com" className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/40 p-3 transition hover:border-primary/40 hover:bg-primary/5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary"><Mail className="h-5 w-5" /></div>
-                  <div className="flex-1"><div className="text-xs text-muted-foreground">Email</div><div className="font-mono text-sm font-semibold" dir="ltr">pppahmed71@gmail.com</div></div>
-                </a>
-                <a href={settings?.instagram_url ?? "https://www.instagram.com/vipstar449/"} target="_blank" rel="noreferrer" className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/40 p-3 transition hover:border-pink-500/40 hover:bg-pink-500/5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500/15 text-pink-400"><Instagram className="h-5 w-5" /></div>
-                  <div className="flex-1"><div className="text-xs text-muted-foreground">Instagram</div><div className="font-mono text-sm font-semibold" dir="ltr">@vipstar449</div></div>
-                </a>
-                <div className="flex items-start gap-3 rounded-lg border border-primary/10 bg-background/40 p-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary"><MapPin className="h-5 w-5" /></div>
-                  <div className="flex-1"><div className="text-xs text-muted-foreground">Address</div><div className="text-sm font-medium leading-snug">{settings?.company_address ?? "Building 62, Shop 62, Block 935, Road 35, Riffa Alhajiyat, Bahrain"}</div></div>
-                </div>
+                {settings?.whatsapp && whatsappNumber && (
+                  <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noreferrer" className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/40 p-3 transition hover:border-primary/40 hover:bg-primary/5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary"><MessageCircle className="h-5 w-5" /></div>
+                    <div className="flex-1"><div className="text-xs text-muted-foreground">WhatsApp</div><div className="font-mono text-sm font-semibold" dir="ltr">{settings.whatsapp}</div></div>
+                  </a>
+                )}
+                {settings?.contact_phone && (
+                  <a href={`tel:${settings.contact_phone}`} className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/40 p-3 transition hover:border-primary/40 hover:bg-primary/5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary"><Phone className="h-5 w-5" /></div>
+                    <div className="flex-1"><div className="text-xs text-muted-foreground">Phone</div><div className="font-mono text-sm font-semibold" dir="ltr">{settings.contact_phone}</div></div>
+                  </a>
+                )}
+                {settings?.contact_email && (
+                  <a href={`mailto:${settings.contact_email}`} className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/40 p-3 transition hover:border-primary/40 hover:bg-primary/5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary"><Mail className="h-5 w-5" /></div>
+                    <div className="flex-1"><div className="text-xs text-muted-foreground">Email</div><div className="font-mono text-sm font-semibold" dir="ltr">{settings.contact_email}</div></div>
+                  </a>
+                )}
+                {settings?.instagram_url && (
+                  <a href={settings.instagram_url} target="_blank" rel="noreferrer" className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/40 p-3 transition hover:border-primary/40 hover:bg-primary/5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary"><Instagram className="h-5 w-5" /></div>
+                    <div className="flex-1"><div className="text-xs text-muted-foreground">Instagram</div><div className="font-mono text-sm font-semibold" dir="ltr">{instagramLabel}</div></div>
+                  </a>
+                )}
+                {settings?.company_address && (
+                  <div className="flex items-start gap-3 rounded-lg border border-primary/10 bg-background/40 p-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary"><MapPin className="h-5 w-5" /></div>
+                    <div className="flex-1"><div className="text-xs text-muted-foreground">Address</div><div className="text-sm font-medium leading-snug">{settings.company_address}</div></div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

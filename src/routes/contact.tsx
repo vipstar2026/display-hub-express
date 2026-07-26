@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
+import { cleanPhoneNumber, useSiteSettings } from "@/lib/site-settings";
 import { toast } from "sonner";
 import { Mail, Phone, MapPin, Clock, MessageCircle, Send, CheckCircle2 } from "lucide-react";
 
@@ -26,15 +27,10 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
   const { t } = useI18n();
-  const [settings, setSettings] = useState<any>(null);
+  const { data: settings } = useSiteSettings();
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-
-  useEffect(() => {
-    supabase.from("site_settings").select("contact_email,contact_phone,whatsapp,business_hours,company_address").eq("id", 1).maybeSingle()
-      .then(({ data }) => setSettings(data));
-  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -75,7 +71,7 @@ function ContactPage() {
                 <InfoCard icon={<Phone className="h-5 w-5" />} label="Phone" value={settings.contact_phone} href={`tel:${settings.contact_phone}`} />
               )}
               {settings?.whatsapp && (
-                <InfoCard icon={<MessageCircle className="h-5 w-5" />} label={t("contact.whatsapp")} value={settings.whatsapp} href={`https://wa.me/${settings.whatsapp.replace(/[^0-9]/g, "")}`} />
+                <InfoCard icon={<MessageCircle className="h-5 w-5" />} label={t("contact.whatsapp")} value={settings.whatsapp} href={`https://wa.me/${cleanPhoneNumber(settings.whatsapp)}`} />
               )}
               {settings?.company_address && (
                 <InfoCard icon={<MapPin className="h-5 w-5" />} label={t("contact.address")} value={settings.company_address} />
