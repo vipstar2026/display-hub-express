@@ -33,6 +33,7 @@ import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminBackupsRouteImport } from './routes/_authenticated/admin.backups'
 import { Route as AuthenticatedAdminBannersRouteImport } from './routes/_authenticated/admin.banners'
 import { Route as AuthenticatedAdminBlogRouteImport } from './routes/_authenticated/admin.blog'
+import { Route as AuthenticatedAdminCampaignsRouteImport } from './routes/_authenticated/admin.campaigns'
 import { Route as AuthenticatedAdminCodesRouteImport } from './routes/_authenticated/admin.codes'
 import { Route as AuthenticatedAdminCouponUsageRouteImport } from './routes/_authenticated/admin.coupon-usage'
 import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin.coupons'
@@ -180,6 +181,12 @@ const AuthenticatedAdminBlogRoute = AuthenticatedAdminBlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminCampaignsRoute =
+  AuthenticatedAdminCampaignsRouteImport.update({
+    id: '/campaigns',
+    path: '/campaigns',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCodesRoute = AuthenticatedAdminCodesRouteImport.update({
   id: '/codes',
   path: '/codes',
@@ -333,6 +340,7 @@ export interface FileRoutesByFullPath {
   '/admin/backups': typeof AuthenticatedAdminBackupsRoute
   '/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/admin/blog': typeof AuthenticatedAdminBlogRoute
+  '/admin/campaigns': typeof AuthenticatedAdminCampaignsRoute
   '/admin/codes': typeof AuthenticatedAdminCodesRoute
   '/admin/coupon-usage': typeof AuthenticatedAdminCouponUsageRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
@@ -379,6 +387,7 @@ export interface FileRoutesByTo {
   '/admin/backups': typeof AuthenticatedAdminBackupsRoute
   '/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/admin/blog': typeof AuthenticatedAdminBlogRoute
+  '/admin/campaigns': typeof AuthenticatedAdminCampaignsRoute
   '/admin/codes': typeof AuthenticatedAdminCodesRoute
   '/admin/coupon-usage': typeof AuthenticatedAdminCouponUsageRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
@@ -428,6 +437,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/backups': typeof AuthenticatedAdminBackupsRoute
   '/_authenticated/admin/banners': typeof AuthenticatedAdminBannersRoute
   '/_authenticated/admin/blog': typeof AuthenticatedAdminBlogRoute
+  '/_authenticated/admin/campaigns': typeof AuthenticatedAdminCampaignsRoute
   '/_authenticated/admin/codes': typeof AuthenticatedAdminCodesRoute
   '/_authenticated/admin/coupon-usage': typeof AuthenticatedAdminCouponUsageRoute
   '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
@@ -477,6 +487,7 @@ export interface FileRouteTypes {
     | '/admin/backups'
     | '/admin/banners'
     | '/admin/blog'
+    | '/admin/campaigns'
     | '/admin/codes'
     | '/admin/coupon-usage'
     | '/admin/coupons'
@@ -523,6 +534,7 @@ export interface FileRouteTypes {
     | '/admin/backups'
     | '/admin/banners'
     | '/admin/blog'
+    | '/admin/campaigns'
     | '/admin/codes'
     | '/admin/coupon-usage'
     | '/admin/coupons'
@@ -571,6 +583,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/backups'
     | '/_authenticated/admin/banners'
     | '/_authenticated/admin/blog'
+    | '/_authenticated/admin/campaigns'
     | '/_authenticated/admin/codes'
     | '/_authenticated/admin/coupon-usage'
     | '/_authenticated/admin/coupons'
@@ -783,6 +796,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBlogRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/campaigns': {
+      id: '/_authenticated/admin/campaigns'
+      path: '/campaigns'
+      fullPath: '/admin/campaigns'
+      preLoaderRoute: typeof AuthenticatedAdminCampaignsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/codes': {
       id: '/_authenticated/admin/codes'
       path: '/codes'
@@ -957,6 +977,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBackupsRoute: typeof AuthenticatedAdminBackupsRoute
   AuthenticatedAdminBannersRoute: typeof AuthenticatedAdminBannersRoute
   AuthenticatedAdminBlogRoute: typeof AuthenticatedAdminBlogRoute
+  AuthenticatedAdminCampaignsRoute: typeof AuthenticatedAdminCampaignsRoute
   AuthenticatedAdminCodesRoute: typeof AuthenticatedAdminCodesRoute
   AuthenticatedAdminCouponUsageRoute: typeof AuthenticatedAdminCouponUsageRoute
   AuthenticatedAdminCouponsRoute: typeof AuthenticatedAdminCouponsRoute
@@ -987,6 +1008,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBackupsRoute: AuthenticatedAdminBackupsRoute,
   AuthenticatedAdminBannersRoute: AuthenticatedAdminBannersRoute,
   AuthenticatedAdminBlogRoute: AuthenticatedAdminBlogRoute,
+  AuthenticatedAdminCampaignsRoute: AuthenticatedAdminCampaignsRoute,
   AuthenticatedAdminCodesRoute: AuthenticatedAdminCodesRoute,
   AuthenticatedAdminCouponUsageRoute: AuthenticatedAdminCouponUsageRoute,
   AuthenticatedAdminCouponsRoute: AuthenticatedAdminCouponsRoute,
