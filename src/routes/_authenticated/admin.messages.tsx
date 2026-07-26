@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Mail, Phone, Trash2, CheckCircle2, Eye, Inbox, Reply, Send, Search } from "lucide-react";
+import { Mail, Phone, Trash2, CheckCircle2, Eye, Inbox, Reply, Send, Search, MessageCircle, Download } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/messages")({
@@ -43,7 +43,42 @@ function MessagesPage() {
     setRows((data ?? []) as Msg[]);
     setLoading(false);
   }
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const channel = supabase
+      .channel("admin-contact-messages")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "contact_messages" }, (payload) => {
+        setRows((rs) => [payload.new as Msg, ...rs.filter((r) => r.id !== (payload.new as Msg).id)]);
+        toast.info(`رسالة جديدة من ${(payload.new as Msg).name}`);
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "contact_messages" }, (payload) => {
+        setRows((rs) => rs.map((r) => (r.id === (payload.new as Msg).id ? (payload.new as Msg) : r)));
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "contact_messages" }, (payload) => {
+        setRows((rs) => rs.filter((r) => r.id !== (payload.old as { id: string }).id));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  function waLink(phone: string, text: string) {
+    return `https://wa.me/${phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(text)}`;
+  }
+
+  function exportCsv() {
+    const head = ["Date", "Name", "Email", "Phone", "Subject", "Message", "Status", "Reply", "Replied at"];
+    const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const csv = [
+      head.join(","),
+      ...filtered.map((r) => [r.created_at, r.name, r.email, r.phone, r.subject, r.message, r.status, r.reply_text, r.replied_at].map(esc).join(",")),
+    ].join("\n");
+    const url = URL.createObjectURL(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `contact-messages-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   async function setStatus(id: string, status: string) {
     const { error } = await supabase.from("contact_messages").update({ status }).eq("id", id);
@@ -63,9 +98,10 @@ function MessagesPage() {
     setReplyText(m.reply_text ?? "");
   }
 
-  async function sendReply(viaMail: boolean) {
+  async function sendReply(via: "none" | "mail" | "wa") {
     if (!replyTo) return;
     if (!replyText.trim()) return toast.error("Empty reply");
+    if (via === "wa" && !replyTo.phone) return toast.error("No phone number");
     setSending(true);
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("contact_messages").update({
@@ -77,10 +113,13 @@ function MessagesPage() {
     setSending(false);
     if (error) return toast.error(error.message);
     setRows((rs) => rs.map((r) => r.id === replyTo.id ? { ...r, reply_text: replyText, replied_at: new Date().toISOString(), status: "resolved" } : r));
-    if (viaMail) {
+    if (via === "mail") {
       const subj = encodeURIComponent(`Re: ${replyTo.subject ?? "Your message"}`);
       const body = encodeURIComponent(replyText);
       window.location.href = `mailto:${replyTo.email}?subject=${subj}&body=${body}`;
+    }
+    if (via === "wa" && replyTo.phone) {
+      window.open(waLink(replyTo.phone, replyText), "_blank", "noopener,noreferrer");
     }
     toast.success("Reply saved");
     setReplyTo(null);
@@ -131,6 +170,9 @@ function MessagesPage() {
           <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search name, email, subject..." value={search} onChange={(e) => setSearch(e.target.value)} className="ps-9" />
         </div>
+        <Button variant="outline" size="sm" onClick={exportCsv} className="gap-1">
+          <Download className="h-3.5 w-3.5" /> CSV
+        </Button>
       </div>
 
       {loading ? (
@@ -167,6 +209,13 @@ function MessagesPage() {
                   <Button size="sm" onClick={() => openReply(m)} className="bg-primary text-background hover:bg-primary/90">
                     <Reply className="me-1 h-3 w-3" /> Reply
                   </Button>
+                  {m.phone && (
+                    <Button variant="outline" size="sm" asChild className="border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10">
+                      <a href={waLink(m.phone, `مرحباً ${m.name}،\n`)} target="_blank" rel="noopener noreferrer">
+                        <MessageCircle className="me-1 h-3 w-3" /> WhatsApp
+                      </a>
+                    </Button>
+                  )}
                   {m.status === "new" && (
                     <Button variant="outline" size="sm" onClick={() => setStatus(m.id, "read")}>
                       <Eye className="me-1 h-3 w-3" /> {t("messages.markRead")}
@@ -214,10 +263,15 @@ function MessagesPage() {
           )}
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setReplyTo(null)}>Cancel</Button>
-            <Button variant="outline" disabled={sending} onClick={() => sendReply(false)}>
+            <Button variant="outline" disabled={sending} onClick={() => sendReply("none")}>
               Save only
             </Button>
-            <Button disabled={sending} onClick={() => sendReply(true)} className="bg-primary text-background hover:bg-primary/90">
+            {replyTo?.phone && (
+              <Button variant="outline" disabled={sending} onClick={() => sendReply("wa")} className="border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10">
+                <MessageCircle className="me-1 h-3 w-3" /> WhatsApp
+              </Button>
+            )}
+            <Button disabled={sending} onClick={() => sendReply("mail")} className="bg-primary text-background hover:bg-primary/90">
               <Send className="me-1 h-3 w-3" /> Save & Open email
             </Button>
           </DialogFooter>

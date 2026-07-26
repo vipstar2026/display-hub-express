@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 import { useI18n, type Lang } from "@/lib/i18n";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -29,8 +29,29 @@ function AdminLayout() {
   const { user } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const [unreadMsgs, setUnreadMsgs] = useState(0);
 
-  const groups: { label: string; items: { to: string; icon: typeof LayoutDashboard; label: string; exact?: boolean }[] }[] = [
+  useEffect(() => {
+    let alive = true;
+    async function refresh() {
+      const { count } = await supabase
+        .from("contact_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "new");
+      if (alive) setUnreadMsgs(count ?? 0);
+    }
+    refresh();
+    const channel = supabase
+      .channel("admin-contact-messages-badge")
+      .on("postgres_changes", { event: "*", schema: "public", table: "contact_messages" }, () => refresh())
+      .subscribe();
+    return () => {
+      alive = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const groups: { label: string; items: { to: string; icon: typeof LayoutDashboard; label: string; exact?: boolean; badge?: number }[] }[] = [
     {
       label: t("admin.overview"),
       items: [{ to: "/admin", icon: LayoutDashboard, label: t("admin.dashboard"), exact: true }],
@@ -77,7 +98,7 @@ function AdminLayout() {
       items: [
         { to: "/admin/banners", icon: ImageIcon, label: "Banners" },
         { to: "/admin/blog", icon: Newspaper, label: "Blog" },
-        { to: "/admin/messages", icon: MessageSquare, label: t("admin.messages") },
+        { to: "/admin/messages", icon: MessageSquare, label: t("admin.messages"), badge: unreadMsgs },
         { to: "/admin/newsletter", icon: Mail, label: t("admin.newsletter") },
         { to: "/admin/campaigns", icon: Megaphone, label: "Campaigns" },
         { to: "/admin/notifications", icon: Bell, label: t("admin.notifications") },
@@ -127,6 +148,11 @@ function AdminLayout() {
                     {active && <span className="absolute start-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-e bg-primary" />}
                     <n.icon className={`h-4 w-4 ${active ? "text-primary" : ""}`} />
                     <span className="flex-1">{n.label}</span>
+                    {!!n.badge && (
+                      <span className="grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-background">
+                        {n.badge > 99 ? "99+" : n.badge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
