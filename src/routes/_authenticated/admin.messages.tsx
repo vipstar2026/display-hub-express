@@ -43,7 +43,42 @@ function MessagesPage() {
     setRows((data ?? []) as Msg[]);
     setLoading(false);
   }
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const channel = supabase
+      .channel("admin-contact-messages")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "contact_messages" }, (payload) => {
+        setRows((rs) => [payload.new as Msg, ...rs.filter((r) => r.id !== (payload.new as Msg).id)]);
+        toast.info(`رسالة جديدة من ${(payload.new as Msg).name}`);
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "contact_messages" }, (payload) => {
+        setRows((rs) => rs.map((r) => (r.id === (payload.new as Msg).id ? (payload.new as Msg) : r)));
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "contact_messages" }, (payload) => {
+        setRows((rs) => rs.filter((r) => r.id !== (payload.old as { id: string }).id));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  function waLink(phone: string, text: string) {
+    return `https://wa.me/${phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(text)}`;
+  }
+
+  function exportCsv() {
+    const head = ["Date", "Name", "Email", "Phone", "Subject", "Message", "Status", "Reply", "Replied at"];
+    const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const csv = [
+      head.join(","),
+      ...filtered.map((r) => [r.created_at, r.name, r.email, r.phone, r.subject, r.message, r.status, r.reply_text, r.replied_at].map(esc).join(",")),
+    ].join("\n");
+    const url = URL.createObjectURL(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `contact-messages-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   async function setStatus(id: string, status: string) {
     const { error } = await supabase.from("contact_messages").update({ status }).eq("id", id);
