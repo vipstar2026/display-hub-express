@@ -170,6 +170,9 @@ function MessagesPage() {
           <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search name, email, subject..." value={search} onChange={(e) => setSearch(e.target.value)} className="ps-9" />
         </div>
+        <Button variant="outline" size="sm" onClick={exportCsv} className="gap-1">
+          <Download className="h-3.5 w-3.5" /> CSV
+        </Button>
       </div>
 
       {loading ? (
