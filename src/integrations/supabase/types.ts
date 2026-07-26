@@ -2358,28 +2358,17 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      validate_coupon:
-        | {
-            Args: { _code: string }
-            Returns: {
-              code: string
-              discount_type: string
-              discount_value: number
-              id: string
-              min_total: number
-            }[]
-          }
-        | {
-            Args: { _code: string; _subtotal: number }
-            Returns: {
-              coupon_id: string
-              discount_amount: number
-              discount_type: string
-              discount_value: number
-              message: string
-              valid: boolean
-            }[]
-          }
+      validate_coupon: {
+        Args: { _code: string; _subtotal: number }
+        Returns: {
+          coupon_id: string
+          discount_amount: number
+          discount_type: string
+          discount_value: number
+          message: string
+          valid: boolean
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "customer"
