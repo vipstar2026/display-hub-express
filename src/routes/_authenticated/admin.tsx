@@ -66,9 +66,12 @@ function AdminLayout() {
       items: [
         { to: "/admin/users", icon: Users, label: t("admin.users") },
         { to: "/admin/customers", icon: UsersRound, label: t("admin.customers_analytics") },
+        { to: "/admin/suppliers", icon: Truck, label: "Suppliers" },
+        { to: "/admin/purchase-orders", icon: FileText, label: "Purchase Orders" },
         { to: "/admin/reviews", icon: MessageSquare, label: "Reviews" },
       ],
     },
+
     {
       label: t("admin.system"),
       items: [
