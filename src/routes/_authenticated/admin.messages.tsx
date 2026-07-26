@@ -98,9 +98,10 @@ function MessagesPage() {
     setReplyText(m.reply_text ?? "");
   }
 
-  async function sendReply(viaMail: boolean) {
+  async function sendReply(via: "none" | "mail" | "wa") {
     if (!replyTo) return;
     if (!replyText.trim()) return toast.error("Empty reply");
+    if (via === "wa" && !replyTo.phone) return toast.error("No phone number");
     setSending(true);
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("contact_messages").update({
@@ -112,10 +113,13 @@ function MessagesPage() {
     setSending(false);
     if (error) return toast.error(error.message);
     setRows((rs) => rs.map((r) => r.id === replyTo.id ? { ...r, reply_text: replyText, replied_at: new Date().toISOString(), status: "resolved" } : r));
-    if (viaMail) {
+    if (via === "mail") {
       const subj = encodeURIComponent(`Re: ${replyTo.subject ?? "Your message"}`);
       const body = encodeURIComponent(replyText);
       window.location.href = `mailto:${replyTo.email}?subject=${subj}&body=${body}`;
+    }
+    if (via === "wa" && replyTo.phone) {
+      window.open(waLink(replyTo.phone, replyText), "_blank", "noopener,noreferrer");
     }
     toast.success("Reply saved");
     setReplyTo(null);
