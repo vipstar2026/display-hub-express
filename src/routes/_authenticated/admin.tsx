@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 import { useI18n, type Lang } from "@/lib/i18n";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
