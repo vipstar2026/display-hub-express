@@ -38,6 +38,7 @@ function AdminLayout() {
       label: t("admin.catalog"),
       items: [
         { to: "/admin/categories", icon: FolderTree, label: t("admin.categories") },
+        { to: "/admin/products", icon: Package, label: t("admin.products") ?? "Products" },
         { to: "/admin/inventory", icon: Boxes, label: t("admin.inventory") },
         { to: "/admin/codes", icon: Key, label: t("admin.codes") ?? "Digital Codes" },
       ],
