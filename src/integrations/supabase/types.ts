@@ -776,6 +776,69 @@ export type Database = {
           },
         ]
       }
+      newsletter_campaigns: {
+        Row: {
+          audience_count: number
+          body_ar: string | null
+          body_en: string | null
+          body_ur: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          notes: string | null
+          scheduled_for: string | null
+          sent_at: string | null
+          sent_count: number
+          status: string
+          subject_ar: string | null
+          subject_en: string | null
+          subject_ur: string | null
+          target_lang: string | null
+          updated_at: string
+        }
+        Insert: {
+          audience_count?: number
+          body_ar?: string | null
+          body_en?: string | null
+          body_ur?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          sent_count?: number
+          status?: string
+          subject_ar?: string | null
+          subject_en?: string | null
+          subject_ur?: string | null
+          target_lang?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audience_count?: number
+          body_ar?: string | null
+          body_en?: string | null
+          body_ur?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          sent_count?: number
+          status?: string
+          subject_ar?: string | null
+          subject_en?: string | null
+          subject_ur?: string | null
+          target_lang?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           created_at: string
@@ -2147,6 +2210,15 @@ export type Database = {
         }
         Returns: number
       }
+      admin_campaign_audience: {
+        Args: { _lang?: string }
+        Returns: {
+          created_at: string
+          email: string
+          lang: string
+          source: string
+        }[]
+      }
       admin_coupon_usage_report: {
         Args: never
         Returns: {
@@ -2184,6 +2256,35 @@ export type Database = {
           total_codes: number
           used_codes: number
         }[]
+      }
+      admin_list_campaigns: {
+        Args: never
+        Returns: {
+          audience_count: number
+          body_ar: string | null
+          body_en: string | null
+          body_ur: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          notes: string | null
+          scheduled_for: string | null
+          sent_at: string | null
+          sent_count: number
+          status: string
+          subject_ar: string | null
+          subject_en: string | null
+          subject_ur: string | null
+          target_lang: string | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "newsletter_campaigns"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       admin_list_coupons: {
         Args: never
@@ -2236,6 +2337,10 @@ export type Database = {
           phone: string
           roles: string[]
         }[]
+      }
+      admin_mark_campaign_sent: {
+        Args: { _id: string; _sent_count: number }
+        Returns: undefined
       }
       admin_set_review_approved: {
         Args: { _approved: boolean; _id: string }
