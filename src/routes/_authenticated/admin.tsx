@@ -148,6 +148,11 @@ function AdminLayout() {
                     {active && <span className="absolute start-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-e bg-primary" />}
                     <n.icon className={`h-4 w-4 ${active ? "text-primary" : ""}`} />
                     <span className="flex-1">{n.label}</span>
+                    {!!n.badge && (
+                      <span className="grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-background">
+                        {n.badge > 99 ? "99+" : n.badge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
