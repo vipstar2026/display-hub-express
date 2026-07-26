@@ -2141,6 +2141,16 @@ export type Database = {
         }[]
       }
       admin_delete_coupon: { Args: { _id: string }; Returns: undefined }
+      admin_digital_codes_stats: {
+        Args: never
+        Returns: {
+          available_codes: number
+          product_id: string
+          product_name: string
+          total_codes: number
+          used_codes: number
+        }[]
+      }
       admin_list_coupons: {
         Args: never
         Returns: {
@@ -2163,6 +2173,26 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+          last_sign_in_at: string
+          phone: string
+          roles: string[]
+        }[]
+      }
+      admin_toggle_user_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       admin_upsert_coupon: {
         Args: { _data: Json }
@@ -2371,7 +2401,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "customer"
+      app_role: "admin" | "customer" | "moderator"
       order_item_status:
         | "pending"
         | "processing"
@@ -2518,7 +2548,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "customer"],
+      app_role: ["admin", "customer", "moderator"],
       order_item_status: [
         "pending",
         "processing",
