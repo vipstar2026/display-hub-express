@@ -65,6 +65,7 @@ function AdminLayout() {
       items: [
         { to: "/admin/users", icon: Users, label: t("admin.users") },
         { to: "/admin/customers", icon: UsersRound, label: t("admin.customers_analytics") },
+        { to: "/admin/reviews", icon: MessageSquare, label: "Reviews" },
       ],
     },
     {
