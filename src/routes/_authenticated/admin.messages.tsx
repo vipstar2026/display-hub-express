@@ -253,10 +253,15 @@ function MessagesPage() {
           )}
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setReplyTo(null)}>Cancel</Button>
-            <Button variant="outline" disabled={sending} onClick={() => sendReply(false)}>
+            <Button variant="outline" disabled={sending} onClick={() => sendReply("none")}>
               Save only
             </Button>
-            <Button disabled={sending} onClick={() => sendReply(true)} className="bg-primary text-background hover:bg-primary/90">
+            {replyTo?.phone && (
+              <Button variant="outline" disabled={sending} onClick={() => sendReply("wa")} className="border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10">
+                <MessageCircle className="me-1 h-3 w-3" /> WhatsApp
+              </Button>
+            )}
+            <Button disabled={sending} onClick={() => sendReply("mail")} className="bg-primary text-background hover:bg-primary/90">
               <Send className="me-1 h-3 w-3" /> Save & Open email
             </Button>
           </DialogFooter>
