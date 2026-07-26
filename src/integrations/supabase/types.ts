@@ -2147,6 +2147,21 @@ export type Database = {
         }
         Returns: number
       }
+      admin_coupon_usage_report: {
+        Args: never
+        Returns: {
+          coupon_code: string
+          coupon_id: string
+          created_at: string
+          discount_amount: number
+          id: string
+          order_id: string
+          order_number: string
+          order_total: number
+          user_email: string
+          user_id: string
+        }[]
+      }
       admin_customer_analytics: {
         Args: never
         Returns: {
@@ -2159,6 +2174,7 @@ export type Database = {
         }[]
       }
       admin_delete_coupon: { Args: { _id: string }; Returns: undefined }
+      admin_delete_review: { Args: { _id: string }; Returns: undefined }
       admin_digital_codes_stats: {
         Args: never
         Returns: {
@@ -2192,6 +2208,22 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      admin_list_reviews: {
+        Args: never
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          is_approved: boolean
+          product_id: string
+          product_name: string
+          product_slug: string
+          rating: number
+          title: string
+          user_email: string
+          user_id: string
+        }[]
+      }
       admin_list_users: {
         Args: never
         Returns: {
@@ -2204,6 +2236,10 @@ export type Database = {
           phone: string
           roles: string[]
         }[]
+      }
+      admin_set_review_approved: {
+        Args: { _approved: boolean; _id: string }
+        Returns: undefined
       }
       admin_toggle_user_role: {
         Args: {
