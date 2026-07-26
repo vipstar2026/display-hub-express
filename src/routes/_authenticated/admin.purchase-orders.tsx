@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/admin/purchase-orders")({
 });
 
 type Supplier = { id: string; name: string };
-type Product = { id: string; name_en: string | null; name_ar: string | null; sku: string | null; stock: number | null; cost: number | null };
+type Product = { id: string; name_en: string | null; name_ar: string | null; sku: string | null; stock: number | null; cost_price: number | null };
 type POItem = { id?: string; product_id: string | null; product_name: string; quantity: number; cost_per_unit: number; total: number };
 type PO = {
   id: string; po_number: string; supplier_id: string; status: string;
@@ -40,7 +40,7 @@ function POPage() {
     const [{ data: p }, { data: s }, { data: pr }] = await Promise.all([
       supabase.from("purchase_orders").select("*").order("created_at", { ascending: false }),
       supabase.from("suppliers").select("id,name").order("name"),
-      supabase.from("products").select("id,name_en,name_ar,sku,stock,cost").order("name_en"),
+      supabase.from("products").select("id,name_en,name_ar,sku,stock,cost_price").order("name_en"),
     ]);
     setPos((p as PO[]) ?? []);
     setSuppliers((s as Supplier[]) ?? []);
@@ -83,7 +83,7 @@ function POPage() {
     updateItem(idx, {
       product_id: p.id,
       product_name: p.name_en || p.name_ar || p.sku || "Product",
-      cost_per_unit: Number(p.cost || 0),
+      cost_per_unit: Number(p.cost_price || 0),
     });
   }
 
