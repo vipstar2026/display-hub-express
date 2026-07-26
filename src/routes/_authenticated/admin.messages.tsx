@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Mail, Phone, Trash2, CheckCircle2, Eye, Inbox, Reply, Send, Search } from "lucide-react";
+import { Mail, Phone, Trash2, CheckCircle2, Eye, Inbox, Reply, Send, Search, MessageCircle, Download } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/messages")({
