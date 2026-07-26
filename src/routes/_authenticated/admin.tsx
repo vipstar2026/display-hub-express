@@ -4,6 +4,7 @@ import {
   LayoutDashboard, FolderTree, ShoppingBag, Users, Settings,
   Satellite, ArrowLeft, Search, Bell, Menu, ChevronRight, Store, LogOut, Globe,
   CreditCard, BarChart3, Calculator, Ticket, UsersRound, Boxes, MessageSquare, Activity, Mail, Newspaper, Image as ImageIcon, Truck, FileText, Database, Zap, Key, Package,
+  Megaphone,
 } from "lucide-react";
 
 import { useI18n, type Lang } from "@/lib/i18n";
