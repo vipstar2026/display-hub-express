@@ -98,7 +98,7 @@ function AdminLayout() {
       items: [
         { to: "/admin/banners", icon: ImageIcon, label: "Banners" },
         { to: "/admin/blog", icon: Newspaper, label: "Blog" },
-        { to: "/admin/messages", icon: MessageSquare, label: t("admin.messages") },
+        { to: "/admin/messages", icon: MessageSquare, label: t("admin.messages"), badge: unreadMsgs },
         { to: "/admin/newsletter", icon: Mail, label: t("admin.newsletter") },
         { to: "/admin/campaigns", icon: Megaphone, label: "Campaigns" },
         { to: "/admin/notifications", icon: Bell, label: t("admin.notifications") },
