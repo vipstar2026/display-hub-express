@@ -1,20 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { Satellite, Mail, Phone, MessageCircle, MapPin } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { NewsletterSignup } from "./NewsletterSignup";
+import { cleanPhoneNumber, pickLocalized, useSiteSettings } from "@/lib/site-settings";
 
 export function Footer() {
-  const { t } = useI18n();
-  const [s, setS] = useState<any>(null);
-
-  useEffect(() => {
-    supabase.from("site_settings")
-      .select("contact_email,contact_phone,whatsapp,company_address,company_cr,instagram_url,twitter_url,facebook_url,tiktok_url,snapchat_url")
-      .eq("id", 1).maybeSingle()
-      .then(({ data }) => setS(data));
-  }, []);
+  const { t, lang } = useI18n();
+  const { data: s } = useSiteSettings();
+  const tagline = pickLocalized(lang, { ar: s?.tagline_ar, en: s?.tagline_en, ur: s?.tagline_ur }) || t("site.tagline");
 
   const nav = [
     { to: "/", label: t("nav.home") },
@@ -30,9 +23,9 @@ export function Footer() {
       <div className="container mx-auto grid gap-10 px-4 py-12 md:grid-cols-5">
         <div className="md:col-span-1">
           <div className="mb-3 flex items-center gap-2 font-display text-lg font-bold text-primary">
-            <Satellite className="h-5 w-5" /> VIPSTAR
+            <Satellite className="h-5 w-5" /> {s?.site_name ?? "VIPSTAR"}
           </div>
-          <p className="text-sm text-muted-foreground">{t("site.tagline")}</p>
+          <p className="text-sm text-muted-foreground">{tagline}</p>
           {s?.company_cr && <p className="mt-2 text-xs text-muted-foreground">CR: {s.company_cr}</p>}
         </div>
 
@@ -57,7 +50,7 @@ export function Footer() {
               <li><a href={`tel:${s.contact_phone}`} className="inline-flex items-center gap-2 hover:text-primary"><Phone className="h-4 w-4" /> {s.contact_phone}</a></li>
             )}
             {s?.whatsapp && (
-              <li><a href={`https://wa.me/${s.whatsapp.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-primary"><MessageCircle className="h-4 w-4" /> {s.whatsapp}</a></li>
+              <li><a href={`https://wa.me/${cleanPhoneNumber(s.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-primary"><MessageCircle className="h-4 w-4" /> {s.whatsapp}</a></li>
             )}
             {s?.company_address && (
               <li className="inline-flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0" /> {s.company_address}</li>
@@ -71,7 +64,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-primary/10 py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} VIPSTAR — {t("footer.rights")}
+        © {new Date().getFullYear()} {s?.site_name ?? "VIPSTAR"} — {t("footer.rights")}
       </div>
     </footer>
   );

@@ -1,20 +1,16 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { cleanPhoneNumber, useSiteSettings } from "@/lib/site-settings";
 
 export function FloatingWhatsApp() {
   const { t } = useI18n();
-  const [wa, setWa] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    supabase.from("site_settings").select("whatsapp,site_name").eq("id", 1).maybeSingle()
-      .then(({ data }) => setWa((data as any)?.whatsapp ?? null));
-  }, []);
+  const { data: settings } = useSiteSettings();
+  const wa = settings?.whatsapp ?? null;
 
   if (!wa) return null;
-  const clean = wa.replace(/[^0-9]/g, "");
+  const clean = cleanPhoneNumber(wa);
   const msg = encodeURIComponent(t("wa.defaultMsg"));
   const href = `https://wa.me/${clean}?text=${msg}`;
 
