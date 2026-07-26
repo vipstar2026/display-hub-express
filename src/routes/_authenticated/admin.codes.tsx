@@ -50,17 +50,36 @@ function AdminCodes() {
     );
   }, [stats]);
 
+  // Parse: split by newline/comma/semicolon/tab, trim, strip surrounding quotes, remove empties, dedupe within input
+  const parsedInput = useMemo(() => {
+    const raw = bulk.split(/[\r\n,;\t]+/).map((l) => l.trim().replace(/^["']|["']$/g, "")).filter(Boolean);
+    return Array.from(new Set(raw));
+  }, [bulk]);
+
+  const existingSet = useMemo(() => new Set(codes.map((c) => c.code)), [codes]);
+  const newCodes = useMemo(() => parsedInput.filter((c) => !existingSet.has(c)), [parsedInput, existingSet]);
+  const dupCount = parsedInput.length - newCodes.length;
+
   const handleAdd = async () => {
-    const lines = bulk.split("\n").map((l) => l.trim()).filter(Boolean);
-    if (!productId || lines.length === 0) return;
-    const { error } = await supabase.from("digital_codes").insert(lines.map((code) => ({ product_id: productId, code })));
+    if (!productId || newCodes.length === 0) return;
+    const { error } = await supabase.from("digital_codes").insert(newCodes.map((code) => ({ product_id: productId, code })));
     if (error) toast.error(error.message);
     else {
-      toast.success(`Added ${lines.length} codes`);
+      toast.success(`Added ${newCodes.length} codes${dupCount ? ` (${dupCount} duplicates skipped)` : ""}`);
       setBulk("");
       qc.invalidateQueries({ queryKey: ["codes", productId] });
       qc.invalidateQueries({ queryKey: ["codes-stats"] });
     }
+  };
+
+  const handleFile = async (file: File) => {
+    const text = await file.text();
+    // If CSV with header, keep the first column
+    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const looksCsv = /,/.test(lines[0] ?? "") && /code/i.test(lines[0] ?? "");
+    const rows = looksCsv ? lines.slice(1).map((l) => l.split(",")[0]) : lines;
+    setBulk((prev) => (prev.trim() ? prev + "\n" : "") + rows.join("\n"));
+    toast.success(`Loaded ${rows.length} lines from ${file.name}`);
   };
 
   const filteredCodes = codes.filter((c) => {
