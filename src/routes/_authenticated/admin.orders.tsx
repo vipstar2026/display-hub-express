@@ -87,12 +87,12 @@ function AdminOrders() {
   };
 
   const saveTracking = async (id: string, tracking_number: string, tracking_carrier: string, tracking_url: string) => {
-    const patch: Record<string, string | null> = {
+    const patch = {
       tracking_number: tracking_number || null,
       tracking_carrier: tracking_carrier || null,
       tracking_url: tracking_url || null,
     };
-    const { error } = await supabase.from("orders").update(patch).eq("id", id);
+    const { error } = await supabase.from("orders").update(patch as never).eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success("Tracking saved"); qc.invalidateQueries({ queryKey: ["admin-orders"] }); }
   };
