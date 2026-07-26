@@ -29,8 +29,29 @@ function AdminLayout() {
   const { user } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const [unreadMsgs, setUnreadMsgs] = useState(0);
 
-  const groups: { label: string; items: { to: string; icon: typeof LayoutDashboard; label: string; exact?: boolean }[] }[] = [
+  useEffect(() => {
+    let alive = true;
+    async function refresh() {
+      const { count } = await supabase
+        .from("contact_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "new");
+      if (alive) setUnreadMsgs(count ?? 0);
+    }
+    refresh();
+    const channel = supabase
+      .channel("admin-contact-messages-badge")
+      .on("postgres_changes", { event: "*", schema: "public", table: "contact_messages" }, () => refresh())
+      .subscribe();
+    return () => {
+      alive = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const groups: { label: string; items: { to: string; icon: typeof LayoutDashboard; label: string; exact?: boolean; badge?: number }[] }[] = [
     {
       label: t("admin.overview"),
       items: [{ to: "/admin", icon: LayoutDashboard, label: t("admin.dashboard"), exact: true }],
