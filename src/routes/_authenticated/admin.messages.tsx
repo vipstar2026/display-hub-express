@@ -209,6 +209,13 @@ function MessagesPage() {
                   <Button size="sm" onClick={() => openReply(m)} className="bg-primary text-background hover:bg-primary/90">
                     <Reply className="me-1 h-3 w-3" /> Reply
                   </Button>
+                  {m.phone && (
+                    <Button variant="outline" size="sm" asChild className="border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10">
+                      <a href={waLink(m.phone, `مرحباً ${m.name}،\n`)} target="_blank" rel="noopener noreferrer">
+                        <MessageCircle className="me-1 h-3 w-3" /> WhatsApp
+                      </a>
+                    </Button>
+                  )}
                   {m.status === "new" && (
                     <Button variant="outline" size="sm" onClick={() => setStatus(m.id, "read")}>
                       <Eye className="me-1 h-3 w-3" /> {t("messages.markRead")}
