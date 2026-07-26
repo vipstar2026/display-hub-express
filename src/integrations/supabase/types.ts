@@ -310,6 +310,9 @@ export type Database = {
           message: string
           name: string
           phone: string | null
+          replied_at: string | null
+          replied_by: string | null
+          reply_text: string | null
           status: string
           subject: string | null
           updated_at: string
@@ -322,6 +325,9 @@ export type Database = {
           message: string
           name: string
           phone?: string | null
+          replied_at?: string | null
+          replied_by?: string | null
+          reply_text?: string | null
           status?: string
           subject?: string | null
           updated_at?: string
@@ -334,6 +340,9 @@ export type Database = {
           message?: string
           name?: string
           phone?: string | null
+          replied_at?: string | null
+          replied_by?: string | null
+          reply_text?: string | null
           status?: string
           subject?: string | null
           updated_at?: string
@@ -927,6 +936,9 @@ export type Database = {
           subtotal: number
           tax: number
           total: number
+          tracking_carrier: string | null
+          tracking_number: string | null
+          tracking_url: string | null
           updated_at: string
         }
         Insert: {
@@ -965,6 +977,9 @@ export type Database = {
           subtotal?: number
           tax?: number
           total?: number
+          tracking_carrier?: string | null
+          tracking_number?: string | null
+          tracking_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -1003,6 +1018,9 @@ export type Database = {
           subtotal?: number
           tax?: number
           total?: number
+          tracking_carrier?: string | null
+          tracking_number?: string | null
+          tracking_url?: string | null
           updated_at?: string
         }
         Relationships: [
