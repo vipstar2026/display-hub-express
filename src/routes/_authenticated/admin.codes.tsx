@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Trash2, Key, Package, CheckCircle2, XCircle, Search, Download } from "lucide-react";
+import { Trash2, Key, Package, CheckCircle2, XCircle, Search, Download, Upload, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/codes")({
   component: AdminCodes,
@@ -50,17 +50,36 @@ function AdminCodes() {
     );
   }, [stats]);
 
+  // Parse: split by newline/comma/semicolon/tab, trim, strip surrounding quotes, remove empties, dedupe within input
+  const parsedInput = useMemo(() => {
+    const raw = bulk.split(/[\r\n,;\t]+/).map((l) => l.trim().replace(/^["']|["']$/g, "")).filter(Boolean);
+    return Array.from(new Set(raw));
+  }, [bulk]);
+
+  const existingSet = useMemo(() => new Set(codes.map((c) => c.code)), [codes]);
+  const newCodes = useMemo(() => parsedInput.filter((c) => !existingSet.has(c)), [parsedInput, existingSet]);
+  const dupCount = parsedInput.length - newCodes.length;
+
   const handleAdd = async () => {
-    const lines = bulk.split("\n").map((l) => l.trim()).filter(Boolean);
-    if (!productId || lines.length === 0) return;
-    const { error } = await supabase.from("digital_codes").insert(lines.map((code) => ({ product_id: productId, code })));
+    if (!productId || newCodes.length === 0) return;
+    const { error } = await supabase.from("digital_codes").insert(newCodes.map((code) => ({ product_id: productId, code })));
     if (error) toast.error(error.message);
     else {
-      toast.success(`Added ${lines.length} codes`);
+      toast.success(`Added ${newCodes.length} codes${dupCount ? ` (${dupCount} duplicates skipped)` : ""}`);
       setBulk("");
       qc.invalidateQueries({ queryKey: ["codes", productId] });
       qc.invalidateQueries({ queryKey: ["codes-stats"] });
     }
+  };
+
+  const handleFile = async (file: File) => {
+    const text = await file.text();
+    // If CSV with header, keep the first column
+    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const looksCsv = /,/.test(lines[0] ?? "") && /code/i.test(lines[0] ?? "");
+    const rows = looksCsv ? lines.slice(1).map((l) => l.split(",")[0]) : lines;
+    setBulk((prev) => (prev.trim() ? prev + "\n" : "") + rows.join("\n"));
+    toast.success(`Loaded ${rows.length} lines from ${file.name}`);
   };
 
   const filteredCodes = codes.filter((c) => {
@@ -148,11 +167,44 @@ function AdminCodes() {
                   </Button>
                 </div>
                 <div>
-                  <Label>Bulk add (one code per line)</Label>
-                  <Textarea rows={5} value={bulk} onChange={(e) => setBulk(e.target.value)} placeholder="ABC-123&#10;DEF-456&#10;GHI-789" className="font-mono" />
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <Label>Bulk add codes</Label>
+                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-primary/20 bg-background/60 px-2.5 py-1 text-xs hover:bg-primary/10">
+                      <Upload className="h-3 w-3" /> Import file (.txt / .csv)
+                      <input
+                        type="file"
+                        accept=".txt,.csv,text/plain,text/csv"
+                        className="hidden"
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }}
+                      />
+                    </label>
+                  </div>
+                  <Textarea
+                    rows={6}
+                    value={bulk}
+                    onChange={(e) => setBulk(e.target.value)}
+                    placeholder="One code per line, or paste CSV / comma-separated&#10;ABC-123&#10;DEF-456&#10;GHI-789"
+                    className="font-mono text-xs"
+                  />
+                  {parsedInput.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-2 text-[11px]">
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary">
+                        <FileText className="me-1 inline h-3 w-3" />
+                        {parsedInput.length} parsed
+                      </span>
+                      <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-emerald-400">
+                        {newCodes.length} new
+                      </span>
+                      {dupCount > 0 && (
+                        <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-amber-400">
+                          {dupCount} already exist (will skip)
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <Button onClick={handleAdd} disabled={!bulk.trim()} className="bg-primary text-background hover:bg-primary">
-                  Add {bulk.split("\n").filter((l) => l.trim()).length} codes
+                <Button onClick={handleAdd} disabled={newCodes.length === 0} className="bg-primary text-background hover:bg-primary">
+                  Add {newCodes.length} codes
                 </Button>
               </div>
 
