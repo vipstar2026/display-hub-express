@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Trash2, Key, Package, CheckCircle2, XCircle, Search, Download } from "lucide-react";
+import { Trash2, Key, Package, CheckCircle2, XCircle, Search, Download, Upload, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/codes")({
   component: AdminCodes,
