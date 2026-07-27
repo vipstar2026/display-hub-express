@@ -27,8 +27,18 @@ type Msg = {
   replied_at: string | null;
 };
 
+type EmailSettings = {
+  from_email: string | null;
+  from_name: string | null;
+  reply_to: string | null;
+  signature_ar: string | null;
+  signature_en: string | null;
+  smtp_enabled: boolean | null;
+};
+
 function MessagesPage() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const [emailCfg, setEmailCfg] = useState<EmailSettings | null>(null);
   const [rows, setRows] = useState<Msg[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "new" | "read" | "resolved">("all");
@@ -43,8 +53,15 @@ function MessagesPage() {
     setRows((data ?? []) as Msg[]);
     setLoading(false);
   }
+  async function loadEmailCfg() {
+    const { data } = await (supabase as any).rpc("get_email_settings_admin");
+    const row = Array.isArray(data) ? data[0] : data;
+    if (row) setEmailCfg(row as EmailSettings);
+  }
   useEffect(() => {
     load();
+    loadEmailCfg();
+
     const channel = supabase
       .channel("admin-contact-messages")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "contact_messages" }, (payload) => {
@@ -93,9 +110,20 @@ function MessagesPage() {
     toast.success("Deleted");
   }
 
+  function signature() {
+    const sig = lang === "en" ? emailCfg?.signature_en : emailCfg?.signature_ar;
+    return (sig || "").trim();
+  }
+
+  function composeBody(text: string) {
+    const sig = signature();
+    return sig ? `${text}\n\n—\n${sig}` : text;
+  }
+
   function openReply(m: Msg) {
     setReplyTo(m);
-    setReplyText(m.reply_text ?? "");
+    const greeting = lang === "en" ? `Hi ${m.name},\n\n` : `مرحباً ${m.name}،\n\n`;
+    setReplyText(m.reply_text ?? greeting);
   }
 
   async function sendReply(via: "none" | "mail" | "wa") {
@@ -115,16 +143,18 @@ function MessagesPage() {
     setRows((rs) => rs.map((r) => r.id === replyTo.id ? { ...r, reply_text: replyText, replied_at: new Date().toISOString(), status: "resolved" } : r));
     if (via === "mail") {
       const subj = encodeURIComponent(`Re: ${replyTo.subject ?? "Your message"}`);
-      const body = encodeURIComponent(replyText);
-      window.location.href = `mailto:${replyTo.email}?subject=${subj}&body=${body}`;
+      const body = encodeURIComponent(composeBody(replyText));
+      const cc = emailCfg?.reply_to ? `&cc=${encodeURIComponent(emailCfg.reply_to)}` : "";
+      window.location.href = `mailto:${replyTo.email}?subject=${subj}&body=${body}${cc}`;
     }
     if (via === "wa" && replyTo.phone) {
-      window.open(waLink(replyTo.phone, replyText), "_blank", "noopener,noreferrer");
+      window.open(waLink(replyTo.phone, composeBody(replyText)), "_blank", "noopener,noreferrer");
     }
     toast.success("Reply saved");
     setReplyTo(null);
     setReplyText("");
   }
+
 
   const filtered = rows.filter((r) => {
     if (filter !== "all" && r.status !== filter) return false;
@@ -255,11 +285,22 @@ function MessagesPage() {
             <div className="space-y-3">
               <div className="rounded-lg border border-primary/10 bg-muted/30 p-3 text-xs">
                 <div className="text-muted-foreground">To: <span className="text-foreground">{replyTo.email}</span></div>
+                {(emailCfg?.from_email || emailCfg?.from_name) && (
+                  <div className="text-muted-foreground">
+                    From: <span className="text-foreground">{emailCfg?.from_name} {emailCfg?.from_email ? `<${emailCfg.from_email}>` : ""}</span>
+                  </div>
+                )}
                 {replyTo.subject && <div className="text-muted-foreground">Subject: <span className="text-foreground">Re: {replyTo.subject}</span></div>}
                 <div className="mt-2 whitespace-pre-wrap text-muted-foreground/80">{replyTo.message}</div>
               </div>
               <Textarea rows={6} placeholder="Write your reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)} />
+              {signature() && (
+                <div className="rounded-lg border border-primary/10 bg-card/40 p-2 text-[11px] whitespace-pre-wrap text-muted-foreground">
+                  —{"\n"}{signature()}
+                </div>
+              )}
             </div>
+
           )}
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setReplyTo(null)}>Cancel</Button>
