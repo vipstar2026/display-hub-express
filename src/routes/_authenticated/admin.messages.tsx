@@ -53,8 +53,15 @@ function MessagesPage() {
     setRows((data ?? []) as Msg[]);
     setLoading(false);
   }
+  async function loadEmailCfg() {
+    const { data } = await (supabase as any).rpc("get_email_settings_admin");
+    const row = Array.isArray(data) ? data[0] : data;
+    if (row) setEmailCfg(row as EmailSettings);
+  }
   useEffect(() => {
     load();
+    loadEmailCfg();
+
     const channel = supabase
       .channel("admin-contact-messages")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "contact_messages" }, (payload) => {
