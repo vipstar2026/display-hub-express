@@ -110,9 +110,20 @@ function MessagesPage() {
     toast.success("Deleted");
   }
 
+  function signature() {
+    const sig = lang === "en" ? emailCfg?.signature_en : emailCfg?.signature_ar;
+    return (sig || "").trim();
+  }
+
+  function composeBody(text: string) {
+    const sig = signature();
+    return sig ? `${text}\n\n—\n${sig}` : text;
+  }
+
   function openReply(m: Msg) {
     setReplyTo(m);
-    setReplyText(m.reply_text ?? "");
+    const greeting = lang === "en" ? `Hi ${m.name},\n\n` : `مرحباً ${m.name}،\n\n`;
+    setReplyText(m.reply_text ?? greeting);
   }
 
   async function sendReply(via: "none" | "mail" | "wa") {
@@ -132,16 +143,18 @@ function MessagesPage() {
     setRows((rs) => rs.map((r) => r.id === replyTo.id ? { ...r, reply_text: replyText, replied_at: new Date().toISOString(), status: "resolved" } : r));
     if (via === "mail") {
       const subj = encodeURIComponent(`Re: ${replyTo.subject ?? "Your message"}`);
-      const body = encodeURIComponent(replyText);
-      window.location.href = `mailto:${replyTo.email}?subject=${subj}&body=${body}`;
+      const body = encodeURIComponent(composeBody(replyText));
+      const cc = emailCfg?.reply_to ? `&cc=${encodeURIComponent(emailCfg.reply_to)}` : "";
+      window.location.href = `mailto:${replyTo.email}?subject=${subj}&body=${body}${cc}`;
     }
     if (via === "wa" && replyTo.phone) {
-      window.open(waLink(replyTo.phone, replyText), "_blank", "noopener,noreferrer");
+      window.open(waLink(replyTo.phone, composeBody(replyText)), "_blank", "noopener,noreferrer");
     }
     toast.success("Reply saved");
     setReplyTo(null);
     setReplyText("");
   }
+
 
   const filtered = rows.filter((r) => {
     if (filter !== "all" && r.status !== filter) return false;
