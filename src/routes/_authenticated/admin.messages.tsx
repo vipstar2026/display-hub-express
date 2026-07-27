@@ -27,8 +27,18 @@ type Msg = {
   replied_at: string | null;
 };
 
+type EmailSettings = {
+  from_email: string | null;
+  from_name: string | null;
+  reply_to: string | null;
+  signature_ar: string | null;
+  signature_en: string | null;
+  smtp_enabled: boolean | null;
+};
+
 function MessagesPage() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const [emailCfg, setEmailCfg] = useState<EmailSettings | null>(null);
   const [rows, setRows] = useState<Msg[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "new" | "read" | "resolved">("all");
