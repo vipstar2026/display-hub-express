@@ -277,7 +277,9 @@ function AdminSettings() {
           <TabsContent value="notifications" className="mt-0 space-y-3">
             <Toggle k="notify_email_new_order" label={t("settings.notify.new_order")} />
             <Toggle k="notify_email_low_stock" label={t("settings.notify.low_stock")} />
+            <EmailSettingsPanel />
           </TabsContent>
+
 
           <TabsContent value="security" className="mt-0 space-y-3">
             <Toggle k="allow_signups" label={t("settings.sec.signups")} desc={t("settings.sec.signups_desc")} />
