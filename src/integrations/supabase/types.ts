@@ -477,6 +477,57 @@ export type Database = {
           },
         ]
       }
+      email_settings: {
+        Row: {
+          created_at: string
+          from_email: string | null
+          from_name: string | null
+          id: number
+          reply_to: string | null
+          signature_ar: string | null
+          signature_en: string | null
+          smtp_enabled: boolean
+          smtp_host: string | null
+          smtp_password: string | null
+          smtp_port: number | null
+          smtp_secure: boolean
+          smtp_username: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          from_email?: string | null
+          from_name?: string | null
+          id?: number
+          reply_to?: string | null
+          signature_ar?: string | null
+          signature_en?: string | null
+          smtp_enabled?: boolean
+          smtp_host?: string | null
+          smtp_password?: string | null
+          smtp_port?: number | null
+          smtp_secure?: boolean
+          smtp_username?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          from_email?: string | null
+          from_name?: string | null
+          id?: number
+          reply_to?: string | null
+          signature_ar?: string | null
+          signature_en?: string | null
+          smtp_enabled?: boolean
+          smtp_host?: string | null
+          smtp_password?: string | null
+          smtp_port?: number | null
+          smtp_secure?: boolean
+          smtp_username?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       flash_sales: {
         Row: {
           created_at: string
@@ -2381,6 +2432,31 @@ export type Database = {
         Args: { _coupon_id: string; _discount: number; _order_id: string }
         Returns: undefined
       }
+      get_email_settings_admin: {
+        Args: never
+        Returns: {
+          created_at: string
+          from_email: string | null
+          from_name: string | null
+          id: number
+          reply_to: string | null
+          signature_ar: string | null
+          signature_en: string | null
+          smtp_enabled: boolean
+          smtp_host: string | null
+          smtp_password: string | null
+          smtp_port: number | null
+          smtp_secure: boolean
+          smtp_username: string | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "email_settings"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_site_settings_admin: {
         Args: never
         Returns: {
@@ -2474,6 +2550,31 @@ export type Database = {
           total: number
           updated_at: string
         }[]
+      }
+      update_email_settings_admin: {
+        Args: { payload: Json }
+        Returns: {
+          created_at: string
+          from_email: string | null
+          from_name: string | null
+          id: number
+          reply_to: string | null
+          signature_ar: string | null
+          signature_en: string | null
+          smtp_enabled: boolean
+          smtp_host: string | null
+          smtp_password: string | null
+          smtp_port: number | null
+          smtp_secure: boolean
+          smtp_username: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "email_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_site_settings_admin: {
         Args: { payload: Json }

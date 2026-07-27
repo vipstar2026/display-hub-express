@@ -17,6 +17,8 @@ import { THEME_LIST, applyTheme, DEFAULT_THEME } from "@/lib/themes";
 import { ThemePreview } from "@/components/ThemePreview";
 import { useI18n } from "@/lib/i18n";
 import { SITE_SETTINGS_QUERY_KEY } from "@/lib/site-settings";
+import { EmailSettingsPanel } from "@/components/admin/EmailSettingsPanel";
+
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
   component: AdminSettings,
@@ -277,7 +279,9 @@ function AdminSettings() {
           <TabsContent value="notifications" className="mt-0 space-y-3">
             <Toggle k="notify_email_new_order" label={t("settings.notify.new_order")} />
             <Toggle k="notify_email_low_stock" label={t("settings.notify.low_stock")} />
+            <EmailSettingsPanel />
           </TabsContent>
+
 
           <TabsContent value="security" className="mt-0 space-y-3">
             <Toggle k="allow_signups" label={t("settings.sec.signups")} desc={t("settings.sec.signups_desc")} />
