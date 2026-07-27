@@ -285,11 +285,22 @@ function MessagesPage() {
             <div className="space-y-3">
               <div className="rounded-lg border border-primary/10 bg-muted/30 p-3 text-xs">
                 <div className="text-muted-foreground">To: <span className="text-foreground">{replyTo.email}</span></div>
+                {(emailCfg?.from_email || emailCfg?.from_name) && (
+                  <div className="text-muted-foreground">
+                    From: <span className="text-foreground">{emailCfg?.from_name} {emailCfg?.from_email ? `<${emailCfg.from_email}>` : ""}</span>
+                  </div>
+                )}
                 {replyTo.subject && <div className="text-muted-foreground">Subject: <span className="text-foreground">Re: {replyTo.subject}</span></div>}
                 <div className="mt-2 whitespace-pre-wrap text-muted-foreground/80">{replyTo.message}</div>
               </div>
               <Textarea rows={6} placeholder="Write your reply..." value={replyText} onChange={(e) => setReplyText(e.target.value)} />
+              {signature() && (
+                <div className="rounded-lg border border-primary/10 bg-card/40 p-2 text-[11px] whitespace-pre-wrap text-muted-foreground">
+                  —{"\n"}{signature()}
+                </div>
+              )}
             </div>
+
           )}
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setReplyTo(null)}>Cancel</Button>
