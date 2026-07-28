@@ -5,7 +5,8 @@ export const createAfsCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { order_id: string }) => input)
   .handler(async ({ data, context }) => {
-    const { afsPrepareCheckout, afsWidgetBase } = await import("@/lib/afs.server");
+    const { afsPrepareCheckout, loadAfsConfig } = await import("@/lib/afs.server");
+    const cfg = await loadAfsConfig();
 
     const { data: order, error } = await context.supabase
       .from("orders")
@@ -24,14 +25,18 @@ export const createAfsCheckout = createServerFn({ method: "POST" })
       email: order.buyer_email,
       givenName: givenName || null,
       surname: rest.join(" ") || null,
+      cfg,
     });
 
     return {
       checkoutId,
-      scriptUrl: `${afsWidgetBase()}?checkoutId=${checkoutId}`,
+      scriptUrl: `${cfg.widgetBase}?checkoutId=${checkoutId}`,
       amount: Number(order.total).toFixed(2),
-      currency: order.currency || "BHD",
-      testMode: (process.env.AFS_MODE ?? "test") !== "live",
+      currency: cfg.currency || order.currency || "BHD",
+      testMode: cfg.testMode,
+      brands: cfg.brands,
+      widgetLang: cfg.widgetLang,
+      resultUrl: cfg.resultUrl,
     };
   });
 
