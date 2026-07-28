@@ -34,6 +34,8 @@ function AdminEmailsPage() {
   const qc = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
   const dispatchFn = useServerFn(dispatchEmails);
+  const txt = (ar: string, en: string, ur: string) => (lang === "ar" ? ar : lang === "ur" ? ur : en);
+
 
 
   const { data, isLoading } = useQuery({
