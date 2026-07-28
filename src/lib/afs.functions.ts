@@ -76,7 +76,7 @@ export const confirmAfsPayment = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    await supabaseAdmin.from("payment_transactions").insert({
+    const txPayload = {
       order_id: order.id,
       provider: "afs",
       provider_charge_id: status.id ?? data.checkout_id,
@@ -87,7 +87,24 @@ export const confirmAfsPayment = createServerFn({ method: "POST" })
       raw_response: status as never,
       failure_reason: success ? null : (status.result?.description ?? null),
       paid_at: success ? new Date().toISOString() : null,
-    });
+    };
+
+    // Reuse the pending row created when the checkout started, if any.
+    const { data: existing } = await supabaseAdmin
+      .from("payment_transactions")
+      .select("id")
+      .eq("order_id", order.id)
+      .eq("provider", "afs")
+      .eq("provider_charge_id", data.checkout_id)
+      .eq("status", "pending")
+      .maybeSingle();
+
+    if (existing) {
+      await supabaseAdmin.from("payment_transactions").update(txPayload).eq("id", existing.id);
+    } else {
+      await supabaseAdmin.from("payment_transactions").insert(txPayload);
+    }
+
 
     if (success) {
       await supabaseAdmin
