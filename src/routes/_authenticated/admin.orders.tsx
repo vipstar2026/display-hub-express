@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle2, XCircle, FileImage, Eye, Clock, Download, Search, Truck, Package, ExternalLink } from "lucide-react";
+import { CheckCircle2, XCircle, FileImage, Eye, Clock, Download, Search, Truck, Package, ExternalLink, RotateCcw, Loader2 } from "lucide-react";
+import { refundAfsPayment } from "@/lib/afs-refund.functions";
 import { generateInvoicePDF } from "@/lib/invoice-pdf";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
@@ -293,6 +294,9 @@ function OrderCard({ order: o, onConfirm, onReject, onStatus, onNotes, onTrackin
               </Button>
             </>
           )}
+          {o.payment_status === "succeeded" && (
+            <RefundButton order={o} />
+          )}
           {o.payment_confirmed_at && (
             <span className="ms-auto text-xs text-emerald-400">
               <Eye className="me-1 inline h-3 w-3" />Confirmed {new Date(o.payment_confirmed_at).toLocaleString()}
@@ -301,5 +305,53 @@ function OrderCard({ order: o, onConfirm, onReject, onStatus, onNotes, onTrackin
         </div>
       </div>
     </div>
+  );
+}
+
+function RefundButton({ order: o }: { order: OrderRow }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [amount, setAmount] = useState(String(Number(o.total).toFixed(2)));
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const run = async () => {
+    setBusy(true);
+    try {
+      const res = await refundAfsPayment({ data: { order_id: o.id, amount: Number(amount), reason: reason || undefined } });
+      if (res.success) {
+        toast.success(`Refunded ${res.amount} ${o.currency}`);
+        setOpen(false);
+        qc.invalidateQueries({ queryKey: ["admin-orders"] });
+      } else {
+        toast.error(res.message || res.code || "Refund failed");
+      }
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline"><RotateCcw className="me-1 h-4 w-4" />Refund</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>Refund · {o.order_number}</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div className="text-xs text-muted-foreground">
+            Paid total: <span className="font-mono">{formatPrice(Number(o.total), o.currency)}</span>. Partial refunds are allowed.
+          </div>
+          <Input type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          <Textarea placeholder="Reason (saved to admin notes)" rows={2} value={reason} onChange={(e) => setReason(e.target.value)} />
+          <Button disabled={busy} onClick={run} className="w-full">
+            {busy ? <Loader2 className="me-1 h-4 w-4 animate-spin" /> : <RotateCcw className="me-1 h-4 w-4" />}
+            Send refund to AFS
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
