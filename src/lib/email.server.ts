@@ -132,7 +132,7 @@ export async function dispatchOutbox(limit = 25) {
   const { data: rows, error } = await supabaseAdmin
     .from("email_outbox")
     .select("id, to_email, to_name, subject, body")
-    .eq("status", "pending")
+    .in("status", ["queued", "pending"])
     .order("created_at", { ascending: true })
     .limit(limit);
   if (error) throw new Error(error.message);
