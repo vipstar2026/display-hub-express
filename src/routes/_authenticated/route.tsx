@@ -3,9 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
     const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
+    if (error || !data.user) {
+      const isAdminArea = location.pathname.startsWith("/admin");
+      throw redirect({ to: isAdminArea ? "/admin-login" : "/auth" });
+    }
     return { user: data.user };
   },
   component: () => <Outlet />,
