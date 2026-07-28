@@ -60,6 +60,7 @@ import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPayIdRouteImport } from './routes/_authenticated/pay.$id'
 import { Route as AuthenticatedPayResultRouteImport } from './routes/_authenticated/pay.result'
 import { Route as ApiPublicAfsReconcileRouteImport } from './routes/api/public/afs-reconcile'
+import { Route as ApiPublicSendEmailsRouteImport } from './routes/api/public/send-emails'
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
 import { Route as AuthenticatedAdminCategoriesSlugRouteImport } from './routes/_authenticated/admin.categories.$slug'
 import { Route as AuthenticatedOrderSuccessIdRouteImport } from './routes/_authenticated/order.success.$id'
@@ -343,6 +344,11 @@ const ApiPublicAfsReconcileRoute = ApiPublicAfsReconcileRouteImport.update({
   path: '/api/public/afs-reconcile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSendEmailsRoute = ApiPublicSendEmailsRouteImport.update({
+  id: '/api/public/send-emails',
+  path: '/api/public/send-emails',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminCategoriesIndexRoute =
   AuthenticatedAdminCategoriesIndexRouteImport.update({
     id: '/categories/',
@@ -412,6 +418,7 @@ export interface FileRoutesByFullPath {
   '/pay/$id': typeof AuthenticatedPayIdRoute
   '/pay/result': typeof AuthenticatedPayResultRoute
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
+  '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
@@ -466,6 +473,7 @@ export interface FileRoutesByTo {
   '/pay/$id': typeof AuthenticatedPayIdRoute
   '/pay/result': typeof AuthenticatedPayResultRoute
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
+  '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
@@ -523,6 +531,7 @@ export interface FileRoutesById {
   '/_authenticated/pay/$id': typeof AuthenticatedPayIdRoute
   '/_authenticated/pay/result': typeof AuthenticatedPayResultRoute
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
+  '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/_authenticated/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
@@ -580,6 +589,7 @@ export interface FileRouteTypes {
     | '/pay/$id'
     | '/pay/result'
     | '/api/public/afs-reconcile'
+    | '/api/public/send-emails'
     | '/admin/'
     | '/admin/categories/$slug'
     | '/order/success/$id'
@@ -634,6 +644,7 @@ export interface FileRouteTypes {
     | '/pay/$id'
     | '/pay/result'
     | '/api/public/afs-reconcile'
+    | '/api/public/send-emails'
     | '/admin'
     | '/admin/categories/$slug'
     | '/order/success/$id'
@@ -690,6 +701,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pay/$id'
     | '/_authenticated/pay/result'
     | '/api/public/afs-reconcile'
+    | '/api/public/send-emails'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/categories/$slug'
     | '/_authenticated/order/success/$id'
@@ -713,6 +725,7 @@ export interface RootRouteChildren {
   ProductSlugRoute: typeof ProductSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ApiPublicAfsReconcileRoute: typeof ApiPublicAfsReconcileRoute
+  ApiPublicSendEmailsRoute: typeof ApiPublicSendEmailsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1074,6 +1087,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAfsReconcileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/send-emails': {
+      id: '/api/public/send-emails'
+      path: '/api/public/send-emails'
+      fullPath: '/api/public/send-emails'
+      preLoaderRoute: typeof ApiPublicSendEmailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/categories/': {
       id: '/_authenticated/admin/categories/'
       path: '/categories'
@@ -1219,6 +1239,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductSlugRoute: ProductSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
   ApiPublicAfsReconcileRoute: ApiPublicAfsReconcileRoute,
+  ApiPublicSendEmailsRoute: ApiPublicSendEmailsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
