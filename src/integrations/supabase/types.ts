@@ -1591,25 +1591,37 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          department: string | null
           display_name: string | null
           id: string
+          is_suspended: boolean
+          job_title: string | null
           phone: string | null
+          staff_notes: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          department?: string | null
           display_name?: string | null
           id: string
+          is_suspended?: boolean
+          job_title?: string | null
           phone?: string | null
+          staff_notes?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          department?: string | null
           display_name?: string | null
           id?: string
+          is_suspended?: boolean
+          job_title?: string | null
           phone?: string | null
+          staff_notes?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -2085,6 +2097,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_permissions: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          permission: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          permission: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          permission?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2427,6 +2463,27 @@ export type Database = {
           roles: string[]
         }[]
       }
+      admin_list_users_full: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          created_at: string
+          department: string
+          display_name: string
+          email: string
+          email_confirmed: boolean
+          id: string
+          is_suspended: boolean
+          job_title: string
+          last_sign_in_at: string
+          orders_count: number
+          permissions: string[]
+          phone: string
+          roles: string[]
+          staff_notes: string
+          total_spent: number
+        }[]
+      }
       admin_mark_campaign_sent: {
         Args: { _id: string; _sent_count: number }
         Returns: undefined
@@ -2435,12 +2492,20 @@ export type Database = {
         Args: { _approved: boolean; _id: string }
         Returns: undefined
       }
+      admin_set_user_permissions: {
+        Args: { _permissions: string[]; _user_id: string }
+        Returns: undefined
+      }
       admin_toggle_user_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      admin_update_user_profile: {
+        Args: { _user_id: string; payload: Json }
+        Returns: undefined
       }
       admin_upsert_coupon: {
         Args: { _data: Json }
@@ -2566,6 +2631,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      has_permission: {
+        Args: { _permission: string; _user_id: string }
+        Returns: boolean
       }
       increment_blog_views: { Args: { _slug: string }; Returns: undefined }
       redeem_coupon: {
