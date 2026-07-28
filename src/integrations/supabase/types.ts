@@ -2819,6 +2819,10 @@ export type Database = {
           valid: boolean
         }[]
       }
+      verify_cron_key: {
+        Args: { _key: string; _name: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "customer" | "moderator"
