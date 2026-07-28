@@ -7,7 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Mail, KeyRound } from "lucide-react";
+import { Mail, KeyRound, Send } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { sendTestEmail } from "@/lib/email.functions";
+
 
 type Row = Record<string, any>;
 
