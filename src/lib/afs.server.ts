@@ -144,3 +144,33 @@ export function afsIsPending(code?: string) {
   if (!code) return false;
   return /^(000\.200|800\.400\.5|100\.400\.500)/.test(code);
 }
+
+/** Full or partial refund of a captured AFS payment (paymentType=RF). */
+export async function afsRefund(params: {
+  paymentId: string;
+  amount: string;
+  currency: string;
+  cfg?: AfsConfig;
+}) {
+  const cfg = params.cfg ?? (await loadAfsConfig());
+  const body = new URLSearchParams({
+    entityId: cfg.entityId,
+    amount: params.amount,
+    currency: cfg.currency || params.currency,
+    paymentType: "RF",
+  });
+  const res = await fetch(`${cfg.base}/v1/payments/${encodeURIComponent(params.paymentId)}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${cfg.token}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: body.toString(),
+  });
+  return (await res.json()) as {
+    id?: string;
+    amount?: string;
+    currency?: string;
+    result?: { code: string; description: string };
+  };
+}
