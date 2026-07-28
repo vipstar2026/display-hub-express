@@ -60,7 +60,7 @@ function AdminPaymentMethods() {
 
   const { data } = useQuery({
     queryKey: ["admin-payment-methods"],
-    queryFn: async () => (await supabase.from("payment_methods").select("*").order("sort_order")).data ?? [],
+    queryFn: async () => (await supabase.rpc("admin_list_payment_methods")).data ?? [],
   });
 
   const applyProvider = (code: string) => {
