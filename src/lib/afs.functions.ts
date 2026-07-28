@@ -31,6 +31,7 @@ export const createAfsCheckout = createServerFn({ method: "POST" })
       scriptUrl: `${afsWidgetBase()}?checkoutId=${checkoutId}`,
       amount: Number(order.total).toFixed(2),
       currency: order.currency || "BHD",
+      testMode: (process.env.AFS_MODE ?? "test") !== "live",
     };
   });
 
