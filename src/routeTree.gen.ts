@@ -58,6 +58,7 @@ import { Route as AuthenticatedAdminSuppliersRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedPayIdRouteImport } from './routes/_authenticated/pay.$id'
 import { Route as AuthenticatedPayResultRouteImport } from './routes/_authenticated/pay.result'
+import { Route as ApiPublicAfsReconcileRouteImport } from './routes/api/public/afs-reconcile'
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
 import { Route as AuthenticatedAdminCategoriesSlugRouteImport } from './routes/_authenticated/admin.categories.$slug'
 import { Route as AuthenticatedOrderSuccessIdRouteImport } from './routes/_authenticated/order.success.$id'
@@ -330,6 +331,11 @@ const AuthenticatedPayResultRoute = AuthenticatedPayResultRouteImport.update({
   path: '/pay/result',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicAfsReconcileRoute = ApiPublicAfsReconcileRouteImport.update({
+  id: '/api/public/afs-reconcile',
+  path: '/api/public/afs-reconcile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminCategoriesIndexRoute =
   AuthenticatedAdminCategoriesIndexRouteImport.update({
     id: '/categories/',
@@ -397,6 +403,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/pay/$id': typeof AuthenticatedPayIdRoute
   '/pay/result': typeof AuthenticatedPayResultRoute
+  '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
@@ -449,6 +456,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/pay/$id': typeof AuthenticatedPayIdRoute
   '/pay/result': typeof AuthenticatedPayResultRoute
+  '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
@@ -504,6 +512,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/pay/$id': typeof AuthenticatedPayIdRoute
   '/_authenticated/pay/result': typeof AuthenticatedPayResultRoute
+  '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/_authenticated/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
@@ -559,6 +568,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/pay/$id'
     | '/pay/result'
+    | '/api/public/afs-reconcile'
     | '/admin/'
     | '/admin/categories/$slug'
     | '/order/success/$id'
@@ -611,6 +621,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/pay/$id'
     | '/pay/result'
+    | '/api/public/afs-reconcile'
     | '/admin'
     | '/admin/categories/$slug'
     | '/order/success/$id'
@@ -665,6 +676,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users'
     | '/_authenticated/pay/$id'
     | '/_authenticated/pay/result'
+    | '/api/public/afs-reconcile'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/categories/$slug'
     | '/_authenticated/order/success/$id'
@@ -687,6 +699,7 @@ export interface RootRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  ApiPublicAfsReconcileRoute: typeof ApiPublicAfsReconcileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1034,6 +1047,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPayResultRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/afs-reconcile': {
+      id: '/api/public/afs-reconcile'
+      path: '/api/public/afs-reconcile'
+      fullPath: '/api/public/afs-reconcile'
+      preLoaderRoute: typeof ApiPublicAfsReconcileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/categories/': {
       id: '/_authenticated/admin/categories/'
       path: '/categories'
@@ -1176,6 +1196,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
   ProductSlugRoute: ProductSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
+  ApiPublicAfsReconcileRoute: ApiPublicAfsReconcileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

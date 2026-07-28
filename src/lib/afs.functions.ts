@@ -28,6 +28,21 @@ export const createAfsCheckout = createServerFn({ method: "POST" })
       cfg,
     });
 
+    // Track the attempt so a shopper who closes the browser can still be reconciled.
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.from("payment_transactions").insert({
+        order_id: order.id,
+        provider: "afs",
+        provider_charge_id: checkoutId,
+        amount: Number(order.total),
+        currency: cfg.currency || order.currency || "BHD",
+        status: "pending",
+      });
+    } catch {
+      /* non-fatal: the result page still confirms the payment */
+    }
+
     return {
       checkoutId,
       scriptUrl: `${cfg.widgetBase}?checkoutId=${checkoutId}`,
