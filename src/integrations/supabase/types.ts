@@ -477,6 +477,59 @@ export type Database = {
           },
         ]
       }
+      email_outbox: {
+        Row: {
+          body: string
+          created_at: string
+          error: string | null
+          id: string
+          order_id: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+          template: string
+          to_email: string
+          to_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          order_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          template?: string
+          to_email: string
+          to_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          order_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          template?: string
+          to_email?: string
+          to_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_outbox_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_settings: {
         Row: {
           created_at: string
