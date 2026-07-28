@@ -17,6 +17,10 @@ type Row = Record<string, any>;
 export function EmailSettingsPanel() {
   const [form, setForm] = useState<Row | null>(null);
   const [saving, setSaving] = useState(false);
+  const [testTo, setTestTo] = useState("");
+  const [testing, setTesting] = useState(false);
+  const testFn = useServerFn(sendTestEmail);
+
 
   const { data, error } = useQuery({
     queryKey: ["email-settings-admin"],
