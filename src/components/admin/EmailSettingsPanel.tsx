@@ -7,13 +7,20 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Mail, KeyRound } from "lucide-react";
+import { Mail, KeyRound, Send } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { sendTestEmail } from "@/lib/email.functions";
+
 
 type Row = Record<string, any>;
 
 export function EmailSettingsPanel() {
   const [form, setForm] = useState<Row | null>(null);
   const [saving, setSaving] = useState(false);
+  const [testTo, setTestTo] = useState("");
+  const [testing, setTesting] = useState(false);
+  const testFn = useServerFn(sendTestEmail);
+
 
   const { data, error } = useQuery({
     queryKey: ["email-settings-admin"],
@@ -99,6 +106,79 @@ export function EmailSettingsPanel() {
         </div>
         <Switch checked={!!form.smtp_secure} onCheckedChange={(v) => set("smtp_secure", v)} />
       </div>
+
+      {/* Automatic sending via HTTP email API */}
+      <div className="space-y-3 rounded-lg border border-primary/20 bg-card/40 p-3">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Send className="h-3.5 w-3.5 text-primary" /> الإرسال التلقائي (API)
+            </div>
+            <div className="text-xs text-muted-foreground">
+              لإرسال رسائل الطلبات والأكواد تلقائياً من البريد الصادر. اختر المزوّد وأدخل مفتاح الـ API.
+            </div>
+          </div>
+          <Switch checked={!!form.api_enabled} onCheckedChange={(v) => set("api_enabled", v)} />
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label className="text-xs">المزوّد</Label>
+            <select
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              value={form.api_provider ?? "resend"}
+              onChange={(e) => set("api_provider", e.target.value)}
+            >
+              <option value="resend">Resend</option>
+              <option value="brevo">Brevo (Sendinblue)</option>
+              <option value="sendgrid">SendGrid</option>
+              <option value="postmark">Postmark</option>
+              <option value="mailersend">MailerSend</option>
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1 text-xs"><KeyRound className="h-3 w-3" /> مفتاح الـ API</Label>
+            <Input
+              type="password"
+              autoComplete="new-password"
+              placeholder="••••••••"
+              value={form.api_key ?? ""}
+              onChange={(e) => set("api_key", e.target.value)}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Field k="api_endpoint" label="رابط مخصص (اختياري)" placeholder="https://api.resend.com/emails" />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="flex-1 space-y-1.5">
+            <Label className="text-xs">إرسال رسالة تجريبية إلى</Label>
+            <Input
+              placeholder="test@vipstar.cc"
+              value={testTo}
+              onChange={(e) => setTestTo(e.target.value)}
+            />
+          </div>
+          <Button
+            variant="outline"
+            disabled={testing || !testTo}
+            onClick={async () => {
+              setTesting(true);
+              try {
+                await testFn({ data: { to: testTo } });
+                toast.success("تم إرسال الرسالة التجريبية");
+              } catch (e) {
+                toast.error((e as Error).message);
+              }
+              setTesting(false);
+            }}
+          >
+            {testing ? "جاري الإرسال…" : "اختبار"}
+          </Button>
+        </div>
+      </div>
+
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">

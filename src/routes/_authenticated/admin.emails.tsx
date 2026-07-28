@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Mail, Send, Check, Copy, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { dispatchEmails } from "@/lib/email.functions";
+
 
 export const Route = createFileRoute("/_authenticated/admin/emails")({
   component: AdminEmailsPage,
@@ -30,7 +33,10 @@ function AdminEmailsPage() {
   const { lang } = useI18n();
   const qc = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
+  const dispatchFn = useServerFn(dispatchEmails);
   const txt = (ar: string, en: string, ur: string) => (lang === "ar" ? ar : lang === "ur" ? ur : en);
+
+
 
   const { data, isLoading } = useQuery({
     queryKey: ["email-outbox"],
@@ -62,7 +68,29 @@ function AdminEmailsPage() {
     qc.invalidateQueries({ queryKey: ["email-outbox"] });
   };
 
-  const queued = (data ?? []).filter((r) => r.status === "queued").length;
+  const queued = (data ?? []).filter((r) => r.status === "queued" || r.status === "pending").length;
+
+  const dispatchNow = async () => {
+    setBusy("dispatch");
+    try {
+      const res = await dispatchFn({ data: undefined as never });
+      if ((res as any).skipped) {
+        toast.error(
+          txt(
+            "الإرسال التلقائي غير مفعّل — فعّله من الإعدادات › البريد",
+            "Automatic sending is disabled — enable it in Settings › Email",
+            "خودکار بھیجنا بند ہے",
+          ),
+        );
+      } else {
+        toast.success(`${txt("تم الإرسال", "Sent", "بھیج دیا")}: ${(res as any).sent} · ${txt("فشل", "failed", "ناکام")}: ${(res as any).failed}`);
+      }
+      qc.invalidateQueries({ queryKey: ["email-outbox"] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+    setBusy(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -80,10 +108,21 @@ function AdminEmailsPage() {
             )}
           </p>
         </div>
-        <Badge variant="secondary">
-          {queued} {txt("بالانتظار", "queued", "قطار میں")}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">
+            {queued} {txt("بالانتظار", "queued", "قطار میں")}
+          </Badge>
+          <Button size="sm" onClick={dispatchNow} disabled={busy === "dispatch" || queued === 0}>
+            {busy === "dispatch" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="mr-2 h-4 w-4" />
+            )}
+            {txt("إرسال الآن", "Send now", "ابھی بھیجیں")}
+          </Button>
+        </div>
       </div>
+
 
       {isLoading ? (
         <div className="flex items-center gap-2 text-muted-foreground">

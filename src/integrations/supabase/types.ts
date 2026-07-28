@@ -532,6 +532,10 @@ export type Database = {
       }
       email_settings: {
         Row: {
+          api_enabled: boolean
+          api_endpoint: string | null
+          api_key: string | null
+          api_provider: string | null
           created_at: string
           from_email: string | null
           from_name: string | null
@@ -548,6 +552,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          api_enabled?: boolean
+          api_endpoint?: string | null
+          api_key?: string | null
+          api_provider?: string | null
           created_at?: string
           from_email?: string | null
           from_name?: string | null
@@ -564,6 +572,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          api_enabled?: boolean
+          api_endpoint?: string | null
+          api_key?: string | null
+          api_provider?: string | null
           created_at?: string
           from_email?: string | null
           from_name?: string | null
@@ -2591,6 +2603,10 @@ export type Database = {
       get_email_settings_admin: {
         Args: never
         Returns: {
+          api_enabled: boolean
+          api_endpoint: string | null
+          api_key: string | null
+          api_provider: string | null
           created_at: string
           from_email: string | null
           from_name: string | null
@@ -2714,6 +2730,10 @@ export type Database = {
       update_email_settings_admin: {
         Args: { payload: Json }
         Returns: {
+          api_enabled: boolean
+          api_endpoint: string | null
+          api_key: string | null
+          api_provider: string | null
           created_at: string
           from_email: string | null
           from_name: string | null
