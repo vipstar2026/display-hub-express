@@ -39,6 +39,7 @@ import { Route as AuthenticatedAdminCodesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminCouponUsageRouteImport } from './routes/_authenticated/admin.coupon-usage'
 import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin.coupons'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin.customers'
+import { Route as AuthenticatedAdminEmailsRouteImport } from './routes/_authenticated/admin.emails'
 import { Route as AuthenticatedAdminFlashSalesRouteImport } from './routes/_authenticated/admin.flash-sales'
 import { Route as AuthenticatedAdminInventoryRouteImport } from './routes/_authenticated/admin.inventory'
 import { Route as AuthenticatedAdminInvoicesRouteImport } from './routes/_authenticated/admin.invoices'
@@ -221,6 +222,12 @@ const AuthenticatedAdminCustomersRoute =
     path: '/customers',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminEmailsRoute =
+  AuthenticatedAdminEmailsRouteImport.update({
+    id: '/emails',
+    path: '/emails',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminFlashSalesRoute =
   AuthenticatedAdminFlashSalesRouteImport.update({
     id: '/flash-sales',
@@ -384,6 +391,7 @@ export interface FileRoutesByFullPath {
   '/admin/coupon-usage': typeof AuthenticatedAdminCouponUsageRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/flash-sales': typeof AuthenticatedAdminFlashSalesRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/invoices': typeof AuthenticatedAdminInvoicesRoute
@@ -437,6 +445,7 @@ export interface FileRoutesByTo {
   '/admin/coupon-usage': typeof AuthenticatedAdminCouponUsageRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/flash-sales': typeof AuthenticatedAdminFlashSalesRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/invoices': typeof AuthenticatedAdminInvoicesRoute
@@ -493,6 +502,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/coupon-usage': typeof AuthenticatedAdminCouponUsageRoute
   '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/_authenticated/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/_authenticated/admin/flash-sales': typeof AuthenticatedAdminFlashSalesRoute
   '/_authenticated/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/_authenticated/admin/invoices': typeof AuthenticatedAdminInvoicesRoute
@@ -549,6 +559,7 @@ export interface FileRouteTypes {
     | '/admin/coupon-usage'
     | '/admin/coupons'
     | '/admin/customers'
+    | '/admin/emails'
     | '/admin/flash-sales'
     | '/admin/inventory'
     | '/admin/invoices'
@@ -602,6 +613,7 @@ export interface FileRouteTypes {
     | '/admin/coupon-usage'
     | '/admin/coupons'
     | '/admin/customers'
+    | '/admin/emails'
     | '/admin/flash-sales'
     | '/admin/inventory'
     | '/admin/invoices'
@@ -657,6 +669,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/coupon-usage'
     | '/_authenticated/admin/coupons'
     | '/_authenticated/admin/customers'
+    | '/_authenticated/admin/emails'
     | '/_authenticated/admin/flash-sales'
     | '/_authenticated/admin/inventory'
     | '/_authenticated/admin/invoices'
@@ -914,6 +927,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCustomersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/emails': {
+      id: '/_authenticated/admin/emails'
+      path: '/emails'
+      fullPath: '/admin/emails'
+      preLoaderRoute: typeof AuthenticatedAdminEmailsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/flash-sales': {
       id: '/_authenticated/admin/flash-sales'
       path: '/flash-sales'
@@ -1100,6 +1120,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCouponUsageRoute: typeof AuthenticatedAdminCouponUsageRoute
   AuthenticatedAdminCouponsRoute: typeof AuthenticatedAdminCouponsRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
+  AuthenticatedAdminEmailsRoute: typeof AuthenticatedAdminEmailsRoute
   AuthenticatedAdminFlashSalesRoute: typeof AuthenticatedAdminFlashSalesRoute
   AuthenticatedAdminInventoryRoute: typeof AuthenticatedAdminInventoryRoute
   AuthenticatedAdminInvoicesRoute: typeof AuthenticatedAdminInvoicesRoute
@@ -1133,6 +1154,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCouponUsageRoute: AuthenticatedAdminCouponUsageRoute,
   AuthenticatedAdminCouponsRoute: AuthenticatedAdminCouponsRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
+  AuthenticatedAdminEmailsRoute: AuthenticatedAdminEmailsRoute,
   AuthenticatedAdminFlashSalesRoute: AuthenticatedAdminFlashSalesRoute,
   AuthenticatedAdminInventoryRoute: AuthenticatedAdminInventoryRoute,
   AuthenticatedAdminInvoicesRoute: AuthenticatedAdminInvoicesRoute,
