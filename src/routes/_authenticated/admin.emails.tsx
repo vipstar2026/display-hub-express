@@ -33,7 +33,8 @@ function AdminEmailsPage() {
   const { lang } = useI18n();
   const qc = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
-  const txt = (ar: string, en: string, ur: string) => (lang === "ar" ? ar : lang === "ur" ? ur : en);
+  const dispatchFn = useServerFn(dispatchEmails);
+
 
   const { data, isLoading } = useQuery({
     queryKey: ["email-outbox"],
