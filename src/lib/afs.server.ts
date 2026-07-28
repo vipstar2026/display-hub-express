@@ -1,20 +1,81 @@
-/** AFS (Arab Financial Services) — OPPWA COPYandPAY server helpers. */
+/** AFS (Arab Financial Services) — OPPWA COPYandPAY server helpers.
+ *  All settings are managed manually from the admin dashboard
+ *  (Payment Methods → AFS). Environment secrets are only a fallback. */
 
-export function afsBaseUrl() {
-  return (process.env.AFS_MODE ?? "test") === "live"
+export interface AfsConfig {
+  entityId: string;
+  token: string;
+  base: string;
+  widgetBase: string;
+  testMode: boolean;
+  paymentType: string;
+  brands: string;
+  currency: string | null;
+  widgetLang: string | null;
+  merchantName: string | null;
+  resultUrl: string | null;
+}
+
+export function afsBaseUrl(mode?: string) {
+  return (mode ?? process.env.AFS_MODE ?? "test") === "live"
     ? "https://eu-prod.oppwa.com"
     : "https://eu-test.oppwa.com";
 }
 
-export function afsWidgetBase() {
-  return `${afsBaseUrl()}/v1/paymentWidgets.js`;
+export function afsWidgetBase(mode?: string) {
+  return `${afsBaseUrl(mode)}/v1/paymentWidgets.js`;
 }
 
-function afsConfig() {
-  const entityId = process.env.AFS_ENTITY_ID;
-  const token = process.env.AFS_ACCESS_TOKEN;
+/** Reads the AFS row from payment_methods; falls back to env secrets. */
+export async function loadAfsConfig(): Promise<AfsConfig> {
+  let cred: Record<string, string> = {};
+  let rowTestMode: boolean | null = null;
+
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("payment_methods")
+      .select("credentials, config, test_mode, is_active")
+      .eq("gateway_provider", "afs")
+      .order("sort_order")
+      .limit(1)
+      .maybeSingle();
+    if (data) {
+      cred = {
+        ...((data.config ?? {}) as Record<string, string>),
+        ...((data.credentials ?? {}) as Record<string, string>),
+      };
+      rowTestMode = data.test_mode;
+    }
+  } catch {
+    /* fall back to env */
+  }
+
+  const pick = (k: string) => {
+    const v = cred[k];
+    return typeof v === "string" && v.trim() !== "" ? v.trim() : null;
+  };
+
+  const entityId = pick("entity_id") ?? process.env.AFS_ENTITY_ID ?? "";
+  const token = pick("access_token") ?? process.env.AFS_ACCESS_TOKEN ?? "";
   if (!entityId || !token) throw new Error("AFS gateway is not configured");
-  return { entityId, token, base: afsBaseUrl() };
+
+  const mode = pick("mode") ?? (rowTestMode === false ? "live" : (process.env.AFS_MODE ?? "test"));
+  const live = mode === "live";
+
+  return {
+    entityId,
+    token,
+    base: afsBaseUrl(mode),
+    widgetBase: afsWidgetBase(mode),
+    testMode: !live,
+    paymentType: pick("payment_type") ?? "DB",
+    brands: pick("brands") ?? "VISA MASTER",
+    currency: pick("currency"),
+    widgetLang: pick("widget_lang"),
+    merchantName: pick("merchant_name"),
+    resultUrl: pick("shopper_result_url"),
+  };
 }
 
 export async function afsPrepareCheckout(params: {
@@ -24,23 +85,25 @@ export async function afsPrepareCheckout(params: {
   email?: string | null;
   givenName?: string | null;
   surname?: string | null;
+  cfg?: AfsConfig;
 }) {
-  const { entityId, token, base } = afsConfig();
+  const cfg = params.cfg ?? (await loadAfsConfig());
   const body = new URLSearchParams({
-    entityId,
+    entityId: cfg.entityId,
     amount: params.amount,
-    currency: params.currency,
-    paymentType: "DB",
+    currency: cfg.currency || params.currency,
+    paymentType: cfg.paymentType,
     merchantTransactionId: params.merchantTransactionId,
   });
+  if (cfg.merchantName) body.set("merchantTransactionId", params.merchantTransactionId);
   if (params.email) body.set("customer.email", params.email);
   if (params.givenName) body.set("customer.givenName", params.givenName.slice(0, 48));
   if (params.surname) body.set("customer.surname", params.surname.slice(0, 48));
 
-  const res = await fetch(`${base}/v1/checkouts`, {
+  const res = await fetch(`${cfg.base}/v1/checkouts`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${cfg.token}`,
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: body.toString(),
@@ -53,11 +116,12 @@ export async function afsPrepareCheckout(params: {
   return { checkoutId: json.id, resultCode: json.result?.code ?? "" };
 }
 
-export async function afsGetStatus(checkoutId: string) {
-  const { entityId, token, base } = afsConfig();
-  const res = await fetch(`${base}/v1/checkouts/${encodeURIComponent(checkoutId)}/payment?entityId=${entityId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export async function afsGetStatus(checkoutId: string, cfg?: AfsConfig) {
+  const c = cfg ?? (await loadAfsConfig());
+  const res = await fetch(
+    `${c.base}/v1/checkouts/${encodeURIComponent(checkoutId)}/payment?entityId=${c.entityId}`,
+    { headers: { Authorization: `Bearer ${c.token}` } },
+  );
   return (await res.json()) as {
     id?: string;
     merchantTransactionId?: string;

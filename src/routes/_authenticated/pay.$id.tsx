@@ -92,9 +92,10 @@ function PayPage() {
           {error && <PayErrorInline message={(error as Error).message} />}
           {data && (
             <form
-              action={`${window.location.origin}/pay/result?order=${id}`}
+              action={`${data.resultUrl || `${window.location.origin}/pay/result`}?order=${id}`}
               className="paymentWidgets"
-              data-brands="VISA MASTER"
+              data-brands={data.brands || "VISA MASTER"}
+              data-lang={data.widgetLang || (lang === "ar" ? "ar" : "en")}
             />
           )}
         </div>
