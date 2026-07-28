@@ -79,6 +79,9 @@ function PayPage() {
           </div>
         )}
 
+        {data?.testMode && <AfsTestCards />}
+
+
         <div className="rounded-xl border border-primary/10 bg-card p-4">
           {isLoading && (
             <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
