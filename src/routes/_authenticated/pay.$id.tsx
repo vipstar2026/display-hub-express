@@ -8,6 +8,7 @@ import { useI18n } from "@/lib/i18n";
 import { createAfsCheckout } from "@/lib/afs.functions";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AfsTestCards } from "@/components/AfsTestCards";
 
 export const Route = createFileRoute("/_authenticated/pay/$id")({
   ssr: false,
@@ -78,6 +79,9 @@ function PayPage() {
             <span className="font-bold text-primary">{data.amount} {data.currency}</span>
           </div>
         )}
+
+        {data?.testMode && <AfsTestCards />}
+
 
         <div className="rounded-xl border border-primary/10 bg-card p-4">
           {isLoading && (
