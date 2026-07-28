@@ -58,11 +58,13 @@ export const adminCreateUser = createServerFn({ method: "POST" })
       department: data.department ?? null,
     });
 
-    const roles = (data.roles ?? []).filter((r) => ["admin", "moderator", "customer"].includes(r));
+    const roles = (data.roles ?? []).filter((r): r is "admin" | "moderator" | "customer" =>
+      ["admin", "moderator", "customer"].includes(r),
+    );
     if (roles.length) {
       await supabaseAdmin
         .from("user_roles")
-        .upsert(roles.map((role) => ({ user_id: userId, role })), { onConflict: "user_id,role" });
+        .upsert(roles.map((role) => ({ user_id: userId as string, role })), { onConflict: "user_id,role" });
     }
 
     const perms = data.permissions ?? [];
