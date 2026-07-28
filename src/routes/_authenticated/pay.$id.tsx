@@ -8,6 +8,7 @@ import { useI18n } from "@/lib/i18n";
 import { createAfsCheckout } from "@/lib/afs.functions";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AfsTestCards } from "@/components/AfsTestCards";
 
 export const Route = createFileRoute("/_authenticated/pay/$id")({
   ssr: false,
