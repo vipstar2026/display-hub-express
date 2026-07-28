@@ -39,6 +39,7 @@ import { Route as AuthenticatedAdminCodesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminCouponUsageRouteImport } from './routes/_authenticated/admin.coupon-usage'
 import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin.coupons'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin.customers'
+import { Route as AuthenticatedAdminEmailsRouteImport } from './routes/_authenticated/admin.emails'
 import { Route as AuthenticatedAdminFlashSalesRouteImport } from './routes/_authenticated/admin.flash-sales'
 import { Route as AuthenticatedAdminInventoryRouteImport } from './routes/_authenticated/admin.inventory'
 import { Route as AuthenticatedAdminInvoicesRouteImport } from './routes/_authenticated/admin.invoices'
@@ -58,6 +59,7 @@ import { Route as AuthenticatedAdminSuppliersRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedPayIdRouteImport } from './routes/_authenticated/pay.$id'
 import { Route as AuthenticatedPayResultRouteImport } from './routes/_authenticated/pay.result'
+import { Route as ApiPublicAfsReconcileRouteImport } from './routes/api/public/afs-reconcile'
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
 import { Route as AuthenticatedAdminCategoriesSlugRouteImport } from './routes/_authenticated/admin.categories.$slug'
 import { Route as AuthenticatedOrderSuccessIdRouteImport } from './routes/_authenticated/order.success.$id'
@@ -220,6 +222,12 @@ const AuthenticatedAdminCustomersRoute =
     path: '/customers',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminEmailsRoute =
+  AuthenticatedAdminEmailsRouteImport.update({
+    id: '/emails',
+    path: '/emails',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminFlashSalesRoute =
   AuthenticatedAdminFlashSalesRouteImport.update({
     id: '/flash-sales',
@@ -330,6 +338,11 @@ const AuthenticatedPayResultRoute = AuthenticatedPayResultRouteImport.update({
   path: '/pay/result',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicAfsReconcileRoute = ApiPublicAfsReconcileRouteImport.update({
+  id: '/api/public/afs-reconcile',
+  path: '/api/public/afs-reconcile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminCategoriesIndexRoute =
   AuthenticatedAdminCategoriesIndexRouteImport.update({
     id: '/categories/',
@@ -378,6 +391,7 @@ export interface FileRoutesByFullPath {
   '/admin/coupon-usage': typeof AuthenticatedAdminCouponUsageRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/flash-sales': typeof AuthenticatedAdminFlashSalesRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/invoices': typeof AuthenticatedAdminInvoicesRoute
@@ -397,6 +411,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/pay/$id': typeof AuthenticatedPayIdRoute
   '/pay/result': typeof AuthenticatedPayResultRoute
+  '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
@@ -430,6 +445,7 @@ export interface FileRoutesByTo {
   '/admin/coupon-usage': typeof AuthenticatedAdminCouponUsageRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/flash-sales': typeof AuthenticatedAdminFlashSalesRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/invoices': typeof AuthenticatedAdminInvoicesRoute
@@ -449,6 +465,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/pay/$id': typeof AuthenticatedPayIdRoute
   '/pay/result': typeof AuthenticatedPayResultRoute
+  '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
@@ -485,6 +502,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/coupon-usage': typeof AuthenticatedAdminCouponUsageRoute
   '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/_authenticated/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/_authenticated/admin/flash-sales': typeof AuthenticatedAdminFlashSalesRoute
   '/_authenticated/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/_authenticated/admin/invoices': typeof AuthenticatedAdminInvoicesRoute
@@ -504,6 +522,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/pay/$id': typeof AuthenticatedPayIdRoute
   '/_authenticated/pay/result': typeof AuthenticatedPayResultRoute
+  '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/_authenticated/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
@@ -540,6 +559,7 @@ export interface FileRouteTypes {
     | '/admin/coupon-usage'
     | '/admin/coupons'
     | '/admin/customers'
+    | '/admin/emails'
     | '/admin/flash-sales'
     | '/admin/inventory'
     | '/admin/invoices'
@@ -559,6 +579,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/pay/$id'
     | '/pay/result'
+    | '/api/public/afs-reconcile'
     | '/admin/'
     | '/admin/categories/$slug'
     | '/order/success/$id'
@@ -592,6 +613,7 @@ export interface FileRouteTypes {
     | '/admin/coupon-usage'
     | '/admin/coupons'
     | '/admin/customers'
+    | '/admin/emails'
     | '/admin/flash-sales'
     | '/admin/inventory'
     | '/admin/invoices'
@@ -611,6 +633,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/pay/$id'
     | '/pay/result'
+    | '/api/public/afs-reconcile'
     | '/admin'
     | '/admin/categories/$slug'
     | '/order/success/$id'
@@ -646,6 +669,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/coupon-usage'
     | '/_authenticated/admin/coupons'
     | '/_authenticated/admin/customers'
+    | '/_authenticated/admin/emails'
     | '/_authenticated/admin/flash-sales'
     | '/_authenticated/admin/inventory'
     | '/_authenticated/admin/invoices'
@@ -665,6 +689,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users'
     | '/_authenticated/pay/$id'
     | '/_authenticated/pay/result'
+    | '/api/public/afs-reconcile'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/categories/$slug'
     | '/_authenticated/order/success/$id'
@@ -687,6 +712,7 @@ export interface RootRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  ApiPublicAfsReconcileRoute: typeof ApiPublicAfsReconcileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -901,6 +927,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCustomersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/emails': {
+      id: '/_authenticated/admin/emails'
+      path: '/emails'
+      fullPath: '/admin/emails'
+      preLoaderRoute: typeof AuthenticatedAdminEmailsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/flash-sales': {
       id: '/_authenticated/admin/flash-sales'
       path: '/flash-sales'
@@ -1034,6 +1067,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPayResultRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/afs-reconcile': {
+      id: '/api/public/afs-reconcile'
+      path: '/api/public/afs-reconcile'
+      fullPath: '/api/public/afs-reconcile'
+      preLoaderRoute: typeof ApiPublicAfsReconcileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/categories/': {
       id: '/_authenticated/admin/categories/'
       path: '/categories'
@@ -1080,6 +1120,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCouponUsageRoute: typeof AuthenticatedAdminCouponUsageRoute
   AuthenticatedAdminCouponsRoute: typeof AuthenticatedAdminCouponsRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
+  AuthenticatedAdminEmailsRoute: typeof AuthenticatedAdminEmailsRoute
   AuthenticatedAdminFlashSalesRoute: typeof AuthenticatedAdminFlashSalesRoute
   AuthenticatedAdminInventoryRoute: typeof AuthenticatedAdminInventoryRoute
   AuthenticatedAdminInvoicesRoute: typeof AuthenticatedAdminInvoicesRoute
@@ -1113,6 +1154,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCouponUsageRoute: AuthenticatedAdminCouponUsageRoute,
   AuthenticatedAdminCouponsRoute: AuthenticatedAdminCouponsRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
+  AuthenticatedAdminEmailsRoute: AuthenticatedAdminEmailsRoute,
   AuthenticatedAdminFlashSalesRoute: AuthenticatedAdminFlashSalesRoute,
   AuthenticatedAdminInventoryRoute: AuthenticatedAdminInventoryRoute,
   AuthenticatedAdminInvoicesRoute: AuthenticatedAdminInvoicesRoute,
@@ -1176,6 +1218,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
   ProductSlugRoute: ProductSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
+  ApiPublicAfsReconcileRoute: ApiPublicAfsReconcileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
