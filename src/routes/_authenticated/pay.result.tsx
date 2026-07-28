@@ -1,0 +1,87 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { useI18n } from "@/lib/i18n";
+import { confirmAfsPayment } from "@/lib/afs.functions";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+
+const searchSchema = z.object({
+  order: z.string().optional(),
+  id: z.string().optional(),
+  resourcePath: z.string().optional(),
+});
+
+export const Route = createFileRoute("/_authenticated/pay/result")({
+  ssr: false,
+  validateSearch: searchSchema,
+  component: PayResult,
+  errorComponent: () => null,
+  notFoundComponent: () => null,
+});
+
+function PayResult() {
+  const search = Route.useSearch();
+  const { lang } = useI18n();
+  const nav = useNavigate();
+  const confirm = useServerFn(confirmAfsPayment);
+
+  const checkoutId =
+    search.id ?? (search.resourcePath ? search.resourcePath.split("/")[3] : undefined);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["afs-result", search.order, checkoutId],
+    enabled: !!search.order && !!checkoutId,
+    retry: false,
+    queryFn: () => confirm({ data: { order_id: search.order!, checkout_id: checkoutId! } }),
+  });
+
+  useEffect(() => {
+    if (data?.success && search.order) {
+      const timer = setTimeout(() => nav({ to: "/order/success/$id", params: { id: search.order! } }), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [data?.success, search.order, nav]);
+
+  const txt = (ar: string, en: string, ur: string) => (lang === "ar" ? ar : lang === "ur" ? ur : en);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="container mx-auto max-w-xl px-4 py-20 text-center">
+        {isLoading || !data ? (
+          <div className="flex items-center justify-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" /> {txt("جارٍ التحقق من الدفع…", "Verifying payment…", "ادائیگی کی تصدیق…")}
+          </div>
+        ) : data.success ? (
+          <>
+            <CheckCircle2 className="mx-auto mb-4 h-14 w-14 text-primary" />
+            <h1 className="font-display text-2xl font-bold">{txt("تم الدفع بنجاح", "Payment successful", "ادائیگی کامیاب")}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">{txt("يتم تحويلك إلى تفاصيل الطلب…", "Redirecting to your order…", "آرڈر کی تفصیل…")}</p>
+          </>
+        ) : (
+          <>
+            <XCircle className="mx-auto mb-4 h-14 w-14 text-destructive" />
+            <h1 className="font-display text-2xl font-bold">
+              {data.pending ? txt("الدفع قيد المعالجة", "Payment pending", "ادائیگی زیر عمل") : txt("فشل الدفع", "Payment failed", "ادائیگی ناکام")}
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">{data.message} ({data.code})</p>
+            <div className="mt-6 flex justify-center gap-2">
+              {search.order && (
+                <Button onClick={() => nav({ to: "/pay/$id", params: { id: search.order! } })}>
+                  {txt("إعادة المحاولة", "Try again", "دوبارہ کوشش")}
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => nav({ to: "/cart" })}>{txt("السلة", "Cart", "کارٹ")}</Button>
+            </div>
+          </>
+        )}
+      </div>
+      <Footer />
+    </div>
+  );
+}

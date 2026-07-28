@@ -170,8 +170,16 @@ function CartPage() {
       }
 
       clear();
+
+      // Online gateway (AFS) → go to hosted card payment page
+      if (method.is_gateway && (method.gateway_provider === "afs" || method.code === "afs")) {
+        nav({ to: "/pay/$id", params: { id: order.id } });
+        return;
+      }
+
       toast.success(t("cart.order_placed"));
       nav({ to: "/order/success/$id", params: { id: order.id } });
+
     } catch (e) {
       toast.error((e as Error).message);
     } finally {

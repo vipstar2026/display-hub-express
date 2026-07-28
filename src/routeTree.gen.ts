@@ -55,6 +55,8 @@ import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminShippingRouteImport } from './routes/_authenticated/admin.shipping'
 import { Route as AuthenticatedAdminSuppliersRouteImport } from './routes/_authenticated/admin.suppliers'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
+import { Route as AuthenticatedPayIdRouteImport } from './routes/_authenticated/pay.$id'
+import { Route as AuthenticatedPayResultRouteImport } from './routes/_authenticated/pay.result'
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
 import { Route as AuthenticatedAdminCategoriesSlugRouteImport } from './routes/_authenticated/admin.categories.$slug'
 import { Route as AuthenticatedOrderSuccessIdRouteImport } from './routes/_authenticated/order.success.$id'
@@ -312,6 +314,16 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedPayIdRoute = AuthenticatedPayIdRouteImport.update({
+  id: '/pay/$id',
+  path: '/pay/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPayResultRoute = AuthenticatedPayResultRouteImport.update({
+  id: '/pay/result',
+  path: '/pay/result',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminCategoriesIndexRoute =
   AuthenticatedAdminCategoriesIndexRouteImport.update({
     id: '/categories/',
@@ -376,6 +388,8 @@ export interface FileRoutesByFullPath {
   '/admin/shipping': typeof AuthenticatedAdminShippingRoute
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/pay/$id': typeof AuthenticatedPayIdRoute
+  '/pay/result': typeof AuthenticatedPayResultRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
@@ -425,6 +439,8 @@ export interface FileRoutesByTo {
   '/admin/shipping': typeof AuthenticatedAdminShippingRoute
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/pay/$id': typeof AuthenticatedPayIdRoute
+  '/pay/result': typeof AuthenticatedPayResultRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
@@ -477,6 +493,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/shipping': typeof AuthenticatedAdminShippingRoute
   '/_authenticated/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/pay/$id': typeof AuthenticatedPayIdRoute
+  '/_authenticated/pay/result': typeof AuthenticatedPayResultRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/_authenticated/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
@@ -529,6 +547,8 @@ export interface FileRouteTypes {
     | '/admin/shipping'
     | '/admin/suppliers'
     | '/admin/users'
+    | '/pay/$id'
+    | '/pay/result'
     | '/admin/'
     | '/admin/categories/$slug'
     | '/order/success/$id'
@@ -578,6 +598,8 @@ export interface FileRouteTypes {
     | '/admin/shipping'
     | '/admin/suppliers'
     | '/admin/users'
+    | '/pay/$id'
+    | '/pay/result'
     | '/admin'
     | '/admin/categories/$slug'
     | '/order/success/$id'
@@ -629,6 +651,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/shipping'
     | '/_authenticated/admin/suppliers'
     | '/_authenticated/admin/users'
+    | '/_authenticated/pay/$id'
+    | '/_authenticated/pay/result'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/categories/$slug'
     | '/_authenticated/order/success/$id'
@@ -976,6 +1000,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/pay/$id': {
+      id: '/_authenticated/pay/$id'
+      path: '/pay/$id'
+      fullPath: '/pay/$id'
+      preLoaderRoute: typeof AuthenticatedPayIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pay/result': {
+      id: '/_authenticated/pay/result'
+      path: '/pay/result'
+      fullPath: '/pay/result'
+      preLoaderRoute: typeof AuthenticatedPayResultRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/categories/': {
       id: '/_authenticated/admin/categories/'
       path: '/categories'
@@ -1085,6 +1123,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRouteWithChildren
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
+  AuthenticatedPayIdRoute: typeof AuthenticatedPayIdRoute
+  AuthenticatedPayResultRoute: typeof AuthenticatedPayResultRoute
   AuthenticatedOrderSuccessIdRoute: typeof AuthenticatedOrderSuccessIdRoute
 }
 
@@ -1092,6 +1132,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRouteWithChildren,
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
+  AuthenticatedPayIdRoute: AuthenticatedPayIdRoute,
+  AuthenticatedPayResultRoute: AuthenticatedPayResultRoute,
   AuthenticatedOrderSuccessIdRoute: AuthenticatedOrderSuccessIdRoute,
 }
 
@@ -1117,13 +1159,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
