@@ -80,6 +80,14 @@ function CartPage() {
   const fee = method ? Number(method.fee_amount) + (subtotal * Number(method.fee_percent)) / 100 : 0;
   const discount = coupon?.discount ?? 0;
   const total = Math.max(0, subtotal + shippingCost + fee - discount);
+  // VAT (Bahrain) — settings decide the rate and whether prices already include it
+  const vatPercent = Number(settings?.vat_percent ?? 0);
+  const tax = vatPercent > 0
+    ? settings?.prices_include_vat
+      ? Number(((total * vatPercent) / (100 + vatPercent)).toFixed(3))
+      : Number(((total * vatPercent) / 100).toFixed(3))
+    : 0;
+  const grandTotal = settings?.prices_include_vat ? total : Number((total + tax).toFixed(3));
 
   const nameOf = (m: { name_ar: string | null; name_en: string | null; name_ur: string | null }) =>
     (lang === "ar" ? m.name_ar : lang === "ur" ? (m.name_ur || m.name_en) : m.name_en) ?? "";
