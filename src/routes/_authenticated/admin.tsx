@@ -79,6 +79,7 @@ function AdminLayout() {
         { to: "/admin/flash-sales", icon: Zap, label: "Flash Sales" },
         { to: "/admin/shipping", icon: Truck, label: t("admin.shipping") },
         { to: "/admin/invoices", icon: FileText, label: t("admin.invoices") },
+        { to: "/admin/payments", icon: CreditCard, label: t("admin.payments_log") },
         { to: "/admin/payment-methods", icon: CreditCard, label: "Payment Methods" },
       ],
     },
