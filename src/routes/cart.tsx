@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useSiteSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/cart")({
   component: CartPage,
@@ -26,6 +27,7 @@ function CartPage() {
   const { t, lang } = useI18n();
   const { items, setQty, remove, subtotal, clear } = useCart();
   const nav = useNavigate();
+  const { data: settings } = useSiteSettings();
   const [userId, setUserId] = useState<string | null>(null);
   const [placing, setPlacing] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
