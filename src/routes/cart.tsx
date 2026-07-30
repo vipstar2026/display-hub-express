@@ -428,8 +428,17 @@ function CartPage() {
                   <span className="font-mono">−{formatPrice(discount)}</span>
                 </div>
               )}
+              {tax > 0 && (
+                <div className="flex justify-between py-2 text-sm text-muted-foreground">
+                  <span>
+                    {lang === "ar" ? `ضريبة القيمة المضافة (${vatPercent}%)` : lang === "ur" ? `ویٹ (${vatPercent}%)` : `VAT (${vatPercent}%)`}
+                    {settings?.prices_include_vat ? (lang === "ar" ? " — شاملة" : " — incl.") : ""}
+                  </span>
+                  <span className="font-mono">{formatPrice(tax)}</span>
+                </div>
+              )}
               <div className="my-3 border-t border-primary/20" />
-              <div className="flex justify-between py-2 text-lg font-bold"><span>{t("shop.total")}</span><span className="font-mono text-primary">{formatPrice(total)}</span></div>
+              <div className="flex justify-between py-2 text-lg font-bold"><span>{t("shop.total")}</span><span className="font-mono text-primary">{formatPrice(grandTotal)}</span></div>
               <Button onClick={handleCheckout} disabled={placing || !method} className="mt-4 w-full bg-primary text-background hover:bg-primary">
                 {placing ? "..." : t("shop.checkout")}
               </Button>
