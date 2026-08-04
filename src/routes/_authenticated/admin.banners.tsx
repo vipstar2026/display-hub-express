@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { dirForLang } from "@/lib/dir";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -230,20 +231,20 @@ function AdminBanners() {
                     placeholder="Title"
                     value={(editing as any)[`title_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`title_${L}`]: e.target.value })}
-                    dir={L === "en" ? "ltr" : "rtl"}
+                    dir={dirForLang(L)}
                   />
                   <Textarea
                     placeholder="Subtitle"
                     rows={2}
                     value={(editing as any)[`subtitle_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`subtitle_${L}`]: e.target.value })}
-                    dir={L === "en" ? "ltr" : "rtl"}
+                    dir={dirForLang(L)}
                   />
                   <Input
                     placeholder="Button label (CTA)"
                     value={(editing as any)[`cta_label_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`cta_label_${L}`]: e.target.value })}
-                    dir={L === "en" ? "ltr" : "rtl"}
+                    dir={dirForLang(L)}
                   />
                 </div>
               ))}

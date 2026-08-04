@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { dirForLang } from "@/lib/dir";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -294,21 +295,21 @@ function AdminBlog() {
                     placeholder="Title"
                     value={(editing as any)[`title_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`title_${L}`]: e.target.value })}
-                    dir={L === "en" || L === "bn" ? "ltr" : "rtl"}
+                    dir={dirForLang(L)}
                   />
                   <Textarea
                     placeholder="Short excerpt"
                     rows={2}
                     value={(editing as any)[`excerpt_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`excerpt_${L}`]: e.target.value })}
-                    dir={L === "en" || L === "bn" ? "ltr" : "rtl"}
+                    dir={dirForLang(L)}
                   />
                   <Textarea
                     placeholder="Content (HTML or plain text)"
                     rows={8}
                     value={(editing as any)[`content_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`content_${L}`]: e.target.value })}
-                    dir={L === "en" || L === "bn" ? "ltr" : "rtl"}
+                    dir={dirForLang(L)}
                   />
                 </div>
               ))}
