@@ -4,6 +4,8 @@
  * `t("عربي", "English")` resolves ur/bn from this dictionary and falls back to English.
  */
 
+import { EN_DICT } from "./admin-i18n.en";
+
 type Tr = { ur: string; bn: string };
 
 const DICT: Record<string, Tr> = {
