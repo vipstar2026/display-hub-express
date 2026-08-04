@@ -28,8 +28,8 @@ type Banner = {
 };
 
 const empty: Partial<Banner> = {
-  title_ar: "", title_en: "", title_ur: "",
-  subtitle_ar: "", subtitle_en: "", subtitle_ur: "",
+  title_ar: "", title_en: "", title_ur: "", title_bn: "",
+  subtitle_ar: "", subtitle_en: "", subtitle_ur: "", subtitle_bn: "",
   image_url: "", link_url: "",
   cta_label_ar: "", cta_label_en: "", cta_label_ur: "",
   sort_order: 0, is_active: true,
@@ -63,8 +63,8 @@ function AdminBanners() {
     if (!editing) return;
     if (!editing.image_url) return toast.error("Image URL is required");
     const payload: any = {
-      title_ar: editing.title_ar || null, title_en: editing.title_en || null, title_ur: editing.title_ur || null,
-      subtitle_ar: editing.subtitle_ar || null, subtitle_en: editing.subtitle_en || null, subtitle_ur: editing.subtitle_ur || null,
+      title_ar: editing.title_ar || null, title_en: editing.title_en || null, title_ur: editing.title_ur || null, title_bn: (editing as any).title_bn || null,
+      subtitle_ar: editing.subtitle_ar || null, subtitle_en: editing.subtitle_en || null, subtitle_ur: editing.subtitle_ur || null, subtitle_bn: (editing as any).subtitle_bn || null,
       image_url: editing.image_url,
       link_url: editing.link_url || null,
       cta_label_ar: editing.cta_label_ar || null, cta_label_en: editing.cta_label_en || null, cta_label_ur: editing.cta_label_ur || null,
@@ -223,9 +223,9 @@ function AdminBanners() {
                 Active
               </label>
 
-              {(["ar", "en", "ur"] as const).map((L) => (
+              {(["ar", "en", "ur", "bn"] as const).map((L) => (
                 <div key={L} className="rounded-lg border border-primary/10 p-3 space-y-2">
-                  <div className="text-xs font-semibold uppercase text-primary">{L === "ar" ? "العربية" : L === "en" ? "English" : "اردو"}</div>
+                  <div className="text-xs font-semibold uppercase text-primary">{L === "ar" ? "العربية" : L === "en" ? "English" : L === "ur" ? "اردو" : "বাংলা"}</div>
                   <Input
                     placeholder="Title"
                     value={(editing as any)[`title_${L}`] ?? ""}

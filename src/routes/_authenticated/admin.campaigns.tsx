@@ -242,10 +242,10 @@ function CampaignsPage() {
               </div>
             </div>
 
-            {(["ar", "en", "ur"] as const).map((lang) => (
+            {(["ar", "en", "ur", "bn"] as const).map((lang) => (
               <div key={lang} className="grid gap-2 rounded-md border p-3">
                 <div className="text-xs font-semibold uppercase text-muted-foreground">
-                  محتوى {lang === "ar" ? "عربي" : lang === "en" ? "إنجليزي" : "أردي"}
+                  محتوى {lang === "ar" ? "عربي" : lang === "en" ? "إنجليزي" : lang === "ur" ? "أردي" : "بنغالي"}
                 </div>
                 <Input placeholder="العنوان"
                   value={draft[`subject_${lang}`]}

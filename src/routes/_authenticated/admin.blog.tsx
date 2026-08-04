@@ -37,9 +37,9 @@ const slugify = (s: string) =>
     .slice(0, 80);
 
 const empty: Partial<Post> = {
-  slug: "", title_ar: "", title_en: "", title_ur: "",
-  excerpt_ar: "", excerpt_en: "", excerpt_ur: "",
-  content_ar: "", content_en: "", content_ur: "",
+  slug: "", title_ar: "", title_en: "", title_ur: "", title_bn: "",
+  excerpt_ar: "", excerpt_en: "", excerpt_ur: "", excerpt_bn: "",
+  content_ar: "", content_en: "", content_ur: "", content_bn: "",
   cover_url: "", tags: [], status: "draft",
 };
 
@@ -99,12 +99,15 @@ function AdminBlog() {
       title_ar: editing.title_ar || null,
       title_en: editing.title_en || null,
       title_ur: editing.title_ur || null,
+      title_bn: (editing as any).title_bn || null,
       excerpt_ar: editing.excerpt_ar || null,
       excerpt_en: editing.excerpt_en || null,
       excerpt_ur: editing.excerpt_ur || null,
+      excerpt_bn: (editing as any).excerpt_bn || null,
       content_ar: editing.content_ar || null,
       content_en: editing.content_en || null,
       content_ur: editing.content_ur || null,
+      content_bn: (editing as any).content_bn || null,
       cover_url: editing.cover_url || null,
       tags,
       status: editing.status || "draft",
@@ -284,28 +287,28 @@ function AdminBlog() {
                 <Input value={tagsText} onChange={(e) => setTagsText(e.target.value)} placeholder="IPTV, tips, receivers" />
               </div>
 
-              {(["ar", "en", "ur"] as const).map((L) => (
+              {(["ar", "en", "ur", "bn"] as const).map((L) => (
                 <div key={L} className="rounded-lg border border-primary/10 p-3 space-y-2">
-                  <div className="text-xs font-semibold uppercase text-primary">{L === "ar" ? "العربية" : L === "en" ? "English" : "اردو"}</div>
+                  <div className="text-xs font-semibold uppercase text-primary">{L === "ar" ? "العربية" : L === "en" ? "English" : L === "ur" ? "اردو" : "বাংলা"}</div>
                   <Input
                     placeholder="Title"
                     value={(editing as any)[`title_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`title_${L}`]: e.target.value })}
-                    dir={L === "en" ? "ltr" : "rtl"}
+                    dir={L === "en" || L === "bn" ? "ltr" : "rtl"}
                   />
                   <Textarea
                     placeholder="Short excerpt"
                     rows={2}
                     value={(editing as any)[`excerpt_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`excerpt_${L}`]: e.target.value })}
-                    dir={L === "en" ? "ltr" : "rtl"}
+                    dir={L === "en" || L === "bn" ? "ltr" : "rtl"}
                   />
                   <Textarea
                     placeholder="Content (HTML or plain text)"
                     rows={8}
                     value={(editing as any)[`content_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`content_${L}`]: e.target.value })}
-                    dir={L === "en" ? "ltr" : "rtl"}
+                    dir={L === "en" || L === "bn" ? "ltr" : "rtl"}
                   />
                 </div>
               ))}
