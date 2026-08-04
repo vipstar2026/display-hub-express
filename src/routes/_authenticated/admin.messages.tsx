@@ -79,7 +79,7 @@ function MessagesPage() {
   }, []);
 
   function waLink(phone: string, text: string) {
-    return `https://wa.me/${phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(text)}`;
+    return waDesktopLink(phone, text);
   }
 
   function exportCsv() {
