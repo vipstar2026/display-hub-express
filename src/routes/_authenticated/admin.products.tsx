@@ -380,10 +380,10 @@ function AdminProducts() {
             {/* Basics */}
             <section className="grid gap-3 md:grid-cols-2">
               <div className="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-primary/80">الأساسيات</div>
-              <div><Label>الاسم (AR) *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
-              <div><Label>الاسم (EN) *</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
-              <div><Label>الاسم (UR)</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
-              <div><Label>الاسم (BN)</Label><Input value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
+              <div><Label>الاسم (AR) *</Label><Input dir="rtl" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+              <div><Label>الاسم (EN) *</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+              <div><Label>الاسم (UR)</Label><Input dir="rtl" value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+              <div><Label>الاسم (BN)</Label><Input dir="ltr" value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
               <div><Label>الرابط (Slug)</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="auto-from-en" /></div>
               <div>
                 <Label>القسم</Label>
@@ -489,10 +489,10 @@ function AdminProducts() {
             {/* Descriptions */}
             <section className="grid gap-3">
               <div className="text-xs font-semibold uppercase tracking-wider text-primary/80">الوصف</div>
-              <div><Label>الوصف (AR)</Label><Textarea value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
-              <div><Label>الوصف (EN)</Label><Textarea value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
-              <div><Label>الوصف (UR)</Label><Textarea value={form.description_ur} onChange={(e) => setForm({ ...form, description_ur: e.target.value })} /></div>
-              <div><Label>الوصف (BN)</Label><Textarea value={form.description_bn} onChange={(e) => setForm({ ...form, description_bn: e.target.value })} /></div>
+              <div><Label>الوصف (AR)</Label><Textarea dir="rtl" value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
+              <div><Label>الوصف (EN)</Label><Textarea dir="ltr" value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
+              <div><Label>الوصف (UR)</Label><Textarea dir="rtl" value={form.description_ur} onChange={(e) => setForm({ ...form, description_ur: e.target.value })} /></div>
+              <div><Label>الوصف (BN)</Label><Textarea dir="ltr" value={form.description_bn} onChange={(e) => setForm({ ...form, description_bn: e.target.value })} /></div>
               <div><Label>رابط الصورة</Label><Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." /></div>
             </section>
 

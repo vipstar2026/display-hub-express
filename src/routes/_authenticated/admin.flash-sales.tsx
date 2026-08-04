@@ -145,10 +145,10 @@ function AdminFlashSales() {
                 </Select>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div><Label>Name AR</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
-                <div><Label>Name EN</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
-                <div><Label>Name UR</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
-                <div><Label>Name BN</Label><Input value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
+                <div><Label>Name AR</Label><Input dir="rtl" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+                <div><Label>Name EN</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+                <div><Label>Name UR</Label><Input dir="rtl" value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+                <div><Label>Name BN</Label><Input dir="ltr" value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div><Label>Sale Price</Label><Input type="number" step="0.001" value={form.sale_price} onChange={(e) => setForm({ ...form, sale_price: e.target.value })} /></div>
