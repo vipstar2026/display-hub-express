@@ -184,7 +184,7 @@ function Analytics() {
           </div>
 
           <Card title={L.trend}>
-            <ResponsiveContainer dir="ltr" width="100%" height={280}>
+            <div dir="ltr" className="h-full w-full"><ResponsiveContainer width="100%" height={280}>
               <AreaChart data={trend}>
                 <defs>
                   <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
@@ -198,7 +198,7 @@ function Analytics() {
                 <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
                 <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#rev)" />
               </AreaChart>
-            </ResponsiveContainer>
+            </ResponsiveContainer></div>
           </Card>
 
           <div className="grid gap-4 lg:grid-cols-2">
@@ -222,7 +222,7 @@ function Analytics() {
               {categoryShare.length === 0 ? (
                 <p className="py-16 text-center text-sm text-muted-foreground">—</p>
               ) : (
-                <ResponsiveContainer dir="ltr" width="100%" height={260}>
+                <div dir="ltr" className="h-full w-full"><ResponsiveContainer width="100%" height={260}>
                   <PieChart>
                     <Pie data={categoryShare} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>
                       {categoryShare.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
@@ -230,14 +230,14 @@ function Analytics() {
                     <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} formatter={(v: any) => formatPrice(Number(v))} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
                   </PieChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></div>
               )}
             </Card>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
             <Card title={L.hours}>
-              <ResponsiveContainer dir="ltr" width="100%" height={220}>
+              <div dir="ltr" className="h-full w-full"><ResponsiveContainer width="100%" height={220}>
                 <BarChart data={hourlyHeat}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                   <XAxis dataKey="hour" stroke="#888" fontSize={10} interval={2} />
@@ -245,7 +245,7 @@ function Analytics() {
                   <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
                   <Bar dataKey="orders" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                 </BarChart>
-              </ResponsiveContainer>
+              </ResponsiveContainer></div>
             </Card>
 
             <Card title={L.segments}>
