@@ -42,7 +42,7 @@ const L = {
   ur: { title: "بلاگ", subtitle: "تازہ ترین خبریں، مضامین اور تجاویز", empty: "ابھی تک کوئی مضمون شائع نہیں ہوا", read: "مزید پڑھیں", views: "مناظر" },
 };
 
-function pick<T extends Record<string, any>>(p: T, base: string, lang: "ar" | "en" | "ur") {
+function pick<T extends Record<string, any>>(p: T, base: string, lang: string) {
   return p[`${base}_${lang}`] || p[`${base}_ar`] || p[`${base}_en`] || p[`${base}_ur`] || "";
 }
 
