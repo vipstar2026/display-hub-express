@@ -116,15 +116,15 @@ function AdminPaymentsPage() {
         <div>
           <h1 className="flex items-center gap-2 font-display text-2xl font-bold">
             <CreditCard className="h-6 w-6 text-primary" />
-            {txt("سجل المدفوعات", "Payment records", "ادائیگی ریکارڈ")}
+            {txt("سجل المدفوعات", "Payment records", "ادائیگی ریکارڈ", "পেমেন্ট রেকর্ড")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {txt("كل عمليات الدفع الإلكتروني والاسترجاع مع ردود البوابة.", "Every online payment and refund with gateway responses.", "ہر آن لائن ادائیگی اور رقم کی واپسی۔")}
+            {txt("كل عمليات الدفع الإلكتروني والاسترجاع مع ردود البوابة.", "Every online payment and refund with gateway responses.", "ہر آن لائن ادائیگی اور رقم کی واپسی۔", "গেটওয়ে প্রতিক্রিয়াসহ প্রতিটি অনলাইন পেমেন্ট ও ফেরত।")}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => refetch()} disabled={isFetching} className="gap-2">
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />{txt("تحديث", "Refresh", "ریفریش")}
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />{txt("تحديث", "Refresh", "ریفریش", "রিফ্রেশ")}
           </Button>
           <Button variant="outline" onClick={exportCsv} className="gap-2">
             <Download className="h-4 w-4" />CSV
@@ -134,10 +134,10 @@ function AdminPaymentsPage() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: txt("إجمالي المحصّل", "Collected", "وصول شدہ"), value: formatPrice(kpis.gross) },
-          { label: txt("المسترجع", "Refunded", "واپس"), value: formatPrice(kpis.refunded) },
-          { label: txt("قيد المعالجة", "Pending", "زیر عمل"), value: String(kpis.pending) },
-          { label: txt("فاشلة", "Failed", "ناکام"), value: String(kpis.failed) },
+          { label: txt("إجمالي المحصّل", "Collected", "وصول شدہ", "সংগৃহীত"), value: formatPrice(kpis.gross) },
+          { label: txt("المسترجع", "Refunded", "واپس", "ফেরত"), value: formatPrice(kpis.refunded) },
+          { label: txt("قيد المعالجة", "Pending", "زیر عمل", "মুলতুবি"), value: String(kpis.pending) },
+          { label: txt("فاشلة", "Failed", "ناکام", "ব্যর্থ"), value: String(kpis.failed) },
         ].map((k) => (
           <div key={k.label} className="rounded-xl border border-primary/10 bg-card p-4">
             <div className="text-xs text-muted-foreground">{k.label}</div>
@@ -149,7 +149,7 @@ function AdminPaymentsPage() {
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[240px] flex-1">
           <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={txt("بحث برقم الطلب أو البريد أو المرجع", "Search order, email or reference", "تلاش کریں")} className="ps-9" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={txt("بحث برقم الطلب أو البريد أو المرجع", "Search order, email or reference", "تلاش کریں", "অর্ডার, ইমেইল বা রেফারেন্স দিয়ে খুঁজুন")} className="ps-9" />
         </div>
         {STATUSES.map((s) => (
           <Button key={s} size="sm" variant={status === s ? "default" : "outline"} onClick={() => setStatus(s)}>
@@ -162,12 +162,12 @@ function AdminPaymentsPage() {
         <table className="w-full text-sm">
           <thead className="border-b border-primary/10 text-start text-xs uppercase text-muted-foreground">
             <tr>
-              <th className="p-3 text-start">{txt("التاريخ", "Date", "تاریخ")}</th>
-              <th className="p-3 text-start">{txt("الطلب", "Order", "آرڈر")}</th>
-              <th className="p-3 text-start">{txt("البوابة", "Gateway", "گیٹ وے")}</th>
-              <th className="p-3 text-start">{txt("المرجع", "Reference", "حوالہ")}</th>
-              <th className="p-3 text-start">{txt("المبلغ", "Amount", "رقم")}</th>
-              <th className="p-3 text-start">{txt("الحالة", "Status", "حالت")}</th>
+              <th className="p-3 text-start">{txt("التاريخ", "Date", "تاریخ", "তারিখ")}</th>
+              <th className="p-3 text-start">{txt("الطلب", "Order", "آرڈر", "অর্ডার")}</th>
+              <th className="p-3 text-start">{txt("البوابة", "Gateway", "گیٹ وے", "গেটওয়ে")}</th>
+              <th className="p-3 text-start">{txt("المرجع", "Reference", "حوالہ", "রেফারেন্স")}</th>
+              <th className="p-3 text-start">{txt("المبلغ", "Amount", "رقم", "পরিমাণ")}</th>
+              <th className="p-3 text-start">{txt("الحالة", "Status", "حالت", "অবস্থা")}</th>
             </tr>
           </thead>
           <tbody>
@@ -175,7 +175,7 @@ function AdminPaymentsPage() {
               <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">…</td></tr>
             )}
             {!isLoading && filtered.length === 0 && (
-              <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">{txt("لا توجد عمليات", "No transactions", "کوئی ریکارڈ نہیں")}</td></tr>
+              <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">{txt("لا توجد عمليات", "No transactions", "کوئی ریکارڈ نہیں", "কোনো লেনদেন নেই")}</td></tr>
             )}
             {filtered.map((r) => (
               <tr key={r.id} className="border-b border-primary/5 last:border-0">
