@@ -4,6 +4,7 @@ import { useI18n } from "@/lib/i18n";
 import { NewsletterSignup } from "./NewsletterSignup";
 import { cleanPhoneNumber, pickLocalized, useSiteSettings } from "@/lib/site-settings";
 import { waAnchorProps } from "@/lib/whatsapp";
+import { POLICY_LINKS, getPolicy } from "@/lib/policies";
 
 export function Footer() {
   const { t, lang } = useI18n();
@@ -62,6 +63,16 @@ export function Footer() {
         <div className="md:col-span-2">
           <NewsletterSignup />
         </div>
+      </div>
+
+      <div className="border-t border-primary/10 px-4 py-4">
+        <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+          {POLICY_LINKS.map((l) => (
+            <li key={l.to}>
+              <Link to={l.to} className="transition hover:text-primary">{getPolicy(l.key, lang).title}</Link>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="border-t border-primary/10 py-4 text-center text-xs text-muted-foreground">
