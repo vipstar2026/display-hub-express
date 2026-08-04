@@ -63,9 +63,9 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {(["ar", "en", "ur"] as Lang[]).map((l) => (
+              {(["ar", "en", "ur", "bn"] as Lang[]).map((l) => (
                 <DropdownMenuItem key={l} onClick={() => setLang(l)} className={lang === l ? "bg-primary/10 text-primary" : ""}>
-                  {l === "ar" ? "العربية" : l === "en" ? "English" : "اردو"}
+                  {l === "ar" ? "العربية" : l === "en" ? "English" : l === "ur" ? "اردو" : "বাংলা"}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
