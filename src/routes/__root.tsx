@@ -49,7 +49,35 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+export const queryClient = new QueryClient();
+
+export function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <CompareProvider>
+              <ThemeApplier />
+              <Outlet />
+              <MobileBottomNav />
+              <PWAInstaller />
+              <FloatingWhatsApp />
+              <ScrollToTop />
+              <CookieConsent />
+              <CompareBar />
+              <LiveChatWidget />
+              <Toaster position="top-center" theme="dark" richColors />
+            </CompareProvider>
+          </WishlistProvider>
+        </CartProvider>
+      </I18nProvider>
+    </QueryClientProvider>
+  );
+}
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  component: App,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -81,32 +109,3 @@ function RootShell({ children }: { children: React.ReactNode }) {
     </html>
   );
 }
-
-export const queryClient = new QueryClient();
-
-export function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <CompareProvider>
-              <ThemeApplier />
-              <Outlet />
-              <MobileBottomNav />
-              <PWAInstaller />
-              <FloatingWhatsApp />
-              <ScrollToTop />
-              <CookieConsent />
-              <CompareBar />
-              <LiveChatWidget />
-              <Toaster position="top-center" theme="dark" richColors />
-            </CompareProvider>
-          </WishlistProvider>
-        </CartProvider>
-      </I18nProvider>
-    </QueryClientProvider>
-  );
-}
-
-Route.options.component = App;
