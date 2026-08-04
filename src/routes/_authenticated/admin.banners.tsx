@@ -31,7 +31,7 @@ const empty: Partial<Banner> = {
   title_ar: "", title_en: "", title_ur: "", title_bn: "",
   subtitle_ar: "", subtitle_en: "", subtitle_ur: "", subtitle_bn: "",
   image_url: "", link_url: "",
-  cta_label_ar: "", cta_label_en: "", cta_label_ur: "",
+  cta_label_ar: "", cta_label_en: "", cta_label_ur: "", cta_label_bn: "",
   sort_order: 0, is_active: true,
   starts_at: null, ends_at: null,
 };
@@ -67,7 +67,7 @@ function AdminBanners() {
       subtitle_ar: editing.subtitle_ar || null, subtitle_en: editing.subtitle_en || null, subtitle_ur: editing.subtitle_ur || null, subtitle_bn: (editing as any).subtitle_bn || null,
       image_url: editing.image_url,
       link_url: editing.link_url || null,
-      cta_label_ar: editing.cta_label_ar || null, cta_label_en: editing.cta_label_en || null, cta_label_ur: editing.cta_label_ur || null,
+      cta_label_ar: editing.cta_label_ar || null, cta_label_en: editing.cta_label_en || null, cta_label_ur: editing.cta_label_ur || null, cta_label_bn: (editing as any).cta_label_bn || null,
       sort_order: Number(editing.sort_order ?? 0),
       is_active: editing.is_active ?? true,
       starts_at: editing.starts_at || null,

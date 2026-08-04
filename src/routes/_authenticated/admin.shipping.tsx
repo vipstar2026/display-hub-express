@@ -17,11 +17,11 @@ export const Route = createFileRoute("/_authenticated/admin/shipping")({
 });
 
 type Zone = {
-  id: string; name_ar: string; name_en: string; name_ur: string | null;
+  id: string; name_ar: string; name_en: string; name_ur: string | null; name_bn?: string | null;
   country_code: string; regions: string[]; is_active: boolean; sort_order: number;
 };
 type Rate = {
-  id: string; zone_id: string; name_ar: string; name_en: string; name_ur: string | null;
+  id: string; zone_id: string; name_ar: string; name_en: string; name_ur: string | null; name_bn?: string | null; name_bn?: string | null;
   method: string; price: number; free_over: number | null;
   min_delivery_days: number; max_delivery_days: number; is_active: boolean; sort_order: number;
 };
@@ -48,14 +48,15 @@ function AdminShippingPage() {
     },
   });
 
-  const zoneName = (z: Zone) => (lang === "ar" ? z.name_ar : lang === "ur" ? (z.name_ur || z.name_en) : z.name_en);
-  const rateName = (r: Rate) => (lang === "ar" ? r.name_ar : lang === "ur" ? (r.name_ur || r.name_en) : r.name_en);
+  const zoneName = (z: Zone) => localizedName(z as unknown as Record<string, unknown>, "name", lang);
+  const rateName = (r: Rate) => localizedName(r as unknown as Record<string, unknown>, "name", lang);
 
   const saveZone = async (form: Partial<Zone>) => {
     const payload = {
       name_ar: form.name_ar ?? "",
       name_en: form.name_en ?? "",
       name_ur: form.name_ur || null,
+      name_bn: form.name_bn || null,
       country_code: form.country_code || "BH",
       regions: (Array.isArray(form.regions) ? form.regions : String(form.regions || "").split(",").map(s => s.trim()).filter(Boolean)) as unknown as never,
       is_active: form.is_active ?? true,
@@ -82,7 +83,7 @@ function AdminShippingPage() {
   const saveRate = async (form: Partial<Rate> & { zone_id: string }) => {
     const payload = {
       zone_id: form.zone_id,
-      name_ar: form.name_ar ?? "", name_en: form.name_en ?? "", name_ur: form.name_ur || null,
+      name_ar: form.name_ar ?? "", name_en: form.name_en ?? "", name_ur: form.name_ur || null, name_bn: form.name_bn || null,
       method: form.method || "standard",
       price: Number(form.price ?? 0),
       free_over: form.free_over === null || form.free_over === undefined || String(form.free_over) === "" ? null : Number(form.free_over),
@@ -118,7 +119,7 @@ function AdminShippingPage() {
           </h1>
           <p className="text-sm text-muted-foreground">{t("shipping.subtitle")}</p>
         </div>
-        <Button onClick={() => { setZoneDialog({ id: "", name_ar: "", name_en: "", name_ur: "", country_code: "BH", regions: [], is_active: true, sort_order: 0 } as unknown as Zone); setZoneOpen(true); }} className="bg-primary text-background hover:bg-primary">
+        <Button onClick={() => { setZoneDialog({ id: "", name_ar: "", name_en: "", name_ur: "", name_bn: "", country_code: "BH", regions: [], is_active: true, sort_order: 0 } as unknown as Zone); setZoneOpen(true); }} className="bg-primary text-background hover:bg-primary">
           <Plus className="me-2 h-4 w-4" />{t("shipping.new_zone")}
         </Button>
       </div>
@@ -217,6 +218,7 @@ function ZoneForm({ initial, onSave }: { initial: Zone; onSave: (v: Partial<Zone
         <div><Label>{t("shipping.name_ar")}</Label><Input value={f.name_ar} onChange={(e) => setF({ ...f, name_ar: e.target.value })} required /></div>
         <div><Label>{t("shipping.name_en")}</Label><Input value={f.name_en} onChange={(e) => setF({ ...f, name_en: e.target.value })} required /></div>
         <div><Label>{t("shipping.name_ur")}</Label><Input value={f.name_ur ?? ""} onChange={(e) => setF({ ...f, name_ur: e.target.value })} /></div>
+        <div><Label>Name (BN)</Label><Input value={f.name_bn ?? ""} onChange={(e) => setF({ ...f, name_bn: e.target.value })} /></div>
         <div><Label>{t("shipping.country")}</Label><Input value={f.country_code} onChange={(e) => setF({ ...f, country_code: e.target.value.toUpperCase() })} /></div>
       </div>
       <div><Label>{t("shipping.regions")}</Label><Input value={f.regionsText} onChange={(e) => setF({ ...f, regionsText: e.target.value })} placeholder="Manama, Muharraq, ..." /></div>
@@ -232,7 +234,7 @@ function ZoneForm({ initial, onSave }: { initial: Zone; onSave: (v: Partial<Zone
 function RateForm({ zoneId, initial, onSave }: { zoneId: string; initial: Rate | null; onSave: (v: Partial<Rate> & { zone_id: string }) => Promise<void> }) {
   const { t } = useI18n();
   const [f, setF] = useState<Partial<Rate>>(initial ?? {
-    name_ar: "", name_en: "", name_ur: "", method: "standard",
+    name_ar: "", name_en: "", name_ur: "", name_bn: "", method: "standard",
     price: 0, free_over: null, min_delivery_days: 1, max_delivery_days: 3,
     is_active: true, sort_order: 0,
   });
@@ -242,6 +244,7 @@ function RateForm({ zoneId, initial, onSave }: { zoneId: string; initial: Rate |
         <div><Label>{t("shipping.name_ar")}</Label><Input value={f.name_ar ?? ""} onChange={(e) => setF({ ...f, name_ar: e.target.value })} required /></div>
         <div><Label>{t("shipping.name_en")}</Label><Input value={f.name_en ?? ""} onChange={(e) => setF({ ...f, name_en: e.target.value })} required /></div>
         <div><Label>{t("shipping.name_ur")}</Label><Input value={f.name_ur ?? ""} onChange={(e) => setF({ ...f, name_ur: e.target.value })} /></div>
+        <div><Label>Name (BN)</Label><Input value={f.name_bn ?? ""} onChange={(e) => setF({ ...f, name_bn: e.target.value })} /></div>
         <div>
           <Label>{t("shipping.method")}</Label>
           <select value={f.method} onChange={(e) => setF({ ...f, method: e.target.value })} className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
