@@ -116,7 +116,7 @@ function AdminLayout() {
   const current = allItems.find((i) => (i.exact ? pathname === i.to : pathname.startsWith(i.to) && i.to !== "/admin")) ?? allItems[0];
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-background via-background to-primary/10">
+    <div className="admin-shell flex min-h-screen bg-gradient-to-br from-background via-background to-primary/10">
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 z-40 w-64 border-e border-primary/20 bg-card/80 backdrop-blur-xl transition-transform md:static md:!translate-x-0 ${open ? "translate-x-0" : "rtl:translate-x-full ltr:-translate-x-full"}`}>
         <div className="flex h-16 items-center gap-2 border-b border-primary/20 px-5">
