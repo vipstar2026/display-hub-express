@@ -56,13 +56,15 @@ function PayPage() {
     document.body.appendChild(s);
   }, [data?.scriptUrl]);
 
-  const heading = lang === "ar" ? "إتمام الدفع" : lang === "ur" ? "ادائیگی مکمل کریں" : "Complete payment";
+  const heading = lang === "ar" ? "إتمام الدفع" : lang === "ur" ? "ادائیگی مکمل کریں" : lang === "bn" ? "পেমেন্ট সম্পন্ন করুন" : "Complete payment";
   const secure =
     lang === "ar"
       ? "الدفع مؤمّن عبر بوابة AFS للخدمات المالية العربية"
       : lang === "ur"
         ? "ادائیگی AFS گیٹ وے کے ذریعے محفوظ ہے"
-        : "Secured by AFS payment gateway";
+        : lang === "bn"
+          ? "AFS পেমেন্ট গেটওয়ে দ্বারা সুরক্ষিত"
+          : "Secured by AFS payment gateway";
 
   return (
     <div className="min-h-screen bg-background">
