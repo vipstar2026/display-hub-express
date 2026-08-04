@@ -10,7 +10,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useI18n, localizedName } from "@/lib/i18n";
 import { makeAdminT } from "@/lib/admin-i18n";
-import { fieldDirProps } from "@/lib/dir";
 
 
 export const Route = createFileRoute("/_authenticated/admin/categories/")({
