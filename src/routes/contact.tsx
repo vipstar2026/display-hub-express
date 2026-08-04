@@ -130,7 +130,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function InfoCard({ icon, label, value, href }: { icon: React.ReactNode; label: string; value: string; href?: string }) {
+function InfoCard({ icon, label, value, href, onClick }: { icon: React.ReactNode; label: string; value: string; href?: string; onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void }) {
   const inner = (
     <div className="flex items-start gap-3 rounded-xl border border-primary/15 bg-card/40 p-4 transition hover:border-primary/40 hover:bg-card/70">
       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">{icon}</div>
@@ -140,5 +140,5 @@ function InfoCard({ icon, label, value, href }: { icon: React.ReactNode; label: 
       </div>
     </div>
   );
-  return href ? <a href={href} target="_blank" rel="noopener noreferrer">{inner}</a> : inner;
+  return href ? <a href={href} target="_blank" rel="noopener noreferrer" onClick={onClick}>{inner}</a> : inner;
 }
