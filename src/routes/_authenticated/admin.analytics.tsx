@@ -145,7 +145,8 @@ function Analytics() {
     ar: { title: "التحليلات المتقدمة", sub: "رؤية شاملة لأداء المتجر", revenue: "الإيرادات", orders: "الطلبات", aov: "متوسط قيمة الطلب", conversion: "التحويل", customers: "العملاء", pending: "قيد الانتظار", trend: "اتجاه الإيرادات", top: "أفضل المنتجات", cats: "حصة الأقسام", hours: "الطلبات حسب الساعة", segments: "شرائح العملاء", low: "منتجات مخزون منخفض", new: "جديد", returning: "متكرر", vip: "VIP", qty: "الكمية", stock: "المخزون" },
     en: { title: "Advanced Analytics", sub: "Full store performance overview", revenue: "Revenue", orders: "Orders", aov: "Avg Order Value", conversion: "Conversion", customers: "Customers", pending: "Pending", trend: "Revenue Trend", top: "Top Products", cats: "Category Share", hours: "Orders by Hour", segments: "Customer Segments", low: "Low Stock", new: "New", returning: "Returning", vip: "VIP", qty: "Qty", stock: "Stock" },
     ur: { title: "ایڈوانسڈ تجزیات", sub: "مکمل کارکردگی کا جائزہ", revenue: "آمدنی", orders: "آرڈرز", aov: "اوسط آرڈر", conversion: "تبدیلی", customers: "گاہک", pending: "زیر التوا", trend: "آمدنی رجحان", top: "اعلی مصنوعات", cats: "زمرہ حصہ", hours: "گھنٹے کے حساب سے", segments: "گاہک طبقات", low: "کم اسٹاک", new: "نیا", returning: "واپس آنے والا", vip: "VIP", qty: "مقدار", stock: "اسٹاک" },
-  }[lang as "ar" | "en" | "ur"] ?? { title: "Analytics" } as any;
+    bn: { title: "উন্নত বিশ্লেষণ", sub: "দোকানের সম্পূর্ণ পারফরম্যান্স", revenue: "আয়", orders: "অর্ডার", aov: "গড় অর্ডার মূল্য", conversion: "কনভার্শন", customers: "গ্রাহক", pending: "অপেক্ষমাণ", trend: "আয়ের প্রবণতা", top: "সেরা পণ্য", cats: "বিভাগের অংশ", hours: "ঘণ্টাভিত্তিক অর্ডার", segments: "গ্রাহক শ্রেণি", low: "কম স্টক", new: "নতুন", returning: "পুনরাবৃত্ত", vip: "VIP", qty: "পরিমাণ", stock: "স্টক" },
+  }[lang as "ar" | "en" | "ur" | "bn"] ?? { title: "Analytics" } as any;
 
   const ranges: Range[] = [7, 30, 90, 365];
 

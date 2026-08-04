@@ -112,7 +112,7 @@ function MessagesPage() {
   }
 
   function signature() {
-    const sig = lang === "en" ? emailCfg?.signature_en : emailCfg?.signature_ar;
+    const sig = lang === "ar" ? emailCfg?.signature_ar : (emailCfg?.signature_en || emailCfg?.signature_ar);
     return (sig || "").trim();
   }
 
@@ -123,7 +123,7 @@ function MessagesPage() {
 
   function openReply(m: Msg) {
     setReplyTo(m);
-    const greeting = lang === "en" ? `Hi ${m.name},\n\n` : `مرحباً ${m.name}،\n\n`;
+    const greeting = lang === "ar" ? `مرحباً ${m.name}،\n\n` : lang === "ur" ? `السلام علیکم ${m.name}،\n\n` : lang === "bn" ? `প্রিয় ${m.name},\n\n` : `Hi ${m.name},\n\n`;
     setReplyText(m.reply_text ?? greeting);
   }
 
