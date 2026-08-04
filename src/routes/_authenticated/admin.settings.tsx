@@ -132,6 +132,7 @@ function AdminSettings() {
               <Field k="tagline_ar" label={t("settings.f.tagline_ar")} />
               <Field k="tagline_en" label={t("settings.f.tagline_en")} />
               <Field k="tagline_ur" label={t("settings.f.tagline_ur")} />
+              <Field k="tagline_bn" label="Tagline (BN)" />
             </Section>
             <Section title={t("settings.sec.hero")} cols={1}>
               <Field k="hero_badge_text" label={t("settings.f.hero_badge")} placeholder="VIPSTAR.CC" />
@@ -139,16 +140,19 @@ function AdminSettings() {
                 <Field k="hero_title_ar" label={t("settings.f.hero_title_ar")} />
                 <Field k="hero_title_en" label={t("settings.f.hero_title_en")} />
                 <Field k="hero_title_ur" label={t("settings.f.hero_title_ur")} />
+                <Field k="hero_title_bn" label="Hero title (BN)" />
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
                 <Area k="hero_subtitle_ar" label={t("settings.f.hero_sub_ar")} rows={2} />
                 <Area k="hero_subtitle_en" label={t("settings.f.hero_sub_en")} rows={2} />
                 <Area k="hero_subtitle_ur" label={t("settings.f.hero_sub_ur")} rows={2} />
+                <Area k="hero_subtitle_bn" label="Hero subtitle (BN)" rows={2} />
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
                 <Field k="hero_cta_ar" label={t("settings.f.hero_cta_ar")} />
                 <Field k="hero_cta_en" label={t("settings.f.hero_cta_en")} />
                 <Field k="hero_cta_ur" label={t("settings.f.hero_cta_ur")} />
+                <Field k="hero_cta_bn" label="Hero CTA (BN)" />
               </div>
             </Section>
             <Section title={t("settings.sec.banner")} cols={1}>
@@ -265,6 +269,7 @@ function AdminSettings() {
               <Area k="meta_description_ar" label={t("settings.f.tagline_ar")} />
               <Area k="meta_description_en" label={t("settings.f.tagline_en")} />
               <Area k="meta_description_ur" label={t("settings.f.tagline_ur")} />
+              <Area k="meta_description_bn" label="Meta description (BN)" />
             </Section>
             <Section title={t("settings.sec.keywords")} cols={1}>
               <Area k="meta_keywords" label={t("settings.f.keywords_hint")} rows={2} />

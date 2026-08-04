@@ -21,8 +21,8 @@ export const Route = createFileRoute("/_authenticated/admin/categories/$slug")({
 interface ProductForm {
   id?: string;
   slug: string; sku: string;
-  name_ar: string; name_en: string; name_ur: string;
-  description_ar: string; description_en: string; description_ur: string;
+  name_ar: string; name_en: string; name_ur: string; name_bn: string;
+  description_ar: string; description_en: string; description_ur: string; description_bn: string;
   type: "physical" | "digital" | "subscription";
   status: "draft" | "active" | "archived";
   price: string; compare_price: string; currency: string;
@@ -49,8 +49,8 @@ function AdminCategoryProducts() {
 
   const empty: ProductForm = {
     slug: "", sku: "",
-    name_ar: "", name_en: "", name_ur: "",
-    description_ar: "", description_en: "", description_ur: "",
+    name_ar: "", name_en: "", name_ur: "", name_bn: "",
+    description_ar: "", description_en: "", description_ur: "", description_bn: "",
     type: defaultType, status: "active",
     price: "0.000", compare_price: "", currency: "BHD",
     stock: defaultType === "subscription" ? "999" : "0",
@@ -72,8 +72,8 @@ function AdminCategoryProducts() {
 
   const handleEdit = (p: {
     id: string; slug: string; sku: string | null;
-    name_ar: string; name_en: string; name_ur: string | null;
-    description_ar: string | null; description_en: string | null; description_ur: string | null;
+    name_ar: string; name_en: string; name_ur: string | null; name_bn?: string | null;
+    description_ar: string | null; description_en: string | null; description_ur: string | null; description_bn?: string | null;
     type: string; status: string; price: number; compare_price: number | null; currency: string;
     stock: number; track_stock: boolean; weight_grams: number | null; is_featured: boolean;
     images: unknown; features: unknown;
@@ -87,8 +87,8 @@ function AdminCategoryProducts() {
     }
     setForm({
       id: p.id, slug: p.slug, sku: p.sku ?? "",
-      name_ar: p.name_ar, name_en: p.name_en, name_ur: p.name_ur ?? "",
-      description_ar: p.description_ar ?? "", description_en: p.description_en ?? "", description_ur: p.description_ur ?? "",
+      name_ar: p.name_ar, name_en: p.name_en, name_ur: p.name_ur ?? "", name_bn: p.name_bn ?? "",
+      description_ar: p.description_ar ?? "", description_en: p.description_en ?? "", description_ur: p.description_ur ?? "", description_bn: p.description_bn ?? "",
       type: p.type as ProductForm["type"], status: p.status as ProductForm["status"],
       price: String(p.price), compare_price: p.compare_price ? String(p.compare_price) : "",
       currency: p.currency,
@@ -146,8 +146,8 @@ function AdminCategoryProducts() {
     const payload = {
       slug: form.slug || form.name_en.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
       sku: form.sku || null,
-      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null,
-      description_ar: form.description_ar || null, description_en: form.description_en || null, description_ur: form.description_ur || null,
+      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null, name_bn: form.name_bn || null,
+      description_ar: form.description_ar || null, description_en: form.description_en || null, description_ur: form.description_ur || null, description_bn: form.description_bn || null,
       category_id: category.id,
       type: form.type, status: form.status,
       price: Number(form.price),
@@ -207,12 +207,16 @@ function AdminCategoryProducts() {
               <section className="grid gap-3 md:grid-cols-2">
                 <div><Label>{t("form.name_ar")}</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
                 <div><Label>{t("form.name_en")}</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+                <div><Label>Name (UR)</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+                <div><Label>Name (BN)</Label><Input value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
               </section>
 
               {/* Descriptions */}
               <section className="grid gap-3">
                 <div><Label>{t("form.desc_ar")}</Label><Textarea rows={2} value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
                 <div><Label>{t("form.desc_en")}</Label><Textarea rows={2} value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
+                <div><Label>Description (UR)</Label><Textarea rows={2} value={form.description_ur} onChange={(e) => setForm({ ...form, description_ur: e.target.value })} /></div>
+                <div><Label>Description (BN)</Label><Textarea rows={2} value={form.description_bn} onChange={(e) => setForm({ ...form, description_bn: e.target.value })} /></div>
               </section>
 
               {/* Pricing / Stock */}
