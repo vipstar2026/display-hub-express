@@ -25,9 +25,9 @@ function PayError() {
       <Header />
       <div className="container mx-auto px-4 py-24 text-center">
         <p className="mb-4 text-muted-foreground">
-          {lang === "ar" ? "تعذر بدء عملية الدفع." : lang === "ur" ? "ادائیگی شروع نہیں ہو سکی۔" : "Could not start the payment."}
+          {lang === "ar" ? "تعذر بدء عملية الدفع." : lang === "ur" ? "ادائیگی شروع نہیں ہو سکی۔" : lang === "bn" ? "পেমেন্ট শুরু করা যায়নি।" : "Could not start the payment."}
         </p>
-        <Button onClick={() => nav({ to: "/cart" })}>{lang === "ar" ? "العودة للسلة" : "Back to cart"}</Button>
+        <Button onClick={() => nav({ to: "/cart" })}>{lang === "ar" ? "العودة للسلة" : lang === "bn" ? "কার্টে ফিরে যান" : "Back to cart"}</Button>
       </div>
       <Footer />
     </div>
