@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, Search, Eye, Trash2, PackageCheck, FileText } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
+import { makeAdminTE } from "@/lib/admin-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/purchase-orders")({
   ssr: false,
@@ -23,6 +25,8 @@ type PO = {
 };
 
 function POPage() {
+  const { lang } = useI18n();
+  const te = useMemo(() => makeAdminTE(lang), [lang]);
   const [pos, setPos] = useState<PO[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -91,9 +95,9 @@ function POPage() {
   const total = subtotal + Number(form.tax || 0);
 
   async function savePO() {
-    if (!form.supplier_id) { toast.error("Select a supplier"); return; }
+    if (!form.supplier_id) { toast.error(te("Select a supplier")); return; }
     const valid = items.filter((it) => it.product_name.trim() && it.quantity > 0);
-    if (valid.length === 0) { toast.error("Add at least one item"); return; }
+    if (valid.length === 0) { toast.error(te("Add at least one item")); return; }
 
     const po_number = "PO-" + Date.now().toString().slice(-8);
     const { data: created, error } = await supabase.from("purchase_orders").insert({
@@ -103,7 +107,7 @@ function POPage() {
       subtotal, tax: Number(form.tax || 0), total,
       notes: form.notes || null,
     }).select().single();
-    if (error || !created) { toast.error(error?.message ?? "Failed"); return; }
+    if (error || !created) { toast.error(error?.message ?? te("Failed")); return; }
 
     const itemRows = valid.map((it) => ({
       purchase_order_id: created.id,
@@ -116,7 +120,7 @@ function POPage() {
     const { error: iErr } = await supabase.from("purchase_order_items").insert(itemRows);
     if (iErr) { toast.error(iErr.message); return; }
 
-    toast.success(`Created ${po_number}`);
+    toast.success(`${te("Created")} ${po_number}`);
     setOpen(false);
     load();
   }
@@ -136,16 +140,16 @@ function POPage() {
       } as any);
     }
     await supabase.from("purchase_orders").update({ status: "received", received_at: new Date().toISOString() }).eq("id", po.id);
-    toast.success("Received & stock updated");
+    toast.success(te("Received & stock updated"));
     load();
   }
 
   async function remove(po: PO) {
-    if (po.status === "received") { toast.error("Cannot delete received PO"); return; }
+    if (po.status === "received") { toast.error(te("Cannot delete received PO")); return; }
     if (!confirm(`Delete ${po.po_number}?`)) return;
     const { error } = await supabase.from("purchase_orders").delete().eq("id", po.id);
     if (error) return toast.error(error.message);
-    toast.success("Deleted");
+    toast.success(te("Deleted"));
     load();
   }
 
@@ -161,32 +165,32 @@ function POPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold">Purchase Orders</h1>
-          <p className="text-sm text-muted-foreground">Create and receive supplier orders</p>
+          <h1 className="text-2xl font-bold">{te("Purchase Orders")}</h1>
+          <p className="text-sm text-muted-foreground">{te("Create and receive supplier orders")}</p>
         </div>
         <Button onClick={openNew} disabled={suppliers.length === 0}>
-          <Plus className="h-4 w-4 me-1" /> New PO
+          <Plus className="h-4 w-4 me-1" /> {te("New PO")}
         </Button>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Kpi label="Total POs" value={kpi.total.toString()} />
-        <Kpi label="Draft" value={kpi.draft.toString()} />
-        <Kpi label="Received" value={kpi.received.toString()} />
-        <Kpi label="Total Spend" value={`${kpi.spend.toFixed(3)} BHD`} />
+        <Kpi label={te("Total POs")} value={kpi.total.toString()} />
+        <Kpi label={te("Draft")} value={kpi.draft.toString()} />
+        <Kpi label={te("Received")} value={kpi.received.toString()} />
+        <Kpi label={te("Total Spend")} value={`${kpi.spend.toFixed(3)} BHD`} />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[220px] max-w-md">
           <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search PO number" value={q} onChange={(e) => setQ(e.target.value)} className="ps-9" />
+          <Input placeholder={te("Search PO number")} value={q} onChange={(e) => setQ(e.target.value)} className="ps-9" />
         </div>
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="h-10 rounded-md border border-border bg-background px-3 text-sm">
-          <option value="all">All statuses</option>
-          <option value="draft">Draft</option>
-          <option value="ordered">Ordered</option>
-          <option value="received">Received</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="all">{te("All statuses")}</option>
+          <option value="draft">{te("Draft")}</option>
+          <option value="ordered">{te("Ordered")}</option>
+          <option value="received">{te("Received")}</option>
+          <option value="cancelled">{te("Cancelled")}</option>
         </select>
       </div>
 
@@ -194,17 +198,17 @@ function POPage() {
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
             <tr>
-              <th className="p-3 text-start">PO #</th>
-              <th className="p-3 text-start">Supplier</th>
-              <th className="p-3 text-start">Status</th>
-              <th className="p-3 text-end">Total</th>
-              <th className="p-3 text-start">Created</th>
-              <th className="p-3 text-end">Actions</th>
+              <th className="p-3 text-start">{te("PO #")}</th>
+              <th className="p-3 text-start">{te("Supplier")}</th>
+              <th className="p-3 text-start">{te("Status")}</th>
+              <th className="p-3 text-end">{te("Total")}</th>
+              <th className="p-3 text-start">{te("Created At")}</th>
+              <th className="p-3 text-end">{te("Actions")}</th>
             </tr>
           </thead>
           <tbody>
-            {loading && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Loading…</td></tr>}
-            {!loading && filtered.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">No purchase orders</td></tr>}
+            {loading && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">{te("Loading…")}</td></tr>}
+            {!loading && filtered.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">{te("No purchase orders")}</td></tr>}
             {filtered.map((p) => (
               <tr key={p.id} className="border-t border-border/60">
                 <td className="p-3 font-mono">{p.po_number}</td>
@@ -222,7 +226,7 @@ function POPage() {
                 <td className="p-3 text-end">
                   <Button variant="ghost" size="icon" onClick={() => openView(p)}><Eye className="h-4 w-4" /></Button>
                   {p.status !== "received" && (
-                    <Button variant="ghost" size="icon" onClick={() => markReceived(p)} title="Receive"><PackageCheck className="h-4 w-4 text-green-500" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => markReceived(p)} title={te("Receive")}><PackageCheck className="h-4 w-4 text-green-500" /></Button>
                   )}
                   {p.status !== "received" && (
                     <Button variant="ghost" size="icon" onClick={() => remove(p)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
@@ -237,32 +241,32 @@ function POPage() {
       {/* Create dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-3xl">
-          <DialogHeader><DialogTitle>New Purchase Order</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{te("New Purchase Order")}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div>
-                <label className="text-xs text-muted-foreground">Supplier</label>
+                <label className="text-xs text-muted-foreground">{te("Supplier")}</label>
                 <select value={form.supplier_id} onChange={(e) => setForm({ ...form, supplier_id: e.target.value })} className="mt-1 w-full h-10 rounded-md border border-border bg-background px-3 text-sm">
                   {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-xs text-muted-foreground">Tax (BHD)</label>
+                <label className="text-xs text-muted-foreground">{te("Tax (BHD)")}</label>
                 <Input type="number" step="0.001" value={form.tax} onChange={(e) => setForm({ ...form, tax: Number(e.target.value) })} />
               </div>
             </div>
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <label className="text-sm font-medium">Items</label>
+                <label className="text-sm font-medium">{te("Items")}</label>
                 <Button size="sm" variant="outline" onClick={() => setItems([...items, { product_id: null, product_name: "", quantity: 1, cost_per_unit: 0, total: 0 }])}>
-                  <Plus className="h-3 w-3 me-1" /> Add row
+                  <Plus className="h-3 w-3 me-1" /> {te("Add row")}
                 </Button>
               </div>
               <div className="space-y-2">
                 {items.map((it, idx) => (
                   <div key={idx} className="grid grid-cols-12 gap-2 items-center">
                     <select value={it.product_id ?? ""} onChange={(e) => selectProduct(idx, e.target.value)} className="col-span-5 h-9 rounded-md border border-border bg-background px-2 text-sm">
-                      <option value="">— select product —</option>
+                      <option value="">{te("— select product —")}</option>
                       {products.map((p) => <option key={p.id} value={p.id}>{p.name_en || p.name_ar} {p.sku ? `(${p.sku})` : ""}</option>)}
                     </select>
                     <Input className="col-span-2" type="number" min={1} value={it.quantity} onChange={(e) => updateItem(idx, { quantity: Number(e.target.value) })} />
@@ -275,14 +279,14 @@ function POPage() {
                 ))}
               </div>
             </div>
-            <Textarea placeholder="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            <Textarea placeholder={te("Notes")} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
             <div className="rounded-md border border-border p-3 text-sm">
-              <div className="flex justify-between"><span>Subtotal</span><span className="font-mono">{subtotal.toFixed(3)}</span></div>
-              <div className="flex justify-between"><span>Tax</span><span className="font-mono">{Number(form.tax || 0).toFixed(3)}</span></div>
-              <div className="mt-1 flex justify-between border-t border-border pt-1 font-semibold"><span>Total</span><span className="font-mono">{total.toFixed(3)} BHD</span></div>
+              <div className="flex justify-between"><span>{te("Subtotal")}</span><span className="font-mono">{subtotal.toFixed(3)}</span></div>
+              <div className="flex justify-between"><span>{te("Tax")}</span><span className="font-mono">{Number(form.tax || 0).toFixed(3)}</span></div>
+              <div className="mt-1 flex justify-between border-t border-border pt-1 font-semibold"><span>{te("Total")}</span><span className="font-mono">{total.toFixed(3)} BHD</span></div>
             </div>
           </div>
-          <DialogFooter><Button onClick={savePO}>Create PO</Button></DialogFooter>
+          <DialogFooter><Button onClick={savePO}>{te("Create PO")}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -293,15 +297,15 @@ function POPage() {
           {viewing && (
             <div className="space-y-3 text-sm">
               <div className="grid grid-cols-2 gap-2">
-                <div><span className="text-muted-foreground">Supplier: </span>{supplierName(viewing.supplier_id)}</div>
-                <div><span className="text-muted-foreground">Status: </span>{viewing.status}</div>
-                <div><span className="text-muted-foreground">Created: </span>{new Date(viewing.created_at).toLocaleString()}</div>
-                <div><span className="text-muted-foreground">Received: </span>{viewing.received_at ? new Date(viewing.received_at).toLocaleString() : "—"}</div>
+                <div><span className="text-muted-foreground">{te("Supplier: ")}</span>{supplierName(viewing.supplier_id)}</div>
+                <div><span className="text-muted-foreground">{te("Status: ")}</span>{viewing.status}</div>
+                <div><span className="text-muted-foreground">{te("Created: ")}</span>{new Date(viewing.created_at).toLocaleString()}</div>
+                <div><span className="text-muted-foreground">{te("Received: ")}</span>{viewing.received_at ? new Date(viewing.received_at).toLocaleString() : "—"}</div>
               </div>
               <div className="rounded border border-border">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
-                    <tr><th className="p-2 text-start">Product</th><th className="p-2 text-end">Qty</th><th className="p-2 text-end">Cost</th><th className="p-2 text-end">Total</th></tr>
+                    <tr><th className="p-2 text-start">{te("Product")}</th><th className="p-2 text-end">{te("Qty")}</th><th className="p-2 text-end">{te("Cost")}</th><th className="p-2 text-end">{te("Total")}</th></tr>
                   </thead>
                   <tbody>
                     {items.map((it, i) => (
@@ -315,7 +319,7 @@ function POPage() {
                   </tbody>
                 </table>
               </div>
-              <div className="flex justify-between border-t border-border pt-2 font-semibold"><span>Total</span><span className="font-mono">{Number(viewing.total).toFixed(3)} {viewing.currency}</span></div>
+              <div className="flex justify-between border-t border-border pt-2 font-semibold"><span>{te("Total")}</span><span className="font-mono">{Number(viewing.total).toFixed(3)} {viewing.currency}</span></div>
               {viewing.notes && <div className="rounded border border-border p-2 text-muted-foreground">{viewing.notes}</div>}
             </div>
           )}

@@ -35,6 +35,15 @@ function AdminEmailsPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const dispatchFn = useServerFn(dispatchEmails);
   const txt = (ar: string, en: string, ur: string, bn?: string) => (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? (bn ?? en) : en);
+  const statusLabel = (s: string) => {
+    const map: Record<string, string> = {
+      sent: txt("تم الإرسال", "Sent", "بھیج دیا", "পাঠানো হয়েছে"),
+      queued: txt("بالانتظار", "Queued", "قطار میں", "সারিবদ্ধ"),
+      pending: txt("قيد الانتظار", "Pending", "زیر التواء", "মুলতুবি"),
+      failed: txt("فشل", "Failed", "ناکام", "ব্যর্থ"),
+    };
+    return map[s] ?? s;
+  };
 
 
 
@@ -80,10 +89,11 @@ function AdminEmailsPage() {
             "الإرسال التلقائي غير مفعّل — فعّله من الإعدادات › البريد",
             "Automatic sending is disabled — enable it in Settings › Email",
             "خودکار بھیجنا بند ہے",
+            "স্বয়ংক্রিয় পাঠানো বন্ধ — সেটিংস › ইমেইল থেকে চালু করুন",
           ),
         );
       } else {
-        toast.success(`${txt("تم الإرسال", "Sent", "بھیج دیا")}: ${(res as any).sent} · ${txt("فشل", "failed", "ناکام")}: ${(res as any).failed}`);
+        toast.success(`${txt("تم الإرسال", "Sent", "بھیج دیا", "পাঠানো হয়েছে")}: ${(res as any).sent} · ${txt("فشل", "failed", "ناکام", "ব্যর্থ")}: ${(res as any).failed}`);
       }
       qc.invalidateQueries({ queryKey: ["email-outbox"] });
     } catch (e) {
@@ -98,19 +108,20 @@ function AdminEmailsPage() {
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold">
             <Mail className="h-6 w-6 text-primary" />
-            {txt("البريد الصادر", "Outbox", "آؤٹ باکس")}
+            {txt("البريد الصادر", "Outbox", "آؤٹ باکس", "আউটবক্স")}
           </h1>
           <p className="text-sm text-muted-foreground">
             {txt(
               "رسائل تأكيد الطلبات والأكواد الرقمية الجاهزة للإرسال",
               "Order confirmations and digital codes ready to send",
               "آرڈر کی تصدیق اور ڈیجیٹل کوڈز",
+              "অর্ডার নিশ্চিতকরণ এবং পাঠানোর জন্য প্রস্তুত ডিজিটাল কোড",
             )}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="secondary">
-            {queued} {txt("بالانتظار", "queued", "قطار میں")}
+            {queued} {txt("بالانتظار", "queued", "قطار میں", "সারিবদ্ধ")}
           </Badge>
           <Button size="sm" onClick={dispatchNow} disabled={busy === "dispatch" || queued === 0}>
             {busy === "dispatch" ? (
@@ -118,7 +129,7 @@ function AdminEmailsPage() {
             ) : (
               <Send className="mr-2 h-4 w-4" />
             )}
-            {txt("إرسال الآن", "Send now", "ابھی بھیجیں")}
+            {txt("إرسال الآن", "Send now", "ابھی بھیجیں", "এখনই পাঠান")}
           </Button>
         </div>
       </div>
@@ -126,11 +137,11 @@ function AdminEmailsPage() {
 
       {isLoading ? (
         <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> {txt("جارٍ التحميل…", "Loading…", "لوڈ…")}
+          <Loader2 className="h-4 w-4 animate-spin" /> {txt("جارٍ التحميل…", "Loading…", "لوڈ…", "লোড হচ্ছে…")}
         </div>
       ) : (data ?? []).length === 0 ? (
         <Card className="p-10 text-center text-muted-foreground">
-          {txt("لا توجد رسائل", "No emails yet", "کوئی ای میل نہیں")}
+          {txt("لا توجد رسائل", "No emails yet", "کوئی ای میل نہیں", "এখনো কোনো ইমেইল নেই")}
         </Card>
       ) : (
         <div className="space-y-3">
@@ -140,7 +151,7 @@ function AdminEmailsPage() {
                 <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{r.subject}</span>
-                    <Badge variant={r.status === "sent" ? "default" : "secondary"}>{r.status}</Badge>
+                    <Badge variant={r.status === "sent" ? "default" : "secondary"}>{statusLabel(r.status)}</Badge>
                     <Badge variant="outline">{r.template}</Badge>
                   </div>
                   <div className="text-sm text-muted-foreground">
@@ -157,16 +168,16 @@ function AdminEmailsPage() {
                     variant="outline"
                     onClick={() => {
                       navigator.clipboard.writeText(r.body);
-                      toast.success(txt("تم النسخ", "Copied", "کاپی ہوگیا"));
+                      toast.success(txt("تم النسخ", "Copied", "کاپی ہوگیا", "কপি হয়েছে"));
                     }}
                   >
-                    <Copy className="mr-1 h-4 w-4" /> {txt("نسخ", "Copy", "کاپی")}
+                    <Copy className="mr-1 h-4 w-4" /> {txt("نسخ", "Copy", "کاپی", "কপি")}
                   </Button>
                   <Button size="sm" asChild>
                     <a
                       href={`mailto:${r.to_email}?subject=${encodeURIComponent(r.subject)}&body=${encodeURIComponent(r.body)}`}
                     >
-                      <Send className="mr-1 h-4 w-4" /> {txt("إرسال", "Send", "بھیجیں")}
+                      <Send className="mr-1 h-4 w-4" /> {txt("إرسال", "Send", "بھیجیں", "পাঠান")}
                     </a>
                   </Button>
                   {r.status !== "sent" && (
@@ -176,7 +187,7 @@ function AdminEmailsPage() {
                       disabled={busy === r.id}
                       onClick={() => setStatus(r.id, "sent")}
                     >
-                      <Check className="mr-1 h-4 w-4" /> {txt("تم الإرسال", "Mark sent", "بھیج دیا")}
+                      <Check className="mr-1 h-4 w-4" /> {txt("تم الإرسال", "Mark sent", "بھیج دیا", "পাঠানো হিসেবে চিহ্নিত করুন")}
                     </Button>
                   )}
                   <Button size="sm" variant="ghost" onClick={() => remove(r.id)}>

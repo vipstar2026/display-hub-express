@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Ticket, Search, Download, TrendingDown } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { useMemo, useState } from "react";
+import { useI18n } from "@/lib/i18n";
+import { makeAdminTE } from "@/lib/admin-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/coupon-usage")({
   component: CouponUsagePage,
@@ -19,6 +21,8 @@ type Row = {
 };
 
 function CouponUsagePage() {
+  const { lang } = useI18n();
+  const te = useMemo(() => makeAdminTE(lang), [lang]);
   const [q, setQ] = useState("");
   const [code, setCode] = useState<string>("__all__");
 
@@ -65,53 +69,53 @@ function CouponUsagePage() {
     <div className="space-y-6">
       <div>
         <h1 className="flex items-center gap-2 font-display text-2xl font-bold">
-          <Ticket className="h-6 w-6 text-primary" /> Coupon usage
+          <Ticket className="h-6 w-6 text-primary" /> {te("Coupon usage")}
         </h1>
-        <p className="text-sm text-muted-foreground">Every redemption with customer, order, and discount amount.</p>
+        <p className="text-sm text-muted-foreground">{te("Every redemption with customer, order, and discount amount.")}</p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <Kpi label="Redemptions" value={String(totals.uses)} />
-        <Kpi label="Discount given" value={formatPrice(totals.discount, "BHD")} accent="text-amber-400" />
-        <Kpi label="Orders revenue" value={formatPrice(totals.revenue, "BHD")} accent="text-emerald-400" />
+        <Kpi label={te("Redemptions")} value={String(totals.uses)} />
+        <Kpi label={te("Discount given")} value={formatPrice(totals.discount, "BHD")} accent="text-amber-400" />
+        <Kpi label={te("Orders revenue")} value={formatPrice(totals.revenue, "BHD")} accent="text-emerald-400" />
       </div>
 
       <div className="flex flex-wrap gap-2">
         <div className="relative min-w-[220px] flex-1">
           <Search className="pointer-events-none absolute start-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search code / email / order…" className="h-9 ps-8" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={te("Search code / email / order…")} className="h-9 ps-8" />
         </div>
         <select
           value={code}
           onChange={(e) => setCode(e.target.value)}
           className="h-9 rounded-md border border-primary/20 bg-background px-2 text-sm"
         >
-          <option value="__all__">All coupons</option>
+          <option value="__all__">{te("All coupons")}</option>
           {codes.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
         <Button size="sm" variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
-          <Download className="me-1.5 h-3.5 w-3.5" /> Export CSV
+          <Download className="me-1.5 h-3.5 w-3.5" /> {te("Export CSV")}
         </Button>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-primary/10 bg-card">
         {isLoading ? (
-          <div className="p-10 text-center text-muted-foreground">Loading…</div>
+          <div className="p-10 text-center text-muted-foreground">{te("Loading…")}</div>
         ) : rows.length === 0 ? (
           <div className="p-12 text-center text-muted-foreground">
             <TrendingDown className="mx-auto mb-2 h-10 w-10 text-primary/30" />
-            No redemptions yet.
+            {te("No redemptions yet.")}
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="border-b border-primary/10 text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
-                <th className="p-3 text-start">Date</th>
-                <th className="p-3 text-start">Code</th>
-                <th className="p-3 text-start">Customer</th>
-                <th className="p-3 text-start">Order</th>
-                <th className="p-3 text-end">Order total</th>
-                <th className="p-3 text-end">Discount</th>
+                <th className="p-3 text-start">{te("Date")}</th>
+                <th className="p-3 text-start">{te("Code")}</th>
+                <th className="p-3 text-start">{te("Customer")}</th>
+                <th className="p-3 text-start">{te("Order")}</th>
+                <th className="p-3 text-end">{te("Order total")}</th>
+                <th className="p-3 text-end">{te("Discount")}</th>
               </tr>
             </thead>
             <tbody>
@@ -119,7 +123,7 @@ function CouponUsagePage() {
                 <tr key={r.id} className="border-b border-primary/5 last:border-0 hover:bg-primary/5">
                   <td className="p-3 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</td>
                   <td className="p-3"><span className="rounded bg-primary/10 px-1.5 py-0.5 font-mono text-xs text-primary">{r.coupon_code ?? "—"}</span></td>
-                  <td className="p-3 text-xs">{r.user_email ?? <span className="text-muted-foreground">guest</span>}</td>
+                  <td className="p-3 text-xs">{r.user_email ?? <span className="text-muted-foreground">{te("guest")}</span>}</td>
                   <td className="p-3 font-mono text-xs">{r.order_number ?? "—"}</td>
                   <td className="p-3 text-end">{r.order_total != null ? formatPrice(Number(r.order_total), "BHD") : "—"}</td>
                   <td className="p-3 text-end text-amber-400">−{formatPrice(Number(r.discount_amount), "BHD")}</td>

@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { dirForLang } from "@/lib/dir";
+import { useI18n } from "@/lib/i18n";
+import { makeAdminTE } from "@/lib/admin-i18n";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +47,8 @@ const empty: Partial<Post> = {
 };
 
 function AdminBlog() {
+  const { lang } = useI18n();
+  const te = useMemo(() => makeAdminTE(lang), [lang]);
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [statusF, setStatusF] = useState<"all" | "draft" | "published">("all");
@@ -90,7 +94,7 @@ function AdminBlog() {
   const save = async () => {
     if (!editing) return;
     const title = editing.title_ar || editing.title_en || editing.title_ur;
-    if (!title) return toast.error("Add a title in at least one language");
+    if (!title) return toast.error(te("Add a title in at least one language"));
     let slug = editing.slug?.trim() || slugify(title);
     if (!slug) slug = `post-${Date.now()}`;
 
@@ -123,29 +127,29 @@ function AdminBlog() {
       if (editing.id) {
         const { error } = await supabase.from("blog_posts" as any).update(payload).eq("id", editing.id);
         if (error) throw error;
-        toast.success("Post updated");
+        toast.success(te("Post updated"));
       } else {
         const { data: u } = await supabase.auth.getUser();
         payload.author_id = u.user?.id;
         const { error } = await supabase.from("blog_posts" as any).insert(payload);
         if (error) throw error;
-        toast.success("Post created");
+        toast.success(te("Post created"));
       }
       setEditing(null);
       qc.invalidateQueries({ queryKey: ["admin-blog"] });
       qc.invalidateQueries({ queryKey: ["blog-posts-public"] });
     } catch (e: any) {
-      toast.error(e.message ?? "Save failed");
+      toast.error(e.message ?? te("Save failed"));
     } finally {
       setSaving(false);
     }
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this post?")) return;
+    if (!confirm(te("Delete this post?"))) return;
     const { error } = await supabase.from("blog_posts" as any).delete().eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Deleted");
+    toast.success(te("Deleted"));
     qc.invalidateQueries({ queryKey: ["admin-blog"] });
   };
 
@@ -155,7 +159,7 @@ function AdminBlog() {
     if (next === "published" && !p.published_at) patch.published_at = new Date().toISOString();
     const { error } = await supabase.from("blog_posts" as any).update(patch).eq("id", p.id);
     if (error) return toast.error(error.message);
-    toast.success(next === "published" ? "Published" : "Unpublished");
+    toast.success(next === "published" ? te("Published") : te("Unpublished"));
     qc.invalidateQueries({ queryKey: ["admin-blog"] });
   };
 
@@ -172,32 +176,32 @@ function AdminBlog() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold flex items-center gap-2">
-            <Newspaper className="h-6 w-6 text-primary" /> Blog
+            <Newspaper className="h-6 w-6 text-primary" /> {te("Blog")}
           </h1>
-          <p className="text-sm text-muted-foreground">Publish news, articles and product guides</p>
+          <p className="text-sm text-muted-foreground">{te("Publish news, articles and product guides")}</p>
         </div>
-        <Button onClick={openNew} className="gap-2"><Plus className="h-4 w-4" /> New post</Button>
+        <Button onClick={openNew} className="gap-2"><Plus className="h-4 w-4" /> {te("New post")}</Button>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-4">
-        <Stat label="Total" value={stats.total} />
-        <Stat label="Published" value={stats.published} />
-        <Stat label="Drafts" value={stats.drafts} />
-        <Stat label="Total views" value={stats.views} />
+        <Stat label={te("Total")} value={stats.total} />
+        <Stat label={te("Published")} value={stats.published} />
+        <Stat label={te("Drafts")} value={stats.drafts} />
+        <Stat label={te("Total views")} value={stats.views} />
       </div>
 
       <div className="rounded-xl border border-primary/20 bg-card/60 p-4 backdrop-blur">
         <div className="grid gap-3 md:grid-cols-[1fr_180px]">
           <div className="relative">
             <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title or slug" className="ps-9" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={te("Search title or slug")} className="ps-9" />
           </div>
           <Select value={statusF} onValueChange={(v) => setStatusF(v as any)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
-              <SelectItem value="draft">Drafts</SelectItem>
+              <SelectItem value="all">{te("All")}</SelectItem>
+              <SelectItem value="published">{te("Published")}</SelectItem>
+              <SelectItem value="draft">{te("Drafts")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -205,9 +209,9 @@ function AdminBlog() {
 
       <div className="rounded-xl border border-primary/20 bg-card/60 backdrop-blur">
         {isFetching && !posts ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
+          <div className="p-8 text-center text-sm text-muted-foreground">{te("Loading…")}</div>
         ) : filtered.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No posts</div>
+          <div className="p-12 text-center text-sm text-muted-foreground">{te("No posts")}</div>
         ) : (
           <div className="divide-y divide-primary/10">
             {filtered.map((p) => {
@@ -231,15 +235,15 @@ function AdminBlog() {
                     p.status === "published"
                       ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
                       : "bg-amber-500/15 text-amber-400 border-amber-500/30"
-                  }`}>{p.status}</span>
+                  }`}>{p.status === "published" ? te("published") : te("draft")}</span>
                   {p.status === "published" && (
-                    <a href={`/blog/${p.slug}`} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary" title="Open">
+                    <a href={`/blog/${p.slug}`} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary" title={te("Open")}>
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   )}
                   <Button size="sm" variant="outline" onClick={() => togglePublish(p)} className="gap-1">
                     {p.status === "published" ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                    {p.status === "published" ? "Unpublish" : "Publish"}
+                    {p.status === "published" ? te("Unpublish") : te("Publish")}
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => openEdit(p)}><Pencil className="h-3.5 w-3.5" /></Button>
                   <Button size="sm" variant="outline" onClick={() => remove(p.id)} className="text-red-400 hover:text-red-400"><Trash2 className="h-3.5 w-3.5" /></Button>
@@ -253,59 +257,59 @@ function AdminBlog() {
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing?.id ? "Edit post" : "New post"}</DialogTitle>
+            <DialogTitle>{editing?.id ? te("Edit post") : te("New post")}</DialogTitle>
           </DialogHeader>
           {editing && (
             <div className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-[1fr_140px]">
                 <div>
-                  <label className="text-xs text-muted-foreground">Slug</label>
+                  <label className="text-xs text-muted-foreground">{te("Slug")}</label>
                   <Input
                     value={editing.slug ?? ""}
                     onChange={(e) => setEditing({ ...editing, slug: e.target.value })}
-                    placeholder="auto-generated-from-title"
+                    placeholder={te("auto-generated-from-title")}
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">Status</label>
+                  <label className="text-xs text-muted-foreground">{te("Status")}</label>
                   <Select value={editing.status ?? "draft"} onValueChange={(v) => setEditing({ ...editing, status: v as any })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="draft">{te("Draft")}</SelectItem>
+                      <SelectItem value="published">{te("Published")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground">Cover image URL</label>
+                <label className="text-xs text-muted-foreground">{te("Cover image URL")}</label>
                 <Input value={editing.cover_url ?? ""} onChange={(e) => setEditing({ ...editing, cover_url: e.target.value })} placeholder="https://…" />
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground">Tags (comma separated)</label>
-                <Input value={tagsText} onChange={(e) => setTagsText(e.target.value)} placeholder="IPTV, tips, receivers" />
+                <label className="text-xs text-muted-foreground">{te("Tags (comma separated)")}</label>
+                <Input value={tagsText} onChange={(e) => setTagsText(e.target.value)} placeholder={te("IPTV, tips, receivers")} />
               </div>
 
               {(["ar", "en", "ur", "bn"] as const).map((L) => (
                 <div key={L} className="rounded-lg border border-primary/10 p-3 space-y-2">
                   <div className="text-xs font-semibold uppercase text-primary">{L === "ar" ? "العربية" : L === "en" ? "English" : L === "ur" ? "اردو" : "বাংলা"}</div>
                   <Input
-                    placeholder="Title"
+                    placeholder={te("Title")}
                     value={(editing as any)[`title_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`title_${L}`]: e.target.value })}
                     dir={dirForLang(L)}
                   />
                   <Textarea
-                    placeholder="Short excerpt"
+                    placeholder={te("Short excerpt")}
                     rows={2}
                     value={(editing as any)[`excerpt_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`excerpt_${L}`]: e.target.value })}
                     dir={dirForLang(L)}
                   />
                   <Textarea
-                    placeholder="Content (HTML or plain text)"
+                    placeholder={te("Content (HTML or plain text)")}
                     rows={8}
                     value={(editing as any)[`content_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`content_${L}`]: e.target.value })}
@@ -316,8 +320,8 @@ function AdminBlog() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+            <Button variant="outline" onClick={() => setEditing(null)}>{te("Cancel")}</Button>
+            <Button onClick={save} disabled={saving}>{saving ? te("Saving…") : te("Save")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

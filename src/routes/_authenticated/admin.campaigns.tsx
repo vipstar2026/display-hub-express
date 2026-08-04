@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { dirForLang } from "@/lib/dir";
+import { useI18n } from "@/lib/i18n";
+import { makeAdminT } from "@/lib/admin-i18n";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +43,8 @@ const emptyDraft = {
 };
 
 function CampaignsPage() {
+  const { lang } = useI18n();
+  const t = useMemo(() => makeAdminT(lang), [lang]);
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -100,7 +104,7 @@ function CampaignsPage() {
       }
     },
     onSuccess: () => {
-      toast.success("تم الحفظ");
+      toast.success(t("تم الحفظ","Saved"));
       setOpen(false); setDraft(emptyDraft);
       qc.invalidateQueries({ queryKey: ["campaigns"] });
     },
@@ -114,7 +118,7 @@ function CampaignsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("تم الحذف");
+      toast.success(t("تم الحذف","Deleted"));
       qc.invalidateQueries({ queryKey: ["campaigns"] });
     },
   });
@@ -134,63 +138,63 @@ function CampaignsPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display flex items-center gap-2 text-3xl font-bold">
-            <Megaphone className="h-7 w-7" /> حملات النشرة البريدية
+            <Megaphone className="h-7 w-7" /> {t("حملات النشرة البريدية","Newsletter Campaigns")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            أنشئ حملات، صدّر الجمهور المستهدف، وأرسل عبر خدمتك التسويقية (Brevo/Mailchimp).
+            {t("أنشئ حملات، صدّر الجمهور المستهدف، وأرسل عبر خدمتك التسويقية (Brevo/Mailchimp).","Create campaigns, export target audiences, and send via your marketing service (Brevo/Mailchimp).")}
           </p>
         </div>
         <Button onClick={() => { setDraft(emptyDraft); setOpen(true); }}>
-          <Plus className="me-2 h-4 w-4" /> حملة جديدة
+          <Plus className="me-2 h-4 w-4" /> {t("حملة جديدة","New campaign")}
         </Button>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="إجمالي الحملات" value={stats.total} />
-        <Stat label="مسودّات" value={stats.drafts} />
-        <Stat label="مُرسلة" value={stats.sent} />
-        <Stat label="إجمالي المستقبلين" value={stats.recipients} />
+        <Stat label={t("إجمالي الحملات","Total campaigns")} value={stats.total} />
+        <Stat label={t("مسودّات","Drafts")} value={stats.drafts} />
+        <Stat label={t("مُرسلة","Sent")} value={stats.sent} />
+        <Stat label={t("إجمالي المستقبلين","Total recipients")} value={stats.recipients} />
       </div>
 
       <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-700 dark:text-amber-300">
-        <strong>ملاحظة:</strong> الإرسال الجماعي المباشر معطّل حفاظًا على سمعة الإرسال.
-        استخدم زر "تصدير الجمهور" وارفع الملف إلى خدمة تسويقية متخصصة (Brevo Campaigns، Mailchimp، …).
+        <strong>{t("ملاحظة:","Note:")}</strong> {t("الإرسال الجماعي المباشر معطّل حفاظًا على سمعة الإرسال.","Direct bulk sending is disabled to protect sender reputation.")}
+        {t(' استخدم زر "تصدير الجمهور" وارفع الملف إلى خدمة تسويقية متخصصة (Brevo Campaigns، Mailchimp، …).', ' Use the "Export Audience" button and upload the file to a dedicated marketing service (Brevo Campaigns, Mailchimp, …).')}
       </div>
 
       <div className="relative max-w-sm">
         <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input value={q} onChange={(e) => setQ(e.target.value)}
-          placeholder="بحث في الحملات..." className="ps-9" />
+          placeholder={t("بحث في الحملات...","Search campaigns...")} className="ps-9" />
       </div>
 
       <div className="rounded-lg border">
         <table className="w-full text-sm">
           <thead className="border-b bg-muted/40 text-start">
             <tr>
-              <th className="px-3 py-2 text-start">الاسم</th>
-              <th className="px-3 py-2 text-start">الجمهور</th>
-              <th className="px-3 py-2 text-start">الحالة</th>
-              <th className="px-3 py-2 text-start">أُرسل إلى</th>
-              <th className="px-3 py-2 text-start">التاريخ</th>
-              <th className="px-3 py-2 text-end">إجراءات</th>
+              <th className="px-3 py-2 text-start">{t("الاسم","Name")}</th>
+              <th className="px-3 py-2 text-start">{t("الجمهور","Audience")}</th>
+              <th className="px-3 py-2 text-start">{t("الحالة","Status")}</th>
+              <th className="px-3 py-2 text-start">{t("أُرسل إلى","Sent to")}</th>
+              <th className="px-3 py-2 text-start">{t("التاريخ","Date")}</th>
+              <th className="px-3 py-2 text-end">{t("إجراءات","Actions")}</th>
             </tr>
           </thead>
           <tbody>
             {campaigns.isLoading && (
-              <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">جارٍ التحميل…</td></tr>
+              <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">{t("جارٍ التحميل…","Loading…")}</td></tr>
             )}
             {!campaigns.isLoading && filtered.length === 0 && (
-              <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">لا توجد حملات</td></tr>
+              <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">{t("لا توجد حملات","No campaigns")}</td></tr>
             )}
             {filtered.map((c) => (
               <tr key={c.id} className="border-b hover:bg-muted/30">
                 <td className="px-3 py-2 font-medium">{c.name}</td>
                 <td className="px-3 py-2">
-                  <Badge variant="outline">{c.target_lang ?? "الكل"}</Badge>
+                  <Badge variant="outline">{c.target_lang ?? t("الكل","All")}</Badge>
                 </td>
                 <td className="px-3 py-2">
                   <Badge variant={c.status === "sent" ? "default" : "secondary"}>
-                    {c.status === "sent" ? "مُرسلة" : c.status === "scheduled" ? "مجدولة" : "مسودة"}
+                    {c.status === "sent" ? t("مُرسلة","Sent") : c.status === "scheduled" ? t("مجدولة","Scheduled") : t("مسودة","Draft")}
                   </Badge>
                 </td>
                 <td className="px-3 py-2">{c.sent_count || "—"}</td>
@@ -206,7 +210,7 @@ function CampaignsPage() {
                       <Mail className="h-4 w-4" />
                     </Button>
                     <Button size="sm" variant="ghost"
-                      onClick={() => { if (confirm("حذف الحملة؟")) del.mutate(c.id); }}>
+                      onClick={() => { if (confirm(t("حذف الحملة؟","Delete this campaign?"))) del.mutate(c.id); }}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
@@ -221,26 +225,26 @@ function CampaignsPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>{draft.id ? "تعديل الحملة" : "حملة جديدة"}</DialogTitle>
+            <DialogTitle>{draft.id ? t("تعديل الحملة","Edit campaign") : t("حملة جديدة","New campaign")}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-2">
             <div className="grid gap-2 md:grid-cols-2">
               <div>
-                <Label>اسم الحملة (داخلي)</Label>
+                <Label>{t("اسم الحملة (داخلي)","Campaign name (internal)")}</Label>
                 <Input value={draft.name}
                   onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
               </div>
               <div>
-                <Label>اللغة المستهدفة</Label>
+                <Label>{t("اللغة المستهدفة","Target language")}</Label>
                 <Select value={draft.target_lang}
                   onValueChange={(v) => setDraft({ ...draft, target_lang: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">كل المشتركين</SelectItem>
-                    <SelectItem value="ar">العربية فقط</SelectItem>
-                    <SelectItem value="en">الإنجليزية فقط</SelectItem>
-                    <SelectItem value="ur">الأردية فقط</SelectItem>
-                    <SelectItem value="bn">البنغالية فقط</SelectItem>
+                    <SelectItem value="all">{t("كل المشتركين","All subscribers")}</SelectItem>
+                    <SelectItem value="ar">{t("العربية فقط","Arabic only")}</SelectItem>
+                    <SelectItem value="en">{t("الإنجليزية فقط","English only")}</SelectItem>
+                    <SelectItem value="ur">{t("الأردية فقط","Urdu only")}</SelectItem>
+                    <SelectItem value="bn">{t("البنغالية فقط","Bengali only")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -249,27 +253,27 @@ function CampaignsPage() {
             {(["ar", "en", "ur", "bn"] as const).map((lang) => (
               <div key={lang} className="grid gap-2 rounded-md border p-3">
                 <div className="text-xs font-semibold uppercase text-muted-foreground">
-                  محتوى {lang === "ar" ? "عربي" : lang === "en" ? "إنجليزي" : lang === "ur" ? "أردي" : "بنغالي"}
+                  {t("محتوى","Content")} {lang === "ar" ? t("عربي","Arabic") : lang === "en" ? t("إنجليزي","English") : lang === "ur" ? t("أردي","Urdu") : t("بنغالي","Bengali")}
                 </div>
-                <Input placeholder="العنوان" dir={dirForLang(lang)}
+                <Input placeholder={t("العنوان","Subject")} dir={dirForLang(lang)}
                   value={draft[`subject_${lang}`]}
                   onChange={(e) => setDraft({ ...draft, [`subject_${lang}`]: e.target.value })} />
-                <Textarea placeholder="نص الرسالة (HTML مسموح)" rows={4} dir={dirForLang(lang)}
+                <Textarea placeholder={t("نص الرسالة (HTML مسموح)","Message body (HTML allowed)")} rows={4} dir={dirForLang(lang)}
                   value={draft[`body_${lang}`]}
                   onChange={(e) => setDraft({ ...draft, [`body_${lang}`]: e.target.value })} />
               </div>
             ))}
 
             <div>
-              <Label>ملاحظات داخلية</Label>
+              <Label>{t("ملاحظات داخلية","Internal notes")}</Label>
               <Textarea rows={2} value={draft.notes}
                 onChange={(e) => setDraft({ ...draft, notes: e.target.value })} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpen(false)}>إلغاء</Button>
+            <Button variant="ghost" onClick={() => setOpen(false)}>{t("إلغاء","Cancel")}</Button>
             <Button onClick={() => save.mutate(draft)} disabled={!draft.name || save.isPending}>
-              {save.isPending ? "جارٍ الحفظ…" : "حفظ"}
+              {save.isPending ? t("جارٍ الحفظ…","Saving…") : t("حفظ","Save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -289,6 +293,8 @@ function CampaignsPage() {
 function AudienceDialog({
   campaign, onClose, onMarked,
 }: { campaign: Campaign; onClose: () => void; onMarked: () => void }) {
+  const { lang } = useI18n();
+  const t = useMemo(() => makeAdminT(lang), [lang]);
   const audience = useQuery({
     queryKey: ["campaign-audience", campaign.target_lang ?? "all"],
     queryFn: async () => {
@@ -316,7 +322,7 @@ function AudienceDialog({
 
   function copyEmails() {
     navigator.clipboard.writeText(emails.join(", "));
-    toast.success(`نُسخ ${emails.length} بريدًا إلى الحافظة`);
+    toast.success(`${emails.length} ${t("بريدًا نُسخ إلى الحافظة", "email(s) copied to clipboard")}`);
   }
 
   async function markSent() {
@@ -324,7 +330,7 @@ function AudienceDialog({
       _id: campaign.id, _sent_count: emails.length,
     } as never);
     if (error) return toast.error(error.message);
-    toast.success("تم تسجيل الحملة كمُرسلة");
+    toast.success(t("تم تسجيل الحملة كمُرسلة","Campaign marked as sent"));
     onMarked(); onClose();
   }
 
@@ -332,28 +338,28 @@ function AudienceDialog({
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>جمهور: {campaign.name}</DialogTitle>
+          <DialogTitle>{t("جمهور:","Audience:")} {campaign.name}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div className="rounded-md bg-muted/40 p-3 text-sm">
-            <strong>{emails.length}</strong> مشترك نشِط
-            {campaign.target_lang && <> · لغة: {campaign.target_lang}</>}
+            <strong>{emails.length}</strong> {t("مشترك نشِط","active subscriber(s)")}
+            {campaign.target_lang && <> · {t("لغة:","Language:")} {campaign.target_lang}</>}
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={download} disabled={!emails.length}>
-              <Download className="me-2 h-4 w-4" /> تصدير CSV
+              <Download className="me-2 h-4 w-4" /> {t("تصدير CSV","Export CSV")}
             </Button>
             <Button variant="outline" onClick={copyEmails} disabled={!emails.length}>
-              <Copy className="me-2 h-4 w-4" /> نسخ العناوين
+              <Copy className="me-2 h-4 w-4" /> {t("نسخ العناوين","Copy addresses")}
             </Button>
             <Button onClick={markSent} disabled={!emails.length || campaign.status === "sent"}>
-              <Send className="me-2 h-4 w-4" /> تسجيل كمُرسلة
+              <Send className="me-2 h-4 w-4" /> {t("تسجيل كمُرسلة","Mark as sent")}
             </Button>
           </div>
           <div className="max-h-64 overflow-auto rounded border p-2 text-xs">
             {emails.slice(0, 200).map((e) => <div key={e}>{e}</div>)}
             {emails.length > 200 && (
-              <div className="pt-2 text-muted-foreground">… و{emails.length - 200} آخر</div>
+              <div className="pt-2 text-muted-foreground">… {emails.length - 200} {t("آخر", "more")}</div>
             )}
           </div>
         </div>

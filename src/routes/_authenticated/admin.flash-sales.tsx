@@ -8,9 +8,11 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Edit, Trash2, Zap, Clock, Package } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/format";
+import { useI18n } from "@/lib/i18n";
+import { makeAdminTE } from "@/lib/admin-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/flash-sales")({
   component: AdminFlashSales,
@@ -38,6 +40,8 @@ const empty: Form = {
 };
 
 function AdminFlashSales() {
+  const { lang } = useI18n();
+  const te = useMemo(() => makeAdminTE(lang), [lang]);
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Form>(empty);
@@ -62,9 +66,9 @@ function AdminFlashSales() {
   });
 
   const handleSave = async () => {
-    if (!form.product_id) { toast.error("Select a product"); return; }
-    if (!form.sale_price) { toast.error("Enter sale price"); return; }
-    if (new Date(form.ends_at) <= new Date(form.starts_at)) { toast.error("End must be after start"); return; }
+    if (!form.product_id) { toast.error(te("Select a product")); return; }
+    if (!form.sale_price) { toast.error(te("Enter sale price")); return; }
+    if (new Date(form.ends_at) <= new Date(form.starts_at)) { toast.error(te("End must be after start")); return; }
 
     const payload = {
       product_id: form.product_id,
@@ -82,16 +86,16 @@ function AdminFlashSales() {
       ? await supabase.from("flash_sales").update(payload).eq("id", form.id)
       : await supabase.from("flash_sales").insert(payload);
     if (error) { toast.error(error.message); return; }
-    toast.success("Saved");
+    toast.success(te("Saved"));
     setOpen(false); setForm(empty);
     qc.invalidateQueries({ queryKey: ["admin-flash-sales"] });
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this flash sale?")) return;
+    if (!confirm(te("Delete this flash sale?"))) return;
     const { error } = await supabase.from("flash_sales").delete().eq("id", id);
     if (error) toast.error(error.message);
-    else { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["admin-flash-sales"] }); }
+    else { toast.success(te("Deleted")); qc.invalidateQueries({ queryKey: ["admin-flash-sales"] }); }
   };
 
   const toggleActive = async (id: string, val: boolean) => {
@@ -102,10 +106,10 @@ function AdminFlashSales() {
 
   const statusOf = (s: { starts_at: string; ends_at: string; is_active: boolean }) => {
     const now = Date.now();
-    if (!s.is_active) return { label: "Paused", cls: "bg-muted text-muted-foreground" };
-    if (new Date(s.starts_at).getTime() > now) return { label: "Scheduled", cls: "bg-amber-500/20 text-amber-300" };
-    if (new Date(s.ends_at).getTime() < now) return { label: "Ended", cls: "bg-red-500/20 text-red-300" };
-    return { label: "Live", cls: "bg-emerald-500/20 text-emerald-300" };
+    if (!s.is_active) return { label: te("Paused"), cls: "bg-muted text-muted-foreground" };
+    if (new Date(s.starts_at).getTime() > now) return { label: te("Scheduled"), cls: "bg-amber-500/20 text-amber-300" };
+    if (new Date(s.ends_at).getTime() < now) return { label: te("Ended"), cls: "bg-red-500/20 text-red-300" };
+    return { label: te("Live"), cls: "bg-emerald-500/20 text-emerald-300" };
   };
 
   return (
@@ -113,19 +117,19 @@ function AdminFlashSales() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="flex items-center gap-2 font-display text-2xl font-bold">
-            <Zap className="h-6 w-6 text-red-400" /> Flash Sales
+            <Zap className="h-6 w-6 text-red-400" /> {te("Flash Sales")}
           </h1>
-          <p className="text-sm text-muted-foreground">Time-limited discount campaigns with countdown</p>
+          <p className="text-sm text-muted-foreground">{te("Time-limited discount campaigns with countdown")}</p>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(empty); }}>
           <DialogTrigger asChild>
-            <Button className="bg-primary text-background hover:bg-primary"><Plus className="me-1 h-4 w-4" />New Flash Sale</Button>
+            <Button className="bg-primary text-background hover:bg-primary"><Plus className="me-1 h-4 w-4" />{te("New Flash Sale")}</Button>
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>{form.id ? "Edit" : "New"} Flash Sale</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{form.id ? te("Edit") : te("New")} {te("Flash Sales")}</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div>
-                <Label>Product</Label>
+                <Label>{te("Product")}</Label>
                 <Select value={form.product_id} onValueChange={(v) => {
                   const p = products.find((pp) => pp.id === v);
                   setForm({
@@ -136,7 +140,7 @@ function AdminFlashSales() {
                     original_price: form.original_price || (p ? String(p.price) : ""),
                   });
                 }}>
-                  <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={te("Select product")} /></SelectTrigger>
                   <SelectContent>
                     {products.map((p) => (
                       <SelectItem key={p.id} value={p.id}>{p.name_en} · {formatPrice(Number(p.price), p.currency ?? "BHD")}</SelectItem>
@@ -145,25 +149,25 @@ function AdminFlashSales() {
                 </Select>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div><Label>Name AR</Label><Input dir="rtl" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
-                <div><Label>Name EN</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
-                <div><Label>Name UR</Label><Input dir="rtl" value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
-                <div><Label>Name BN</Label><Input dir="ltr" value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
+                <div><Label>{te("Name AR")}</Label><Input dir="rtl" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+                <div><Label>{te("Name EN")}</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+                <div><Label>{te("Name UR")}</Label><Input dir="rtl" value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+                <div><Label>{te("Name BN")}</Label><Input dir="ltr" value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div><Label>Sale Price</Label><Input type="number" step="0.001" value={form.sale_price} onChange={(e) => setForm({ ...form, sale_price: e.target.value })} /></div>
-                <div><Label>Original Price (optional)</Label><Input type="number" step="0.001" value={form.original_price} onChange={(e) => setForm({ ...form, original_price: e.target.value })} /></div>
+                <div><Label>{te("Sale Price")}</Label><Input type="number" step="0.001" value={form.sale_price} onChange={(e) => setForm({ ...form, sale_price: e.target.value })} /></div>
+                <div><Label>{te("Original Price (optional)")}</Label><Input type="number" step="0.001" value={form.original_price} onChange={(e) => setForm({ ...form, original_price: e.target.value })} /></div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div><Label>Starts</Label><Input type="datetime-local" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} /></div>
-                <div><Label>Ends</Label><Input type="datetime-local" value={form.ends_at} onChange={(e) => setForm({ ...form, ends_at: e.target.value })} /></div>
+                <div><Label>{te("Starts")}</Label><Input type="datetime-local" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} /></div>
+                <div><Label>{te("Ends")}</Label><Input type="datetime-local" value={form.ends_at} onChange={(e) => setForm({ ...form, ends_at: e.target.value })} /></div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div><Label>Stock Limit (optional)</Label><Input type="number" value={form.stock_limit} onChange={(e) => setForm({ ...form, stock_limit: e.target.value })} /></div>
-                <div><Label>Sort Order</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} /></div>
+                <div><Label>{te("Stock Limit (optional)")}</Label><Input type="number" value={form.stock_limit} onChange={(e) => setForm({ ...form, stock_limit: e.target.value })} /></div>
+                <div><Label>{te("Sort Order")}</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} /></div>
               </div>
-              <div className="flex items-center gap-2"><Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} /><Label>Active</Label></div>
-              <Button onClick={handleSave} className="w-full bg-primary text-background hover:bg-primary">Save</Button>
+              <div className="flex items-center gap-2"><Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} /><Label>{te("Active")}</Label></div>
+              <Button onClick={handleSave} className="w-full bg-primary text-background hover:bg-primary">{te("Save")}</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -171,7 +175,7 @@ function AdminFlashSales() {
 
       <div className="space-y-3">
         {sales.length === 0 && (
-          <div className="rounded-xl border border-primary/10 bg-card p-8 text-center text-muted-foreground">No flash sales yet</div>
+          <div className="rounded-xl border border-primary/10 bg-card p-8 text-center text-muted-foreground">{te("No flash sales yet")}</div>
         )}
         {sales.map((s) => {
           const st = statusOf(s as { starts_at: string; ends_at: string; is_active: boolean });
@@ -202,12 +206,12 @@ function AdminFlashSales() {
 
               <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{new Date(s.starts_at).toLocaleString()} → {new Date(s.ends_at).toLocaleString()}</span>
-                {s.stock_limit && <span className="flex items-center gap-1"><Package className="h-3 w-3" />{s.sold_count}/{s.stock_limit} sold</span>}
+                {s.stock_limit && <span className="flex items-center gap-1"><Package className="h-3 w-3" />{s.sold_count}/{s.stock_limit} {te("sold")}</span>}
               </div>
 
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <Switch checked={s.is_active} onCheckedChange={(v) => toggleActive(s.id, v)} />
-                <span className="text-xs text-muted-foreground">Active</span>
+                <span className="text-xs text-muted-foreground">{te("Active")}</span>
                 <div className="ms-auto flex gap-1">
                   <Button size="sm" variant="ghost" onClick={() => {
                     setForm({
