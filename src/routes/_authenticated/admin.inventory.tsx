@@ -18,6 +18,7 @@ type Product = {
   name_ar: string | null;
   name_en: string | null;
   name_ur: string | null;
+  name_bn?: string | null;
   sku: string | null;
   stock: number;
   status: string;
@@ -45,7 +46,7 @@ function InventoryPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("id, name_ar, name_en, name_ur, sku, stock, status, images")
+        .select("id, name_ar, name_en, name_ur, name_bn, sku, stock, status, images")
         .eq("status", "active")
         .lte("stock", effectiveThreshold)
         .order("stock", { ascending: true });
