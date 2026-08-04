@@ -35,6 +35,15 @@ function AdminEmailsPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const dispatchFn = useServerFn(dispatchEmails);
   const txt = (ar: string, en: string, ur: string, bn?: string) => (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? (bn ?? en) : en);
+  const statusLabel = (s: string) => {
+    const map: Record<string, string> = {
+      sent: txt("تم الإرسال", "Sent", "بھیج دیا", "পাঠানো হয়েছে"),
+      queued: txt("بالانتظار", "Queued", "قطار میں", "সারিবদ্ধ"),
+      pending: txt("قيد الانتظار", "Pending", "زیر التواء", "মুলতুবি"),
+      failed: txt("فشل", "Failed", "ناکام", "ব্যর্থ"),
+    };
+    return map[s] ?? s;
+  };
 
 
 
@@ -142,7 +151,7 @@ function AdminEmailsPage() {
                 <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{r.subject}</span>
-                    <Badge variant={r.status === "sent" ? "default" : "secondary"}>{r.status}</Badge>
+                    <Badge variant={r.status === "sent" ? "default" : "secondary"}>{statusLabel(r.status)}</Badge>
                     <Badge variant="outline">{r.template}</Badge>
                   </div>
                   <div className="text-sm text-muted-foreground">
