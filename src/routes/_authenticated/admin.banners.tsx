@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { dirForLang } from "@/lib/dir";
+import { useI18n } from "@/lib/i18n";
+import { makeAdminTE } from "@/lib/admin-i18n";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +40,8 @@ const empty: Partial<Banner> = {
 };
 
 function AdminBanners() {
+  const { lang } = useI18n();
+  const te = useMemo(() => makeAdminTE(lang), [lang]);
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Partial<Banner> | null>(null);
   const [saving, setSaving] = useState(false);
@@ -62,7 +66,7 @@ function AdminBanners() {
 
   const save = async () => {
     if (!editing) return;
-    if (!editing.image_url) return toast.error("Image URL is required");
+    if (!editing.image_url) return toast.error(te("Image URL is required"));
     const payload: any = {
       title_ar: editing.title_ar || null, title_en: editing.title_en || null, title_ur: editing.title_ur || null, title_bn: (editing as any).title_bn || null,
       subtitle_ar: editing.subtitle_ar || null, subtitle_en: editing.subtitle_en || null, subtitle_ur: editing.subtitle_ur || null, subtitle_bn: (editing as any).subtitle_bn || null,
@@ -79,27 +83,27 @@ function AdminBanners() {
       if (editing.id) {
         const { error } = await supabase.from("banners" as any).update(payload).eq("id", editing.id);
         if (error) throw error;
-        toast.success("Banner updated");
+        toast.success(te("Banner updated"));
       } else {
         const { error } = await supabase.from("banners" as any).insert(payload);
         if (error) throw error;
-        toast.success("Banner created");
+        toast.success(te("Banner created"));
       }
       setEditing(null);
       qc.invalidateQueries({ queryKey: ["admin-banners"] });
       qc.invalidateQueries({ queryKey: ["home-banners"] });
     } catch (e: any) {
-      toast.error(e.message ?? "Save failed");
+      toast.error(e.message ?? te("Save failed"));
     } finally {
       setSaving(false);
     }
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this banner?")) return;
+    if (!confirm(te("Delete this banner?"))) return;
     const { error } = await supabase.from("banners" as any).delete().eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Deleted");
+    toast.success(te("Deleted"));
     qc.invalidateQueries({ queryKey: ["admin-banners"] });
     qc.invalidateQueries({ queryKey: ["home-banners"] });
   };
@@ -125,28 +129,28 @@ function AdminBanners() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold flex items-center gap-2">
-            <ImageIcon className="h-6 w-6 text-primary" /> Homepage Banners
+            <ImageIcon className="h-6 w-6 text-primary" /> {te("Homepage Banners")}
           </h1>
-          <p className="text-sm text-muted-foreground">Rotating hero slider — schedule, reorder, translate</p>
+          <p className="text-sm text-muted-foreground">{te("Rotating hero slider — schedule, reorder, translate")}</p>
         </div>
-        <Button onClick={() => setEditing({ ...empty })} className="gap-2"><Plus className="h-4 w-4" /> New banner</Button>
+        <Button onClick={() => setEditing({ ...empty })} className="gap-2"><Plus className="h-4 w-4" /> {te("New banner")}</Button>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <Stat label="Total" value={stats.total} />
-        <Stat label="Active" value={stats.active} />
-        <Stat label="Inactive" value={stats.inactive} />
+        <Stat label={te("Total")} value={stats.total} />
+        <Stat label={te("Active")} value={stats.active} />
+        <Stat label={te("Inactive")} value={stats.inactive} />
       </div>
 
       <div className="rounded-xl border border-primary/20 bg-card/60 backdrop-blur">
         {isFetching && !banners ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
+          <div className="p-8 text-center text-sm text-muted-foreground">{te("Loading…")}</div>
         ) : (banners ?? []).length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No banners yet</div>
+          <div className="p-12 text-center text-sm text-muted-foreground">{te("No banners yet")}</div>
         ) : (
           <div className="divide-y divide-primary/10">
             {(banners ?? []).map((b) => {
-              const title = b.title_ar || b.title_en || b.title_ur || "(untitled)";
+              const title = b.title_ar || b.title_en || b.title_ur || te("(untitled)");
               return (
                 <div key={b.id} className="flex flex-wrap items-center gap-3 p-4 hover:bg-primary/5">
                   <div className="h-16 w-28 flex-shrink-0 overflow-hidden rounded bg-primary/5">
@@ -157,8 +161,8 @@ function AdminBanners() {
                     <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span>#{b.sort_order}</span>
                       {b.link_url && (<><span>·</span><a href={b.link_url} target="_blank" rel="noreferrer" className="hover:text-primary flex items-center gap-1"><ExternalLink className="h-3 w-3" />{b.link_url}</a></>)}
-                      {b.starts_at && (<><span>·</span><span>from {new Date(b.starts_at).toLocaleDateString()}</span></>)}
-                      {b.ends_at && (<><span>·</span><span>until {new Date(b.ends_at).toLocaleDateString()}</span></>)}
+                      {b.starts_at && (<><span>·</span><span>{te("from")} {new Date(b.starts_at).toLocaleDateString()}</span></>)}
+                      {b.ends_at && (<><span>·</span><span>{te("until")} {new Date(b.ends_at).toLocaleDateString()}</span></>)}
                     </div>
                   </div>
                   <span className={`rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
@@ -183,12 +187,12 @@ function AdminBanners() {
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing?.id ? "Edit banner" : "New banner"}</DialogTitle>
+            <DialogTitle>{editing?.id ? te("Edit banner") : te("New banner")}</DialogTitle>
           </DialogHeader>
           {editing && (
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-muted-foreground">Image URL *</label>
+                <label className="text-xs text-muted-foreground">{te("Image URL *")}</label>
                 <Input value={editing.image_url ?? ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} placeholder="https://…" />
                 {editing.image_url && (
                   <div className="mt-2 aspect-[21/9] w-full overflow-hidden rounded-lg border border-primary/10 bg-black">
@@ -199,49 +203,49 @@ function AdminBanners() {
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="text-xs text-muted-foreground">Link URL</label>
-                  <Input value={editing.link_url ?? ""} onChange={(e) => setEditing({ ...editing, link_url: e.target.value })} placeholder="/shop or https://…" />
+                  <label className="text-xs text-muted-foreground">{te("Link URL")}</label>
+                  <Input value={editing.link_url ?? ""} onChange={(e) => setEditing({ ...editing, link_url: e.target.value })} placeholder={te("/shop or https://…")} />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">Sort order</label>
+                  <label className="text-xs text-muted-foreground">{te("Sort order")}</label>
                   <Input type="number" value={editing.sort_order ?? 0} onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) })} />
                 </div>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="text-xs text-muted-foreground">Starts at</label>
+                  <label className="text-xs text-muted-foreground">{te("Starts at")}</label>
                   <Input type="datetime-local" value={editing.starts_at ? editing.starts_at.slice(0,16) : ""} onChange={(e) => setEditing({ ...editing, starts_at: e.target.value ? new Date(e.target.value).toISOString() : null })} />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">Ends at</label>
+                  <label className="text-xs text-muted-foreground">{te("Ends at")}</label>
                   <Input type="datetime-local" value={editing.ends_at ? editing.ends_at.slice(0,16) : ""} onChange={(e) => setEditing({ ...editing, ends_at: e.target.value ? new Date(e.target.value).toISOString() : null })} />
                 </div>
               </div>
 
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={editing.is_active ?? true} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} />
-                Active
+                {te("Active")}
               </label>
 
               {(["ar", "en", "ur", "bn"] as const).map((L) => (
                 <div key={L} className="rounded-lg border border-primary/10 p-3 space-y-2">
                   <div className="text-xs font-semibold uppercase text-primary">{L === "ar" ? "العربية" : L === "en" ? "English" : L === "ur" ? "اردو" : "বাংলা"}</div>
                   <Input
-                    placeholder="Title"
+                    placeholder={te("Title")}
                     value={(editing as any)[`title_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`title_${L}`]: e.target.value })}
                     dir={dirForLang(L)}
                   />
                   <Textarea
-                    placeholder="Subtitle"
+                    placeholder={te("Subtitle")}
                     rows={2}
                     value={(editing as any)[`subtitle_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`subtitle_${L}`]: e.target.value })}
                     dir={dirForLang(L)}
                   />
                   <Input
-                    placeholder="Button label (CTA)"
+                    placeholder={te("Button label (CTA)")}
                     value={(editing as any)[`cta_label_${L}`] ?? ""}
                     onChange={(e) => setEditing({ ...editing, [`cta_label_${L}`]: e.target.value })}
                     dir={dirForLang(L)}
@@ -251,8 +255,8 @@ function AdminBanners() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+            <Button variant="outline" onClick={() => setEditing(null)}>{te("Cancel")}</Button>
+            <Button onClick={save} disabled={saving}>{saving ? te("Saving…") : te("Save")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
