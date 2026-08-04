@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { cleanPhoneNumber, useSiteSettings } from "@/lib/site-settings";
-import { waAnchorProps } from "@/lib/whatsapp";
+import { waLink, openWhatsApp } from "@/lib/whatsapp";
 import { toast } from "sonner";
 import { Mail, Phone, MapPin, Clock, MessageCircle, Send, CheckCircle2 } from "lucide-react";
 
