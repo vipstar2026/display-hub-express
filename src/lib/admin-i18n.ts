@@ -193,3 +193,16 @@ export function makeAdminT(lang: string) {
     return (lang === "ur" ? tr.ur : tr.bn) || e;
   };
 }
+
+/**
+ * English-keyed translator for admin screens written with plain English text.
+ * `te("Orders")` returns the string in the active UI language.
+ */
+export function makeAdminTE(lang: string) {
+  return (en: string): string => {
+    if (lang === "en") return en;
+    const tr = EN_DICT[en];
+    if (!tr) return en;
+    return (lang === "ar" ? tr.ar : lang === "ur" ? tr.ur : tr.bn) || en;
+  };
+}
