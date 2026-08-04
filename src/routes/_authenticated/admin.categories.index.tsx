@@ -8,6 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Edit, Trash2, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useI18n, localizedName } from "@/lib/i18n";
+import { makeAdminT } from "@/lib/admin-i18n";
+import { fieldDirProps } from "@/lib/dir";
 
 
 export const Route = createFileRoute("/_authenticated/admin/categories/")({
@@ -18,6 +21,8 @@ interface CatForm { id?: string; slug: string; name_ar: string; name_en: string;
 const empty: CatForm = { slug: "", name_ar: "", name_en: "", name_ur: "", name_bn: "", icon: "satellite", sort_order: "0" };
 
 function AdminCategories() {
+  const { lang } = useI18n();
+  const t = makeAdminT(lang);
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<CatForm>(empty);
@@ -37,26 +42,26 @@ function AdminCategories() {
       ? await supabase.from("categories").update(payload).eq("id", form.id)
       : await supabase.from("categories").insert(payload);
     if (error) { toast.error(error.message); return; }
-    toast.success("Saved"); setOpen(false); setForm(empty); qc.invalidateQueries({ queryKey: ["admin-cats"] });
+    toast.success(t("تم الحفظ", "Saved")); setOpen(false); setForm(empty); qc.invalidateQueries({ queryKey: ["admin-cats"] });
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold">Categories</h1>
+        <h1 className="font-display text-2xl font-bold">{t("التصنيفات", "Categories")}</h1>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(empty); }}>
-          <DialogTrigger asChild><Button className="bg-primary text-background hover:bg-primary"><Plus className="me-1 h-4 w-4" />New</Button></DialogTrigger>
+          <DialogTrigger asChild><Button className="bg-primary text-background hover:bg-primary"><Plus className="me-1 h-4 w-4" />{t("جديد", "New")}</Button></DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>{form.id ? "Edit" : "New"} Category</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{form.id ? t("تعديل التصنيف", "Edit Category") : t("تصنيف جديد", "New Category")}</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <div><Label>Slug</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} /></div>
-              <div><Label>Name AR</Label><Input dir="rtl" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
-              <div><Label>Name EN</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
-              <div><Label>Name UR</Label><Input dir="rtl" value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
-              <div><Label>Name BN</Label><Input dir="ltr" value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
-              <div><Label>Icon (lucide name)</Label><Input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} /></div>
-              <div><Label>Sort Order</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} /></div>
-              <Button onClick={handleSave} className="w-full bg-primary text-background hover:bg-primary">Save</Button>
+              <div><Label>{t("الرابط (Slug)", "Slug")}</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} /></div>
+              <div><Label>{t("الاسم (عربي)", "Name AR")}</Label><Input dir="rtl" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+              <div><Label>{t("الاسم (إنجليزي)", "Name EN")}</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+              <div><Label>{t("الاسم (أردو)", "Name UR")}</Label><Input dir="rtl" value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+              <div><Label>{t("الاسم (بنغالي)", "Name BN")}</Label><Input dir="ltr" value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
+              <div><Label>{t("أيقونة (اسم lucide)", "Icon (lucide name)")}</Label><Input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} /></div>
+              <div><Label>{t("ترتيب العرض", "Sort Order")}</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} /></div>
+              <Button onClick={handleSave} className="w-full bg-primary text-background hover:bg-primary">{t("حفظ", "Save")}</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -71,7 +76,7 @@ function AdminCategories() {
               className="flex min-w-0 flex-1 items-center gap-2"
             >
               <div className="min-w-0">
-                <div className="truncate font-medium">{c.name_en} <span className="text-muted-foreground">· {c.name_ar}</span></div>
+                <div className="truncate font-medium">{localizedName(c as unknown as Record<string, unknown>, "name", lang)}</div>
                 <div className="text-xs text-muted-foreground">/{c.slug}</div>
               </div>
               <ChevronRight className="ms-auto h-4 w-4 text-muted-foreground rtl:rotate-180" />
@@ -80,9 +85,9 @@ function AdminCategories() {
               <Edit className="h-4 w-4" />
             </Button>
             <Button size="sm" variant="ghost" onClick={async () => {
-              if (!confirm("Delete?")) return;
+              if (!confirm(t("حذف؟", "Delete?"))) return;
               const { error } = await supabase.from("categories").delete().eq("id", c.id);
-              if (error) toast.error(error.message); else { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["admin-cats"] }); }
+              if (error) toast.error(error.message); else { toast.success(t("تم الحذف", "Deleted")); qc.invalidateQueries({ queryKey: ["admin-cats"] }); }
             }}><Trash2 className="h-4 w-4 text-destructive" /></Button>
           </div>
         ))}
