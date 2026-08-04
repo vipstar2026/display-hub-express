@@ -41,3 +41,11 @@ export function waAnchorProps(phone: string | null | undefined, text?: string) {
     },
   };
 }
+
+/** URL that opens the chat on the current device (WhatsApp Web on desktop). */
+export function waDesktopLink(phone: string | null | undefined, text?: string) {
+  const n = cleanWaNumber(phone);
+  if (!n) return "#";
+  if (isMobileDevice()) return waLink(phone, text);
+  return `https://web.whatsapp.com/send?phone=${n}${text ? `&text=${encodeURIComponent(text)}` : ""}`;
+}
