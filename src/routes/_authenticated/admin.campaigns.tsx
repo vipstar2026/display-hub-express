@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/admin/campaigns")({
 
 type Campaign = {
   id: string; name: string;
-  subject_ar: string | null; subject_en: string | null; subject_ur: string | null;
+  subject_ar: string | null; subject_en: string | null; subject_ur: string | null; subject_bn: string | null;
   body_ar: string | null; body_en: string | null; body_ur: string | null;
   target_lang: string | null; status: string;
   audience_count: number; sent_count: number;
@@ -34,8 +34,8 @@ type Campaign = {
 
 const emptyDraft = {
   id: "", name: "",
-  subject_ar: "", subject_en: "", subject_ur: "",
-  body_ar: "", body_en: "", body_ur: "",
+  subject_ar: "", subject_en: "", subject_ur: "", subject_bn: "",
+  body_ar: "", body_en: "", body_ur: "", body_bn: "",
   target_lang: "all", notes: "",
 };
 

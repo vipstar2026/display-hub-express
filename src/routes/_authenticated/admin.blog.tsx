@@ -17,9 +17,9 @@ export const Route = createFileRoute("/_authenticated/admin/blog")({
 type Post = {
   id: string;
   slug: string;
-  title_ar: string | null; title_en: string | null; title_ur: string | null;
-  excerpt_ar: string | null; excerpt_en: string | null; excerpt_ur: string | null;
-  content_ar: string | null; content_en: string | null; content_ur: string | null;
+  title_ar: string | null; title_en: string | null; title_ur: string | null; title_bn: string | null;
+  excerpt_ar: string | null; excerpt_en: string | null; excerpt_ur: string | null; excerpt_bn: string | null;
+  content_ar: string | null; content_en: string | null; content_ur: string | null; content_bn: string | null;
   cover_url: string | null;
   tags: string[];
   status: "draft" | "published";

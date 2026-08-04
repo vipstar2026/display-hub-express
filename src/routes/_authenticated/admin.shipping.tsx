@@ -21,7 +21,7 @@ type Zone = {
   country_code: string; regions: string[]; is_active: boolean; sort_order: number;
 };
 type Rate = {
-  id: string; zone_id: string; name_ar: string; name_en: string; name_ur: string | null; name_bn?: string | null; name_bn?: string | null;
+  id: string; zone_id: string; name_ar: string; name_en: string; name_ur: string | null; name_bn?: string | null;
   method: string; price: number; free_over: number | null;
   min_delivery_days: number; max_delivery_days: number; is_active: boolean; sort_order: number;
 };

@@ -15,11 +15,11 @@ export const Route = createFileRoute("/_authenticated/admin/banners")({
 
 type Banner = {
   id: string;
-  title_ar: string | null; title_en: string | null; title_ur: string | null;
-  subtitle_ar: string | null; subtitle_en: string | null; subtitle_ur: string | null;
+  title_ar: string | null; title_en: string | null; title_ur: string | null; title_bn: string | null;
+  subtitle_ar: string | null; subtitle_en: string | null; subtitle_ur: string | null; subtitle_bn: string | null;
   image_url: string;
   link_url: string | null;
-  cta_label_ar: string | null; cta_label_en: string | null; cta_label_ur: string | null;
+  cta_label_ar: string | null; cta_label_en: string | null; cta_label_ur: string | null; cta_label_bn: string | null;
   sort_order: number;
   is_active: boolean;
   starts_at: string | null;
