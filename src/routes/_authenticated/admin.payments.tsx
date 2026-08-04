@@ -40,7 +40,7 @@ function AdminPaymentsPage() {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<(typeof STATUSES)[number]>("all");
 
-  const txt = (ar: string, en: string, ur: string) => (lang === "ar" ? ar : lang === "ur" ? ur : en);
+  const txt = (ar: string, en: string, ur: string, bn?: string) => (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? (bn ?? en) : en);
 
   const { data: rows = [], isLoading, refetch, isFetching } = useQuery({
     queryKey: ["admin-payment-tx"],

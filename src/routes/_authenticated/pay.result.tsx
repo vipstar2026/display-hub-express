@@ -47,7 +47,7 @@ function PayResult() {
     }
   }, [data?.success, search.order, nav]);
 
-  const txt = (ar: string, en: string, ur: string) => (lang === "ar" ? ar : lang === "ur" ? ur : en);
+  const txt = (ar: string, en: string, ur: string, bn?: string) => (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? (bn ?? en) : en);
 
   return (
     <div className="min-h-screen bg-background">
