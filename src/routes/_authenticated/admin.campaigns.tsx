@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { dirForLang } from "@/lib/dir";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -250,10 +251,10 @@ function CampaignsPage() {
                 <div className="text-xs font-semibold uppercase text-muted-foreground">
                   محتوى {lang === "ar" ? "عربي" : lang === "en" ? "إنجليزي" : lang === "ur" ? "أردي" : "بنغالي"}
                 </div>
-                <Input placeholder="العنوان"
+                <Input placeholder="العنوان" dir={dirForLang(lang)}
                   value={draft[`subject_${lang}`]}
                   onChange={(e) => setDraft({ ...draft, [`subject_${lang}`]: e.target.value })} />
-                <Textarea placeholder="نص الرسالة (HTML مسموح)" rows={4}
+                <Textarea placeholder="نص الرسالة (HTML مسموح)" rows={4} dir={dirForLang(lang)}
                   value={draft[`body_${lang}`]}
                   onChange={(e) => setDraft({ ...draft, [`body_${lang}`]: e.target.value })} />
               </div>
