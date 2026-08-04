@@ -239,6 +239,7 @@ function CampaignsPage() {
                     <SelectItem value="ar">العربية فقط</SelectItem>
                     <SelectItem value="en">الإنجليزية فقط</SelectItem>
                     <SelectItem value="ur">الأردية فقط</SelectItem>
+                    <SelectItem value="bn">البنغالية فقط</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
