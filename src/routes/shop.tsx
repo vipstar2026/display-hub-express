@@ -54,7 +54,7 @@ function ShopPage() {
   const { data: products } = useQuery({
     queryKey: ["shop-products", category, q, sort, min, max],
     queryFn: async () => {
-      let query = supabase.from("products").select("*, categories!inner(id, slug, name_ar, name_en, name_ur, sort_order)").eq("status", "active");
+      let query = supabase.from("products").select("*, categories!inner(id, slug, name_ar, name_en, name_ur, name_bn, sort_order)").eq("status", "active");
       if (category) query = query.eq("categories.slug", category);
       if (q) query = query.or(`name_ar.ilike.%${q}%,name_en.ilike.%${q}%`);
       if (min) query = query.gte("price", Number(min));
@@ -76,7 +76,7 @@ function ShopPage() {
     (products ?? []).forEach((p: any) => {
       const cid = p.categories?.id ?? p.category_id;
       if (!cid) return;
-      if (!buckets.has(cid)) buckets.set(cid, { cat: p.categories ?? { id: cid, name_en: "Other", name_ar: "أخرى", name_ur: "دیگر", slug: "" }, items: [] });
+      if (!buckets.has(cid)) buckets.set(cid, { cat: p.categories ?? { id: cid, name_en: "Other", name_ar: "أخرى", name_ur: "دیگر", name_bn: "অন্যান্য", slug: "" }, items: [] });
       buckets.get(cid)!.items.push(p);
     });
     return Array.from(buckets.values()).filter((g) => g.items.length > 0);

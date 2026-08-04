@@ -123,6 +123,7 @@ export type Database = {
         Row: {
           created_at: string
           cta_label_ar: string | null
+          cta_label_bn: string | null
           cta_label_en: string | null
           cta_label_ur: string | null
           ends_at: string | null
@@ -133,9 +134,11 @@ export type Database = {
           sort_order: number
           starts_at: string | null
           subtitle_ar: string | null
+          subtitle_bn: string | null
           subtitle_en: string | null
           subtitle_ur: string | null
           title_ar: string | null
+          title_bn: string | null
           title_en: string | null
           title_ur: string | null
           updated_at: string
@@ -143,6 +146,7 @@ export type Database = {
         Insert: {
           created_at?: string
           cta_label_ar?: string | null
+          cta_label_bn?: string | null
           cta_label_en?: string | null
           cta_label_ur?: string | null
           ends_at?: string | null
@@ -153,9 +157,11 @@ export type Database = {
           sort_order?: number
           starts_at?: string | null
           subtitle_ar?: string | null
+          subtitle_bn?: string | null
           subtitle_en?: string | null
           subtitle_ur?: string | null
           title_ar?: string | null
+          title_bn?: string | null
           title_en?: string | null
           title_ur?: string | null
           updated_at?: string
@@ -163,6 +169,7 @@ export type Database = {
         Update: {
           created_at?: string
           cta_label_ar?: string | null
+          cta_label_bn?: string | null
           cta_label_en?: string | null
           cta_label_ur?: string | null
           ends_at?: string | null
@@ -173,9 +180,11 @@ export type Database = {
           sort_order?: number
           starts_at?: string | null
           subtitle_ar?: string | null
+          subtitle_bn?: string | null
           subtitle_en?: string | null
           subtitle_ur?: string | null
           title_ar?: string | null
+          title_bn?: string | null
           title_en?: string | null
           title_ur?: string | null
           updated_at?: string
@@ -186,11 +195,13 @@ export type Database = {
         Row: {
           author_id: string | null
           content_ar: string | null
+          content_bn: string | null
           content_en: string | null
           content_ur: string | null
           cover_url: string | null
           created_at: string
           excerpt_ar: string | null
+          excerpt_bn: string | null
           excerpt_en: string | null
           excerpt_ur: string | null
           id: string
@@ -199,6 +210,7 @@ export type Database = {
           status: string
           tags: string[]
           title_ar: string | null
+          title_bn: string | null
           title_en: string | null
           title_ur: string | null
           updated_at: string
@@ -207,11 +219,13 @@ export type Database = {
         Insert: {
           author_id?: string | null
           content_ar?: string | null
+          content_bn?: string | null
           content_en?: string | null
           content_ur?: string | null
           cover_url?: string | null
           created_at?: string
           excerpt_ar?: string | null
+          excerpt_bn?: string | null
           excerpt_en?: string | null
           excerpt_ur?: string | null
           id?: string
@@ -220,6 +234,7 @@ export type Database = {
           status?: string
           tags?: string[]
           title_ar?: string | null
+          title_bn?: string | null
           title_en?: string | null
           title_ur?: string | null
           updated_at?: string
@@ -228,11 +243,13 @@ export type Database = {
         Update: {
           author_id?: string | null
           content_ar?: string | null
+          content_bn?: string | null
           content_en?: string | null
           content_ur?: string | null
           cover_url?: string | null
           created_at?: string
           excerpt_ar?: string | null
+          excerpt_bn?: string | null
           excerpt_en?: string | null
           excerpt_ur?: string | null
           id?: string
@@ -241,6 +258,7 @@ export type Database = {
           status?: string
           tags?: string[]
           title_ar?: string | null
+          title_bn?: string | null
           title_en?: string | null
           title_ur?: string | null
           updated_at?: string
@@ -256,6 +274,7 @@ export type Database = {
           id: string
           is_active: boolean
           name_ar: string
+          name_bn: string | null
           name_en: string
           name_ur: string | null
           parent_id: string | null
@@ -270,6 +289,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name_ar: string
+          name_bn?: string | null
           name_en: string
           name_ur?: string | null
           parent_id?: string | null
@@ -284,6 +304,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name_ar?: string
+          name_bn?: string | null
           name_en?: string
           name_ur?: string | null
           parent_id?: string | null
@@ -600,6 +621,7 @@ export type Database = {
           id: string
           is_active: boolean
           name_ar: string
+          name_bn: string | null
           name_en: string
           name_ur: string | null
           original_price: number | null
@@ -617,6 +639,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name_ar: string
+          name_bn?: string | null
           name_en: string
           name_ur?: string | null
           original_price?: number | null
@@ -634,6 +657,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name_ar?: string
+          name_bn?: string | null
           name_en?: string
           name_ur?: string | null
           original_price?: number | null
@@ -896,6 +920,7 @@ export type Database = {
         Row: {
           audience_count: number
           body_ar: string | null
+          body_bn: string | null
           body_en: string | null
           body_ur: string | null
           created_at: string
@@ -908,6 +933,7 @@ export type Database = {
           sent_count: number
           status: string
           subject_ar: string | null
+          subject_bn: string | null
           subject_en: string | null
           subject_ur: string | null
           target_lang: string | null
@@ -916,6 +942,7 @@ export type Database = {
         Insert: {
           audience_count?: number
           body_ar?: string | null
+          body_bn?: string | null
           body_en?: string | null
           body_ur?: string | null
           created_at?: string
@@ -928,6 +955,7 @@ export type Database = {
           sent_count?: number
           status?: string
           subject_ar?: string | null
+          subject_bn?: string | null
           subject_en?: string | null
           subject_ur?: string | null
           target_lang?: string | null
@@ -936,6 +964,7 @@ export type Database = {
         Update: {
           audience_count?: number
           body_ar?: string | null
+          body_bn?: string | null
           body_en?: string | null
           body_ur?: string | null
           created_at?: string
@@ -948,6 +977,7 @@ export type Database = {
           sent_count?: number
           status?: string
           subject_ar?: string | null
+          subject_bn?: string | null
           subject_en?: string | null
           subject_ur?: string | null
           target_lang?: string | null
@@ -1253,6 +1283,7 @@ export type Database = {
           icon: string | null
           id: string
           instructions_ar: string | null
+          instructions_bn: string | null
           instructions_en: string | null
           instructions_ur: string | null
           is_active: boolean | null
@@ -1261,6 +1292,7 @@ export type Database = {
           max_amount: number | null
           min_amount: number | null
           name_ar: string
+          name_bn: string | null
           name_en: string
           name_ur: string | null
           requires_proof: boolean | null
@@ -1282,6 +1314,7 @@ export type Database = {
           icon?: string | null
           id?: string
           instructions_ar?: string | null
+          instructions_bn?: string | null
           instructions_en?: string | null
           instructions_ur?: string | null
           is_active?: boolean | null
@@ -1290,6 +1323,7 @@ export type Database = {
           max_amount?: number | null
           min_amount?: number | null
           name_ar: string
+          name_bn?: string | null
           name_en: string
           name_ur?: string | null
           requires_proof?: boolean | null
@@ -1311,6 +1345,7 @@ export type Database = {
           icon?: string | null
           id?: string
           instructions_ar?: string | null
+          instructions_bn?: string | null
           instructions_en?: string | null
           instructions_ur?: string | null
           is_active?: boolean | null
@@ -1319,6 +1354,7 @@ export type Database = {
           max_amount?: number | null
           min_amount?: number | null
           name_ar?: string
+          name_bn?: string | null
           name_en?: string
           name_ur?: string | null
           requires_proof?: boolean | null
@@ -1569,6 +1605,7 @@ export type Database = {
           created_at: string
           currency: string
           description_ar: string | null
+          description_bn: string | null
           description_en: string | null
           description_ur: string | null
           features: Json
@@ -1576,6 +1613,7 @@ export type Database = {
           images: Json
           is_featured: boolean
           name_ar: string
+          name_bn: string | null
           name_en: string
           name_ur: string | null
           price: number
@@ -1596,6 +1634,7 @@ export type Database = {
           created_at?: string
           currency?: string
           description_ar?: string | null
+          description_bn?: string | null
           description_en?: string | null
           description_ur?: string | null
           features?: Json
@@ -1603,6 +1642,7 @@ export type Database = {
           images?: Json
           is_featured?: boolean
           name_ar: string
+          name_bn?: string | null
           name_en: string
           name_ur?: string | null
           price: number
@@ -1623,6 +1663,7 @@ export type Database = {
           created_at?: string
           currency?: string
           description_ar?: string | null
+          description_bn?: string | null
           description_en?: string | null
           description_ur?: string | null
           features?: Json
@@ -1630,6 +1671,7 @@ export type Database = {
           images?: Json
           is_featured?: boolean
           name_ar?: string
+          name_bn?: string | null
           name_en?: string
           name_ur?: string | null
           price?: number
@@ -1846,6 +1888,7 @@ export type Database = {
           method: string
           min_delivery_days: number
           name_ar: string
+          name_bn: string | null
           name_en: string
           name_ur: string | null
           price: number
@@ -1862,6 +1905,7 @@ export type Database = {
           method?: string
           min_delivery_days?: number
           name_ar: string
+          name_bn?: string | null
           name_en: string
           name_ur?: string | null
           price?: number
@@ -1878,6 +1922,7 @@ export type Database = {
           method?: string
           min_delivery_days?: number
           name_ar?: string
+          name_bn?: string | null
           name_en?: string
           name_ur?: string | null
           price?: number
@@ -1902,6 +1947,7 @@ export type Database = {
           id: string
           is_active: boolean
           name_ar: string
+          name_bn: string | null
           name_en: string
           name_ur: string | null
           regions: Json
@@ -1914,6 +1960,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name_ar: string
+          name_bn?: string | null
           name_en: string
           name_ur?: string | null
           regions?: Json
@@ -1926,6 +1973,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name_ar?: string
+          name_bn?: string | null
           name_en?: string
           name_ur?: string | null
           regions?: Json
@@ -1956,12 +2004,15 @@ export type Database = {
           google_analytics_id: string | null
           hero_badge_text: string | null
           hero_cta_ar: string | null
+          hero_cta_bn: string | null
           hero_cta_en: string | null
           hero_cta_ur: string | null
           hero_subtitle_ar: string | null
+          hero_subtitle_bn: string | null
           hero_subtitle_en: string | null
           hero_subtitle_ur: string | null
           hero_title_ar: string | null
+          hero_title_bn: string | null
           hero_title_en: string | null
           hero_title_ur: string | null
           id: number
@@ -1971,6 +2022,7 @@ export type Database = {
           maintenance_message: string | null
           maintenance_mode: boolean
           meta_description_ar: string | null
+          meta_description_bn: string | null
           meta_description_en: string | null
           meta_description_ur: string | null
           meta_keywords: string | null
@@ -1986,6 +2038,7 @@ export type Database = {
           snapchat_url: string | null
           social_links: Json
           tagline_ar: string | null
+          tagline_bn: string | null
           tagline_en: string | null
           tagline_ur: string | null
           telegram_url: string | null
@@ -2019,12 +2072,15 @@ export type Database = {
           google_analytics_id?: string | null
           hero_badge_text?: string | null
           hero_cta_ar?: string | null
+          hero_cta_bn?: string | null
           hero_cta_en?: string | null
           hero_cta_ur?: string | null
           hero_subtitle_ar?: string | null
+          hero_subtitle_bn?: string | null
           hero_subtitle_en?: string | null
           hero_subtitle_ur?: string | null
           hero_title_ar?: string | null
+          hero_title_bn?: string | null
           hero_title_en?: string | null
           hero_title_ur?: string | null
           id?: number
@@ -2034,6 +2090,7 @@ export type Database = {
           maintenance_message?: string | null
           maintenance_mode?: boolean
           meta_description_ar?: string | null
+          meta_description_bn?: string | null
           meta_description_en?: string | null
           meta_description_ur?: string | null
           meta_keywords?: string | null
@@ -2049,6 +2106,7 @@ export type Database = {
           snapchat_url?: string | null
           social_links?: Json
           tagline_ar?: string | null
+          tagline_bn?: string | null
           tagline_en?: string | null
           tagline_ur?: string | null
           telegram_url?: string | null
@@ -2082,12 +2140,15 @@ export type Database = {
           google_analytics_id?: string | null
           hero_badge_text?: string | null
           hero_cta_ar?: string | null
+          hero_cta_bn?: string | null
           hero_cta_en?: string | null
           hero_cta_ur?: string | null
           hero_subtitle_ar?: string | null
+          hero_subtitle_bn?: string | null
           hero_subtitle_en?: string | null
           hero_subtitle_ur?: string | null
           hero_title_ar?: string | null
+          hero_title_bn?: string | null
           hero_title_en?: string | null
           hero_title_ur?: string | null
           id?: number
@@ -2097,6 +2158,7 @@ export type Database = {
           maintenance_message?: string | null
           maintenance_mode?: boolean
           meta_description_ar?: string | null
+          meta_description_bn?: string | null
           meta_description_en?: string | null
           meta_description_ur?: string | null
           meta_keywords?: string | null
@@ -2112,6 +2174,7 @@ export type Database = {
           snapchat_url?: string | null
           social_links?: Json
           tagline_ar?: string | null
+          tagline_bn?: string | null
           tagline_en?: string | null
           tagline_ur?: string | null
           telegram_url?: string | null
@@ -2256,6 +2319,7 @@ export type Database = {
           icon: string | null
           id: string | null
           instructions_ar: string | null
+          instructions_bn: string | null
           instructions_en: string | null
           instructions_ur: string | null
           is_active: boolean | null
@@ -2264,6 +2328,7 @@ export type Database = {
           max_amount: number | null
           min_amount: number | null
           name_ar: string | null
+          name_bn: string | null
           name_en: string | null
           name_ur: string | null
           requires_proof: boolean | null
@@ -2283,6 +2348,7 @@ export type Database = {
           icon?: string | null
           id?: string | null
           instructions_ar?: string | null
+          instructions_bn?: string | null
           instructions_en?: string | null
           instructions_ur?: string | null
           is_active?: boolean | null
@@ -2291,6 +2357,7 @@ export type Database = {
           max_amount?: number | null
           min_amount?: number | null
           name_ar?: string | null
+          name_bn?: string | null
           name_en?: string | null
           name_ur?: string | null
           requires_proof?: boolean | null
@@ -2310,6 +2377,7 @@ export type Database = {
           icon?: string | null
           id?: string | null
           instructions_ar?: string | null
+          instructions_bn?: string | null
           instructions_en?: string | null
           instructions_ur?: string | null
           is_active?: boolean | null
@@ -2318,6 +2386,7 @@ export type Database = {
           max_amount?: number | null
           min_amount?: number | null
           name_ar?: string | null
+          name_bn?: string | null
           name_en?: string | null
           name_ur?: string | null
           requires_proof?: boolean | null
@@ -2414,6 +2483,7 @@ export type Database = {
         Returns: {
           audience_count: number
           body_ar: string | null
+          body_bn: string | null
           body_en: string | null
           body_ur: string | null
           created_at: string
@@ -2426,6 +2496,7 @@ export type Database = {
           sent_count: number
           status: string
           subject_ar: string | null
+          subject_bn: string | null
           subject_en: string | null
           subject_ur: string | null
           target_lang: string | null
@@ -2475,6 +2546,7 @@ export type Database = {
           icon: string | null
           id: string
           instructions_ar: string | null
+          instructions_bn: string | null
           instructions_en: string | null
           instructions_ur: string | null
           is_active: boolean | null
@@ -2483,6 +2555,7 @@ export type Database = {
           max_amount: number | null
           min_amount: number | null
           name_ar: string
+          name_bn: string | null
           name_en: string
           name_ur: string | null
           requires_proof: boolean | null
@@ -2652,12 +2725,15 @@ export type Database = {
           google_analytics_id: string | null
           hero_badge_text: string | null
           hero_cta_ar: string | null
+          hero_cta_bn: string | null
           hero_cta_en: string | null
           hero_cta_ur: string | null
           hero_subtitle_ar: string | null
+          hero_subtitle_bn: string | null
           hero_subtitle_en: string | null
           hero_subtitle_ur: string | null
           hero_title_ar: string | null
+          hero_title_bn: string | null
           hero_title_en: string | null
           hero_title_ur: string | null
           id: number
@@ -2667,6 +2743,7 @@ export type Database = {
           maintenance_message: string | null
           maintenance_mode: boolean
           meta_description_ar: string | null
+          meta_description_bn: string | null
           meta_description_en: string | null
           meta_description_ur: string | null
           meta_keywords: string | null
@@ -2682,6 +2759,7 @@ export type Database = {
           snapchat_url: string | null
           social_links: Json
           tagline_ar: string | null
+          tagline_bn: string | null
           tagline_en: string | null
           tagline_ur: string | null
           telegram_url: string | null
@@ -2779,12 +2857,15 @@ export type Database = {
           google_analytics_id: string | null
           hero_badge_text: string | null
           hero_cta_ar: string | null
+          hero_cta_bn: string | null
           hero_cta_en: string | null
           hero_cta_ur: string | null
           hero_subtitle_ar: string | null
+          hero_subtitle_bn: string | null
           hero_subtitle_en: string | null
           hero_subtitle_ur: string | null
           hero_title_ar: string | null
+          hero_title_bn: string | null
           hero_title_en: string | null
           hero_title_ur: string | null
           id: number
@@ -2794,6 +2875,7 @@ export type Database = {
           maintenance_message: string | null
           maintenance_mode: boolean
           meta_description_ar: string | null
+          meta_description_bn: string | null
           meta_description_en: string | null
           meta_description_ur: string | null
           meta_keywords: string | null
@@ -2809,6 +2891,7 @@ export type Database = {
           snapchat_url: string | null
           social_links: Json
           tagline_ar: string | null
+          tagline_bn: string | null
           tagline_en: string | null
           tagline_ur: string | null
           telegram_url: string | null

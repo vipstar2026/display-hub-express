@@ -24,8 +24,8 @@ export const Route = createFileRoute("/_authenticated/admin/campaigns")({
 
 type Campaign = {
   id: string; name: string;
-  subject_ar: string | null; subject_en: string | null; subject_ur: string | null;
-  body_ar: string | null; body_en: string | null; body_ur: string | null;
+  subject_ar: string | null; subject_en: string | null; subject_ur: string | null; subject_bn: string | null;
+  body_ar: string | null; body_en: string | null; body_ur: string | null; body_bn: string | null;
   target_lang: string | null; status: string;
   audience_count: number; sent_count: number;
   scheduled_for: string | null; sent_at: string | null;
@@ -34,8 +34,8 @@ type Campaign = {
 
 const emptyDraft = {
   id: "", name: "",
-  subject_ar: "", subject_en: "", subject_ur: "",
-  body_ar: "", body_en: "", body_ur: "",
+  subject_ar: "", subject_en: "", subject_ur: "", subject_bn: "",
+  body_ar: "", body_en: "", body_ur: "", body_bn: "",
   target_lang: "all", notes: "",
 };
 
@@ -78,9 +78,11 @@ function CampaignsPage() {
         subject_ar: d.subject_ar || null,
         subject_en: d.subject_en || null,
         subject_ur: d.subject_ur || null,
+        subject_bn: d.subject_bn || null,
         body_ar: d.body_ar || null,
         body_en: d.body_en || null,
         body_ur: d.body_ur || null,
+        body_bn: d.body_bn || null,
         target_lang: d.target_lang === "all" ? null : d.target_lang,
         notes: d.notes || null,
       };
@@ -119,8 +121,8 @@ function CampaignsPage() {
   function openEdit(c: Campaign) {
     setDraft({
       id: c.id, name: c.name,
-      subject_ar: c.subject_ar ?? "", subject_en: c.subject_en ?? "", subject_ur: c.subject_ur ?? "",
-      body_ar: c.body_ar ?? "", body_en: c.body_en ?? "", body_ur: c.body_ur ?? "",
+      subject_ar: c.subject_ar ?? "", subject_en: c.subject_en ?? "", subject_ur: c.subject_ur ?? "", subject_bn: (c as any).subject_bn ?? "",
+      body_ar: c.body_ar ?? "", body_en: c.body_en ?? "", body_ur: c.body_ur ?? "", body_bn: (c as any).body_bn ?? "",
       target_lang: c.target_lang ?? "all", notes: c.notes ?? "",
     });
     setOpen(true);
@@ -237,15 +239,16 @@ function CampaignsPage() {
                     <SelectItem value="ar">العربية فقط</SelectItem>
                     <SelectItem value="en">الإنجليزية فقط</SelectItem>
                     <SelectItem value="ur">الأردية فقط</SelectItem>
+                    <SelectItem value="bn">البنغالية فقط</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            {(["ar", "en", "ur"] as const).map((lang) => (
+            {(["ar", "en", "ur", "bn"] as const).map((lang) => (
               <div key={lang} className="grid gap-2 rounded-md border p-3">
                 <div className="text-xs font-semibold uppercase text-muted-foreground">
-                  محتوى {lang === "ar" ? "عربي" : lang === "en" ? "إنجليزي" : "أردي"}
+                  محتوى {lang === "ar" ? "عربي" : lang === "en" ? "إنجليزي" : lang === "ur" ? "أردي" : "بنغالي"}
                 </div>
                 <Input placeholder="العنوان"
                   value={draft[`subject_${lang}`]}

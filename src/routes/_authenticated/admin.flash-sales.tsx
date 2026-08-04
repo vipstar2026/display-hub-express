@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/admin/flash-sales")({
 type Form = {
   id?: string;
   product_id: string;
-  name_ar: string; name_en: string; name_ur: string;
+  name_ar: string; name_en: string; name_ur: string; name_bn: string;
   sale_price: string; original_price: string;
   starts_at: string; ends_at: string;
   stock_limit: string;
@@ -31,7 +31,7 @@ const nowLocal = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60
 const in7Days = () => new Date(Date.now() + 7 * 86400000 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 
 const empty: Form = {
-  product_id: "", name_ar: "", name_en: "", name_ur: "",
+  product_id: "", name_ar: "", name_en: "", name_ur: "", name_bn: "",
   sale_price: "", original_price: "",
   starts_at: nowLocal(), ends_at: in7Days(),
   stock_limit: "", is_active: true, sort_order: "0",
@@ -68,7 +68,7 @@ function AdminFlashSales() {
 
     const payload = {
       product_id: form.product_id,
-      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null,
+      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null, name_bn: form.name_bn || null,
       sale_price: Number(form.sale_price),
       original_price: form.original_price ? Number(form.original_price) : null,
       starts_at: new Date(form.starts_at).toISOString(),
@@ -148,6 +148,7 @@ function AdminFlashSales() {
                 <div><Label>Name AR</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
                 <div><Label>Name EN</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
                 <div><Label>Name UR</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+                <div><Label>Name BN</Label><Input value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div><Label>Sale Price</Label><Input type="number" step="0.001" value={form.sale_price} onChange={(e) => setForm({ ...form, sale_price: e.target.value })} /></div>
@@ -211,7 +212,7 @@ function AdminFlashSales() {
                   <Button size="sm" variant="ghost" onClick={() => {
                     setForm({
                       id: s.id, product_id: s.product_id,
-                      name_ar: s.name_ar, name_en: s.name_en, name_ur: s.name_ur ?? "",
+                      name_ar: s.name_ar, name_en: s.name_en, name_ur: s.name_ur ?? "", name_bn: (s as any).name_bn ?? "",
                       sale_price: String(s.sale_price),
                       original_price: s.original_price ? String(s.original_price) : "",
                       starts_at: new Date(s.starts_at).toISOString().slice(0, 16),

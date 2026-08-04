@@ -40,9 +40,10 @@ const L = {
   ar: { title: "المدونة", subtitle: "أحدث الأخبار والمقالات والنصائح", empty: "لا توجد مقالات منشورة بعد", read: "اقرأ المزيد", views: "مشاهدة" },
   en: { title: "Blog", subtitle: "Latest news, articles and tips", empty: "No published posts yet", read: "Read more", views: "views" },
   ur: { title: "بلاگ", subtitle: "تازہ ترین خبریں، مضامین اور تجاویز", empty: "ابھی تک کوئی مضمون شائع نہیں ہوا", read: "مزید پڑھیں", views: "مناظر" },
+  bn: { title: "ব্লগ", subtitle: "সর্বশেষ খবর, নিবন্ধ ও পরামর্শ", empty: "এখনো কোনো প্রকাশিত পোস্ট নেই", read: "আরও পড়ুন", views: "ভিউ" },
 };
 
-function pick<T extends Record<string, any>>(p: T, base: string, lang: "ar" | "en" | "ur") {
+function pick<T extends Record<string, any>>(p: T, base: string, lang: string) {
   return p[`${base}_${lang}`] || p[`${base}_ar`] || p[`${base}_en`] || p[`${base}_ur`] || "";
 }
 

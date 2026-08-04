@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, localizedName } from "@/lib/i18n";
 import { formatPrice } from "@/lib/format";
 import { Zap, Clock } from "lucide-react";
 
@@ -74,7 +74,7 @@ export function FlashSalesSection() {
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {data.map((f) => {
-            const name = (lang === "ar" ? f.name_ar : lang === "ur" ? f.name_ur : f.name_en) || f.name_en;
+            const name = localizedName(f as unknown as Record<string, unknown>, "name", lang) || f.name_en;
             const img = f.products?.images?.[0];
             const original = f.original_price ?? f.products?.price ?? 0;
             const discount = original > 0 ? Math.round(((original - f.sale_price) / original) * 100) : 0;

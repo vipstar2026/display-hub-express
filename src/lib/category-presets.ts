@@ -288,9 +288,11 @@ const PRESET_TRANSLATIONS: Record<string, { en: string; ur: string }> = {
   "إضاءة": { en: "Backlit", ur: "روشنی" },
 };
 
-export function translatePresetLabel(label: string, lang: "ar" | "en" | "ur"): string {
+export function translatePresetLabel(label: string, lang: string): string {
   if (lang === "ar") return label;
-  return PRESET_TRANSLATIONS[label]?.[lang] ?? label;
+  const tr = PRESET_TRANSLATIONS[label];
+  if (!tr) return label;
+  return (tr as Record<string, string>)[lang] ?? tr.en ?? label;
 }
 
 /* ============ Warranty (global for every product) ============ */
@@ -300,28 +302,29 @@ export interface WarrantyOption {
   ar: string;
   en: string;
   ur: string;
+  bn: string;
 }
 
 export const WARRANTY_OPTIONS: WarrantyOption[] = [
-  { value: "none",     ar: "بدون ضمان",        en: "No warranty",       ur: "کوئی وارنٹی نہیں" },
-  { value: "1d",       ar: "يوم واحد",          en: "1 day",             ur: "1 دن" },
-  { value: "3d",       ar: "3 أيام",            en: "3 days",            ur: "3 دن" },
-  { value: "7d",       ar: "7 أيام",            en: "7 days",            ur: "7 دن" },
-  { value: "14d",      ar: "14 يوم",            en: "14 days",           ur: "14 دن" },
-  { value: "30d",      ar: "30 يوم",            en: "30 days",           ur: "30 دن" },
-  { value: "3m",       ar: "3 شهور",            en: "3 months",          ur: "3 مہینے" },
-  { value: "6m",       ar: "6 شهور",            en: "6 months",          ur: "6 مہینے" },
-  { value: "1y",       ar: "سنة واحدة",          en: "1 year",            ur: "1 سال" },
-  { value: "2y",       ar: "سنتان",             en: "2 years",           ur: "2 سال" },
-  { value: "3y",       ar: "3 سنوات",           en: "3 years",           ur: "3 سال" },
-  { value: "over_1y",  ar: "أكثر من سنة",       en: "More than 1 year",  ur: "ایک سال سے زیادہ" },
-  { value: "lifetime", ar: "ضمان مدى الحياة",   en: "Lifetime",          ur: "تاحیات وارنٹی" },
-  { value: "custom",   ar: "إدخال يدوي",        en: "Custom",            ur: "دستی اندراج" },
+  { value: "none",     ar: "بدون ضمان",        en: "No warranty",       ur: "کوئی وارنٹی نہیں", bn: "ওয়ারেন্টি নেই" },
+  { value: "1d",       ar: "يوم واحد",          en: "1 day",             ur: "1 دن", bn: "১ দিন" },
+  { value: "3d",       ar: "3 أيام",            en: "3 days",            ur: "3 دن", bn: "৩ দিন" },
+  { value: "7d",       ar: "7 أيام",            en: "7 days",            ur: "7 دن", bn: "৭ দিন" },
+  { value: "14d",      ar: "14 يوم",            en: "14 days",           ur: "14 دن", bn: "১৪ দিন" },
+  { value: "30d",      ar: "30 يوم",            en: "30 days",           ur: "30 دن", bn: "৩০ দিন" },
+  { value: "3m",       ar: "3 شهور",            en: "3 months",          ur: "3 مہینے", bn: "৩ মাস" },
+  { value: "6m",       ar: "6 شهور",            en: "6 months",          ur: "6 مہینے", bn: "৬ মাস" },
+  { value: "1y",       ar: "سنة واحدة",          en: "1 year",            ur: "1 سال", bn: "১ বছর" },
+  { value: "2y",       ar: "سنتان",             en: "2 years",           ur: "2 سال", bn: "২ বছর" },
+  { value: "3y",       ar: "3 سنوات",           en: "3 years",           ur: "3 سال", bn: "৩ বছর" },
+  { value: "over_1y",  ar: "أكثر من سنة",       en: "More than 1 year",  ur: "ایک سال سے زیادہ", bn: "১ বছরের বেশি" },
+  { value: "lifetime", ar: "ضمان مدى الحياة",   en: "Lifetime",          ur: "تاحیات وارنٹی", bn: "আজীবন ওয়ারেন্টি" },
+  { value: "custom",   ar: "إدخال يدوي",        en: "Custom",            ur: "دستی اندراج", bn: "কাস্টম" },
 ];
 
 export function warrantyLabel(
   value: unknown,
-  lang: "ar" | "en" | "ur",
+  lang: string,
   custom?: unknown,
 ): string | null {
   if (!value || typeof value !== "string") return null;
@@ -330,13 +333,15 @@ export function warrantyLabel(
     return c || null;
   }
   const opt = WARRANTY_OPTIONS.find((o) => o.value === value);
-  return opt ? opt[lang] : null;
+  if (!opt) return null;
+  return (opt as unknown as Record<string, string>)[lang] ?? opt.en;
 }
 
-export const WARRANTY_LABEL_I18N = { ar: "الضمان", en: "Warranty", ur: "وارنٹی" } as const;
-export const WARRANTY_CUSTOM_PLACEHOLDER_I18N = {
+export const WARRANTY_LABEL_I18N: Record<string, string> = { ar: "الضمان", en: "Warranty", ur: "وارنٹی", bn: "ওয়ারেন্টি" };
+export const WARRANTY_CUSTOM_PLACEHOLDER_I18N: Record<string, string> = {
   ar: "مثال: 45 يوم / 18 شهر",
   en: "e.g. 45 days / 18 months",
   ur: "مثال: 45 دن / 18 مہینے",
-} as const;
+  bn: "উদাহরণ: ৪৫ দিন / ১৮ মাস",
+};
 

@@ -213,6 +213,7 @@ function AdminLayout() {
                   <option value="ar">AR</option>
                   <option value="en">EN</option>
                   <option value="ur">UR</option>
+                  <option value="bn">BN</option>
                 </select>
               </div>
               <Button variant="ghost" size="icon" className="relative">

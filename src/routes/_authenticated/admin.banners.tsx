@@ -15,11 +15,11 @@ export const Route = createFileRoute("/_authenticated/admin/banners")({
 
 type Banner = {
   id: string;
-  title_ar: string | null; title_en: string | null; title_ur: string | null;
-  subtitle_ar: string | null; subtitle_en: string | null; subtitle_ur: string | null;
+  title_ar: string | null; title_en: string | null; title_ur: string | null; title_bn: string | null;
+  subtitle_ar: string | null; subtitle_en: string | null; subtitle_ur: string | null; subtitle_bn: string | null;
   image_url: string;
   link_url: string | null;
-  cta_label_ar: string | null; cta_label_en: string | null; cta_label_ur: string | null;
+  cta_label_ar: string | null; cta_label_en: string | null; cta_label_ur: string | null; cta_label_bn: string | null;
   sort_order: number;
   is_active: boolean;
   starts_at: string | null;
@@ -28,10 +28,10 @@ type Banner = {
 };
 
 const empty: Partial<Banner> = {
-  title_ar: "", title_en: "", title_ur: "",
-  subtitle_ar: "", subtitle_en: "", subtitle_ur: "",
+  title_ar: "", title_en: "", title_ur: "", title_bn: "",
+  subtitle_ar: "", subtitle_en: "", subtitle_ur: "", subtitle_bn: "",
   image_url: "", link_url: "",
-  cta_label_ar: "", cta_label_en: "", cta_label_ur: "",
+  cta_label_ar: "", cta_label_en: "", cta_label_ur: "", cta_label_bn: "",
   sort_order: 0, is_active: true,
   starts_at: null, ends_at: null,
 };
@@ -63,11 +63,11 @@ function AdminBanners() {
     if (!editing) return;
     if (!editing.image_url) return toast.error("Image URL is required");
     const payload: any = {
-      title_ar: editing.title_ar || null, title_en: editing.title_en || null, title_ur: editing.title_ur || null,
-      subtitle_ar: editing.subtitle_ar || null, subtitle_en: editing.subtitle_en || null, subtitle_ur: editing.subtitle_ur || null,
+      title_ar: editing.title_ar || null, title_en: editing.title_en || null, title_ur: editing.title_ur || null, title_bn: (editing as any).title_bn || null,
+      subtitle_ar: editing.subtitle_ar || null, subtitle_en: editing.subtitle_en || null, subtitle_ur: editing.subtitle_ur || null, subtitle_bn: (editing as any).subtitle_bn || null,
       image_url: editing.image_url,
       link_url: editing.link_url || null,
-      cta_label_ar: editing.cta_label_ar || null, cta_label_en: editing.cta_label_en || null, cta_label_ur: editing.cta_label_ur || null,
+      cta_label_ar: editing.cta_label_ar || null, cta_label_en: editing.cta_label_en || null, cta_label_ur: editing.cta_label_ur || null, cta_label_bn: (editing as any).cta_label_bn || null,
       sort_order: Number(editing.sort_order ?? 0),
       is_active: editing.is_active ?? true,
       starts_at: editing.starts_at || null,
@@ -223,9 +223,9 @@ function AdminBanners() {
                 Active
               </label>
 
-              {(["ar", "en", "ur"] as const).map((L) => (
+              {(["ar", "en", "ur", "bn"] as const).map((L) => (
                 <div key={L} className="rounded-lg border border-primary/10 p-3 space-y-2">
-                  <div className="text-xs font-semibold uppercase text-primary">{L === "ar" ? "العربية" : L === "en" ? "English" : "اردو"}</div>
+                  <div className="text-xs font-semibold uppercase text-primary">{L === "ar" ? "العربية" : L === "en" ? "English" : L === "ur" ? "اردو" : "বাংলা"}</div>
                   <Input
                     placeholder="Title"
                     value={(editing as any)[`title_${L}`] ?? ""}

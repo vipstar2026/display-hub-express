@@ -28,9 +28,9 @@ const ICONS: Record<string, typeof Landmark> = { landmark: Landmark, smartphone:
 interface Form {
   id?: string;
   provider: string;
-  code: string; name_ar: string; name_en: string; name_ur: string;
+  code: string; name_ar: string; name_en: string; name_ur: string; name_bn: string;
   type: PType; icon: string; logo_url: string;
-  instructions_ar: string; instructions_en: string; instructions_ur: string;
+  instructions_ar: string; instructions_en: string; instructions_ur: string; instructions_bn: string;
   values: Record<string, string>;
   is_gateway: boolean; gateway_provider: string; test_mode: boolean;
   config: string; supported_currencies: string;
@@ -40,9 +40,9 @@ interface Form {
 }
 
 const empty: Form = {
-  provider: "", code: "", name_ar: "", name_en: "", name_ur: "",
+  provider: "", code: "", name_ar: "", name_en: "", name_ur: "", name_bn: "",
   type: "bank_transfer", icon: "landmark", logo_url: "",
-  instructions_ar: "", instructions_en: "", instructions_ur: "",
+  instructions_ar: "", instructions_en: "", instructions_ur: "", instructions_bn: "",
   values: {}, is_gateway: false, gateway_provider: "",
   test_mode: true, config: "{}", supported_currencies: "BHD",
   requires_proof: true, is_active: true,
@@ -100,11 +100,12 @@ function AdminPaymentMethods() {
 
     const payload = {
       code: form.code.trim(),
-      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null,
+      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null, name_bn: form.name_bn || null,
       type: form.type, icon: form.icon || null, logo_url: form.logo_url || null,
       instructions_ar: form.instructions_ar || null,
       instructions_en: form.instructions_en || null,
       instructions_ur: form.instructions_ur || null,
+      instructions_bn: form.instructions_bn || null,
       account_details: (form.is_gateway ? {} : filled) as never,
       is_gateway: form.is_gateway,
       gateway_provider: form.is_gateway ? (form.gateway_provider || form.provider || null) : null,
@@ -257,6 +258,7 @@ function AdminPaymentMethods() {
                       <div><Label>{ar ? "الاسم (عربي)" : "Name (AR)"}</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
                       <div><Label>{ar ? "الاسم (إنجليزي)" : "Name (EN)"}</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
                       <div><Label>{ar ? "الاسم (أردو)" : "Name (UR)"}</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+                      <div><Label>{ar ? "الاسم (بنغالي)" : "Name (BN)"}</Label><Input value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
                       <div>
                         <Label>{ar ? "الأيقونة" : "Icon"}</Label>
                         <Select value={form.icon} onValueChange={(v) => setForm({ ...form, icon: v })}>
@@ -277,6 +279,7 @@ function AdminPaymentMethods() {
                       <div><Label>{ar ? "التعليمات (عربي)" : "Instructions (AR)"}</Label><Textarea value={form.instructions_ar} onChange={(e) => setForm({ ...form, instructions_ar: e.target.value })} /></div>
                       <div><Label>{ar ? "التعليمات (إنجليزي)" : "Instructions (EN)"}</Label><Textarea value={form.instructions_en} onChange={(e) => setForm({ ...form, instructions_en: e.target.value })} /></div>
                       <div><Label>{ar ? "التعليمات (أردو)" : "Instructions (UR)"}</Label><Textarea value={form.instructions_ur} onChange={(e) => setForm({ ...form, instructions_ur: e.target.value })} /></div>
+                      <div><Label>{ar ? "التعليمات (بنغالي)" : "Instructions (BN)"}</Label><Textarea value={form.instructions_bn} onChange={(e) => setForm({ ...form, instructions_bn: e.target.value })} /></div>
                       {!form.is_gateway && (
                         <div className="flex items-center gap-2">
                           <Switch checked={form.requires_proof} onCheckedChange={(v) => setForm({ ...form, requires_proof: v })} />
@@ -352,9 +355,9 @@ function AdminPaymentMethods() {
                   Object.entries(stored).forEach(([k, v]) => { if (values[k] === undefined) values[k] = String(v ?? ""); });
                   setForm({
                     id: m.id, provider: p?.code ?? "", code: m.code,
-                    name_ar: m.name_ar, name_en: m.name_en, name_ur: m.name_ur ?? "",
+                    name_ar: m.name_ar, name_en: m.name_en, name_ur: m.name_ur ?? "", name_bn: (m as any).name_bn ?? "",
                     type: m.type as PType, icon: m.icon ?? "landmark", logo_url: mx.logo_url ?? "",
-                    instructions_ar: m.instructions_ar ?? "", instructions_en: m.instructions_en ?? "", instructions_ur: m.instructions_ur ?? "",
+                    instructions_ar: m.instructions_ar ?? "", instructions_en: m.instructions_en ?? "", instructions_ur: m.instructions_ur ?? "", instructions_bn: (m as any).instructions_bn ?? "",
                     values,
                     is_gateway: isGw, gateway_provider: mx.gateway_provider ?? "",
                     test_mode: mx.test_mode ?? true,

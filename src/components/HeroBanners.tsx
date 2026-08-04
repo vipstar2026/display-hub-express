@@ -41,16 +41,16 @@ export function HeroBanners() {
 
   if (count === 0) return null;
 
-  const pick = (ar?: string | null, en?: string | null, ur?: string | null) =>
-    (lang === "ar" ? ar : lang === "ur" ? ur : en) || en || ar || ur || "";
+  const pick = (ar?: string | null, en?: string | null, ur?: string | null, bn?: string | null) =>
+    (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? bn : en) || en || ar || ur || bn || "";
 
   return (
     <section className="relative border-b border-primary/20 bg-black">
       <div className="relative mx-auto aspect-[21/9] max-h-[520px] w-full overflow-hidden md:aspect-[21/8]">
         {list.map((b, i) => {
-          const title = pick(b.title_ar, b.title_en, b.title_ur);
-          const sub = pick(b.subtitle_ar, b.subtitle_en, b.subtitle_ur);
-          const cta = pick(b.cta_label_ar, b.cta_label_en, b.cta_label_ur);
+          const title = pick(b.title_ar, b.title_en, b.title_ur, (b as unknown as Record<string,string|null>).title_bn);
+          const sub = pick(b.subtitle_ar, b.subtitle_en, b.subtitle_ur, (b as unknown as Record<string,string|null>).subtitle_bn);
+          const cta = pick(b.cta_label_ar, b.cta_label_en, b.cta_label_ur, (b as unknown as Record<string,string|null>).cta_label_bn);
           const active = i === idx;
           const inner = (
             <>
