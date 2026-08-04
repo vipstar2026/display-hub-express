@@ -159,3 +159,26 @@
     box-shadow: var(--shadow-hover);
   }
 }
+
+/* Admin bidi handling: each table cell / field renders in the direction of its
+   own content, so Bengali (LTR) rows stay readable inside the RTL dashboard. */
+.admin-shell table td,
+.admin-shell table th,
+.admin-shell [data-bidi="auto"] {
+  unicode-bidi: plaintext;
+}
+
+.admin-shell input[dir="ltr"],
+.admin-shell textarea[dir="ltr"] {
+  text-align: left;
+}
+
+.admin-shell input[dir="rtl"],
+.admin-shell textarea[dir="rtl"] {
+  text-align: right;
+}
+
+/* Charts always lay out left-to-right regardless of UI language. */
+.admin-shell .recharts-wrapper {
+  direction: ltr;
+}
