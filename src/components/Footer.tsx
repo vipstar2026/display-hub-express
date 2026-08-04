@@ -7,7 +7,7 @@ import { cleanPhoneNumber, pickLocalized, useSiteSettings } from "@/lib/site-set
 export function Footer() {
   const { t, lang } = useI18n();
   const { data: s } = useSiteSettings();
-  const tagline = pickLocalized(lang, { ar: s?.tagline_ar, en: s?.tagline_en, ur: s?.tagline_ur }) || t("site.tagline");
+  const tagline = pickLocalized(lang, { ar: s?.tagline_ar, en: s?.tagline_en, ur: s?.tagline_ur, bn: s?.tagline_bn }) || t("site.tagline");
 
   const nav = [
     { to: "/", label: t("nav.home") },
