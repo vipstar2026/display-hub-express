@@ -3,6 +3,7 @@ import { Satellite, Mail, Phone, MessageCircle, MapPin } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { NewsletterSignup } from "./NewsletterSignup";
 import { cleanPhoneNumber, pickLocalized, useSiteSettings } from "@/lib/site-settings";
+import { waAnchorProps } from "@/lib/whatsapp";
 
 export function Footer() {
   const { t, lang } = useI18n();
