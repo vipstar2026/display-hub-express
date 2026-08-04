@@ -184,7 +184,7 @@ function Analytics() {
           </div>
 
           <Card title={L.trend}>
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer dir="ltr" width="100%" height={280}>
               <AreaChart data={trend}>
                 <defs>
                   <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
@@ -222,7 +222,7 @@ function Analytics() {
               {categoryShare.length === 0 ? (
                 <p className="py-16 text-center text-sm text-muted-foreground">—</p>
               ) : (
-                <ResponsiveContainer width="100%" height={260}>
+                <ResponsiveContainer dir="ltr" width="100%" height={260}>
                   <PieChart>
                     <Pie data={categoryShare} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>
                       {categoryShare.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
@@ -237,7 +237,7 @@ function Analytics() {
 
           <div className="grid gap-4 lg:grid-cols-2">
             <Card title={L.hours}>
-              <ResponsiveContainer width="100%" height={220}>
+              <ResponsiveContainer dir="ltr" width="100%" height={220}>
                 <BarChart data={hourlyHeat}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                   <XAxis dataKey="hour" stroke="#888" fontSize={10} interval={2} />

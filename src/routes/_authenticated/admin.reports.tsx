@@ -148,7 +148,7 @@ function Reports() {
       <div className="rounded-xl border border-primary/20 bg-card/60 p-5 backdrop-blur">
         <h3 className="mb-4 font-display text-lg font-semibold">{t("reports.revenueOverTime")}</h3>
         <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer dir="ltr" width="100%" height="100%">
             <AreaChart data={stats.days}>
               <defs>
                 <linearGradient id="rv" x1="0" y1="0" x2="0" y2="1">
@@ -187,7 +187,7 @@ function Reports() {
         <div className="rounded-xl border border-primary/20 bg-card/60 p-5 backdrop-blur">
           <h3 className="mb-4 font-display text-lg font-semibold">{t("reports.byPaymentMethod")}</h3>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer dir="ltr" width="100%" height="100%">
               <BarChart data={stats.paymentMethods}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
                 <XAxis dataKey="name" fontSize={11} />
