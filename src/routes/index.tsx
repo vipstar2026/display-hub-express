@@ -10,6 +10,7 @@ import { ArrowRight, ShieldCheck, Truck, Headphones, Satellite, Phone, Mail, Map
 import { HeroBanners } from "@/components/HeroBanners";
 import { FlashSalesSection } from "@/components/FlashSalesSection";
 import { cleanPhoneNumber, pickLocalized, socialHandle, useSiteSettings } from "@/lib/site-settings";
+import { waAnchorProps } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
