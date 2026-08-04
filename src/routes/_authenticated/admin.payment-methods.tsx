@@ -14,6 +14,7 @@ import { Plus, Edit, Trash2, Landmark, Smartphone, Banknote, Wallet, CreditCard,
 import { useState } from "react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
+import { makeAdminT } from "@/lib/admin-i18n";
 import { PAYMENT_PROVIDERS, providerByCode, type PaymentProvider } from "@/lib/payment-providers";
 
 export const Route = createFileRoute("/_authenticated/admin/payment-methods")({
@@ -51,7 +52,9 @@ const empty: Form = {
 
 function AdminPaymentMethods() {
   const { lang } = useI18n();
-  const ar = lang !== "en";
+  const ar = lang === "ar";
+  const t = makeAdminT(lang);
+  const pickL = (row: any, base: string) => row?.[`${base}_${lang}`] || row?.[`${base}_en`] || row?.[`${base}_ar`] || "";
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Form>(empty);
@@ -85,14 +88,14 @@ function AdminPaymentMethods() {
   const setVal = (k: string, v: string) => setForm((f) => ({ ...f, values: { ...f.values, [k]: v } }));
 
   const save = async () => {
-    if (!form.code.trim()) { toast.error(ar ? "أدخل الرمز (Code)" : "Enter a code"); return; }
+    if (!form.code.trim()) { toast.error(t("أدخل الرمز (Code)", "Enter a code")); return; }
     let cfg: Record<string, unknown>;
     try { cfg = JSON.parse(form.config || "{}"); }
-    catch { toast.error(ar ? "الإعدادات الإضافية يجب أن تكون JSON صحيح" : "Extra config must be valid JSON"); return; }
+    catch { toast.error(t("الإعدادات الإضافية يجب أن تكون JSON صحيح", "Extra config must be valid JSON")); return; }
 
     const missing = (preset?.fields ?? []).filter((fl) => fl.required && !(form.values[fl.key] ?? "").trim());
     if (missing.length && form.is_active) {
-      toast.error((ar ? "حقول مطلوبة ناقصة: " : "Missing required fields: ") + missing.map((m) => (ar ? m.label_ar : m.label_en)).join("، "));
+      toast.error((t("حقول مطلوبة ناقصة: ", "Missing required fields: ")) + missing.map((m) => (ar ? m.label_ar : m.label_en)).join("، "));
       return;
     }
 
@@ -126,16 +129,16 @@ function AdminPaymentMethods() {
       ? await supabase.from("payment_methods").update(payload).eq("id", form.id)
       : await supabase.from("payment_methods").insert(payload);
     if (error) { toast.error(error.message); return; }
-    toast.success(ar ? "تم الحفظ" : "Saved");
+    toast.success(t("تم الحفظ", "Saved"));
     setOpen(false); setForm(empty);
     qc.invalidateQueries({ queryKey: ["admin-payment-methods"] });
   };
 
   const del = async (id: string) => {
-    if (!confirm(ar ? "حذف وسيلة الدفع؟" : "Delete this payment method?")) return;
+    if (!confirm(t("حذف وسيلة الدفع؟", "Delete this payment method?"))) return;
     const { error } = await supabase.from("payment_methods").delete().eq("id", id);
     if (error) toast.error(error.message);
-    else { toast.success(ar ? "تم الحذف" : "Deleted"); qc.invalidateQueries({ queryKey: ["admin-payment-methods"] }); }
+    else { toast.success(t("تم الحذف", "Deleted")); qc.invalidateQueries({ queryKey: ["admin-payment-methods"] }); }
   };
 
   const toggle = async (id: string, is_active: boolean) => {
@@ -154,30 +157,30 @@ function AdminPaymentMethods() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold">{ar ? "طرق الدفع" : "Payment Methods"}</h1>
+          <h1 className="font-display text-2xl font-bold">{t("طرق الدفع", "Payment Methods")}</h1>
           <p className="text-sm text-muted-foreground">
-            {ar ? "كل طرق الدفع المتاحة 2026 — اختر النوع واملأ البيانات يدوياً مع شرح التركيب." : "All 2026 payment options — pick a type, fill the data manually, with setup guides."}
+            {t("كل طرق الدفع المتاحة 2026 — اختر النوع واملأ البيانات يدوياً مع شرح التركيب.", "All 2026 payment options — pick a type, fill the data manually, with setup guides.")}
           </p>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setForm(empty); }}>
           <DialogTrigger asChild>
-            <Button className="bg-primary text-background hover:bg-primary"><Plus className="me-1 h-4 w-4" />{ar ? "وسيلة جديدة" : "New Method"}</Button>
+            <Button className="bg-primary text-background hover:bg-primary"><Plus className="me-1 h-4 w-4" />{t("وسيلة جديدة", "New Method")}</Button>
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{form.id ? (ar ? "تعديل وسيلة الدفع" : "Edit payment method") : (ar ? "إضافة وسيلة دفع" : "Add payment method")}</DialogTitle>
+              <DialogTitle>{form.id ? (t("تعديل وسيلة الدفع", "Edit payment method")) : (t("إضافة وسيلة دفع", "Add payment method"))}</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
               {/* Provider picker */}
               <div>
-                <Label>{ar ? "نوع وسيلة الدفع" : "Payment provider"}</Label>
+                <Label>{t("نوع وسيلة الدفع", "Payment provider")}</Label>
                 <Select value={form.provider} onValueChange={applyProvider}>
-                  <SelectTrigger><SelectValue placeholder={ar ? "اختر من القائمة" : "Select from list"} /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("اختر من القائمة", "Select from list")} /></SelectTrigger>
                   <SelectContent>
-                    <div className="px-2 py-1 text-[11px] font-semibold text-muted-foreground">{ar ? "يدوي / بدون API" : "Manual / no API"}</div>
+                    <div className="px-2 py-1 text-[11px] font-semibold text-muted-foreground">{t("يدوي / بدون API", "Manual / no API")}</div>
                     {manualProviders.map((p) => <SelectItem key={p.code} value={p.code}>{ar ? p.name_ar : p.name_en}</SelectItem>)}
-                    <div className="px-2 py-1 text-[11px] font-semibold text-muted-foreground">{ar ? "بوابات إلكترونية" : "Electronic gateways"}</div>
+                    <div className="px-2 py-1 text-[11px] font-semibold text-muted-foreground">{t("بوابات إلكترونية", "Electronic gateways")}</div>
                     {gatewayProviders.map((p) => <SelectItem key={p.code} value={p.code}>{ar ? p.name_ar : p.name_en}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -188,10 +191,10 @@ function AdminPaymentMethods() {
                 <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
                   <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-primary">
                     <BookOpen className="h-4 w-4" />
-                    {ar ? "طريقة التركيب خطوة بخطوة" : "Step-by-step setup"}
+                    {t("طريقة التركيب خطوة بخطوة", "Step-by-step setup")}
                     {preset.docs && (
                       <a href={preset.docs} target="_blank" rel="noreferrer" className="ms-auto inline-flex items-center gap-1 text-xs underline">
-                        {ar ? "الوثائق" : "Docs"} <ExternalLink className="h-3 w-3" />
+                        {t("الوثائق", "Docs")} <ExternalLink className="h-3 w-3" />
                       </a>
                     )}
                   </div>
@@ -207,12 +210,12 @@ function AdminPaymentMethods() {
                   <div className="mb-3 flex items-center gap-2">
                     {preset.kind === "gateway" ? <KeyRound className="h-4 w-4 text-primary" /> : <Landmark className="h-4 w-4 text-primary" />}
                     <Label className="text-base font-semibold">
-                      {preset.kind === "gateway" ? (ar ? "بيانات الاتصال بالبوابة" : "Gateway credentials") : (ar ? "بيانات الحساب" : "Account details")}
+                      {preset.kind === "gateway" ? (t("بيانات الاتصال بالبوابة", "Gateway credentials")) : (t("بيانات الحساب", "Account details"))}
                     </Label>
                     {preset.kind === "gateway" && (
                       <div className="ms-auto flex items-center gap-2">
                         <Switch checked={form.test_mode} onCheckedChange={(v) => setForm({ ...form, test_mode: v })} />
-                        <span className="text-xs text-muted-foreground">{ar ? "وضع الاختبار" : "Test mode"}</span>
+                        <span className="text-xs text-muted-foreground">{t("وضع الاختبار", "Test mode")}</span>
                       </div>
                     )}
                   </div>
@@ -244,46 +247,46 @@ function AdminPaymentMethods() {
               {/* Basics */}
               <Accordion type="single" collapsible defaultValue="basics">
                 <AccordionItem value="basics">
-                  <AccordionTrigger className="text-sm">{ar ? "الأسماء والعرض" : "Naming & display"}</AccordionTrigger>
+                  <AccordionTrigger className="text-sm">{t("الأسماء والعرض", "Naming & display")}</AccordionTrigger>
                   <AccordionContent>
                     <div className="grid gap-3 md:grid-cols-2">
-                      <div><Label>{ar ? "الرمز (Code)" : "Code"}</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="bank_nbb" /></div>
+                      <div><Label>{t("الرمز (Code)", "Code")}</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="bank_nbb" /></div>
                       <div>
-                        <Label>{ar ? "التصنيف" : "Type"}</Label>
+                        <Label>{t("التصنيف", "Type")}</Label>
                         <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as PType })}>
                           <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>{TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
-                      <div><Label>{ar ? "الاسم (عربي)" : "Name (AR)"}</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
-                      <div><Label>{ar ? "الاسم (إنجليزي)" : "Name (EN)"}</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
-                      <div><Label>{ar ? "الاسم (أردو)" : "Name (UR)"}</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
-                      <div><Label>{ar ? "الاسم (بنغالي)" : "Name (BN)"}</Label><Input value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
+                      <div><Label>{t("الاسم (عربي)", "Name (AR)")}</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+                      <div><Label>{t("الاسم (إنجليزي)", "Name (EN)")}</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+                      <div><Label>{t("الاسم (أردو)", "Name (UR)")}</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+                      <div><Label>{t("الاسم (بنغالي)", "Name (BN)")}</Label><Input value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
                       <div>
-                        <Label>{ar ? "الأيقونة" : "Icon"}</Label>
+                        <Label>{t("الأيقونة", "Icon")}</Label>
                         <Select value={form.icon} onValueChange={(v) => setForm({ ...form, icon: v })}>
                           <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>{Object.keys(ICONS).map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
-                      <div className="md:col-span-2"><Label>{ar ? "رابط الشعار" : "Logo URL"}</Label><Input value={form.logo_url} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} placeholder="https://..." /></div>
-                      <div className="md:col-span-2"><Label>{ar ? "العملات المدعومة" : "Supported currencies"}</Label><Input value={form.supported_currencies} onChange={(e) => setForm({ ...form, supported_currencies: e.target.value })} placeholder="BHD, USD, SAR" /></div>
+                      <div className="md:col-span-2"><Label>{t("رابط الشعار", "Logo URL")}</Label><Input value={form.logo_url} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} placeholder="https://..." /></div>
+                      <div className="md:col-span-2"><Label>{t("العملات المدعومة", "Supported currencies")}</Label><Input value={form.supported_currencies} onChange={(e) => setForm({ ...form, supported_currencies: e.target.value })} placeholder="BHD, USD, SAR" /></div>
                     </div>
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="instructions">
-                  <AccordionTrigger className="text-sm">{ar ? "تعليمات تظهر للعميل" : "Customer instructions"}</AccordionTrigger>
+                  <AccordionTrigger className="text-sm">{t("تعليمات تظهر للعميل", "Customer instructions")}</AccordionTrigger>
                   <AccordionContent>
                     <div className="grid gap-3">
-                      <div><Label>{ar ? "التعليمات (عربي)" : "Instructions (AR)"}</Label><Textarea value={form.instructions_ar} onChange={(e) => setForm({ ...form, instructions_ar: e.target.value })} /></div>
-                      <div><Label>{ar ? "التعليمات (إنجليزي)" : "Instructions (EN)"}</Label><Textarea value={form.instructions_en} onChange={(e) => setForm({ ...form, instructions_en: e.target.value })} /></div>
-                      <div><Label>{ar ? "التعليمات (أردو)" : "Instructions (UR)"}</Label><Textarea value={form.instructions_ur} onChange={(e) => setForm({ ...form, instructions_ur: e.target.value })} /></div>
-                      <div><Label>{ar ? "التعليمات (بنغالي)" : "Instructions (BN)"}</Label><Textarea value={form.instructions_bn} onChange={(e) => setForm({ ...form, instructions_bn: e.target.value })} /></div>
+                      <div><Label>{t("التعليمات (عربي)", "Instructions (AR)")}</Label><Textarea value={form.instructions_ar} onChange={(e) => setForm({ ...form, instructions_ar: e.target.value })} /></div>
+                      <div><Label>{t("التعليمات (إنجليزي)", "Instructions (EN)")}</Label><Textarea value={form.instructions_en} onChange={(e) => setForm({ ...form, instructions_en: e.target.value })} /></div>
+                      <div><Label>{t("التعليمات (أردو)", "Instructions (UR)")}</Label><Textarea value={form.instructions_ur} onChange={(e) => setForm({ ...form, instructions_ur: e.target.value })} /></div>
+                      <div><Label>{t("التعليمات (بنغالي)", "Instructions (BN)")}</Label><Textarea value={form.instructions_bn} onChange={(e) => setForm({ ...form, instructions_bn: e.target.value })} /></div>
                       {!form.is_gateway && (
                         <div className="flex items-center gap-2">
                           <Switch checked={form.requires_proof} onCheckedChange={(v) => setForm({ ...form, requires_proof: v })} />
-                          <Label>{ar ? "يتطلب إثبات دفع" : "Requires payment proof"}</Label>
+                          <Label>{t("يتطلب إثبات دفع", "Requires payment proof")}</Label>
                         </div>
                       )}
                     </div>
@@ -291,15 +294,15 @@ function AdminPaymentMethods() {
                 </AccordionItem>
 
                 <AccordionItem value="limits">
-                  <AccordionTrigger className="text-sm">{ar ? "الرسوم والحدود" : "Fees & limits"}</AccordionTrigger>
+                  <AccordionTrigger className="text-sm">{t("الرسوم والحدود", "Fees & limits")}</AccordionTrigger>
                   <AccordionContent>
                     <div className="grid gap-3 md:grid-cols-2">
-                      <div><Label>{ar ? "الترتيب" : "Sort order"}</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} /></div>
-                      <div><Label>{ar ? "رسوم ثابتة (BHD)" : "Fee (BHD)"}</Label><Input type="number" step="0.001" value={form.fee_amount} onChange={(e) => setForm({ ...form, fee_amount: e.target.value })} /></div>
-                      <div><Label>{ar ? "رسوم نسبة (%)" : "Fee (%)"}</Label><Input type="number" step="0.01" value={form.fee_percent} onChange={(e) => setForm({ ...form, fee_percent: e.target.value })} /></div>
-                      <div><Label>{ar ? "أقل مبلغ" : "Min amount"}</Label><Input type="number" step="0.001" value={form.min_amount} onChange={(e) => setForm({ ...form, min_amount: e.target.value })} /></div>
-                      <div><Label>{ar ? "أعلى مبلغ" : "Max amount"}</Label><Input type="number" step="0.001" value={form.max_amount} onChange={(e) => setForm({ ...form, max_amount: e.target.value })} /></div>
-                      <div className="md:col-span-2"><Label>{ar ? "إعدادات إضافية (JSON)" : "Extra config (JSON)"}</Label><Textarea rows={3} className="font-mono text-xs" value={form.config} onChange={(e) => setForm({ ...form, config: e.target.value })} placeholder='{"success_url":"","cancel_url":""}' /></div>
+                      <div><Label>{t("الترتيب", "Sort order")}</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} /></div>
+                      <div><Label>{t("رسوم ثابتة (BHD)", "Fee (BHD)")}</Label><Input type="number" step="0.001" value={form.fee_amount} onChange={(e) => setForm({ ...form, fee_amount: e.target.value })} /></div>
+                      <div><Label>{t("رسوم نسبة (%)", "Fee (%)")}</Label><Input type="number" step="0.01" value={form.fee_percent} onChange={(e) => setForm({ ...form, fee_percent: e.target.value })} /></div>
+                      <div><Label>{t("أقل مبلغ", "Min amount")}</Label><Input type="number" step="0.001" value={form.min_amount} onChange={(e) => setForm({ ...form, min_amount: e.target.value })} /></div>
+                      <div><Label>{t("أعلى مبلغ", "Max amount")}</Label><Input type="number" step="0.001" value={form.max_amount} onChange={(e) => setForm({ ...form, max_amount: e.target.value })} /></div>
+                      <div className="md:col-span-2"><Label>{t("إعدادات إضافية (JSON)", "Extra config (JSON)")}</Label><Textarea rows={3} className="font-mono text-xs" value={form.config} onChange={(e) => setForm({ ...form, config: e.target.value })} placeholder='{"success_url":"","cancel_url":""}' /></div>
                     </div>
                   </AccordionContent>
                 </AccordionItem>
@@ -307,11 +310,11 @@ function AdminPaymentMethods() {
 
               <div className="flex items-center gap-2">
                 <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
-                <Label>{ar ? "مفعّلة (تظهر في صفحة الدفع)" : "Active (visible at checkout)"}</Label>
+                <Label>{t("مفعّلة (تظهر في صفحة الدفع)", "Active (visible at checkout)")}</Label>
               </div>
             </div>
 
-            <Button onClick={save} className="mt-3 w-full bg-primary text-background hover:bg-primary">{ar ? "حفظ" : "Save"}</Button>
+            <Button onClick={save} className="mt-3 w-full bg-primary text-background hover:bg-primary">{t("حفظ", "Save")}</Button>
           </DialogContent>
         </Dialog>
       </div>
@@ -330,20 +333,20 @@ function AdminPaymentMethods() {
                 </div>
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium">{ar ? m.name_ar : m.name_en}</span>
-                    <span className="text-muted-foreground">· {ar ? m.name_en : m.name_ar}</span>
+                    <span className="font-medium">{pickL(m, "name") || m.name_en}</span>
+                    <span className="text-muted-foreground">· {m.name_en || m.name_ar}</span>
                     {isGw
-                      ? <Badge variant="outline" className="border-primary/40 text-primary text-[10px]"><Zap className="me-0.5 h-3 w-3" />{ar ? "بوابة" : "Gateway"}</Badge>
-                      : <Badge variant="outline" className="text-[10px]">{ar ? "يدوي" : "Manual"}</Badge>}
+                      ? <Badge variant="outline" className="border-primary/40 text-primary text-[10px]"><Zap className="me-0.5 h-3 w-3" />{t("بوابة", "Gateway")}</Badge>
+                      : <Badge variant="outline" className="text-[10px]">{t("يدوي", "Manual")}</Badge>}
                     {isGw && mx.test_mode && <Badge variant="outline" className="text-[10px]">TEST</Badge>}
-                    {!ready && <Badge variant="outline" className="border-amber-500/40 text-amber-400 text-[10px]">{ar ? "البيانات ناقصة" : "Data missing"}</Badge>}
+                    {!ready && <Badge variant="outline" className="border-amber-500/40 text-amber-400 text-[10px]">{t("البيانات ناقصة", "Data missing")}</Badge>}
                   </div>
                   <div className="text-xs text-muted-foreground">{m.type} · <code>{m.code}</code>{isGw && mx.gateway_provider ? ` · ${mx.gateway_provider}` : ""}</div>
                 </div>
                 <Switch checked={!!m.is_active} onCheckedChange={(v) => toggle(m.id, v)} />
               </div>
-              {!isGw && (ar ? m.instructions_ar : m.instructions_en) && (
-                <p className="mt-3 text-xs text-muted-foreground line-clamp-2">{ar ? m.instructions_ar : m.instructions_en}</p>
+              {!isGw && pickL(m, "instructions") && (
+                <p className="mt-3 text-xs text-muted-foreground line-clamp-2">{pickL(m, "instructions")}</p>
               )}
               <div className="mt-3 flex justify-end gap-2">
                 <Button size="sm" variant="ghost" onClick={() => {
@@ -377,7 +380,7 @@ function AdminPaymentMethods() {
         })}
         {(data ?? []).length === 0 && (
           <div className="col-span-full rounded-xl border border-primary/10 bg-card p-8 text-center text-muted-foreground">
-            {ar ? "لا توجد طرق دفع بعد." : "No payment methods yet."}
+            {t("لا توجد طرق دفع بعد.", "No payment methods yet.")}
           </div>
         )}
       </div>
