@@ -10,6 +10,7 @@ import { ArrowRight, ShieldCheck, Truck, Headphones, Satellite, Phone, Mail, Map
 import { HeroBanners } from "@/components/HeroBanners";
 import { FlashSalesSection } from "@/components/FlashSalesSection";
 import { cleanPhoneNumber, pickLocalized, socialHandle, useSiteSettings } from "@/lib/site-settings";
+import { waAnchorProps } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -197,7 +198,7 @@ function HomePage() {
               {/* Right contact panel */}
               <div className="grid gap-3 p-8 md:p-10">
                 {settings?.whatsapp && whatsappNumber && (
-                  <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noreferrer" className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/40 p-3 transition hover:border-primary/40 hover:bg-primary/5">
+                  <a {...waAnchorProps(settings.whatsapp)} className="group flex items-center gap-3 rounded-lg border border-primary/10 bg-background/40 p-3 transition hover:border-primary/40 hover:bg-primary/5">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary"><MessageCircle className="h-5 w-5" /></div>
                     <div className="flex-1"><div className="text-xs text-muted-foreground">WhatsApp</div><div className="font-mono text-sm font-semibold" dir="ltr">{settings.whatsapp}</div></div>
                   </a>

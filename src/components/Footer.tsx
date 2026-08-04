@@ -3,6 +3,7 @@ import { Satellite, Mail, Phone, MessageCircle, MapPin } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { NewsletterSignup } from "./NewsletterSignup";
 import { cleanPhoneNumber, pickLocalized, useSiteSettings } from "@/lib/site-settings";
+import { waAnchorProps } from "@/lib/whatsapp";
 
 export function Footer() {
   const { t, lang } = useI18n();
@@ -50,7 +51,7 @@ export function Footer() {
               <li><a href={`tel:${s.contact_phone}`} className="inline-flex items-center gap-2 hover:text-primary"><Phone className="h-4 w-4" /> {s.contact_phone}</a></li>
             )}
             {s?.whatsapp && (
-              <li><a href={`https://wa.me/${cleanPhoneNumber(s.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-primary"><MessageCircle className="h-4 w-4" /> {s.whatsapp}</a></li>
+              <li><a {...waAnchorProps(s.whatsapp)} className="inline-flex items-center gap-2 hover:text-primary"><MessageCircle className="h-4 w-4" /> {s.whatsapp}</a></li>
             )}
             {s?.company_address && (
               <li className="inline-flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0" /> {s.company_address}</li>

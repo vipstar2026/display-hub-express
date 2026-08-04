@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { cleanPhoneNumber, useSiteSettings } from "@/lib/site-settings";
+import { waLink, openWhatsApp } from "@/lib/whatsapp";
 import { toast } from "sonner";
 import { Mail, Phone, MapPin, Clock, MessageCircle, Send, CheckCircle2 } from "lucide-react";
 
@@ -71,7 +72,7 @@ function ContactPage() {
                 <InfoCard icon={<Phone className="h-5 w-5" />} label="Phone" value={settings.contact_phone} href={`tel:${settings.contact_phone}`} />
               )}
               {settings?.whatsapp && (
-                <InfoCard icon={<MessageCircle className="h-5 w-5" />} label={t("contact.whatsapp")} value={settings.whatsapp} href={`https://wa.me/${cleanPhoneNumber(settings.whatsapp)}`} />
+                <InfoCard icon={<MessageCircle className="h-5 w-5" />} label={t("contact.whatsapp")} value={settings.whatsapp} href={waLink(settings.whatsapp)} onClick={(e) => { e.preventDefault(); openWhatsApp(settings.whatsapp); }} />
               )}
               {settings?.company_address && (
                 <InfoCard icon={<MapPin className="h-5 w-5" />} label={t("contact.address")} value={settings.company_address} />
@@ -130,7 +131,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function InfoCard({ icon, label, value, href }: { icon: React.ReactNode; label: string; value: string; href?: string }) {
+function InfoCard({ icon, label, value, href, onClick }: { icon: React.ReactNode; label: string; value: string; href?: string; onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void }) {
   const inner = (
     <div className="flex items-start gap-3 rounded-xl border border-primary/15 bg-card/40 p-4 transition hover:border-primary/40 hover:bg-card/70">
       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">{icon}</div>
@@ -140,5 +141,5 @@ function InfoCard({ icon, label, value, href }: { icon: React.ReactNode; label: 
       </div>
     </div>
   );
-  return href ? <a href={href} target="_blank" rel="noopener noreferrer">{inner}</a> : inner;
+  return href ? <a href={href} target="_blank" rel="noopener noreferrer" onClick={onClick}>{inner}</a> : inner;
 }

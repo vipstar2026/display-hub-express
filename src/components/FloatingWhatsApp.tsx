@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { cleanPhoneNumber, useSiteSettings } from "@/lib/site-settings";
+import { useSiteSettings } from "@/lib/site-settings";
+import { waAnchorProps } from "@/lib/whatsapp";
 
 export function FloatingWhatsApp() {
   const { t } = useI18n();
@@ -10,9 +11,7 @@ export function FloatingWhatsApp() {
   const wa = settings?.whatsapp ?? null;
 
   if (!wa) return null;
-  const clean = cleanPhoneNumber(wa);
-  const msg = encodeURIComponent(t("wa.defaultMsg"));
-  const href = `https://wa.me/${clean}?text=${msg}`;
+  const anchor = waAnchorProps(wa, t("wa.defaultMsg"));
 
   return (
     <>
@@ -33,7 +32,7 @@ export function FloatingWhatsApp() {
             </button>
           </div>
           <p className="mb-3 text-xs text-muted-foreground">{t("wa.prompt")}</p>
-          <a href={href} target="_blank" rel="noopener noreferrer"
+          <a {...anchor}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 py-2 text-sm font-medium text-white transition hover:bg-emerald-600">
             <MessageCircle className="h-4 w-4" /> {t("wa.startChat")}
           </a>
