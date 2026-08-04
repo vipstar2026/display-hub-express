@@ -293,6 +293,8 @@ function CampaignsPage() {
 function AudienceDialog({
   campaign, onClose, onMarked,
 }: { campaign: Campaign; onClose: () => void; onMarked: () => void }) {
+  const { lang } = useI18n();
+  const t = useMemo(() => makeAdminT(lang), [lang]);
   const audience = useQuery({
     queryKey: ["campaign-audience", campaign.target_lang ?? "all"],
     queryFn: async () => {
