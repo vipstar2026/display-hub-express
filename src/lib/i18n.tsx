@@ -2620,6 +2620,6 @@ export function useI18n() {
 }
 
 export function localizedName(row: Record<string, unknown>, base: string, lang: Lang): string {
-  const v = row[`${base}_${lang}`] ?? row[`${base}_en`];
+  const v = row[`${base}_${lang}`] || row[`${base}_en`] || row[`${base}_ar`];
   return typeof v === "string" ? v : "";
 }

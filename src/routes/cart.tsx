@@ -54,7 +54,7 @@ function CartPage() {
 
   const { data: shippingRates } = useQuery({
     queryKey: ["shipping-rates-public"],
-    queryFn: async () => (await supabase.from("shipping_rates").select("*, shipping_zones(name_ar,name_en,name_ur)").eq("is_active", true).order("sort_order")).data ?? [],
+    queryFn: async () => (await supabase.from("shipping_rates").select("*, shipping_zones(name_ar,name_en,name_ur,name_bn)").eq("is_active", true).order("sort_order")).data ?? [],
   });
 
   const { data: addresses } = useQuery({
@@ -91,10 +91,8 @@ function CartPage() {
     : 0;
   const grandTotal = settings?.prices_include_vat ? total : Number((total + tax).toFixed(3));
 
-  const nameOf = (m: { name_ar: string | null; name_en: string | null; name_ur: string | null }) =>
-    (lang === "ar" ? m.name_ar : lang === "ur" ? (m.name_ur || m.name_en) : m.name_en) ?? "";
-  const instrOf = (m: { instructions_ar: string | null; instructions_en: string | null; instructions_ur: string | null }) =>
-    (lang === "ar" ? m.instructions_ar : lang === "ur" ? m.instructions_ur : m.instructions_en) ?? m.instructions_en ?? "";
+  const nameOf = (m: Record<string, unknown>) => localizedName(m, "name", lang);
+  const instrOf = (m: Record<string, unknown>) => localizedName(m, "instructions", lang);
 
   const applyCoupon = async () => {
     if (!couponInput.trim()) return;
@@ -306,7 +304,7 @@ function CartPage() {
                     {(shippingRates ?? []).map((r) => {
                       const active = r.id === selectedRate;
                       const isFree = r.free_over && subtotal >= Number(r.free_over);
-                      const rname = lang === "ar" ? r.name_ar : lang === "ur" ? (r.name_ur || r.name_en) : r.name_en;
+                      const rname = localizedName(r as unknown as Record<string, unknown>, "name", lang);
                       return (
                         <button
                           key={r.id}

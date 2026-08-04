@@ -29,7 +29,7 @@ export function RelatedProducts({ productId, categoryId }: { productId: string; 
       if (!categoryId) return [];
       const { data } = await supabase
         .from("products")
-        .select("id, slug, name_ar, name_en, name_ur, price, compare_price, currency, stock, track_stock, images, type, features")
+        .select("id, slug, name_ar, name_en, name_ur, name_bn, price, compare_price, currency, stock, track_stock, images, type, features")
         .eq("category_id", categoryId)
         .eq("status", "active")
         .neq("id", productId)
@@ -61,7 +61,7 @@ export function RecentlyViewed({ excludeId }: { excludeId?: string }) {
       if (ids.length === 0) return [];
       const { data } = await supabase
         .from("products")
-        .select("id, slug, name_ar, name_en, name_ur, price, compare_price, currency, stock, track_stock, images, type, features")
+        .select("id, slug, name_ar, name_en, name_ur, name_bn, price, compare_price, currency, stock, track_stock, images, type, features")
         .in("id", ids)
         .eq("status", "active");
       // preserve recency order

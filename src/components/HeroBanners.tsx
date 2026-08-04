@@ -41,8 +41,8 @@ export function HeroBanners() {
 
   if (count === 0) return null;
 
-  const pick = (ar?: string | null, en?: string | null, ur?: string | null) =>
-    (lang === "ar" ? ar : lang === "ur" ? ur : en) || en || ar || ur || "";
+  const pick = (ar?: string | null, en?: string | null, ur?: string | null, bn?: string | null) =>
+    (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? bn : en) || en || ar || ur || bn || "";
 
   return (
     <section className="relative border-b border-primary/20 bg-black">

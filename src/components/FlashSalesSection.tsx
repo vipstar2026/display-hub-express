@@ -74,7 +74,7 @@ export function FlashSalesSection() {
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {data.map((f) => {
-            const name = (lang === "ar" ? f.name_ar : lang === "ur" ? f.name_ur : f.name_en) || f.name_en;
+            const name = localizedName(f as unknown as Record<string, unknown>, "name", lang) || f.name_en;
             const img = f.products?.images?.[0];
             const original = f.original_price ?? f.products?.price ?? 0;
             const discount = original > 0 ? Math.round(((original - f.sale_price) / original) * 100) : 0;
