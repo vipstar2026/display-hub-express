@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { cleanPhoneNumber, useSiteSettings } from "@/lib/site-settings";
+import { useSiteSettings } from "@/lib/site-settings";
+import { waAnchorProps } from "@/lib/whatsapp";
 
 export function FloatingWhatsApp() {
   const { t } = useI18n();
@@ -10,9 +11,7 @@ export function FloatingWhatsApp() {
   const wa = settings?.whatsapp ?? null;
 
   if (!wa) return null;
-  const clean = cleanPhoneNumber(wa);
-  const msg = encodeURIComponent(t("wa.defaultMsg"));
-  const href = `https://wa.me/${clean}?text=${msg}`;
+  const anchor = waAnchorProps(wa, t("wa.defaultMsg"));
 
   return (
     <>
