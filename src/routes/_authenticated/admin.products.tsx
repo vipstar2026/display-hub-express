@@ -219,9 +219,11 @@ interface ProductForm {
   name_ar: string;
   name_en: string;
   name_ur: string;
+  name_bn: string;
   description_ar: string;
   description_en: string;
   description_ur: string;
+  description_bn: string;
   category_id: string;
   category_slug: string;
   type: "physical" | "digital" | "subscription";
@@ -236,8 +238,8 @@ interface ProductForm {
 }
 
 const empty: ProductForm = {
-  slug: "", name_ar: "", name_en: "", name_ur: "",
-  description_ar: "", description_en: "", description_ur: "",
+  slug: "", name_ar: "", name_en: "", name_ur: "", name_bn: "",
+  description_ar: "", description_en: "", description_ur: "", description_bn: "",
   category_id: "", category_slug: "",
   type: "physical", status: "active",
   price: "0", compare_price: "", currency: "USD", stock: "0",
@@ -272,8 +274,8 @@ function AdminProducts() {
   };
 
   const handleEdit = (p: {
-    id: string; slug: string; name_ar: string; name_en: string; name_ur: string | null;
-    description_ar: string | null; description_en: string | null; description_ur: string | null;
+    id: string; slug: string; name_ar: string; name_en: string; name_ur: string | null; name_bn: string | null;
+    description_ar: string | null; description_en: string | null; description_ur: string | null; description_bn: string | null;
     category_id: string | null; type: string; status: string; price: number;
     compare_price: number | null; currency: string; stock: number; is_featured: boolean;
     images: unknown; features: unknown; categories?: { slug: string } | null;
@@ -281,8 +283,8 @@ function AdminProducts() {
     const feats = (p.features && typeof p.features === "object" ? p.features : {}) as Record<string, string | number | boolean>;
     setForm({
       id: p.id, slug: p.slug,
-      name_ar: p.name_ar, name_en: p.name_en, name_ur: p.name_ur ?? "",
-      description_ar: p.description_ar ?? "", description_en: p.description_en ?? "", description_ur: p.description_ur ?? "",
+      name_ar: p.name_ar, name_en: p.name_en, name_ur: p.name_ur ?? "", name_bn: p.name_bn ?? "",
+      description_ar: p.description_ar ?? "", description_en: p.description_en ?? "", description_ur: p.description_ur ?? "", description_bn: p.description_bn ?? "",
       category_id: p.category_id ?? "",
       category_slug: p.categories?.slug ?? "",
       type: p.type as ProductForm["type"], status: p.status as ProductForm["status"],
@@ -298,8 +300,8 @@ function AdminProducts() {
     if (!form.name_ar || !form.name_en) { toast.error("الاسم مطلوب (AR/EN)"); return; }
     const payload = {
       slug: form.slug || form.name_en.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
-      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null,
-      description_ar: form.description_ar || null, description_en: form.description_en || null, description_ur: form.description_ur || null,
+      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null, name_bn: form.name_bn || null,
+      description_ar: form.description_ar || null, description_en: form.description_en || null, description_ur: form.description_ur || null, description_bn: form.description_bn || null,
       category_id: form.category_id || null,
       type: form.type, status: form.status,
       price: Number(form.price),
@@ -381,6 +383,7 @@ function AdminProducts() {
               <div><Label>الاسم (AR) *</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
               <div><Label>الاسم (EN) *</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
               <div><Label>الاسم (UR)</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+              <div><Label>الاسم (BN)</Label><Input value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
               <div><Label>الرابط (Slug)</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="auto-from-en" /></div>
               <div>
                 <Label>القسم</Label>

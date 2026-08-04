@@ -14,8 +14,8 @@ export const Route = createFileRoute("/_authenticated/admin/categories/")({
   component: AdminCategories,
 });
 
-interface CatForm { id?: string; slug: string; name_ar: string; name_en: string; name_ur: string; icon: string; sort_order: string; }
-const empty: CatForm = { slug: "", name_ar: "", name_en: "", name_ur: "", icon: "satellite", sort_order: "0" };
+interface CatForm { id?: string; slug: string; name_ar: string; name_en: string; name_ur: string; name_bn: string; icon: string; sort_order: string; }
+const empty: CatForm = { slug: "", name_ar: "", name_en: "", name_ur: "", name_bn: "", icon: "satellite", sort_order: "0" };
 
 function AdminCategories() {
   const qc = useQueryClient();
@@ -30,7 +30,7 @@ function AdminCategories() {
   const handleSave = async () => {
     const payload = {
       slug: form.slug,
-      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null,
+      name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null, name_bn: form.name_bn || null,
       icon: form.icon || null, sort_order: Number(form.sort_order),
     };
     const { error } = form.id
@@ -53,6 +53,7 @@ function AdminCategories() {
               <div><Label>Name AR</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
               <div><Label>Name EN</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
               <div><Label>Name UR</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+              <div><Label>Name BN</Label><Input value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
               <div><Label>Icon (lucide name)</Label><Input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} /></div>
               <div><Label>Sort Order</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} /></div>
               <Button onClick={handleSave} className="w-full bg-primary text-background hover:bg-primary">Save</Button>
@@ -75,7 +76,7 @@ function AdminCategories() {
               </div>
               <ChevronRight className="ms-auto h-4 w-4 text-muted-foreground rtl:rotate-180" />
             </Link>
-            <Button size="sm" variant="ghost" onClick={() => { setForm({ id: c.id, slug: c.slug, name_ar: c.name_ar, name_en: c.name_en, name_ur: c.name_ur ?? "", icon: c.icon ?? "", sort_order: String(c.sort_order) }); setOpen(true); }}>
+            <Button size="sm" variant="ghost" onClick={() => { setForm({ id: c.id, slug: c.slug, name_ar: c.name_ar, name_en: c.name_en, name_ur: c.name_ur ?? "", name_bn: (c as unknown as { name_bn?: string | null }).name_bn ?? "", icon: c.icon ?? "", sort_order: String(c.sort_order) }); setOpen(true); }}>
               <Edit className="h-4 w-4" />
             </Button>
             <Button size="sm" variant="ghost" onClick={async () => {
