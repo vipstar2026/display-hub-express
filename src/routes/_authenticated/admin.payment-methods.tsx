@@ -54,6 +54,7 @@ function AdminPaymentMethods() {
   const { lang } = useI18n();
   const ar = lang === "ar";
   const t = makeAdminT(lang);
+  const pickL = (row: any, base: string) => row?.[`${base}_${lang}`] || row?.[`${base}_en`] || row?.[`${base}_ar`] || "";
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Form>(empty);
@@ -332,8 +333,8 @@ function AdminPaymentMethods() {
                 </div>
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium">{ar ? m.name_ar : m.name_en}</span>
-                    <span className="text-muted-foreground">· {ar ? m.name_en : m.name_ar}</span>
+                    <span className="font-medium">{pickL(m, "name") || m.name_en}</span>
+                    <span className="text-muted-foreground">· {m.name_en || m.name_ar}</span>
                     {isGw
                       ? <Badge variant="outline" className="border-primary/40 text-primary text-[10px]"><Zap className="me-0.5 h-3 w-3" />{t("بوابة", "Gateway")}</Badge>
                       : <Badge variant="outline" className="text-[10px]">{t("يدوي", "Manual")}</Badge>}
@@ -344,8 +345,8 @@ function AdminPaymentMethods() {
                 </div>
                 <Switch checked={!!m.is_active} onCheckedChange={(v) => toggle(m.id, v)} />
               </div>
-              {!isGw && (ar ? m.instructions_ar : m.instructions_en) && (
-                <p className="mt-3 text-xs text-muted-foreground line-clamp-2">{ar ? m.instructions_ar : m.instructions_en}</p>
+              {!isGw && pickL(m, "instructions") && (
+                <p className="mt-3 text-xs text-muted-foreground line-clamp-2">{pickL(m, "instructions")}</p>
               )}
               <div className="mt-3 flex justify-end gap-2">
                 <Button size="sm" variant="ghost" onClick={() => {
