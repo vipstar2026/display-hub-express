@@ -5,6 +5,17 @@ export type Lang = "ar" | "en" | "ur" | "bn";
 type Dict = Record<string, string>;
 
 const AR: Dict = {
+  "admin.analytics": "التحليلات",
+  "admin.coupon_usage": "استخدام الكوبونات",
+  "admin.flash_sales": "العروض السريعة",
+  "admin.payment_methods": "طرق الدفع",
+  "admin.suppliers": "الموردون",
+  "admin.purchase_orders": "أوامر الشراء",
+  "admin.reviews": "التقييمات",
+  "admin.banners": "البانرات",
+  "admin.blog": "المدونة",
+  "admin.outbox": "صندوق الصادر",
+  "admin.campaigns": "الحملات",
   "site.tagline": "متجرك المتخصص للستلايت و IPTV",
   "nav.home": "الرئيسية",
   "nav.shop": "المتجر",
@@ -652,6 +663,17 @@ const AR: Dict = {
 };
 
 const EN: Dict = {
+  "admin.analytics": "Analytics",
+  "admin.coupon_usage": "Coupon Usage",
+  "admin.flash_sales": "Flash Sales",
+  "admin.payment_methods": "Payment Methods",
+  "admin.suppliers": "Suppliers",
+  "admin.purchase_orders": "Purchase Orders",
+  "admin.reviews": "Reviews",
+  "admin.banners": "Banners",
+  "admin.blog": "Blog",
+  "admin.outbox": "Outbox",
+  "admin.campaigns": "Campaigns",
   "site.tagline": "Your specialist Satellite & IPTV store",
   "nav.home": "Home",
   "nav.shop": "Shop",
@@ -1296,6 +1318,17 @@ const EN: Dict = {
 };
 
 const UR: Dict = {
+  "admin.analytics": "تجزیات",
+  "admin.coupon_usage": "کوپن استعمال",
+  "admin.flash_sales": "فلیش سیلز",
+  "admin.payment_methods": "ادائیگی کے طریقے",
+  "admin.suppliers": "سپلائرز",
+  "admin.purchase_orders": "خریداری آرڈرز",
+  "admin.reviews": "جائزے",
+  "admin.banners": "بینرز",
+  "admin.blog": "بلاگ",
+  "admin.outbox": "آؤٹ باکس",
+  "admin.campaigns": "مہمات",
   "site.tagline": "سیٹلائٹ اور IPTV کا ماہر اسٹور",
   "nav.home": "ہوم",
   "nav.shop": "اسٹور",
@@ -1939,6 +1972,17 @@ const UR: Dict = {
 };
 
 const BN: Dict = {
+  "admin.analytics": "অ্যানালিটিক্স",
+  "admin.coupon_usage": "কুপন ব্যবহার",
+  "admin.flash_sales": "ফ্ল্যাশ সেল",
+  "admin.payment_methods": "পেমেন্ট পদ্ধতি",
+  "admin.suppliers": "সরবরাহকারী",
+  "admin.purchase_orders": "ক্রয় আদেশ",
+  "admin.reviews": "রিভিউ",
+  "admin.banners": "ব্যানার",
+  "admin.blog": "ব্লগ",
+  "admin.outbox": "আউটবক্স",
+  "admin.campaigns": "ক্যাম্পেইন",
   "site.tagline": "আপনার বিশেষজ্ঞ Satellite & IPTV স্টোর",
   "nav.home": "হোম",
   "nav.shop": "শপ",
