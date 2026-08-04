@@ -491,6 +491,8 @@ function AdminProducts() {
               <div className="text-xs font-semibold uppercase tracking-wider text-primary/80">الوصف</div>
               <div><Label>الوصف (AR)</Label><Textarea value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
               <div><Label>الوصف (EN)</Label><Textarea value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
+              <div><Label>الوصف (UR)</Label><Textarea value={form.description_ur} onChange={(e) => setForm({ ...form, description_ur: e.target.value })} /></div>
+              <div><Label>الوصف (BN)</Label><Textarea value={form.description_bn} onChange={(e) => setForm({ ...form, description_bn: e.target.value })} /></div>
               <div><Label>رابط الصورة</Label><Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." /></div>
             </section>
 
