@@ -322,7 +322,7 @@ function AudienceDialog({
 
   function copyEmails() {
     navigator.clipboard.writeText(emails.join(", "));
-    toast.success(t(`نُسخ ${emails.length} بريدًا إلى الحافظة`, `Copied ${emails.length} email(s) to clipboard`));
+    toast.success(`${emails.length} ${t("بريدًا نُسخ إلى الحافظة", "email(s) copied to clipboard")}`);
   }
 
   async function markSent() {
@@ -359,7 +359,7 @@ function AudienceDialog({
           <div className="max-h-64 overflow-auto rounded border p-2 text-xs">
             {emails.slice(0, 200).map((e) => <div key={e}>{e}</div>)}
             {emails.length > 200 && (
-              <div className="pt-2 text-muted-foreground">{t(`… و${emails.length - 200} آخر`, `… and ${emails.length - 200} more`)}</div>
+              <div className="pt-2 text-muted-foreground">… {emails.length - 200} {t("آخر", "more")}</div>
             )}
           </div>
         </div>
