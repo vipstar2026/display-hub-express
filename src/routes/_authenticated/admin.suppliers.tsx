@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, Search, Pencil, Trash2, Users } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
+import { makeAdminTE } from "@/lib/admin-i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/suppliers")({
   ssr: false,
@@ -25,6 +27,8 @@ type Supplier = {
 };
 
 function SuppliersPage() {
+  const { lang } = useI18n();
+  const te = useMemo(() => makeAdminTE(lang), [lang]);
   const [rows, setRows] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -53,7 +57,7 @@ function SuppliersPage() {
   }
 
   async function save() {
-    if (!form.name.trim()) { toast.error("Name required"); return; }
+    if (!form.name.trim()) { toast.error(te("Name required")); return; }
     const payload = {
       name: form.name.trim(),
       phone: form.phone || null,
@@ -65,16 +69,16 @@ function SuppliersPage() {
       ? await supabase.from("suppliers").update(payload).eq("id", editing.id)
       : await supabase.from("suppliers").insert(payload);
     if (res.error) { toast.error(res.error.message); return; }
-    toast.success(editing ? "Updated" : "Created");
+    toast.success(editing ? te("Updated") : te("Created"));
     setOpen(false);
     load();
   }
 
   async function remove(id: string) {
-    if (!confirm("Delete supplier?")) return;
+    if (!confirm(te("Delete supplier?"))) return;
     const { error } = await supabase.from("suppliers").delete().eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Deleted");
+    toast.success(te("Deleted"));
     load();
   }
 
@@ -88,52 +92,52 @@ function SuppliersPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold">Suppliers</h1>
-          <p className="text-sm text-muted-foreground">Manage vendors and outstanding balances</p>
+          <h1 className="text-2xl font-bold">{te("Suppliers")}</h1>
+          <p className="text-sm text-muted-foreground">{te("Manage vendors and outstanding balances")}</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openNew}><Plus className="h-4 w-4 me-1" /> New Supplier</Button>
+            <Button onClick={openNew}><Plus className="h-4 w-4 me-1" /> {te("New Supplier")}</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>{editing ? "Edit Supplier" : "New Supplier"}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{editing ? te("Edit Supplier") : te("New Supplier")}</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <Input placeholder="Name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-              <Input placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-              <Input placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              <Input placeholder="Address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
-              <Textarea placeholder="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+              <Input placeholder={te("Name *")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Input placeholder={te("Phone")} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              <Input placeholder={te("Email")} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <Input placeholder={te("Address")} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+              <Textarea placeholder={te("Notes")} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
             </div>
-            <DialogFooter><Button onClick={save}>Save</Button></DialogFooter>
+            <DialogFooter><Button onClick={save}>{te("Save")}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        <Kpi label="Total Suppliers" value={rows.length.toString()} />
-        <Kpi label="Outstanding Balance" value={`${totalBalance.toFixed(3)} BHD`} />
-        <Kpi label="Active" value={rows.filter((r) => r.balance > 0).length.toString()} />
+        <Kpi label={te("Total Suppliers")} value={rows.length.toString()} />
+        <Kpi label={te("Outstanding Balance")} value={`${totalBalance.toFixed(3)} BHD`} />
+        <Kpi label={te("Active")} value={rows.filter((r) => r.balance > 0).length.toString()} />
       </div>
 
       <div className="relative max-w-md">
         <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder="Search name / email / phone" value={q} onChange={(e) => setQ(e.target.value)} className="ps-9" />
+        <Input placeholder={te("Search name / email / phone")} value={q} onChange={(e) => setQ(e.target.value)} className="ps-9" />
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
             <tr>
-              <th className="p-3 text-start">Name</th>
-              <th className="p-3 text-start">Phone</th>
-              <th className="p-3 text-start">Email</th>
-              <th className="p-3 text-end">Balance</th>
-              <th className="p-3 text-end">Actions</th>
+              <th className="p-3 text-start">{te("Name")}</th>
+              <th className="p-3 text-start">{te("Phone")}</th>
+              <th className="p-3 text-start">{te("Email")}</th>
+              <th className="p-3 text-end">{te("Balance")}</th>
+              <th className="p-3 text-end">{te("Actions")}</th>
             </tr>
           </thead>
           <tbody>
-            {loading && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">Loading…</td></tr>}
-            {!loading && filtered.length === 0 && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No suppliers</td></tr>}
+            {loading && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">{te("Loading…")}</td></tr>}
+            {!loading && filtered.length === 0 && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">{te("No suppliers")}</td></tr>}
             {filtered.map((s) => (
               <tr key={s.id} className="border-t border-border/60">
                 <td className="p-3 font-medium">{s.name}</td>

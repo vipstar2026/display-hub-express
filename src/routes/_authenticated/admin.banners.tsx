@@ -169,7 +169,7 @@ function AdminBanners() {
                     b.is_active
                       ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
                       : "bg-zinc-500/15 text-zinc-400 border-zinc-500/30"
-                  }`}>{b.is_active ? "active" : "hidden"}</span>
+                  }`}>{b.is_active ? te("active") : te("hidden")}</span>
                   <Button size="sm" variant="outline" onClick={() => move(b, -1)}><ArrowUp className="h-3.5 w-3.5" /></Button>
                   <Button size="sm" variant="outline" onClick={() => move(b, 1)}><ArrowDown className="h-3.5 w-3.5" /></Button>
                   <Button size="sm" variant="outline" onClick={() => toggle(b)} className="gap-1">

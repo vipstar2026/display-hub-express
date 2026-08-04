@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useMemo, useState } from "react";
+import { useI18n } from "@/lib/i18n";
+import { makeAdminTE } from "@/lib/admin-i18n";
 import { toast } from "sonner";
 import { Trash2, Key, Package, CheckCircle2, XCircle, Search, Download, Upload, FileText } from "lucide-react";
 
@@ -18,6 +20,8 @@ type StatsRow = { product_id: string; product_name: string; total_codes: number;
 
 function AdminCodes() {
   const qc = useQueryClient();
+  const { lang } = useI18n();
+  const te = useMemo(() => makeAdminTE(lang), [lang]);
   const [productId, setProductId] = useState("");
   const [bulk, setBulk] = useState("");
   const [q, setQ] = useState("");
@@ -65,7 +69,7 @@ function AdminCodes() {
     const { error } = await supabase.from("digital_codes").insert(newCodes.map((code) => ({ product_id: productId, code })));
     if (error) toast.error(error.message);
     else {
-      toast.success(`Added ${newCodes.length} codes${dupCount ? ` (${dupCount} duplicates skipped)` : ""}`);
+      toast.success(`${te("Added")} ${newCodes.length} ${te("codes")}${dupCount ? ` (${dupCount} ${te("duplicates skipped")})` : ""}`);
       setBulk("");
       qc.invalidateQueries({ queryKey: ["codes", productId] });
       qc.invalidateQueries({ queryKey: ["codes-stats"] });
@@ -79,7 +83,7 @@ function AdminCodes() {
     const looksCsv = /,/.test(lines[0] ?? "") && /code/i.test(lines[0] ?? "");
     const rows = looksCsv ? lines.slice(1).map((l) => l.split(",")[0]) : lines;
     setBulk((prev) => (prev.trim() ? prev + "\n" : "") + rows.join("\n"));
-    toast.success(`Loaded ${rows.length} lines from ${file.name}`);
+    toast.success(`${te("Loaded")} ${rows.length} ${te("lines from")} ${file.name}`);
   };
 
   const filteredCodes = codes.filter((c) => {
@@ -106,27 +110,27 @@ function AdminCodes() {
     <div className="space-y-6">
       <div>
         <h1 className="flex items-center gap-2 font-display text-2xl font-bold">
-          <Key className="h-6 w-6 text-primary" /> Digital / IPTV Codes
+          <Key className="h-6 w-6 text-primary" /> {te("Digital / IPTV Codes")}
         </h1>
-        <p className="text-sm text-muted-foreground">Manage subscription codes and stock per digital product.</p>
+        <p className="text-sm text-muted-foreground">{te("Manage subscription codes and stock per digital product.")}</p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi icon={Package} label="Products" value={stats.length} />
-        <Kpi icon={Key} label="Total codes" value={totals.total} />
-        <Kpi icon={CheckCircle2} label="Available" value={totals.available} accent="text-emerald-400" />
-        <Kpi icon={XCircle} label="Used" value={totals.used} accent="text-amber-400" />
+        <Kpi icon={Package} label={te("Products")} value={stats.length} />
+        <Kpi icon={Key} label={te("Total codes")} value={totals.total} />
+        <Kpi icon={CheckCircle2} label={te("Available")} value={totals.available} accent="text-emerald-400" />
+        <Kpi icon={XCircle} label={te("Used")} value={totals.used} accent="text-amber-400" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
         {/* Product picker with stock levels */}
         <div className="rounded-2xl border border-primary/15 bg-card">
           <div className="border-b border-primary/10 p-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Products
+            {te("Products")}
           </div>
           <div className="max-h-[520px] divide-y divide-primary/10 overflow-y-auto">
             {stats.length === 0 && (
-              <div className="p-6 text-center text-xs text-muted-foreground">No digital products found</div>
+              <div className="p-6 text-center text-xs text-muted-foreground">{te("No digital products found")}</div>
             )}
             {stats.map((s) => (
               <button
@@ -144,7 +148,7 @@ function AdminCodes() {
                   </div>
                 </div>
                 {Number(s.available_codes) === 0 && Number(s.total_codes) > 0 && (
-                  <span className="rounded bg-red-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-red-400">Out</span>
+                  <span className="rounded bg-red-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-red-400">{te("Out")}</span>
                 )}
               </button>
             ))}
@@ -155,7 +159,7 @@ function AdminCodes() {
         <div className="space-y-4">
           {!productId ? (
             <div className="grid h-full min-h-[300px] place-items-center rounded-2xl border border-dashed border-primary/20 bg-card/40 p-10 text-center text-sm text-muted-foreground">
-              Select a product on the left to add or manage its codes.
+              {te("Select a product on the left to add or manage its codes.")}
             </div>
           ) : (
             <>
@@ -163,14 +167,14 @@ function AdminCodes() {
                 <div className="flex items-center justify-between">
                   <h3 className="font-display text-lg font-bold">{currentProduct?.product_name}</h3>
                   <Button size="sm" variant="outline" onClick={exportCsv} disabled={codes.length === 0}>
-                    <Download className="me-1.5 h-3.5 w-3.5" /> CSV
+                    <Download className="me-1.5 h-3.5 w-3.5" /> {te("CSV")}
                   </Button>
                 </div>
                 <div>
                   <div className="mb-1.5 flex items-center justify-between">
-                    <Label>Bulk add codes</Label>
+                    <Label>{te("Bulk add codes")}</Label>
                     <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-primary/20 bg-background/60 px-2.5 py-1 text-xs hover:bg-primary/10">
-                      <Upload className="h-3 w-3" /> Import file (.txt / .csv)
+                      <Upload className="h-3 w-3" /> {te("Import file (.txt / .csv)")}
                       <input
                         type="file"
                         accept=".txt,.csv,text/plain,text/csv"
@@ -183,28 +187,28 @@ function AdminCodes() {
                     rows={6}
                     value={bulk}
                     onChange={(e) => setBulk(e.target.value)}
-                    placeholder="One code per line, or paste CSV / comma-separated&#10;ABC-123&#10;DEF-456&#10;GHI-789"
+                    placeholder={te("One code per line, or paste CSV / comma-separated\nABC-123\nDEF-456\nGHI-789")}
                     className="font-mono text-xs"
                   />
                   {parsedInput.length > 0 && (
                     <div className="mt-1.5 flex flex-wrap gap-2 text-[11px]">
                       <span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary">
                         <FileText className="me-1 inline h-3 w-3" />
-                        {parsedInput.length} parsed
+                        {parsedInput.length} {te("parsed")}
                       </span>
                       <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-emerald-400">
-                        {newCodes.length} new
+                        {newCodes.length} {te("new")}
                       </span>
                       {dupCount > 0 && (
                         <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-amber-400">
-                          {dupCount} already exist (will skip)
+                          {dupCount} {te("already exist (will skip)")}
                         </span>
                       )}
                     </div>
                   )}
                 </div>
                 <Button onClick={handleAdd} disabled={newCodes.length === 0} className="bg-primary text-background hover:bg-primary">
-                  Add {newCodes.length} codes
+                  {te("Add")} {newCodes.length} {te("codes")}
                 </Button>
               </div>
 
@@ -212,26 +216,26 @@ function AdminCodes() {
                 <div className="flex flex-wrap items-center gap-2 border-b border-primary/10 p-3">
                   <div className="relative flex-1 min-w-[180px]">
                     <Search className="pointer-events-none absolute start-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                    <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search code…" className="h-8 ps-8 text-xs" />
+                    <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={te("Search code…")} className="h-8 ps-8 text-xs" />
                   </div>
                   <Select value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
                     <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="available">Available</SelectItem>
-                      <SelectItem value="used">Used</SelectItem>
+                      <SelectItem value="all">{te("All")}</SelectItem>
+                      <SelectItem value="available">{te("Available")}</SelectItem>
+                      <SelectItem value="used">{te("Used")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="max-h-[420px] divide-y divide-primary/10 overflow-y-auto">
                   {filteredCodes.length === 0 && (
-                    <div className="p-8 text-center text-sm text-muted-foreground">No codes match</div>
+                    <div className="p-8 text-center text-sm text-muted-foreground">{te("No codes match")}</div>
                   )}
                   {filteredCodes.map((c) => (
                     <div key={c.id} className="flex items-center gap-3 p-3 text-sm">
                       <code className="font-mono text-primary">{c.code}</code>
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${c.is_used ? "bg-amber-500/15 text-amber-400" : "bg-emerald-500/15 text-emerald-400"}`}>
-                        {c.is_used ? "USED" : "AVAILABLE"}
+                        {c.is_used ? te("USED") : te("AVAILABLE")}
                       </span>
                       {c.used_at && <span className="text-xs text-muted-foreground">{new Date(c.used_at).toLocaleDateString()}</span>}
                       <Button
@@ -239,7 +243,7 @@ function AdminCodes() {
                         variant="ghost"
                         className="ms-auto text-red-400 hover:text-red-300"
                         onClick={async () => {
-                          if (!confirm("Delete this code?")) return;
+                          if (!confirm(te("Delete this code?"))) return;
                           await supabase.from("digital_codes").delete().eq("id", c.id);
                           qc.invalidateQueries({ queryKey: ["codes", productId] });
                           qc.invalidateQueries({ queryKey: ["codes-stats"] });
