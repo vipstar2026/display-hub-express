@@ -44,7 +44,7 @@ export function LiveChatWidget() {
   async function send() {
     if (!text.trim()) return;
     if (!name.trim() || !email.trim()) {
-      toast.error(lang === "ar" ? "أدخل الاسم والبريد" : lang === "ur" ? "نام اور ای میل درج کریں" : "Enter name and email");
+      toast.error(lang === "ar" ? "أدخل الاسم والبريد" : lang === "ur" ? "نام اور ای میل درج کریں" : lang === "bn" ? "নাম ও ইমেইল লিখুন" : "Enter name and email");
       return;
     }
     setSending(true);
