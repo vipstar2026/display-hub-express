@@ -32,7 +32,7 @@ export function FloatingWhatsApp() {
             </button>
           </div>
           <p className="mb-3 text-xs text-muted-foreground">{t("wa.prompt")}</p>
-          <a href={href} target="_blank" rel="noopener noreferrer"
+          <a {...anchor}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 py-2 text-sm font-medium text-white transition hover:bg-emerald-600">
             <MessageCircle className="h-4 w-4" /> {t("wa.startChat")}
           </a>
