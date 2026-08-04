@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
+import { makeAdminT } from "@/lib/admin-i18n";
 import {
   PERMISSION_GROUPS,
   PERMISSION_PRESETS,
@@ -62,16 +63,16 @@ type Row = {
   total_spent: number;
 };
 
-const ROLES: { key: RoleKey; ar: string; en: string; ur: string; icon: typeof Shield; color: string }[] = [
-  { key: "admin", ar: "مدير", en: "Admin", ur: "ایڈمن", icon: ShieldCheck, color: "bg-primary/15 text-primary border-primary/30" },
-  { key: "moderator", ar: "مشرف", en: "Moderator", ur: "موڈریٹر", icon: Shield, color: "bg-amber-500/15 text-amber-400 border-amber-500/30" },
-  { key: "customer", ar: "عميل", en: "Customer", ur: "گاہک", icon: UserIcon, color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" },
+const ROLES: { key: RoleKey; ar: string; en: string; ur: string; bn: string; icon: typeof Shield; color: string }[] = [
+  { key: "admin", ar: "مدير", en: "Admin", ur: "ایڈمن", bn: "অ্যাডমিন", icon: ShieldCheck, color: "bg-primary/15 text-primary border-primary/30" },
+  { key: "moderator", ar: "مشرف", en: "Moderator", ur: "موڈریٹر", bn: "মডারেটর", icon: Shield, color: "bg-amber-500/15 text-amber-400 border-amber-500/30" },
+  { key: "customer", ar: "عميل", en: "Customer", ur: "گاہک", bn: "গ্রাহক", icon: UserIcon, color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" },
 ];
 
 function AdminUsers() {
   const { lang } = useI18n();
   const ar = lang !== "en";
-  const t = (a: string, e: string) => (lang === "en" ? e : a);
+  const t = makeAdminT(lang);
   const qc = useQueryClient();
 
   const [q, setQ] = useState("");
@@ -254,7 +255,7 @@ function AdminUsers() {
 function ManageUserDialog({
   user, onClose, onSaved, lang,
 }: { user: Row; onClose: () => void; onSaved: () => void; lang: string; ar: boolean }) {
-  const t = (a: string, e: string) => (lang === "en" ? e : a);
+  const t = makeAdminT(lang);
   const deleteUser = useServerFn(adminDeleteUser);
   const resetPassword = useServerFn(adminSendPasswordReset);
   const setPassword = useServerFn(adminSetUserPassword);
@@ -443,7 +444,7 @@ function ManageUserDialog({
 /* ---------------- Create dialog ---------------- */
 
 function CreateUserDialog({ onClose, onSaved, lang }: { onClose: () => void; onSaved: () => void; lang: string }) {
-  const t = (a: string, e: string) => (lang === "en" ? e : a);
+  const t = makeAdminT(lang);
   const createUser = useServerFn(adminCreateUser);
   const [form, setForm] = useState({
     email: "", password: "", display_name: "", phone: "", job_title: "", department: "",
