@@ -11,6 +11,10 @@ import { Plus, Edit, Trash2, Package, Tv, Satellite, Smartphone, Wifi, Camera, K
 import { useState, type ComponentType } from "react";
 import { toast } from "sonner";
 import { formatPrice, firstImage } from "@/lib/format";
+import { useI18n } from "@/lib/i18n";
+import { makeAdminT } from "@/lib/admin-i18n";
+import { translatePresetLabel } from "@/lib/category-presets";
+import { dirForLang } from "@/lib/dir";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
   component: AdminProducts,
@@ -248,17 +252,25 @@ const empty: ProductForm = {
 
 function AdminProducts() {
   const qc = useQueryClient();
+  const { lang } = useI18n();
+  const t = makeAdminT(lang);
+  const L = (o: { name_ar?: string | null; name_en?: string | null; name_ur?: string | null; name_bn?: string | null } | null | undefined): string => {
+    if (!o) return "";
+    const v = lang === "ar" ? o.name_ar : lang === "ur" ? o.name_ur : lang === "bn" ? o.name_bn : o.name_en;
+    return v || o.name_en || o.name_ar || "";
+  };
+  const tl = (label: string) => translatePresetLabel(label, lang);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<ProductForm>(empty);
 
   const { data: products } = useQuery({
     queryKey: ["admin-products"],
-    queryFn: async () => (await supabase.from("products").select("*, categories(slug, name_en, name_ar)").order("created_at", { ascending: false })).data ?? [],
+    queryFn: async () => (await supabase.from("products").select("*, categories(slug, name_en, name_ar, name_ur, name_bn)").order("created_at", { ascending: false })).data ?? [],
   });
 
   const { data: cats } = useQuery({
     queryKey: ["admin-cats-list"],
-    queryFn: async () => (await supabase.from("categories").select("id, slug, name_en, name_ar").order("sort_order")).data ?? [],
+    queryFn: async () => (await supabase.from("categories").select("id, slug, name_en, name_ar, name_ur, name_bn").order("sort_order")).data ?? [],
   });
 
   const openForCategory = (cat: { id: string; slug: string }) => {
@@ -329,7 +341,7 @@ function AdminProducts() {
   const preset = form.category_slug ? CATEGORY_PRESETS[form.category_slug] : undefined;
   const dynamicFields = preset?.fields ?? [];
   const showStock = form.type !== "subscription" && form.type !== "digital";
-  const currentCategoryName = cats?.find((c) => c.id === form.category_id)?.name_ar ?? "";
+  const currentCategoryName = L(cats?.find((c) => c.id === form.category_id)) ?? "";
 
   const setFeature = (key: string, value: string | number | boolean) => {
     setForm((f) => ({ ...f, features: { ...f.features, [key]: value } }));
@@ -338,8 +350,8 @@ function AdminProducts() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-bold">المنتجات</h1>
-        <p className="mt-1 text-sm text-muted-foreground">اختر القسم لإضافة منتج بالحقول الخاصة به</p>
+        <h1 className="font-display text-2xl font-bold">{t("المنتجات", "Products")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("اختر القسم لإضافة منتج بالحقول الخاصة به", "Pick a category to add a product with its own fields")}</p>
       </div>
 
       {/* Category-specific add buttons */}
@@ -357,8 +369,8 @@ function AdminProducts() {
                 <Icon className="h-5 w-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold">{c.name_ar}</div>
-                <div className="truncate text-[10px] text-muted-foreground">{hasPreset ? `+ حقول مخصصة` : "حقول أساسية"}</div>
+                <div className="truncate text-sm font-semibold" dir={dirForLang(lang)}>{L(c)}</div>
+                <div className="truncate text-[10px] text-muted-foreground">{hasPreset ? `+ ${t("حقول مخصصة", "custom fields")}` : t("حقول أساسية", "basic fields")}</div>
               </div>
               <Plus className="h-4 w-4 text-primary opacity-70 group-hover:opacity-100" />
             </button>
@@ -371,7 +383,7 @@ function AdminProducts() {
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {form.id ? "تعديل" : "إضافة"} منتج
+              {form.id ? t("تعديل منتج", "Edit product") : t("إضافة منتج", "Add product")}
               {currentCategoryName && <span className="ms-2 text-sm font-normal text-primary">— {currentCategoryName}</span>}
             </DialogTitle>
           </DialogHeader>
@@ -379,14 +391,14 @@ function AdminProducts() {
           <div className="space-y-5">
             {/* Basics */}
             <section className="grid gap-3 md:grid-cols-2">
-              <div className="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-primary/80">الأساسيات</div>
-              <div><Label>الاسم (AR) *</Label><Input dir="rtl" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
-              <div><Label>الاسم (EN) *</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
-              <div><Label>الاسم (UR)</Label><Input dir="rtl" value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
-              <div><Label>الاسم (BN)</Label><Input dir="ltr" value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
-              <div><Label>الرابط (Slug)</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="auto-from-en" /></div>
+              <div className="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-primary/80">{t("الأساسيات", "Basics")}</div>
+              <div><Label>{t("الاسم", "Name")} (AR) *</Label><Input dir="rtl" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+              <div><Label>{t("الاسم", "Name")} (EN) *</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+              <div><Label>{t("الاسم", "Name")} (UR)</Label><Input dir="rtl" value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+              <div><Label>{t("الاسم", "Name")} (BN)</Label><Input dir="ltr" value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
+              <div><Label>{t("الرابط (Slug)", "Slug")}</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="auto-from-en" /></div>
               <div>
-                <Label>القسم</Label>
+                <Label>{t("القسم", "Category")}</Label>
                 <Select
                   value={form.category_id}
                   onValueChange={(v) => {
@@ -396,17 +408,17 @@ function AdminProducts() {
                   }}
                 >
                   <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>{(cats ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name_ar}</SelectItem>)}</SelectContent>
+                  <SelectContent>{(cats ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{L(c)}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>النوع</Label>
+                <Label>{t("النوع", "Type")}</Label>
                 <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as ProductForm["type"] })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="physical">منتج فعلي</SelectItem>
-                    <SelectItem value="digital">رقمي</SelectItem>
-                    <SelectItem value="subscription">اشتراك</SelectItem>
+                    <SelectItem value="physical">{t("منتج فعلي", "Physical")}</SelectItem>
+                    <SelectItem value="digital">{t("رقمي", "Digital")}</SelectItem>
+                    <SelectItem value="subscription">{t("اشتراك", "Subscription")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -414,25 +426,25 @@ function AdminProducts() {
 
             {/* Pricing */}
             <section className="grid gap-3 md:grid-cols-2">
-              <div className="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-primary/80">السعر والمخزون</div>
-              <div><Label>السعر</Label><Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
-              <div><Label>السعر قبل الخصم</Label><Input type="number" step="0.01" value={form.compare_price} onChange={(e) => setForm({ ...form, compare_price: e.target.value })} /></div>
-              <div><Label>العملة</Label><Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} /></div>
-              {showStock && <div><Label>المخزون</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>}
+              <div className="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-primary/80">{t("السعر والمخزون", "Pricing & stock")}</div>
+              <div><Label>{t("السعر", "Price")}</Label><Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
+              <div><Label>{t("السعر قبل الخصم", "Compare price")}</Label><Input type="number" step="0.01" value={form.compare_price} onChange={(e) => setForm({ ...form, compare_price: e.target.value })} /></div>
+              <div><Label>{t("العملة", "Currency")}</Label><Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} /></div>
+              {showStock && <div><Label>{t("المخزون", "Stock")}</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>}
               <div>
-                <Label>الحالة</Label>
+                <Label>{t("الحالة", "Status")}</Label>
                 <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as ProductForm["status"] })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="draft">مسودة</SelectItem>
-                    <SelectItem value="active">مفعّل</SelectItem>
-                    <SelectItem value="archived">مؤرشف</SelectItem>
+                    <SelectItem value="draft">{t("مسودة", "Draft")}</SelectItem>
+                    <SelectItem value="active">{t("مفعّل", "Active")}</SelectItem>
+                    <SelectItem value="archived">{t("مؤرشف", "Archived")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex items-end gap-2">
                 <input type="checkbox" id="feat" checked={form.is_featured} onChange={(e) => setForm({ ...form, is_featured: e.target.checked })} />
-                <Label htmlFor="feat">مميز</Label>
+                <Label htmlFor="feat">{t("مميز", "Featured")}</Label>
               </div>
             </section>
 
@@ -440,7 +452,7 @@ function AdminProducts() {
             {dynamicFields.length > 0 && (
               <section className="grid gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 md:grid-cols-2">
                 <div className="md:col-span-2 text-xs font-semibold uppercase tracking-wider text-primary">
-                  حقول القسم: {currentCategoryName}
+                  {t("حقول القسم", "Category fields")}: {currentCategoryName}
                 </div>
                 {dynamicFields.map((f) => {
                   const v = form.features[f.key];
@@ -448,14 +460,14 @@ function AdminProducts() {
                     return (
                       <div key={f.key} className="flex items-end gap-2">
                         <input type="checkbox" id={`f-${f.key}`} checked={Boolean(v)} onChange={(e) => setFeature(f.key, e.target.checked)} />
-                        <Label htmlFor={`f-${f.key}`}>{f.label}</Label>
+                        <Label htmlFor={`f-${f.key}`}>{tl(f.label)}</Label>
                       </div>
                     );
                   }
                   if (f.type === "select") {
                     return (
                       <div key={f.key}>
-                        <Label>{f.label}</Label>
+                        <Label>{tl(f.label)}</Label>
                         <Select value={String(v ?? "")} onValueChange={(val) => setFeature(f.key, val)}>
                           <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                           <SelectContent>{(f.options ?? []).map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
@@ -466,14 +478,14 @@ function AdminProducts() {
                   if (f.type === "textarea") {
                     return (
                       <div key={f.key} className="md:col-span-2">
-                        <Label>{f.label}</Label>
+                        <Label>{tl(f.label)}</Label>
                         <Textarea value={String(v ?? "")} onChange={(e) => setFeature(f.key, e.target.value)} placeholder={f.placeholder} />
                       </div>
                     );
                   }
                   return (
                     <div key={f.key}>
-                      <Label>{f.label}</Label>
+                      <Label>{tl(f.label)}</Label>
                       <Input
                         type={f.type === "number" ? "number" : "text"}
                         value={String(v ?? "")}
@@ -488,15 +500,15 @@ function AdminProducts() {
 
             {/* Descriptions */}
             <section className="grid gap-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-primary/80">الوصف</div>
-              <div><Label>الوصف (AR)</Label><Textarea dir="rtl" value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
-              <div><Label>الوصف (EN)</Label><Textarea dir="ltr" value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
-              <div><Label>الوصف (UR)</Label><Textarea dir="rtl" value={form.description_ur} onChange={(e) => setForm({ ...form, description_ur: e.target.value })} /></div>
-              <div><Label>الوصف (BN)</Label><Textarea dir="ltr" value={form.description_bn} onChange={(e) => setForm({ ...form, description_bn: e.target.value })} /></div>
-              <div><Label>رابط الصورة</Label><Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." /></div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-primary/80">{t("الوصف", "Description")}</div>
+              <div><Label>{t("الوصف", "Description")} (AR)</Label><Textarea dir="rtl" value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
+              <div><Label>{t("الوصف", "Description")} (EN)</Label><Textarea dir="ltr" value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
+              <div><Label>{t("الوصف", "Description")} (UR)</Label><Textarea dir="rtl" value={form.description_ur} onChange={(e) => setForm({ ...form, description_ur: e.target.value })} /></div>
+              <div><Label>{t("الوصف", "Description")} (BN)</Label><Textarea dir="ltr" value={form.description_bn} onChange={(e) => setForm({ ...form, description_bn: e.target.value })} /></div>
+              <div><Label>{t("رابط الصورة", "Image URL")}</Label><Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." /></div>
             </section>
 
-            <Button onClick={handleSave} className="w-full bg-primary text-background hover:bg-primary">حفظ</Button>
+            <Button onClick={handleSave} className="w-full bg-primary text-background hover:bg-primary">{t("حفظ", "Save")}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -504,21 +516,21 @@ function AdminProducts() {
       {/* Products list */}
       <div className="rounded-xl border border-primary/10 bg-card">
         <div className="flex items-center justify-between border-b border-primary/10 p-3">
-          <div className="text-sm font-semibold">جميع المنتجات ({(products ?? []).length})</div>
+          <div className="text-sm font-semibold">{t("جميع المنتجات", "All products")} ({(products ?? []).length})</div>
         </div>
-        {(products ?? []).length === 0 && <div className="p-8 text-center text-muted-foreground">لا توجد منتجات بعد — اختر قسمًا أعلاه للبدء</div>}
+        {(products ?? []).length === 0 && <div className="p-8 text-center text-muted-foreground">{t("لا توجد منتجات بعد — اختر قسمًا أعلاه للبدء", "No products yet — pick a category above to start")}</div>}
         <div className="divide-y divide-primary/10">
           {(products ?? []).map((p) => {
             const img = firstImage(p.images);
-            const catName = (p as { categories?: { name_ar?: string } }).categories?.name_ar;
+            const catName = L((p as { categories?: { name_ar?: string; name_en?: string; name_ur?: string | null; name_bn?: string | null } }).categories);
             return (
               <div key={p.id} className="flex items-center gap-3 p-3">
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded bg-background/50">
                   {img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-5 w-5 text-primary/30" /></div>}
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium">{p.name_ar}</div>
-                  <div className="text-xs text-muted-foreground">{catName ?? "—"} · {p.type} · {p.status} · مخزون: {p.stock}</div>
+                  <div className="font-medium" dir={dirForLang(lang)}>{L(p)}</div>
+                  <div className="text-xs text-muted-foreground">{catName ?? "—"} · {p.type} · {p.status} · {t("مخزون", "Stock")}: {p.stock}</div>
                 </div>
                 <div className="font-mono text-primary">{formatPrice(Number(p.price), p.currency)}</div>
                 <Button size="sm" variant="ghost" onClick={() => handleEdit(p)}><Edit className="h-4 w-4" /></Button>
