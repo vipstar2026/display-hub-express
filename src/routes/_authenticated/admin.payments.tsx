@@ -95,6 +95,17 @@ function AdminPaymentsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const statusLabel = (s: string) => {
+    const map: Record<string, string> = {
+      all: txt("الكل", "All", "سب", "সব"),
+      succeeded: txt("ناجحة", "Succeeded", "کامیاب", "সফল"),
+      pending: txt("قيد الانتظار", "Pending", "زیر التواء", "মুলতুবি"),
+      failed: txt("فاشلة", "Failed", "ناکام", "ব্যর্থ"),
+      refunded: txt("مسترجعة", "Refunded", "واپس شدہ", "ফেরত"),
+    };
+    return map[s] ?? s;
+  };
+
   const badge = (s: string) => {
     const map: Record<string, { cls: string; Icon: typeof CheckCircle2 }> = {
       succeeded: { cls: "border-primary/40 bg-primary/10 text-primary", Icon: CheckCircle2 },
@@ -105,7 +116,7 @@ function AdminPaymentsPage() {
     const { cls, Icon } = map[s] ?? map.pending;
     return (
       <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${cls}`}>
-        <Icon className="h-3 w-3" />{s}
+        <Icon className="h-3 w-3" />{statusLabel(s)}
       </span>
     );
   };
@@ -153,7 +164,7 @@ function AdminPaymentsPage() {
         </div>
         {STATUSES.map((s) => (
           <Button key={s} size="sm" variant={status === s ? "default" : "outline"} onClick={() => setStatus(s)}>
-            {s}
+            {statusLabel(s)}
           </Button>
         ))}
       </div>
