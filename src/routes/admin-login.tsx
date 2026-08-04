@@ -30,33 +30,36 @@ function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
 
+  const pick = (ar: string, en: string, ur: string, bn: string) =>
+    lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? bn : en;
+
   const T = {
-    badge: lang === "ar" ? "منطقة موظفين" : lang === "ur" ? "اسٹاف زون" : "Staff area",
-    title: lang === "ar" ? "مركز التحكم" : lang === "ur" ? "کنٹرول سینٹر" : "Control Center",
-    sub:
-      lang === "ar"
-        ? "الدخول مخصص لفريق العمل المصرّح له فقط"
-        : lang === "ur"
-          ? "صرف مجاز عملے کے لیے"
-          : "Authorized staff only",
-    email: lang === "ar" ? "البريد الوظيفي" : lang === "ur" ? "ای میل" : "Work email",
-    password: lang === "ar" ? "كلمة المرور" : lang === "ur" ? "پاس ورڈ" : "Password",
-    signin: lang === "ar" ? "دخول آمن" : lang === "ur" ? "محفوظ لاگ ان" : "Secure sign in",
-    back: lang === "ar" ? "العودة للمتجر" : lang === "ur" ? "اسٹور پر واپس" : "Back to store",
-    customer: lang === "ar" ? "زبون؟ سجّل الدخول من هنا" : lang === "ur" ? "کسٹمر؟ یہاں لاگ ان کریں" : "Customer? Sign in here",
-    denied:
-      lang === "ar"
-        ? "هذا الحساب لا يملك صلاحية الدخول للوحة التحكم."
-        : lang === "ur"
-          ? "اس اکاؤنٹ کو ڈیش بورڈ تک رسائی نہیں۔"
-          : "This account has no dashboard access.",
-    notice:
-      lang === "ar"
-        ? "جميع محاولات الدخول تُسجَّل مع عنوان الجهاز والوقت."
-        : lang === "ur"
-          ? "تمام لاگ ان کوششیں ریکارڈ کی جاتی ہیں۔"
-          : "All sign-in attempts are logged.",
-    enc: lang === "ar" ? "اتصال مشفّر" : lang === "ur" ? "خفیہ کنکشن" : "Encrypted session",
+    badge: pick("منطقة موظفين", "Staff area", "اسٹاف زون", "স্টাফ এরিয়া"),
+    title: pick("مركز التحكم", "Control Center", "کنٹرول سینٹر", "কন্ট্রোল সেন্টার"),
+    sub: pick(
+      "الدخول مخصص لفريق العمل المصرّح له فقط",
+      "Authorized staff only",
+      "صرف مجاز عملے کے لیے",
+      "শুধুমাত্র অনুমোদিত কর্মীদের জন্য",
+    ),
+    email: pick("البريد الوظيفي", "Work email", "ای میل", "কর্মক্ষেত্রের ইমেইল"),
+    password: pick("كلمة المرور", "Password", "پاس ورڈ", "পাসওয়ার্ড"),
+    signin: pick("دخول آمن", "Secure sign in", "محفوظ لاگ ان", "নিরাপদ সাইন ইন"),
+    back: pick("العودة للمتجر", "Back to store", "اسٹور پر واپس", "স্টোরে ফিরে যান"),
+    customer: pick("زبون؟ سجّل الدخول من هنا", "Customer? Sign in here", "کسٹمر؟ یہاں لاگ ان کریں", "গ্রাহক? এখানে সাইন ইন করুন"),
+    denied: pick(
+      "هذا الحساب لا يملك صلاحية الدخول للوحة التحكم.",
+      "This account has no dashboard access.",
+      "اس اکاؤنٹ کو ڈیش بورڈ تک رسائی نہیں۔",
+      "এই অ্যাকাউন্টের ড্যাশবোর্ড অ্যাক্সেস নেই।",
+    ),
+    notice: pick(
+      "جميع محاولات الدخول تُسجَّل مع عنوان الجهاز والوقت.",
+      "All sign-in attempts are logged.",
+      "تمام لاگ ان کوششیں ریکارڈ کی جاتی ہیں۔",
+      "সব সাইন-ইন প্রচেষ্টা রেকর্ড করা হয়।",
+    ),
+    enc: pick("اتصال مشفّر", "Encrypted session", "خفیہ کنکشن", "এনক্রিপ্টেড সংযোগ"),
   };
 
   const routeByRole = async (userId: string) => {

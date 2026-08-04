@@ -44,7 +44,7 @@ export function LiveChatWidget() {
   async function send() {
     if (!text.trim()) return;
     if (!name.trim() || !email.trim()) {
-      toast.error(lang === "ar" ? "أدخل الاسم والبريد" : lang === "ur" ? "نام اور ای میل درج کریں" : "Enter name and email");
+      toast.error(lang === "ar" ? "أدخل الاسم والبريد" : lang === "ur" ? "نام اور ای میل درج کریں" : lang === "bn" ? "নাম ও ইমেইল লিখুন" : "Enter name and email");
       return;
     }
     setSending(true);
@@ -74,6 +74,8 @@ export function LiveChatWidget() {
               ? "تم استلام رسالتك! سنرد عليك عبر البريد الإلكتروني في أقرب وقت."
               : lang === "ur"
               ? "آپ کا پیغام موصول ہو گیا! ہم جلد ای میل پر جواب دیں گے۔"
+              : lang === "bn"
+              ? "আপনার বার্তা পেয়েছি! আমরা শীঘ্রই ইমেইলে উত্তর দেব।"
               : "Message received! We'll reply to your email shortly.",
           at: Date.now(),
         },
@@ -85,7 +87,8 @@ export function LiveChatWidget() {
     ar: { title: "الدردشة المباشرة", sub: "نرد خلال دقائق", name: "الاسم", email: "البريد", placeholder: "اكتب رسالتك...", welcome: "مرحباً! كيف نساعدك اليوم؟" },
     en: { title: "Live Chat", sub: "We reply in minutes", name: "Name", email: "Email", placeholder: "Type your message...", welcome: "Hi! How can we help you today?" },
     ur: { title: "لائیو چیٹ", sub: "چند منٹوں میں جواب", name: "نام", email: "ای میل", placeholder: "پیغام لکھیں...", welcome: "ہیلو! ہم کیسے مدد کر سکتے ہیں؟" },
-  }[lang as "ar" | "en" | "ur"] ?? { title: "Live Chat", sub: "", name: "Name", email: "Email", placeholder: "Type...", welcome: "Hi!" };
+    bn: { title: "লাইভ চ্যাট", sub: "কয়েক মিনিটেই উত্তর", name: "নাম", email: "ইমেইল", placeholder: "আপনার বার্তা লিখুন...", welcome: "হ্যালো! কীভাবে সাহায্য করতে পারি?" },
+  }[lang as "ar" | "en" | "ur" | "bn"] ?? { title: "Live Chat", sub: "", name: "Name", email: "Email", placeholder: "Type...", welcome: "Hi!" };
 
   return (
     <>

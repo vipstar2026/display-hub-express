@@ -9,7 +9,7 @@ import { Zap, Clock } from "lucide-react";
 type FlashRow = {
   id: string;
   product_id: string;
-  name_ar: string; name_en: string; name_ur: string | null;
+  name_ar: string; name_en: string; name_ur: string | null; name_bn: string | null;
   sale_price: number; original_price: number | null;
   ends_at: string; stock_limit: number | null; sold_count: number;
   products: { slug: string; images: string[] | null; price: number; currency: string } | null;
@@ -45,7 +45,7 @@ export function FlashSalesSection() {
     queryFn: async () => {
       const { data } = await supabase
         .from("flash_sales")
-        .select("id,product_id,name_ar,name_en,name_ur,sale_price,original_price,ends_at,stock_limit,sold_count,products(slug,images,price,currency)")
+        .select("id,product_id,name_ar,name_en,name_ur,name_bn,sale_price,original_price,ends_at,stock_limit,sold_count,products(slug,images,price,currency)")
         .order("sort_order")
         .limit(8);
       return (data ?? []) as unknown as FlashRow[];

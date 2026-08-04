@@ -429,7 +429,7 @@ function CartPage() {
               {tax > 0 && (
                 <div className="flex justify-between py-2 text-sm text-muted-foreground">
                   <span>
-                    {lang === "ar" ? `ضريبة القيمة المضافة (${vatPercent}%)` : lang === "ur" ? `ویٹ (${vatPercent}%)` : `VAT (${vatPercent}%)`}
+                    {lang === "ar" ? `ضريبة القيمة المضافة (${vatPercent}%)` : lang === "ur" ? `ویٹ (${vatPercent}%)` : lang === "bn" ? `ভ্যাট (${vatPercent}%)` : `VAT (${vatPercent}%)`}
                     {settings?.prices_include_vat ? (lang === "ar" ? " — شاملة" : " — incl.") : ""}
                   </span>
                   <span className="font-mono">{formatPrice(tax)}</span>

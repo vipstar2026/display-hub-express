@@ -103,7 +103,7 @@ function AdminDashboard() {
     queryFn: async () => {
       const { data } = await supabase
         .from("order_items")
-        .select("product_id, quantity, unit_price, products(id, name_ar, name_en, name_ur, images)")
+        .select("product_id, quantity, unit_price, products(id, name_ar, name_en, name_ur, name_bn, images)")
         .limit(200);
       const agg = new Map<string, { product: Record<string, unknown>; qty: number; revenue: number }>();
       (data ?? []).forEach((row) => {
@@ -123,7 +123,7 @@ function AdminDashboard() {
     queryFn: async () =>
       (await supabase
         .from("products")
-        .select("id, name_ar, name_en, name_ur, stock, status")
+        .select("id, name_ar, name_en, name_ur, name_bn, stock, status")
         .eq("status", "active")
         .lte("stock", 5)
         .order("stock", { ascending: true })

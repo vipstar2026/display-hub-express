@@ -26,9 +26,11 @@ type Post = {
   title_ar: string | null;
   title_en: string | null;
   title_ur: string | null;
+  title_bn: string | null;
   excerpt_ar: string | null;
   excerpt_en: string | null;
   excerpt_ur: string | null;
+  excerpt_bn: string | null;
   cover_url: string | null;
   tags: string[];
   published_at: string | null;
@@ -44,13 +46,13 @@ const L = {
 };
 
 function pick<T extends Record<string, any>>(p: T, base: string, lang: string) {
-  return p[`${base}_${lang}`] || p[`${base}_ar`] || p[`${base}_en`] || p[`${base}_ur`] || "";
+  return p[`${base}_${lang}`] || p[`${base}_en`] || p[`${base}_ar`] || p[`${base}_ur`] || p[`${base}_bn`] || "";
 }
 
 function BlogList() {
   const { lang } = useI18n();
   const l = L[lang];
-  const isRTL = lang !== "en";
+  const isRTL = lang !== "en" && lang !== "bn";
   const Arrow = isRTL ? ArrowLeft : ArrowRight;
 
   const { data: posts, isLoading } = useQuery({
@@ -58,7 +60,7 @@ function BlogList() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("blog_posts" as any)
-        .select("id, slug, title_ar, title_en, title_ur, excerpt_ar, excerpt_en, excerpt_ur, cover_url, tags, published_at, created_at, views")
+        .select("id, slug, title_ar, title_en, title_ur, title_bn, excerpt_ar, excerpt_en, excerpt_ur, excerpt_bn, cover_url, tags, published_at, created_at, views")
         .eq("status", "published")
         .order("published_at", { ascending: false, nullsFirst: false })
         .limit(60);

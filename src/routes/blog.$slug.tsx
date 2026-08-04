@@ -14,9 +14,9 @@ export const Route = createFileRoute("/blog/$slug")({
 type Post = {
   id: string;
   slug: string;
-  title_ar: string | null; title_en: string | null; title_ur: string | null;
-  excerpt_ar: string | null; excerpt_en: string | null; excerpt_ur: string | null;
-  content_ar: string | null; content_en: string | null; content_ur: string | null;
+  title_ar: string | null; title_en: string | null; title_ur: string | null; title_bn: string | null;
+  excerpt_ar: string | null; excerpt_en: string | null; excerpt_ur: string | null; excerpt_bn: string | null;
+  content_ar: string | null; content_en: string | null; content_ur: string | null; content_bn: string | null;
   cover_url: string | null;
   tags: string[];
   published_at: string | null;
@@ -25,7 +25,7 @@ type Post = {
 };
 
 function pick<T extends Record<string, any>>(p: T, base: string, lang: string) {
-  return p[`${base}_${lang}`] || p[`${base}_ar`] || p[`${base}_en`] || p[`${base}_ur`] || "";
+  return p[`${base}_${lang}`] || p[`${base}_en`] || p[`${base}_ar`] || p[`${base}_ur`] || p[`${base}_bn`] || "";
 }
 
 function BlogPost() {
@@ -76,7 +76,7 @@ function BlogPost() {
       <Header />
       <main className="container mx-auto flex-1 px-4 py-10 max-w-4xl">
         <Link to="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6">
-          <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {lang === "en" ? "Blog" : lang === "ur" ? "بلاگ" : "المدونة"}
+          <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {lang === "en" ? "Blog" : lang === "ur" ? "بلاگ" : lang === "bn" ? "ব্লগ" : "المدونة"}
         </Link>
 
         {isLoading ? (

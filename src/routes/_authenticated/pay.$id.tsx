@@ -25,9 +25,9 @@ function PayError() {
       <Header />
       <div className="container mx-auto px-4 py-24 text-center">
         <p className="mb-4 text-muted-foreground">
-          {lang === "ar" ? "تعذر بدء عملية الدفع." : lang === "ur" ? "ادائیگی شروع نہیں ہو سکی۔" : "Could not start the payment."}
+          {lang === "ar" ? "تعذر بدء عملية الدفع." : lang === "ur" ? "ادائیگی شروع نہیں ہو سکی۔" : lang === "bn" ? "পেমেন্ট শুরু করা যায়নি।" : "Could not start the payment."}
         </p>
-        <Button onClick={() => nav({ to: "/cart" })}>{lang === "ar" ? "العودة للسلة" : "Back to cart"}</Button>
+        <Button onClick={() => nav({ to: "/cart" })}>{lang === "ar" ? "العودة للسلة" : lang === "bn" ? "কার্টে ফিরে যান" : "Back to cart"}</Button>
       </div>
       <Footer />
     </div>
@@ -56,13 +56,15 @@ function PayPage() {
     document.body.appendChild(s);
   }, [data?.scriptUrl]);
 
-  const heading = lang === "ar" ? "إتمام الدفع" : lang === "ur" ? "ادائیگی مکمل کریں" : "Complete payment";
+  const heading = lang === "ar" ? "إتمام الدفع" : lang === "ur" ? "ادائیگی مکمل کریں" : lang === "bn" ? "পেমেন্ট সম্পন্ন করুন" : "Complete payment";
   const secure =
     lang === "ar"
       ? "الدفع مؤمّن عبر بوابة AFS للخدمات المالية العربية"
       : lang === "ur"
         ? "ادائیگی AFS گیٹ وے کے ذریعے محفوظ ہے"
-        : "Secured by AFS payment gateway";
+        : lang === "bn"
+          ? "AFS পেমেন্ট গেটওয়ে দ্বারা সুরক্ষিত"
+          : "Secured by AFS payment gateway";
 
   return (
     <div className="min-h-screen bg-background">

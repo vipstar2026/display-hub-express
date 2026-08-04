@@ -14,6 +14,7 @@ interface Product {
   name_ar: string;
   name_en: string;
   name_ur: string | null;
+  name_bn?: string | null;
   price: number;
   currency: string;
   stock: number;
