@@ -72,7 +72,7 @@ function ContactPage() {
                 <InfoCard icon={<Phone className="h-5 w-5" />} label="Phone" value={settings.contact_phone} href={`tel:${settings.contact_phone}`} />
               )}
               {settings?.whatsapp && (
-                <InfoCard icon={<MessageCircle className="h-5 w-5" />} label={t("contact.whatsapp")} value={settings.whatsapp} href={`https://wa.me/${cleanPhoneNumber(settings.whatsapp)}`} />
+                <InfoCard icon={<MessageCircle className="h-5 w-5" />} label={t("contact.whatsapp")} value={settings.whatsapp} {...waAnchorProps(settings.whatsapp)} />
               )}
               {settings?.company_address && (
                 <InfoCard icon={<MapPin className="h-5 w-5" />} label={t("contact.address")} value={settings.company_address} />
