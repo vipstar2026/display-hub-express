@@ -215,10 +215,10 @@ function ZoneForm({ initial, onSave }: { initial: Zone; onSave: (v: Partial<Zone
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSave({ ...f, id: initial.id || undefined, regions: f.regionsText.split(",").map(s => s.trim()).filter(Boolean) }); }} className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
-        <div><Label>{t("shipping.name_ar")}</Label><Input value={f.name_ar} onChange={(e) => setF({ ...f, name_ar: e.target.value })} required /></div>
-        <div><Label>{t("shipping.name_en")}</Label><Input value={f.name_en} onChange={(e) => setF({ ...f, name_en: e.target.value })} required /></div>
-        <div><Label>{t("shipping.name_ur")}</Label><Input value={f.name_ur ?? ""} onChange={(e) => setF({ ...f, name_ur: e.target.value })} /></div>
-        <div><Label>Name (BN)</Label><Input value={f.name_bn ?? ""} onChange={(e) => setF({ ...f, name_bn: e.target.value })} /></div>
+        <div><Label>{t("shipping.name_ar")}</Label><Input dir="rtl" value={f.name_ar} onChange={(e) => setF({ ...f, name_ar: e.target.value })} required /></div>
+        <div><Label>{t("shipping.name_en")}</Label><Input dir="ltr" value={f.name_en} onChange={(e) => setF({ ...f, name_en: e.target.value })} required /></div>
+        <div><Label>{t("shipping.name_ur")}</Label><Input dir="rtl" value={f.name_ur ?? ""} onChange={(e) => setF({ ...f, name_ur: e.target.value })} /></div>
+        <div><Label>Name (BN)</Label><Input dir="ltr" value={f.name_bn ?? ""} onChange={(e) => setF({ ...f, name_bn: e.target.value })} /></div>
         <div><Label>{t("shipping.country")}</Label><Input value={f.country_code} onChange={(e) => setF({ ...f, country_code: e.target.value.toUpperCase() })} /></div>
       </div>
       <div><Label>{t("shipping.regions")}</Label><Input value={f.regionsText} onChange={(e) => setF({ ...f, regionsText: e.target.value })} placeholder="Manama, Muharraq, ..." /></div>
@@ -241,10 +241,10 @@ function RateForm({ zoneId, initial, onSave }: { zoneId: string; initial: Rate |
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSave({ ...f, zone_id: zoneId, id: initial?.id }); }} className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
-        <div><Label>{t("shipping.name_ar")}</Label><Input value={f.name_ar ?? ""} onChange={(e) => setF({ ...f, name_ar: e.target.value })} required /></div>
-        <div><Label>{t("shipping.name_en")}</Label><Input value={f.name_en ?? ""} onChange={(e) => setF({ ...f, name_en: e.target.value })} required /></div>
-        <div><Label>{t("shipping.name_ur")}</Label><Input value={f.name_ur ?? ""} onChange={(e) => setF({ ...f, name_ur: e.target.value })} /></div>
-        <div><Label>Name (BN)</Label><Input value={f.name_bn ?? ""} onChange={(e) => setF({ ...f, name_bn: e.target.value })} /></div>
+        <div><Label>{t("shipping.name_ar")}</Label><Input dir="rtl" value={f.name_ar ?? ""} onChange={(e) => setF({ ...f, name_ar: e.target.value })} required /></div>
+        <div><Label>{t("shipping.name_en")}</Label><Input dir="ltr" value={f.name_en ?? ""} onChange={(e) => setF({ ...f, name_en: e.target.value })} required /></div>
+        <div><Label>{t("shipping.name_ur")}</Label><Input dir="rtl" value={f.name_ur ?? ""} onChange={(e) => setF({ ...f, name_ur: e.target.value })} /></div>
+        <div><Label>Name (BN)</Label><Input dir="ltr" value={f.name_bn ?? ""} onChange={(e) => setF({ ...f, name_bn: e.target.value })} /></div>
         <div>
           <Label>{t("shipping.method")}</Label>
           <select value={f.method} onChange={(e) => setF({ ...f, method: e.target.value })} className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm">

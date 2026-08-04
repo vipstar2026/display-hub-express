@@ -217,7 +217,7 @@ function AdminDashboard() {
             </div>
           </div>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
+            <div dir="ltr" className="h-full w-full"><ResponsiveContainer width="100%" height="100%">
               <AreaChart data={stats?.days ?? []} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
@@ -233,7 +233,7 @@ function AdminDashboard() {
                 />
                 <Area type="monotone" dataKey="revenue" stroke="#06b6d4" strokeWidth={2} fill="url(#rev)" />
               </AreaChart>
-            </ResponsiveContainer>
+            </ResponsiveContainer></div>
           </div>
         </div>
 
@@ -244,7 +244,7 @@ function AdminDashboard() {
           ) : (
             <>
               <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%">
+                <div dir="ltr" className="h-full w-full"><ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={stats?.statusData} dataKey="value" nameKey="name" innerRadius={40} outerRadius={70} paddingAngle={2}>
                       {(stats?.statusData ?? []).map((s) => (
@@ -253,7 +253,7 @@ function AdminDashboard() {
                     </Pie>
                     <Tooltip contentStyle={{ background: "#0a0f1a", border: "1px solid #06b6d433", borderRadius: 8, fontSize: 12 }} />
                   </PieChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></div>
               </div>
               <div className="mt-3 space-y-1.5">
                 {(stats?.statusData ?? []).map((s) => (

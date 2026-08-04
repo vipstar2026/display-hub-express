@@ -205,18 +205,18 @@ function AdminCategoryProducts() {
             <div className="space-y-5">
               {/* Names */}
               <section className="grid gap-3 md:grid-cols-2">
-                <div><Label>{t("form.name_ar")}</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
-                <div><Label>{t("form.name_en")}</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
-                <div><Label>Name (UR)</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
-                <div><Label>Name (BN)</Label><Input value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
+                <div><Label>{t("form.name_ar")}</Label><Input dir="rtl" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+                <div><Label>{t("form.name_en")}</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+                <div><Label>Name (UR)</Label><Input dir="rtl" value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+                <div><Label>Name (BN)</Label><Input dir="ltr" value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
               </section>
 
               {/* Descriptions */}
               <section className="grid gap-3">
-                <div><Label>{t("form.desc_ar")}</Label><Textarea rows={2} value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
-                <div><Label>{t("form.desc_en")}</Label><Textarea rows={2} value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
-                <div><Label>Description (UR)</Label><Textarea rows={2} value={form.description_ur} onChange={(e) => setForm({ ...form, description_ur: e.target.value })} /></div>
-                <div><Label>Description (BN)</Label><Textarea rows={2} value={form.description_bn} onChange={(e) => setForm({ ...form, description_bn: e.target.value })} /></div>
+                <div><Label>{t("form.desc_ar")}</Label><Textarea dir="rtl" rows={2} value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
+                <div><Label>{t("form.desc_en")}</Label><Textarea dir="ltr" rows={2} value={form.description_en} onChange={(e) => setForm({ ...form, description_en: e.target.value })} /></div>
+                <div><Label>Description (UR)</Label><Textarea dir="rtl" rows={2} value={form.description_ur} onChange={(e) => setForm({ ...form, description_ur: e.target.value })} /></div>
+                <div><Label>Description (BN)</Label><Textarea dir="ltr" rows={2} value={form.description_bn} onChange={(e) => setForm({ ...form, description_bn: e.target.value })} /></div>
               </section>
 
               {/* Pricing / Stock */}

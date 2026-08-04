@@ -258,10 +258,10 @@ function AdminPaymentMethods() {
                           <SelectContent>{TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
-                      <div><Label>{t("الاسم (عربي)", "Name (AR)")}</Label><Input value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
-                      <div><Label>{t("الاسم (إنجليزي)", "Name (EN)")}</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
-                      <div><Label>{t("الاسم (أردو)", "Name (UR)")}</Label><Input value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
-                      <div><Label>{t("الاسم (بنغالي)", "Name (BN)")}</Label><Input value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
+                      <div><Label>{t("الاسم (عربي)", "Name (AR)")}</Label><Input dir="rtl" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
+                      <div><Label>{t("الاسم (إنجليزي)", "Name (EN)")}</Label><Input dir="ltr" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+                      <div><Label>{t("الاسم (أردو)", "Name (UR)")}</Label><Input dir="rtl" value={form.name_ur} onChange={(e) => setForm({ ...form, name_ur: e.target.value })} /></div>
+                      <div><Label>{t("الاسم (بنغالي)", "Name (BN)")}</Label><Input dir="ltr" value={form.name_bn} onChange={(e) => setForm({ ...form, name_bn: e.target.value })} /></div>
                       <div>
                         <Label>{t("الأيقونة", "Icon")}</Label>
                         <Select value={form.icon} onValueChange={(v) => setForm({ ...form, icon: v })}>
@@ -279,10 +279,10 @@ function AdminPaymentMethods() {
                   <AccordionTrigger className="text-sm">{t("تعليمات تظهر للعميل", "Customer instructions")}</AccordionTrigger>
                   <AccordionContent>
                     <div className="grid gap-3">
-                      <div><Label>{t("التعليمات (عربي)", "Instructions (AR)")}</Label><Textarea value={form.instructions_ar} onChange={(e) => setForm({ ...form, instructions_ar: e.target.value })} /></div>
-                      <div><Label>{t("التعليمات (إنجليزي)", "Instructions (EN)")}</Label><Textarea value={form.instructions_en} onChange={(e) => setForm({ ...form, instructions_en: e.target.value })} /></div>
-                      <div><Label>{t("التعليمات (أردو)", "Instructions (UR)")}</Label><Textarea value={form.instructions_ur} onChange={(e) => setForm({ ...form, instructions_ur: e.target.value })} /></div>
-                      <div><Label>{t("التعليمات (بنغالي)", "Instructions (BN)")}</Label><Textarea value={form.instructions_bn} onChange={(e) => setForm({ ...form, instructions_bn: e.target.value })} /></div>
+                      <div><Label>{t("التعليمات (عربي)", "Instructions (AR)")}</Label><Textarea dir="rtl" value={form.instructions_ar} onChange={(e) => setForm({ ...form, instructions_ar: e.target.value })} /></div>
+                      <div><Label>{t("التعليمات (إنجليزي)", "Instructions (EN)")}</Label><Textarea dir="ltr" value={form.instructions_en} onChange={(e) => setForm({ ...form, instructions_en: e.target.value })} /></div>
+                      <div><Label>{t("التعليمات (أردو)", "Instructions (UR)")}</Label><Textarea dir="rtl" value={form.instructions_ur} onChange={(e) => setForm({ ...form, instructions_ur: e.target.value })} /></div>
+                      <div><Label>{t("التعليمات (بنغالي)", "Instructions (BN)")}</Label><Textarea dir="ltr" value={form.instructions_bn} onChange={(e) => setForm({ ...form, instructions_bn: e.target.value })} /></div>
                       {!form.is_gateway && (
                         <div className="flex items-center gap-2">
                           <Switch checked={form.requires_proof} onCheckedChange={(v) => setForm({ ...form, requires_proof: v })} />
