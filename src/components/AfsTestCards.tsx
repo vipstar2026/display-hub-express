@@ -18,17 +18,19 @@ export function AfsTestCards() {
   const [copied, setCopied] = useState<string | null>(null);
 
   const t = {
-    title: lang === "ar" ? "بطاقات الاختبار" : lang === "ur" ? "ٹیسٹ کارڈز" : "Test cards",
+    title: lang === "ar" ? "بطاقات الاختبار" : lang === "ur" ? "ٹیسٹ کارڈز" : lang === "bn" ? "টেস্ট কার্ড" : "Test cards",
     hint:
       lang === "ar"
         ? "تاريخ الانتهاء: أي تاريخ مستقبلي — CVV: أي ٣ أرقام. الوضع تجريبي، لا يتم خصم أي مبلغ."
         : lang === "ur"
           ? "میعاد: کوئی بھی مستقبل کی تاریخ — CVV: کوئی بھی 3 ہندسے۔ ٹیسٹ موڈ، رقم منہا نہیں ہوگی۔"
-          : "Expiry: any future date — CVV: any 3 digits. Test mode, no real charge.",
-    threeds: lang === "ar" ? "تحقق 3D Secure" : "3D Secure",
-    yes: lang === "ar" ? "نعم" : "Yes",
-    no: lang === "ar" ? "لا" : "No",
-    challenge: lang === "ar" ? "تحدٍ (Challenge)" : "Challenge",
+          : lang === "bn"
+            ? "মেয়াদ: ভবিষ্যতের যেকোনো তারিখ — CVV: যেকোনো ৩ সংখ্যা। টেস্ট মোড, কোনো টাকা কাটা হবে না।"
+            : "Expiry: any future date — CVV: any 3 digits. Test mode, no real charge.",
+    threeds: lang === "ar" ? "تحقق 3D Secure" : lang === "bn" ? "3D Secure যাচাই" : "3D Secure",
+    yes: lang === "ar" ? "نعم" : lang === "bn" ? "হ্যাঁ" : "Yes",
+    no: lang === "ar" ? "لا" : lang === "bn" ? "না" : "No",
+    challenge: lang === "ar" ? "تحدٍ (Challenge)" : lang === "bn" ? "চ্যালেঞ্জ" : "Challenge",
   };
 
   const label = (v: Card["threeds"]) => (v === "Y" ? t.yes : v === "N" ? t.no : t.challenge);
