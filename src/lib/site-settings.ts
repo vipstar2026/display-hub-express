@@ -9,6 +9,7 @@ export type PublicSiteSettings = {
   tagline_ar: string | null;
   tagline_en: string | null;
   tagline_ur: string | null;
+  tagline_bn: string | null;
   logo_url: string | null;
   favicon_url: string | null;
   og_image_url: string | null;
@@ -41,6 +42,7 @@ export type PublicSiteSettings = {
   meta_description_ar: string | null;
   meta_description_en: string | null;
   meta_description_ur: string | null;
+  meta_description_bn: string | null;
   meta_keywords: string | null;
   google_analytics_id: string | null;
   meta_pixel_id: string | null;
@@ -56,25 +58,28 @@ export type PublicSiteSettings = {
   hero_title_ar: string | null;
   hero_title_en: string | null;
   hero_title_ur: string | null;
+  hero_title_bn: string | null;
   hero_subtitle_ar: string | null;
   hero_subtitle_en: string | null;
   hero_subtitle_ur: string | null;
+  hero_subtitle_bn: string | null;
   hero_cta_ar: string | null;
   hero_cta_en: string | null;
   hero_cta_ur: string | null;
+  hero_cta_bn: string | null;
   updated_at: string | null;
 };
 
 export const PUBLIC_SITE_SETTINGS_SELECT = `
-  site_name,default_language,tagline_ar,tagline_en,tagline_ur,
+  site_name,default_language,tagline_ar,tagline_en,tagline_ur,tagline_bn,
   logo_url,favicon_url,og_image_url,primary_color,accent_color,theme_preset,
   announcement_bar_enabled,announcement_bar_text,
   contact_email,contact_phone,whatsapp,business_hours,company_address,company_cr,company_vat_no,
   instagram_url,twitter_url,facebook_url,tiktok_url,youtube_url,snapchat_url,telegram_url,
   default_currency,shipping_flat,free_shipping_threshold,vat_percent,prices_include_vat,low_stock_threshold,allow_guest_checkout,
-  meta_description_ar,meta_description_en,meta_description_ur,meta_keywords,google_analytics_id,meta_pixel_id,tiktok_pixel_id,
+  meta_description_ar,meta_description_en,meta_description_ur,meta_description_bn,meta_keywords,google_analytics_id,meta_pixel_id,tiktok_pixel_id,
   notify_email_new_order,notify_email_low_stock,allow_signups,require_email_verification,maintenance_mode,maintenance_message,custom_head_html,
-  hero_badge_text,hero_title_ar,hero_title_en,hero_title_ur,hero_subtitle_ar,hero_subtitle_en,hero_subtitle_ur,hero_cta_ar,hero_cta_en,hero_cta_ur,
+  hero_badge_text,hero_title_ar,hero_title_en,hero_title_ur,hero_title_bn,hero_subtitle_ar,hero_subtitle_en,hero_subtitle_ur,hero_subtitle_bn,hero_cta_ar,hero_cta_en,hero_cta_ur,hero_cta_bn,
   updated_at
 `;
 
@@ -98,10 +103,13 @@ export function useSiteSettings() {
 }
 
 export function pickLocalized(
-  lang: "ar" | "en" | "ur" | string,
-  values: { ar?: string | null; en?: string | null; ur?: string | null },
+  lang: string,
+  values: { ar?: string | null; en?: string | null; ur?: string | null; bn?: string | null },
 ) {
-  return (lang === "ar" ? values.ar : lang === "ur" ? values.ur : values.en) || values.en || values.ar || values.ur || "";
+  return (
+    (lang === "ar" ? values.ar : lang === "ur" ? values.ur : lang === "bn" ? values.bn : values.en) ||
+    values.en || values.ar || values.ur || values.bn || ""
+  );
 }
 
 export function cleanPhoneNumber(value: string | null | undefined) {

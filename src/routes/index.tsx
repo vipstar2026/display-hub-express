@@ -66,11 +66,11 @@ function HomePage() {
 
   const { data: settings } = useSiteSettings();
 
-  const tagline = pickLocalized(lang, { ar: settings?.tagline_ar, en: settings?.tagline_en, ur: settings?.tagline_ur });
+  const tagline = pickLocalized(lang, { ar: settings?.tagline_ar, en: settings?.tagline_en, ur: settings?.tagline_ur, bn: settings?.tagline_bn });
   const heroBadge = settings?.hero_badge_text || "VIPSTAR.CC";
-  const heroTitle = pickLocalized(lang, { ar: settings?.hero_title_ar, en: settings?.hero_title_en, ur: settings?.hero_title_ur }) || t("home.hero.title");
-  const heroSub = pickLocalized(lang, { ar: settings?.hero_subtitle_ar, en: settings?.hero_subtitle_en, ur: settings?.hero_subtitle_ur }) || t("home.hero.sub");
-  const heroCta = pickLocalized(lang, { ar: settings?.hero_cta_ar, en: settings?.hero_cta_en, ur: settings?.hero_cta_ur }) || t("home.hero.cta");
+  const heroTitle = pickLocalized(lang, { ar: settings?.hero_title_ar, en: settings?.hero_title_en, ur: settings?.hero_title_ur, bn: settings?.hero_title_bn }) || t("home.hero.title");
+  const heroSub = pickLocalized(lang, { ar: settings?.hero_subtitle_ar, en: settings?.hero_subtitle_en, ur: settings?.hero_subtitle_ur, bn: settings?.hero_subtitle_bn }) || t("home.hero.sub");
+  const heroCta = pickLocalized(lang, { ar: settings?.hero_cta_ar, en: settings?.hero_cta_en, ur: settings?.hero_cta_ur, bn: settings?.hero_cta_bn }) || t("home.hero.cta");
   const whatsappNumber = cleanPhoneNumber(settings?.whatsapp);
   const instagramLabel = socialHandle(settings?.instagram_url, "Instagram");
 

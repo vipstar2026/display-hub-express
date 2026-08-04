@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, localizedName } from "@/lib/i18n";
 import { formatPrice } from "@/lib/format";
 import { Zap, Clock } from "lucide-react";
 
