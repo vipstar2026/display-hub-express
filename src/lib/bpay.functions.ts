@@ -1,0 +1,130 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+/** Tells the storefront whether the BENEFIT gateway is live yet. */
+export const bpayStatus = createServerFn({ method: "GET" }).handler(async () => {
+  const { bpayIsEnabled } = await import("@/lib/bpay.server");
+  return { enabled: await bpayIsEnabled() };
+});
+
+export const createBpayCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { order_id: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { bpayPrepareCheckout, loadBpayConfig } = await import("@/lib/bpay.server");
+    const cfg = await loadBpayConfig();
+
+    const { data: order, error } = await context.supabase
+      .from("orders")
+      .select("id, order_number, total, currency, buyer_id, buyer_email, buyer_name, payment_status")
+      .eq("id", data.order_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!order || order.buyer_id !== context.userId) throw new Error("Order not found");
+    if (order.payment_status === "succeeded") throw new Error("Order already paid");
+
+    const [givenName, ...rest] = (order.buyer_name ?? "").trim().split(" ");
+    const { checkoutId, redirectUrl } = await bpayPrepareCheckout({
+      amount: Number(order.total).toFixed(2),
+      currency: order.currency || "BHD",
+      merchantTransactionId: order.order_number,
+      email: order.buyer_email,
+      givenName: givenName || null,
+      surname: rest.join(" ") || null,
+      cfg,
+    });
+
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.from("payment_transactions").insert({
+        order_id: order.id,
+        provider: "benefit",
+        provider_charge_id: checkoutId || order.order_number,
+        amount: Number(order.total),
+        currency: cfg.currency || order.currency || "BHD",
+        status: "pending",
+        redirect_url: redirectUrl,
+      });
+    } catch {
+      /* non-fatal */
+    }
+
+    return {
+      checkoutId,
+      redirectUrl,
+      flow: cfg.flow,
+      scriptUrl: checkoutId ? `${cfg.widgetBase}?checkoutId=${checkoutId}` : null,
+      amount: Number(order.total).toFixed(2),
+      currency: cfg.currency || order.currency || "BHD",
+      testMode: cfg.testMode,
+      brands: cfg.brands,
+      widgetLang: cfg.widgetLang,
+      resultUrl: cfg.resultUrl,
+    };
+  });
+
+export const confirmBpayPayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { order_id: string; checkout_id: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { bpayGetStatus, bpayIsSuccess, bpayIsPending } = await import("@/lib/bpay.server");
+
+    const { data: order, error } = await context.supabase
+      .from("orders")
+      .select("id, order_number, total, buyer_id")
+      .eq("id", data.order_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!order || order.buyer_id !== context.userId) throw new Error("Order not found");
+
+    const status = await bpayGetStatus(data.checkout_id);
+    const code = status.result?.code;
+    const success = bpayIsSuccess(code);
+    const pending = bpayIsPending(code);
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const txPayload = {
+      order_id: order.id,
+      provider: "benefit",
+      provider_charge_id: status.id ?? data.checkout_id,
+      amount: Number(status.amount ?? order.total),
+      currency: status.currency ?? "BHD",
+      status: success ? "succeeded" : pending ? "pending" : "failed",
+      payment_method: status.paymentBrand ?? "BENEFIT",
+      raw_response: status as never,
+      failure_reason: success ? null : (status.result?.description ?? null),
+      paid_at: success ? new Date().toISOString() : null,
+    };
+
+    const { data: existing } = await supabaseAdmin
+      .from("payment_transactions")
+      .select("id")
+      .eq("order_id", order.id)
+      .eq("provider", "benefit")
+      .eq("status", "pending")
+      .maybeSingle();
+
+    if (existing) {
+      await supabaseAdmin.from("payment_transactions").update(txPayload).eq("id", existing.id);
+    } else {
+      await supabaseAdmin.from("payment_transactions").insert(txPayload);
+    }
+
+    if (success) {
+      await supabaseAdmin
+        .from("orders")
+        .update({
+          payment_status: "succeeded",
+          status: "paid",
+          paid_at: new Date().toISOString(),
+          payment_method: "BENEFIT",
+          payment_reference: status.id ?? data.checkout_id,
+        })
+        .eq("id", order.id);
+    } else if (!pending) {
+      await supabaseAdmin.from("orders").update({ payment_status: "failed" }).eq("id", order.id);
+    }
+
+    return { success, pending, code: code ?? "", message: status.result?.description ?? "" };
+  });
