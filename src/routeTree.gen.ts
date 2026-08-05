@@ -71,6 +71,7 @@ import { Route as ApiPublicSendEmailsRouteImport } from './routes/api/public/sen
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
 import { Route as AuthenticatedAdminCategoriesSlugRouteImport } from './routes/_authenticated/admin.categories.$slug'
 import { Route as AuthenticatedOrderSuccessIdRouteImport } from './routes/_authenticated/order.success.$id'
+import { Route as ApiPublicPaymentsBenefitRouteImport } from './routes/api/public/payments/benefit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -410,6 +411,12 @@ const AuthenticatedOrderSuccessIdRoute =
     path: '/order/success/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicPaymentsBenefitRoute =
+  ApiPublicPaymentsBenefitRouteImport.update({
+    id: '/api/public/payments/benefit',
+    path: '/api/public/payments/benefit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -472,6 +479,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
+  '/api/public/payments/benefit': typeof ApiPublicPaymentsBenefitRoute
   '/admin/categories/': typeof AuthenticatedAdminCategoriesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -534,6 +542,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
+  '/api/public/payments/benefit': typeof ApiPublicPaymentsBenefitRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesIndexRoute
 }
 export interface FileRoutesById {
@@ -599,6 +608,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/_authenticated/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
+  '/api/public/payments/benefit': typeof ApiPublicPaymentsBenefitRoute
   '/_authenticated/admin/categories/': typeof AuthenticatedAdminCategoriesIndexRoute
 }
 export interface FileRouteTypes {
@@ -664,6 +674,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/categories/$slug'
     | '/order/success/$id'
+    | '/api/public/payments/benefit'
     | '/admin/categories/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -726,6 +737,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/categories/$slug'
     | '/order/success/$id'
+    | '/api/public/payments/benefit'
     | '/admin/categories'
   id:
     | '__root__'
@@ -790,6 +802,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/admin/categories/$slug'
     | '/_authenticated/order/success/$id'
+    | '/api/public/payments/benefit'
     | '/_authenticated/admin/categories/'
   fileRoutesById: FileRoutesById
 }
@@ -817,6 +830,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   ApiPublicAfsReconcileRoute: typeof ApiPublicAfsReconcileRoute
   ApiPublicSendEmailsRoute: typeof ApiPublicSendEmailsRoute
+  ApiPublicPaymentsBenefitRoute: typeof ApiPublicPaymentsBenefitRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1255,6 +1269,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrderSuccessIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/payments/benefit': {
+      id: '/api/public/payments/benefit'
+      path: '/api/public/payments/benefit'
+      fullPath: '/api/public/payments/benefit'
+      preLoaderRoute: typeof ApiPublicPaymentsBenefitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1388,17 +1409,8 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   ApiPublicAfsReconcileRoute: ApiPublicAfsReconcileRoute,
   ApiPublicSendEmailsRoute: ApiPublicSendEmailsRoute,
+  ApiPublicPaymentsBenefitRoute: ApiPublicPaymentsBenefitRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
