@@ -123,11 +123,105 @@ export async function sendEmail(cfg: EmailConfig, mail: OutgoingEmail): Promise<
   }
 }
 
+/* -------------------------------------------------------------------------
+ * Lovable email (default) — enqueues into the managed sending queue using the
+ * verified sender domain. Used whenever no external API provider is enabled.
+ * ---------------------------------------------------------------------- */
+
+const SITE_NAME = "VIPSTAR";
+const SENDER_DOMAIN = "notify.vipstar.cc";
+const FROM_DOMAIN = "vipstar.cc";
+
+function randomToken() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function unsubscribeToken(admin: any, email: string) {
+  const { data: existing } = await admin
+    .from("email_unsubscribe_tokens")
+    .select("token, used_at")
+    .eq("email", email)
+    .maybeSingle();
+  if (existing?.token) return existing.token as string;
+  const token = randomToken();
+  await admin
+    .from("email_unsubscribe_tokens")
+    .upsert({ token, email }, { onConflict: "email", ignoreDuplicates: true });
+  const { data: stored } = await admin
+    .from("email_unsubscribe_tokens")
+    .select("token")
+    .eq("email", email)
+    .maybeSingle();
+  return (stored?.token as string) ?? token;
+}
+
+/** Sends through Lovable's managed email queue (no API key needed). */
+export async function sendViaLovable(mail: OutgoingEmail, idempotencyKey?: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const admin = supabaseAdmin as any;
+  const to = mail.to.trim();
+  const normalized = to.toLowerCase();
+
+  const { data: suppressed } = await admin
+    .from("suppressed_emails")
+    .select("id")
+    .eq("email", normalized)
+    .maybeSingle();
+  if (suppressed) throw new Error("email_suppressed");
+
+  const messageId = crypto.randomUUID();
+  const token = await unsubscribeToken(admin, normalized);
+
+  const { render } = await import("@react-email/render");
+  const React = await import("react");
+  const { template } = await import("@/lib/email-templates/notification");
+  const element = React.createElement(template.component, {
+    title: mail.subject,
+    message: mail.text,
+  });
+  const html = await render(element as any);
+  const text = await render(element as any, { plainText: true });
+
+  await admin.from("email_send_log").insert({
+    message_id: messageId,
+    template_name: "notification",
+    recipient_email: to,
+    status: "pending",
+  });
+
+  const { error } = await admin.rpc("enqueue_email", {
+    queue_name: "transactional_emails",
+    payload: {
+      message_id: messageId,
+      to,
+      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+      sender_domain: SENDER_DOMAIN,
+      subject: mail.subject,
+      html,
+      text,
+      purpose: "transactional",
+      label: "notification",
+      idempotency_key: idempotencyKey || messageId,
+      unsubscribe_token: token,
+      queued_at: new Date().toISOString(),
+    },
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** Sends a single email: external API provider if enabled, otherwise Lovable. */
+export async function deliver(mail: OutgoingEmail, idempotencyKey?: string) {
+  const cfg = await loadEmailConfig();
+  if (cfg) return await sendEmail(cfg, mail);
+  return await sendViaLovable(mail, idempotencyKey);
+}
+
 /** Sends every queued (pending) email in the outbox. */
 export async function dispatchOutbox(limit = 25) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const cfg = await loadEmailConfig();
-  if (!cfg) return { sent: 0, failed: 0, skipped: true as const, reason: "email_api_disabled" };
 
   const { data: rows, error } = await supabaseAdmin
     .from("email_outbox")
@@ -140,13 +234,15 @@ export async function dispatchOutbox(limit = 25) {
   let sent = 0;
   let failed = 0;
   for (const row of rows ?? []) {
+    const mail: OutgoingEmail = {
+      to: row.to_email,
+      toName: row.to_name,
+      subject: row.subject,
+      text: row.body,
+    };
     try {
-      await sendEmail(cfg, {
-        to: row.to_email,
-        toName: row.to_name,
-        subject: row.subject,
-        text: row.body,
-      });
+      if (cfg) await sendEmail(cfg, mail);
+      else await sendViaLovable(mail, `outbox-${row.id}`);
       await supabaseAdmin
         .from("email_outbox")
         .update({ status: "sent", sent_at: new Date().toISOString(), error: null })
