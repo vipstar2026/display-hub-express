@@ -99,10 +99,12 @@ export const Route = createFileRoute("/api/public/payments/afs")({
         if (!order) return json({ error: "order not found" }, 404);
 
         // Never trust the notification body: ask the gateway for the real status.
-        const status = checkoutId ? await afsGetStatus(checkoutId, cfg) : null;
-        const code = status?.result?.code ?? ((pay["result"] as { code?: string })?.code ?? "");
-        const success = afsIsSuccess(code);
-        const pending = afsIsPending(code);
+        const status = checkoutId ? await afsVerifyNotification(checkoutId) : null;
+        const verified = !!status?.result?.code;
+        const code = status?.result?.code ?? "";
+        const success = verified && afsIsSuccess(code);
+        const pending = !verified || afsIsPending(code);
+
 
         const txPayload = {
           order_id: order.id,
