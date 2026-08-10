@@ -146,6 +146,44 @@ export async function afsGetStatus(checkoutId: string, cfg?: AfsConfig) {
   };
 }
 
+export type AfsStatus = Awaited<ReturnType<typeof afsGetStatus>>;
+
+/** Looks a payment up by its payment id (used by webhook notifications). */
+export async function afsGetPayment(paymentId: string, cfg?: AfsConfig) {
+  const c = cfg ?? (await loadAfsConfig());
+  const res = await fetch(
+    `${c.base}/v1/payments/${encodeURIComponent(paymentId)}?entityId=${c.entityId}`,
+    { headers: { Authorization: `Bearer ${c.token}` } },
+  );
+  return (await res.json()) as AfsStatus;
+}
+
+/** Verifies a notification id against the gateway, trying the checkout lookup,
+ *  then the payment lookup, then the opposite environment (test/live).
+ *  Returns null when the gateway does not recognise the id — callers must NOT
+ *  mark an order paid in that case. */
+export async function afsVerifyNotification(id: string): Promise<AfsStatus | null> {
+  const known = (s: AfsStatus | null) => {
+    const code = s?.result?.code ?? "";
+    return code && !/^(200\.300\.404|700\.400|800\.[89])/.test(code) ? s : null;
+  };
+  for (const mode of ["test", "live"] as const) {
+    let cfg: AfsConfig;
+    try {
+      cfg = await loadAfsConfig(mode);
+    } catch {
+      continue;
+    }
+    const viaCheckout = known(await afsGetStatus(id, cfg).catch(() => null));
+    if (viaCheckout) return viaCheckout;
+    const viaPayment = known(await afsGetPayment(id, cfg).catch(() => null));
+    if (viaPayment) return viaPayment;
+  }
+  return null;
+}
+
+
+
 /** Successful / successfully-pending result codes per AFS result-code reference. */
 export function afsIsSuccess(code?: string) {
   if (!code) return false;
