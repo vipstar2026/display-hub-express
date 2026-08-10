@@ -194,7 +194,16 @@ export const runPaymentSimulation = createServerFn({ method: "POST" })
   });
 
 /** Removes every simulation order and its artefacts. */
-export const clearPaymentSimulations = createServerFn({ method: "POST" }).handler(async () => {
+export const clearPaymentSimulations = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+  const { data: isAdmin } = await context.supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", context.userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (!isAdmin) throw new Error("Forbidden");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: orders } = await supabaseAdmin
     .from("orders")
