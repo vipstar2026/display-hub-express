@@ -14,6 +14,8 @@ export interface AfsConfig {
   widgetLang: string | null;
   merchantName: string | null;
   resultUrl: string | null;
+  /** Hex key supplied by AFS to decrypt production webhook payloads. */
+  webhookKey: string | null;
 }
 
 export function afsBaseUrl(mode?: string) {
