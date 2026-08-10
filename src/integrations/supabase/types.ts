@@ -2669,6 +2669,10 @@ export type Database = {
         }
       }
       assign_digital_codes: { Args: { _order_id: string }; Returns: undefined }
+      cancel_stale_pending_orders: {
+        Args: { _minutes?: number }
+        Returns: number
+      }
       finalize_coupon_use: {
         Args: { _coupon_id: string; _discount: number; _order_id: string }
         Returns: undefined
