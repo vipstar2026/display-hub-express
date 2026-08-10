@@ -2788,6 +2788,10 @@ export type Database = {
         Returns: boolean
       }
       increment_blog_views: { Args: { _slug: string }; Returns: undefined }
+      post_order_journal: {
+        Args: { _order_id: string; _reverse?: boolean }
+        Returns: string
+      }
       redeem_coupon: {
         Args: { _code: string; _subtotal: number }
         Returns: {
