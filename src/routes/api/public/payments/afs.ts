@@ -144,12 +144,13 @@ export const Route = createFileRoute("/api/public/payments/afs")({
               payment_reference: status?.id ?? checkoutId,
             })
             .eq("id", order.id);
-        } else if (!success && !pending) {
+        } else if (verified && !success && !pending) {
           await supabaseAdmin
             .from("orders")
             .update({ payment_status: "failed" })
             .eq("id", order.id);
         }
+
 
         return json({ received: true, status: txPayload.status });
       },
