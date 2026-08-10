@@ -58,12 +58,19 @@ export async function loadAfsConfig(): Promise<AfsConfig> {
     return typeof v === "string" && v.trim() !== "" ? v.trim() : null;
   };
 
-  const entityId = pick("entity_id") ?? process.env.AFS_ENTITY_ID ?? "";
-  const token = pick("access_token") ?? process.env.AFS_ACCESS_TOKEN ?? "";
-  if (!entityId || !token) throw new Error("AFS gateway is not configured");
-
-  const mode = pick("mode") ?? (rowTestMode === false ? "live" : (process.env.AFS_MODE ?? "test"));
+  const mode =
+    pick("mode") ?? (rowTestMode === false ? "live" : (process.env.AFS_MODE ?? "test"));
   const live = mode === "live";
+
+  // Production credentials are stored separately so the test pair stays intact.
+  const entityId =
+    (live ? pick("live_entity_id") : null) ?? pick("entity_id") ?? process.env.AFS_ENTITY_ID ?? "";
+  const token =
+    (live ? pick("live_access_token") : null) ??
+    pick("access_token") ??
+    process.env.AFS_ACCESS_TOKEN ??
+    "";
+  if (!entityId || !token) throw new Error("AFS gateway is not configured");
 
   return {
     entityId,
@@ -77,6 +84,7 @@ export async function loadAfsConfig(): Promise<AfsConfig> {
     widgetLang: pick("widget_lang"),
     merchantName: pick("merchant_name"),
     resultUrl: pick("shopper_result_url"),
+    webhookKey: pick("webhook_decryption_key") ?? process.env.AFS_WEBHOOK_KEY ?? null,
   };
 }
 
