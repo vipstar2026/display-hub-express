@@ -54,6 +54,7 @@ import { Route as AuthenticatedAdminNewsletterRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
 import { Route as AuthenticatedAdminPaymentMethodsRouteImport } from './routes/_authenticated/admin.payment-methods'
+import { Route as AuthenticatedAdminPaymentSandboxRouteImport } from './routes/_authenticated/admin.payment-sandbox'
 import { Route as AuthenticatedAdminPaymentsRouteImport } from './routes/_authenticated/admin.payments'
 import { Route as AuthenticatedAdminPosRouteImport } from './routes/_authenticated/admin.pos'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
@@ -71,6 +72,7 @@ import { Route as ApiPublicSendEmailsRouteImport } from './routes/api/public/sen
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
 import { Route as AuthenticatedAdminCategoriesSlugRouteImport } from './routes/_authenticated/admin.categories.$slug'
 import { Route as AuthenticatedOrderSuccessIdRouteImport } from './routes/_authenticated/order.success.$id'
+import { Route as ApiPublicPaymentsAfsRouteImport } from './routes/api/public/payments/afs'
 import { Route as ApiPublicPaymentsBenefitRouteImport } from './routes/api/public/payments/benefit'
 
 const IndexRoute = IndexRouteImport.update({
@@ -315,6 +317,12 @@ const AuthenticatedAdminPaymentMethodsRoute =
     path: '/payment-methods',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPaymentSandboxRoute =
+  AuthenticatedAdminPaymentSandboxRouteImport.update({
+    id: '/payment-sandbox',
+    path: '/payment-sandbox',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminPaymentsRoute =
   AuthenticatedAdminPaymentsRouteImport.update({
     id: '/payments',
@@ -411,6 +419,11 @@ const AuthenticatedOrderSuccessIdRoute =
     path: '/order/success/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicPaymentsAfsRoute = ApiPublicPaymentsAfsRouteImport.update({
+  id: '/api/public/payments/afs',
+  path: '/api/public/payments/afs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPaymentsBenefitRoute =
   ApiPublicPaymentsBenefitRouteImport.update({
     id: '/api/public/payments/benefit',
@@ -462,6 +475,7 @@ export interface FileRoutesByFullPath {
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/payment-methods': typeof AuthenticatedAdminPaymentMethodsRoute
+  '/admin/payment-sandbox': typeof AuthenticatedAdminPaymentSandboxRoute
   '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/admin/pos': typeof AuthenticatedAdminPosRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
@@ -479,6 +493,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
+  '/api/public/payments/afs': typeof ApiPublicPaymentsAfsRoute
   '/api/public/payments/benefit': typeof ApiPublicPaymentsBenefitRoute
   '/admin/categories/': typeof AuthenticatedAdminCategoriesIndexRoute
 }
@@ -525,6 +540,7 @@ export interface FileRoutesByTo {
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/payment-methods': typeof AuthenticatedAdminPaymentMethodsRoute
+  '/admin/payment-sandbox': typeof AuthenticatedAdminPaymentSandboxRoute
   '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/admin/pos': typeof AuthenticatedAdminPosRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
@@ -542,6 +558,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
+  '/api/public/payments/afs': typeof ApiPublicPaymentsAfsRoute
   '/api/public/payments/benefit': typeof ApiPublicPaymentsBenefitRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesIndexRoute
 }
@@ -591,6 +608,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/payment-methods': typeof AuthenticatedAdminPaymentMethodsRoute
+  '/_authenticated/admin/payment-sandbox': typeof AuthenticatedAdminPaymentSandboxRoute
   '/_authenticated/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/_authenticated/admin/pos': typeof AuthenticatedAdminPosRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
@@ -608,6 +626,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/_authenticated/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
+  '/api/public/payments/afs': typeof ApiPublicPaymentsAfsRoute
   '/api/public/payments/benefit': typeof ApiPublicPaymentsBenefitRoute
   '/_authenticated/admin/categories/': typeof AuthenticatedAdminCategoriesIndexRoute
 }
@@ -657,6 +676,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/orders'
     | '/admin/payment-methods'
+    | '/admin/payment-sandbox'
     | '/admin/payments'
     | '/admin/pos'
     | '/admin/products'
@@ -674,6 +694,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/categories/$slug'
     | '/order/success/$id'
+    | '/api/public/payments/afs'
     | '/api/public/payments/benefit'
     | '/admin/categories/'
   fileRoutesByTo: FileRoutesByTo
@@ -720,6 +741,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/orders'
     | '/admin/payment-methods'
+    | '/admin/payment-sandbox'
     | '/admin/payments'
     | '/admin/pos'
     | '/admin/products'
@@ -737,6 +759,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/categories/$slug'
     | '/order/success/$id'
+    | '/api/public/payments/afs'
     | '/api/public/payments/benefit'
     | '/admin/categories'
   id:
@@ -785,6 +808,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/payment-methods'
+    | '/_authenticated/admin/payment-sandbox'
     | '/_authenticated/admin/payments'
     | '/_authenticated/admin/pos'
     | '/_authenticated/admin/products'
@@ -802,6 +826,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/admin/categories/$slug'
     | '/_authenticated/order/success/$id'
+    | '/api/public/payments/afs'
     | '/api/public/payments/benefit'
     | '/_authenticated/admin/categories/'
   fileRoutesById: FileRoutesById
@@ -830,6 +855,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   ApiPublicAfsReconcileRoute: typeof ApiPublicAfsReconcileRoute
   ApiPublicSendEmailsRoute: typeof ApiPublicSendEmailsRoute
+  ApiPublicPaymentsAfsRoute: typeof ApiPublicPaymentsAfsRoute
   ApiPublicPaymentsBenefitRoute: typeof ApiPublicPaymentsBenefitRoute
 }
 
@@ -1150,6 +1176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPaymentMethodsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/payment-sandbox': {
+      id: '/_authenticated/admin/payment-sandbox'
+      path: '/payment-sandbox'
+      fullPath: '/admin/payment-sandbox'
+      preLoaderRoute: typeof AuthenticatedAdminPaymentSandboxRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/payments': {
       id: '/_authenticated/admin/payments'
       path: '/payments'
@@ -1269,6 +1302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrderSuccessIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/payments/afs': {
+      id: '/api/public/payments/afs'
+      path: '/api/public/payments/afs'
+      fullPath: '/api/public/payments/afs'
+      preLoaderRoute: typeof ApiPublicPaymentsAfsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/benefit': {
       id: '/api/public/payments/benefit'
       path: '/api/public/payments/benefit'
@@ -1310,6 +1350,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminPaymentMethodsRoute: typeof AuthenticatedAdminPaymentMethodsRoute
+  AuthenticatedAdminPaymentSandboxRoute: typeof AuthenticatedAdminPaymentSandboxRoute
   AuthenticatedAdminPaymentsRoute: typeof AuthenticatedAdminPaymentsRoute
   AuthenticatedAdminPosRoute: typeof AuthenticatedAdminPosRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
@@ -1345,6 +1386,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminPaymentMethodsRoute: AuthenticatedAdminPaymentMethodsRoute,
+  AuthenticatedAdminPaymentSandboxRoute: AuthenticatedAdminPaymentSandboxRoute,
   AuthenticatedAdminPaymentsRoute: AuthenticatedAdminPaymentsRoute,
   AuthenticatedAdminPosRoute: AuthenticatedAdminPosRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
@@ -1409,6 +1451,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   ApiPublicAfsReconcileRoute: ApiPublicAfsReconcileRoute,
   ApiPublicSendEmailsRoute: ApiPublicSendEmailsRoute,
+  ApiPublicPaymentsAfsRoute: ApiPublicPaymentsAfsRoute,
   ApiPublicPaymentsBenefitRoute: ApiPublicPaymentsBenefitRoute,
 }
 export const routeTree = rootRouteImport

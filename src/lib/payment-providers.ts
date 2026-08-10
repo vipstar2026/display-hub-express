@@ -606,6 +606,13 @@ export const PAYMENT_PROVIDERS: PaymentProvider[] = [
       { key: "merchant_name", label_ar: "اسم التاجر الظاهر", label_en: "Merchant display name", placeholder: "VIP STAR SATELLITE" },
       { key: "shopper_result_url", label_ar: "رابط نتيجة الدفع", label_en: "Shopper result URL", kind: "url", placeholder: "https://vipstar.cc/pay/result",
         hint_ar: "الصفحة التي يعود إليها العميل بعد 3D Secure.", hint_en: "Where the customer returns after 3D Secure." },
+      { key: "live_entity_id", label_ar: "Entity ID للإنتاج", label_en: "Production Entity ID", placeholder: "8acda4cd...",
+        hint_ar: "يُستخدم تلقائياً عندما تكون البيئة «live».", hint_en: "Used automatically when the environment is “live”." },
+      { key: "live_access_token", label_ar: "Access Token للإنتاج", label_en: "Production Access Token", kind: "password",
+        hint_ar: "بيانات الإنتاج من AFS/Payon — سرّية تماماً.", hint_en: "Production credentials from AFS/Payon — strictly secret." },
+      { key: "webhook_decryption_key", label_ar: "مفتاح فك تشفير الويب هوك", label_en: "Webhook decryption key", kind: "password",
+        hint_ar: "مفتاح hex يرسله البنك بعد تسجيل رابط الإشعارات: https://vipstar.cc/api/public/payments/afs",
+        hint_en: "Hex key issued by the bank after registering the webhook: https://vipstar.cc/api/public/payments/afs" },
       { key: "webhook_secret", label_ar: "سر الويب هوك (اختياري)", label_en: "Webhook secret (optional)", kind: "password" },
     ],
     steps_ar: [

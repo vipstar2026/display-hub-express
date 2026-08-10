@@ -14,6 +14,8 @@ export interface AfsConfig {
   widgetLang: string | null;
   merchantName: string | null;
   resultUrl: string | null;
+  /** Hex key supplied by AFS to decrypt production webhook payloads. */
+  webhookKey: string | null;
 }
 
 export function afsBaseUrl(mode?: string) {
@@ -56,12 +58,19 @@ export async function loadAfsConfig(): Promise<AfsConfig> {
     return typeof v === "string" && v.trim() !== "" ? v.trim() : null;
   };
 
-  const entityId = pick("entity_id") ?? process.env.AFS_ENTITY_ID ?? "";
-  const token = pick("access_token") ?? process.env.AFS_ACCESS_TOKEN ?? "";
-  if (!entityId || !token) throw new Error("AFS gateway is not configured");
-
-  const mode = pick("mode") ?? (rowTestMode === false ? "live" : (process.env.AFS_MODE ?? "test"));
+  const mode =
+    pick("mode") ?? (rowTestMode === false ? "live" : (process.env.AFS_MODE ?? "test"));
   const live = mode === "live";
+
+  // Production credentials are stored separately so the test pair stays intact.
+  const entityId =
+    (live ? pick("live_entity_id") : null) ?? pick("entity_id") ?? process.env.AFS_ENTITY_ID ?? "";
+  const token =
+    (live ? pick("live_access_token") : null) ??
+    pick("access_token") ??
+    process.env.AFS_ACCESS_TOKEN ??
+    "";
+  if (!entityId || !token) throw new Error("AFS gateway is not configured");
 
   return {
     entityId,
@@ -75,6 +84,7 @@ export async function loadAfsConfig(): Promise<AfsConfig> {
     widgetLang: pick("widget_lang"),
     merchantName: pick("merchant_name"),
     resultUrl: pick("shopper_result_url"),
+    webhookKey: pick("webhook_decryption_key") ?? process.env.AFS_WEBHOOK_KEY ?? null,
   };
 }
 
@@ -173,4 +183,22 @@ export async function afsRefund(params: {
     currency?: string;
     result?: { code: string; description: string };
   };
+}
+
+/** Decrypts an AFS/OPPWA webhook body (AES-256-GCM, all values hex-encoded). */
+export async function afsDecryptWebhook(params: {
+  keyHex: string;
+  ivHex: string;
+  authTagHex: string;
+  bodyHex: string;
+}) {
+  const { createDecipheriv } = await import("crypto");
+  const key = Buffer.from(params.keyHex, "hex");
+  const iv = Buffer.from(params.ivHex, "hex");
+  const tag = Buffer.from(params.authTagHex, "hex");
+  const data = Buffer.from(params.bodyHex, "hex");
+  const decipher = createDecipheriv("aes-256-gcm", key, iv);
+  decipher.setAuthTag(tag);
+  const plain = Buffer.concat([decipher.update(data), decipher.final()]).toString("utf8");
+  return JSON.parse(plain) as Record<string, unknown>;
 }
