@@ -25,8 +25,9 @@ export const Route = createFileRoute("/api/public/payments/afs")({
 
         const raw = (await request.text()).trim();
 
-        const { loadAfsConfig, afsDecryptWebhook, afsGetStatus, afsIsSuccess, afsIsPending } =
+        const { loadAfsConfig, afsDecryptWebhook, afsVerifyNotification, afsIsSuccess, afsIsPending } =
           await import("@/lib/afs.server");
+
 
         let cfg;
         try {
