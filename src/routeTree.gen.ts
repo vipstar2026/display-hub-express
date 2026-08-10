@@ -74,6 +74,7 @@ import { Route as AuthenticatedAdminCategoriesSlugRouteImport } from './routes/_
 import { Route as AuthenticatedOrderSuccessIdRouteImport } from './routes/_authenticated/order.success.$id'
 import { Route as ApiPublicPaymentsAfsRouteImport } from './routes/api/public/payments/afs'
 import { Route as ApiPublicPaymentsBenefitRouteImport } from './routes/api/public/payments/benefit'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -430,6 +431,12 @@ const ApiPublicPaymentsBenefitRoute =
     path: '/api/public/payments/benefit',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -495,6 +502,7 @@ export interface FileRoutesByFullPath {
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
   '/api/public/payments/afs': typeof ApiPublicPaymentsAfsRoute
   '/api/public/payments/benefit': typeof ApiPublicPaymentsBenefitRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/categories/': typeof AuthenticatedAdminCategoriesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -560,6 +568,7 @@ export interface FileRoutesByTo {
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
   '/api/public/payments/afs': typeof ApiPublicPaymentsAfsRoute
   '/api/public/payments/benefit': typeof ApiPublicPaymentsBenefitRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesIndexRoute
 }
 export interface FileRoutesById {
@@ -628,6 +637,7 @@ export interface FileRoutesById {
   '/_authenticated/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
   '/api/public/payments/afs': typeof ApiPublicPaymentsAfsRoute
   '/api/public/payments/benefit': typeof ApiPublicPaymentsBenefitRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/_authenticated/admin/categories/': typeof AuthenticatedAdminCategoriesIndexRoute
 }
 export interface FileRouteTypes {
@@ -696,6 +706,7 @@ export interface FileRouteTypes {
     | '/order/success/$id'
     | '/api/public/payments/afs'
     | '/api/public/payments/benefit'
+    | '/lovable/email/queue/process'
     | '/admin/categories/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -761,6 +772,7 @@ export interface FileRouteTypes {
     | '/order/success/$id'
     | '/api/public/payments/afs'
     | '/api/public/payments/benefit'
+    | '/lovable/email/queue/process'
     | '/admin/categories'
   id:
     | '__root__'
@@ -828,6 +840,7 @@ export interface FileRouteTypes {
     | '/_authenticated/order/success/$id'
     | '/api/public/payments/afs'
     | '/api/public/payments/benefit'
+    | '/lovable/email/queue/process'
     | '/_authenticated/admin/categories/'
   fileRoutesById: FileRoutesById
 }
@@ -857,6 +870,7 @@ export interface RootRouteChildren {
   ApiPublicSendEmailsRoute: typeof ApiPublicSendEmailsRoute
   ApiPublicPaymentsAfsRoute: typeof ApiPublicPaymentsAfsRoute
   ApiPublicPaymentsBenefitRoute: typeof ApiPublicPaymentsBenefitRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1316,6 +1330,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsBenefitRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1453,7 +1474,18 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSendEmailsRoute: ApiPublicSendEmailsRoute,
   ApiPublicPaymentsAfsRoute: ApiPublicPaymentsAfsRoute,
   ApiPublicPaymentsBenefitRoute: ApiPublicPaymentsBenefitRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
