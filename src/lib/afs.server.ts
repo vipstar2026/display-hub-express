@@ -184,3 +184,21 @@ export async function afsRefund(params: {
     result?: { code: string; description: string };
   };
 }
+
+/** Decrypts an AFS/OPPWA webhook body (AES-256-GCM, all values hex-encoded). */
+export async function afsDecryptWebhook(params: {
+  keyHex: string;
+  ivHex: string;
+  authTagHex: string;
+  bodyHex: string;
+}) {
+  const { createDecipheriv } = await import("crypto");
+  const key = Buffer.from(params.keyHex, "hex");
+  const iv = Buffer.from(params.ivHex, "hex");
+  const tag = Buffer.from(params.authTagHex, "hex");
+  const data = Buffer.from(params.bodyHex, "hex");
+  const decipher = createDecipheriv("aes-256-gcm", key, iv);
+  decipher.setAuthTag(tag);
+  const plain = Buffer.concat([decipher.update(data), decipher.final()]).toString("utf8");
+  return JSON.parse(plain) as Record<string, unknown>;
+}
