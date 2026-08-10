@@ -28,8 +28,10 @@ export function afsWidgetBase(mode?: string) {
   return `${afsBaseUrl(mode)}/v1/paymentWidgets.js`;
 }
 
-/** Reads the AFS row from payment_methods; falls back to env secrets. */
-export async function loadAfsConfig(): Promise<AfsConfig> {
+/** Reads the AFS row from payment_methods; falls back to env secrets.
+ *  `forceMode` lets the webhook verify a notification against the other
+ *  environment when test/live are mixed during activation. */
+export async function loadAfsConfig(forceMode?: "test" | "live"): Promise<AfsConfig> {
   let cred: Record<string, string> = {};
   let rowTestMode: boolean | null = null;
 
