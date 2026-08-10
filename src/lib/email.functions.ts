@@ -27,10 +27,8 @@ export const sendTestEmail = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { loadEmailConfig, sendEmail } = await import("@/lib/email.server");
-    const cfg = await loadEmailConfig();
-    if (!cfg) throw new Error("email_api_disabled");
-    await sendEmail(cfg, {
+    const { deliver } = await import("@/lib/email.server");
+    await deliver({
       to: data.to,
       subject: "VIPSTAR — Test email / رسالة تجريبية",
       text: "تم إعداد إرسال البريد بنجاح.\nEmail sending is configured correctly.\n\nVIPSTAR",
