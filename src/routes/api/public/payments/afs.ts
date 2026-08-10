@@ -69,15 +69,15 @@ export const Route = createFileRoute("/api/public/payments/afs")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        let order: { id: string; total: number; currency: string; payment_status: string } | null =
-          null;
+        type OrderRow = { id: string; total: number; currency: string; payment_status: string };
+        let order: OrderRow | null = null;
         if (orderNumber) {
           const { data } = await supabaseAdmin
             .from("orders")
             .select("id, total, currency, payment_status")
             .eq("order_number", orderNumber)
             .maybeSingle();
-          order = data as typeof order;
+          order = data as OrderRow | null;
         }
         if (!order && checkoutId) {
           const { data: tx } = await supabaseAdmin
@@ -92,7 +92,7 @@ export const Route = createFileRoute("/api/public/payments/afs")({
               .select("id, total, currency, payment_status")
               .eq("id", tx.order_id)
               .maybeSingle();
-            order = data as typeof order;
+            order = data as OrderRow | null;
           }
         }
         if (!order) return json({ error: "order not found" }, 404);
