@@ -81,6 +81,7 @@ function AdminLayout() {
         { to: "/admin/invoices", icon: FileText, label: t("admin.invoices") },
         { to: "/admin/payments", icon: CreditCard, label: t("admin.payments_log") },
         { to: "/admin/payment-methods", icon: CreditCard, label: t("admin.payment_methods") },
+        { to: "/admin/payment-sandbox", icon: CreditCard, label: lang === "ar" ? "محاكاة الدفع" : "Payment sandbox" },
       ],
     },
     {
