@@ -61,7 +61,9 @@ export async function loadAfsConfig(forceMode?: "test" | "live"): Promise<AfsCon
   };
 
   const mode =
-    pick("mode") ?? (rowTestMode === false ? "live" : (process.env.AFS_MODE ?? "test"));
+    forceMode ??
+    pick("mode") ??
+    (rowTestMode === false ? "live" : (process.env.AFS_MODE ?? "test"));
   const live = mode === "live";
 
   // Production credentials are stored separately so the test pair stays intact.
