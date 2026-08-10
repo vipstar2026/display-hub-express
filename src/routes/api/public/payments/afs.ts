@@ -25,8 +25,9 @@ export const Route = createFileRoute("/api/public/payments/afs")({
 
         const raw = (await request.text()).trim();
 
-        const { loadAfsConfig, afsDecryptWebhook, afsGetStatus, afsIsSuccess, afsIsPending } =
+        const { loadAfsConfig, afsDecryptWebhook, afsVerifyNotification, afsIsSuccess, afsIsPending } =
           await import("@/lib/afs.server");
+
 
         let cfg;
         try {
@@ -98,10 +99,12 @@ export const Route = createFileRoute("/api/public/payments/afs")({
         if (!order) return json({ error: "order not found" }, 404);
 
         // Never trust the notification body: ask the gateway for the real status.
-        const status = checkoutId ? await afsGetStatus(checkoutId, cfg) : null;
-        const code = status?.result?.code ?? ((pay["result"] as { code?: string })?.code ?? "");
-        const success = afsIsSuccess(code);
-        const pending = afsIsPending(code);
+        const status = checkoutId ? await afsVerifyNotification(checkoutId) : null;
+        const verified = !!status?.result?.code;
+        const code = status?.result?.code ?? "";
+        const success = verified && afsIsSuccess(code);
+        const pending = !verified || afsIsPending(code);
+
 
         const txPayload = {
           order_id: order.id,
@@ -141,12 +144,13 @@ export const Route = createFileRoute("/api/public/payments/afs")({
               payment_reference: status?.id ?? checkoutId,
             })
             .eq("id", order.id);
-        } else if (!success && !pending) {
+        } else if (verified && !success && !pending) {
           await supabaseAdmin
             .from("orders")
             .update({ payment_status: "failed" })
             .eq("id", order.id);
         }
+
 
         return json({ received: true, status: txPayload.status });
       },
