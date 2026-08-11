@@ -16,12 +16,38 @@ export const Route = createFileRoute("/api/public/payments/afs")({
   server: {
     handlers: {
       GET: async () => new Response("ok"),
+      HEAD: async () => new Response(null, { status: 200 }),
+      OPTIONS: async () =>
+        new Response(null, {
+          status: 200,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, HEAD, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+          },
+        }),
       POST: async ({ request }) => {
-        const json = (v: unknown, status = 200) =>
+        // AFS treats any non-2xx reply as a failed notification and retries.
+        // This endpoint therefore ALWAYS answers 200; problems are reported in
+        // the JSON body and recorded in activity_log for diagnostics.
+        const json = (v: unknown) =>
           new Response(JSON.stringify(v), {
-            status,
+            status: 200,
             headers: { "Content-Type": "application/json" },
           });
+
+        const log = async (action: string, details: unknown) => {
+          try {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            await supabaseAdmin.from("activity_log").insert({
+              action,
+              entity_type: "afs_webhook",
+              details: details as never,
+            });
+          } catch {
+            /* diagnostics only */
+          }
+        };
 
         const raw = (await request.text()).trim();
 
@@ -33,7 +59,8 @@ export const Route = createFileRoute("/api/public/payments/afs")({
         try {
           cfg = await loadAfsConfig();
         } catch {
-          return json({ error: "gateway not configured" }, 503);
+          await log("config_missing", { raw: raw.slice(0, 200) });
+          return json({ received: true, error: "gateway not configured" });
         }
 
         const ivHex =
@@ -43,7 +70,10 @@ export const Route = createFileRoute("/api/public/payments/afs")({
 
         let payload: Record<string, unknown> = {};
         if (ivHex && tagHex) {
-          if (!cfg.webhookKey) return json({ error: "missing decryption key" }, 503);
+          if (!cfg.webhookKey) {
+            await log("missing_key", { ivHex });
+            return json({ received: true, error: "missing decryption key" });
+          }
           try {
             payload = await afsDecryptWebhook({
               keyHex: cfg.webhookKey,
@@ -51,8 +81,9 @@ export const Route = createFileRoute("/api/public/payments/afs")({
               authTagHex: tagHex,
               bodyHex: raw,
             });
-          } catch {
-            return json({ error: "decryption failed" }, 401);
+          } catch (e) {
+            await log("decryption_failed", { ivHex, message: (e as Error).message });
+            return json({ received: true, error: "decryption failed" });
           }
         } else {
           // Unencrypted probe / connectivity test from the bank.
@@ -66,6 +97,7 @@ export const Route = createFileRoute("/api/public/payments/afs")({
         const pay = (payload["payload"] ?? payload) as Record<string, unknown>;
         const checkoutId = (pay["id"] as string) ?? (pay["ndc"] as string) ?? null;
         const orderNumber = (pay["merchantTransactionId"] as string) ?? null;
+        await log("received", { checkoutId, orderNumber, type: payload["type"] ?? null });
         if (!checkoutId && !orderNumber) return json({ received: true, ignored: true });
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -96,7 +128,9 @@ export const Route = createFileRoute("/api/public/payments/afs")({
             order = data as OrderRow | null;
           }
         }
-        if (!order) return json({ error: "order not found" }, 404);
+        // A bank test notification has no matching order — acknowledge it.
+        if (!order) return json({ received: true, ignored: "order not found" });
+
 
         // Never trust the notification body: ask the gateway for the real status.
         const status = checkoutId ? await afsVerifyNotification(checkoutId) : null;
