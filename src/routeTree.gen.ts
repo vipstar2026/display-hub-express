@@ -35,6 +35,7 @@ import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as PayLinkTokenRouteImport } from './routes/pay-link.$token'
+import { Route as PayLinkResultRouteImport } from './routes/pay-link.result'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as AuthenticatedAccountAddressesRouteImport } from './routes/_authenticated/account.addresses'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
@@ -209,6 +210,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
 const PayLinkTokenRoute = PayLinkTokenRouteImport.update({
   id: '/pay-link/$token',
   path: '/pay-link/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PayLinkResultRoute = PayLinkResultRouteImport.update({
+  id: '/pay-link/result',
+  path: '/pay-link/result',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductSlugRoute = ProductSlugRouteImport.update({
@@ -501,6 +507,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/pay-link/$token': typeof PayLinkTokenRoute
+  '/pay-link/result': typeof PayLinkResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/account/addresses': typeof AuthenticatedAccountAddressesRoute
@@ -573,6 +580,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/pay-link/$token': typeof PayLinkTokenRoute
+  '/pay-link/result': typeof PayLinkResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/blog': typeof BlogIndexRoute
   '/account/addresses': typeof AuthenticatedAccountAddressesRoute
@@ -648,6 +656,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/pay-link/$token': typeof PayLinkTokenRoute
+  '/pay-link/result': typeof PayLinkResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/_authenticated/account/addresses': typeof AuthenticatedAccountAddressesRoute
@@ -723,6 +732,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/pay-link/$token'
+    | '/pay-link/result'
     | '/product/$slug'
     | '/blog/'
     | '/account/addresses'
@@ -795,6 +805,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/pay-link/$token'
+    | '/pay-link/result'
     | '/product/$slug'
     | '/blog'
     | '/account/addresses'
@@ -869,6 +880,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/email/unsubscribe'
     | '/pay-link/$token'
+    | '/pay-link/result'
     | '/product/$slug'
     | '/blog/'
     | '/_authenticated/account/addresses'
@@ -941,6 +953,7 @@ export interface RootRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   PayLinkTokenRoute: typeof PayLinkTokenRoute
+  PayLinkResultRoute: typeof PayLinkResultRoute
   ProductSlugRoute: typeof ProductSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ApiPublicAfsReconcileRoute: typeof ApiPublicAfsReconcileRoute
@@ -1135,6 +1148,13 @@ declare module '@tanstack/react-router' {
       path: '/pay-link/$token'
       fullPath: '/pay-link/$token'
       preLoaderRoute: typeof PayLinkTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pay-link/result': {
+      id: '/pay-link/result'
+      path: '/pay-link/result'
+      fullPath: '/pay-link/result'
+      preLoaderRoute: typeof PayLinkResultRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/product/$slug': {
@@ -1593,6 +1613,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   PayLinkTokenRoute: PayLinkTokenRoute,
+  PayLinkResultRoute: PayLinkResultRoute,
   ProductSlugRoute: ProductSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
   ApiPublicAfsReconcileRoute: ApiPublicAfsReconcileRoute,
