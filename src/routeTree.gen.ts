@@ -34,6 +34,8 @@ import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticat
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as PayLinkTokenRouteImport } from './routes/pay-link.$token'
+import { Route as PayLinkResultRouteImport } from './routes/pay-link.result'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as AuthenticatedAccountAddressesRouteImport } from './routes/_authenticated/account.addresses'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
@@ -55,6 +57,7 @@ import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminNewsletterRouteImport } from './routes/_authenticated/admin.newsletter'
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
+import { Route as AuthenticatedAdminPaymentLinksRouteImport } from './routes/_authenticated/admin.payment-links'
 import { Route as AuthenticatedAdminPaymentMethodsRouteImport } from './routes/_authenticated/admin.payment-methods'
 import { Route as AuthenticatedAdminPaymentSandboxRouteImport } from './routes/_authenticated/admin.payment-sandbox'
 import { Route as AuthenticatedAdminPaymentsRouteImport } from './routes/_authenticated/admin.payments'
@@ -205,6 +208,16 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PayLinkTokenRoute = PayLinkTokenRouteImport.update({
+  id: '/pay-link/$token',
+  path: '/pay-link/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PayLinkResultRoute = PayLinkResultRouteImport.update({
+  id: '/pay-link/result',
+  path: '/pay-link/result',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductSlugRoute = ProductSlugRouteImport.update({
   id: '/product/$slug',
   path: '/product/$slug',
@@ -325,6 +338,12 @@ const AuthenticatedAdminOrdersRoute =
   AuthenticatedAdminOrdersRouteImport.update({
     id: '/orders',
     path: '/orders',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminPaymentLinksRoute =
+  AuthenticatedAdminPaymentLinksRouteImport.update({
+    id: '/payment-links',
+    path: '/payment-links',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminPaymentMethodsRoute =
@@ -494,6 +513,8 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pay-link/$token': typeof PayLinkTokenRoute
+  '/pay-link/result': typeof PayLinkResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/account/addresses': typeof AuthenticatedAccountAddressesRoute
@@ -515,6 +536,7 @@ export interface FileRoutesByFullPath {
   '/admin/newsletter': typeof AuthenticatedAdminNewsletterRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
+  '/admin/payment-links': typeof AuthenticatedAdminPaymentLinksRoute
   '/admin/payment-methods': typeof AuthenticatedAdminPaymentMethodsRoute
   '/admin/payment-sandbox': typeof AuthenticatedAdminPaymentSandboxRoute
   '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
@@ -565,6 +587,8 @@ export interface FileRoutesByTo {
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pay-link/$token': typeof PayLinkTokenRoute
+  '/pay-link/result': typeof PayLinkResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/blog': typeof BlogIndexRoute
   '/account/addresses': typeof AuthenticatedAccountAddressesRoute
@@ -586,6 +610,7 @@ export interface FileRoutesByTo {
   '/admin/newsletter': typeof AuthenticatedAdminNewsletterRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
+  '/admin/payment-links': typeof AuthenticatedAdminPaymentLinksRoute
   '/admin/payment-methods': typeof AuthenticatedAdminPaymentMethodsRoute
   '/admin/payment-sandbox': typeof AuthenticatedAdminPaymentSandboxRoute
   '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
@@ -639,6 +664,8 @@ export interface FileRoutesById {
   '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/pay-link/$token': typeof PayLinkTokenRoute
+  '/pay-link/result': typeof PayLinkResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/_authenticated/account/addresses': typeof AuthenticatedAccountAddressesRoute
@@ -660,6 +687,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/newsletter': typeof AuthenticatedAdminNewsletterRoute
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
+  '/_authenticated/admin/payment-links': typeof AuthenticatedAdminPaymentLinksRoute
   '/_authenticated/admin/payment-methods': typeof AuthenticatedAdminPaymentMethodsRoute
   '/_authenticated/admin/payment-sandbox': typeof AuthenticatedAdminPaymentSandboxRoute
   '/_authenticated/admin/payments': typeof AuthenticatedAdminPaymentsRoute
@@ -713,6 +741,8 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/pay-link/$token'
+    | '/pay-link/result'
     | '/product/$slug'
     | '/blog/'
     | '/account/addresses'
@@ -734,6 +764,7 @@ export interface FileRouteTypes {
     | '/admin/newsletter'
     | '/admin/notifications'
     | '/admin/orders'
+    | '/admin/payment-links'
     | '/admin/payment-methods'
     | '/admin/payment-sandbox'
     | '/admin/payments'
@@ -784,6 +815,8 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/pay-link/$token'
+    | '/pay-link/result'
     | '/product/$slug'
     | '/blog'
     | '/account/addresses'
@@ -805,6 +838,7 @@ export interface FileRouteTypes {
     | '/admin/newsletter'
     | '/admin/notifications'
     | '/admin/orders'
+    | '/admin/payment-links'
     | '/admin/payment-methods'
     | '/admin/payment-sandbox'
     | '/admin/payments'
@@ -857,6 +891,8 @@ export interface FileRouteTypes {
     | '/_authenticated/wishlist'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/pay-link/$token'
+    | '/pay-link/result'
     | '/product/$slug'
     | '/blog/'
     | '/_authenticated/account/addresses'
@@ -878,6 +914,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/newsletter'
     | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/orders'
+    | '/_authenticated/admin/payment-links'
     | '/_authenticated/admin/payment-methods'
     | '/_authenticated/admin/payment-sandbox'
     | '/_authenticated/admin/payments'
@@ -928,6 +965,8 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   BlogSlugRoute: typeof BlogSlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  PayLinkTokenRoute: typeof PayLinkTokenRoute
+  PayLinkResultRoute: typeof PayLinkResultRoute
   ProductSlugRoute: typeof ProductSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ApiPublicAfsReconcileRoute: typeof ApiPublicAfsReconcileRoute
@@ -1117,6 +1156,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pay-link/$token': {
+      id: '/pay-link/$token'
+      path: '/pay-link/$token'
+      fullPath: '/pay-link/$token'
+      preLoaderRoute: typeof PayLinkTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pay-link/result': {
+      id: '/pay-link/result'
+      path: '/pay-link/result'
+      fullPath: '/pay-link/result'
+      preLoaderRoute: typeof PayLinkResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/product/$slug': {
       id: '/product/$slug'
       path: '/product/$slug'
@@ -1262,6 +1315,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/admin/orders'
       preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/payment-links': {
+      id: '/_authenticated/admin/payment-links'
+      path: '/payment-links'
+      fullPath: '/admin/payment-links'
+      preLoaderRoute: typeof AuthenticatedAdminPaymentLinksRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/payment-methods': {
@@ -1472,6 +1532,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminNewsletterRoute: typeof AuthenticatedAdminNewsletterRoute
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
+  AuthenticatedAdminPaymentLinksRoute: typeof AuthenticatedAdminPaymentLinksRoute
   AuthenticatedAdminPaymentMethodsRoute: typeof AuthenticatedAdminPaymentMethodsRoute
   AuthenticatedAdminPaymentSandboxRoute: typeof AuthenticatedAdminPaymentSandboxRoute
   AuthenticatedAdminPaymentsRoute: typeof AuthenticatedAdminPaymentsRoute
@@ -1508,6 +1569,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminNewsletterRoute: AuthenticatedAdminNewsletterRoute,
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
+  AuthenticatedAdminPaymentLinksRoute: AuthenticatedAdminPaymentLinksRoute,
   AuthenticatedAdminPaymentMethodsRoute: AuthenticatedAdminPaymentMethodsRoute,
   AuthenticatedAdminPaymentSandboxRoute: AuthenticatedAdminPaymentSandboxRoute,
   AuthenticatedAdminPaymentsRoute: AuthenticatedAdminPaymentsRoute,
@@ -1572,6 +1634,8 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   BlogSlugRoute: BlogSlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  PayLinkTokenRoute: PayLinkTokenRoute,
+  PayLinkResultRoute: PayLinkResultRoute,
   ProductSlugRoute: ProductSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
   ApiPublicAfsReconcileRoute: ApiPublicAfsReconcileRoute,

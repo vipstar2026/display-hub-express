@@ -162,3 +162,36 @@ export const confirmPaymentLinkPayment = createServerFn({ method: "POST" })
       orderId: link.order_id,
     };
   });
+
+export const getPaymentLinkPublic = createServerFn({ method: "POST" })
+  .inputValidator((input: { token: string }) => input)
+  .handler(async ({ data }) => {
+    const { createClient } = await import("@supabase/supabase-js");
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+    const client = createClient(process.env["SUPABASE_URL"]!, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: {
+        fetch: (input, init) => {
+          const h = new Headers(init?.headers);
+          if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
+          h.set("apikey", key);
+          return fetch(input, { ...init, headers: h });
+        },
+      },
+    });
+    const { data: rows, error } = await client.rpc("get_payment_link", { _token: data.token });
+    if (error) throw new Error(error.message);
+    const link = Array.isArray(rows) ? rows[0] : rows;
+    if (!link) throw new Error("Payment link not found");
+    return link as {
+      token: string;
+      amount: number;
+      currency: string;
+      description: string | null;
+      customer_name: string | null;
+      customer_email: string | null;
+      status: string;
+      expires_at: string | null;
+      order_id: string | null;
+    };
+  });
