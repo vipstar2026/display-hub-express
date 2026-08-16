@@ -64,9 +64,11 @@ function AdminBackupsPage() {
     setBusy("all");
     try {
       const tables = ["orders", "order_items", "products", "categories", "profiles", "invoices", "newsletter_subscribers", "coupons"];
+      const PROFILE_COLS = "id,display_name,avatar_url,phone,created_at,updated_at";
       const bundle: Record<string, unknown> = { exported_at: new Date().toISOString() };
       for (const tbl of tables) {
-        const { data } = await supabase.from(tbl as never).select("*").limit(10000);
+        const cols = tbl === "profiles" ? PROFILE_COLS : "*";
+        const { data } = await supabase.from(tbl as never).select(cols).limit(10000);
         bundle[tbl] = data ?? [];
       }
       const stamp = new Date().toISOString().slice(0, 10);
@@ -79,11 +81,11 @@ function AdminBackupsPage() {
     }
   };
 
-  const cards: { key: string; table: string; file: string; icon: typeof ShoppingBag; label: string; desc: string }[] = [
+  const cards: { key: string; table: string; file: string; select?: string; icon: typeof ShoppingBag; label: string; desc: string }[] = [
     { key: "orders", table: "orders", file: "orders", icon: ShoppingBag, label: t("backups.orders"), desc: t("backups.orders_desc") },
     { key: "order_items", table: "order_items", file: "order-items", icon: FileText, label: t("backups.order_items"), desc: t("backups.order_items_desc") },
     { key: "products", table: "products", file: "products", icon: Package, label: t("backups.products"), desc: t("backups.products_desc") },
-    { key: "customers", table: "profiles", file: "customers", icon: UsersRound, label: t("backups.customers"), desc: t("backups.customers_desc") },
+    { key: "customers", table: "profiles", file: "customers", select: "id,display_name,avatar_url,phone,created_at,updated_at", icon: UsersRound, label: t("backups.customers"), desc: t("backups.customers_desc") },
     { key: "invoices", table: "invoices", file: "invoices", icon: FileText, label: t("backups.invoices"), desc: t("backups.invoices_desc") },
     { key: "newsletter", table: "newsletter_subscribers", file: "newsletter", icon: Mail, label: t("backups.newsletter"), desc: t("backups.newsletter_desc") },
     { key: "coupons", table: "coupons", file: "coupons", icon: Ticket, label: t("backups.coupons"), desc: t("backups.coupons_desc") },
@@ -125,7 +127,7 @@ function AdminBackupsPage() {
                 variant="outline"
                 className="w-full"
                 disabled={loading}
-                onClick={() => exportTable(c.key, c.table, c.file)}
+                onClick={() => exportTable(c.key, c.table, c.file, c.select ?? "*")}
               >
                 {loading ? <Loader2 className="me-2 h-3.5 w-3.5 animate-spin" /> : <Download className="me-2 h-3.5 w-3.5" />}
                 {t("backups.export_csv")}
