@@ -81,7 +81,7 @@ function AdminBackupsPage() {
     }
   };
 
-  const cards: { key: string; table: string; file: string; icon: typeof ShoppingBag; label: string; desc: string }[] = [
+  const cards: { key: string; table: string; file: string; select?: string; icon: typeof ShoppingBag; label: string; desc: string }[] = [
     { key: "orders", table: "orders", file: "orders", icon: ShoppingBag, label: t("backups.orders"), desc: t("backups.orders_desc") },
     { key: "order_items", table: "order_items", file: "order-items", icon: FileText, label: t("backups.order_items"), desc: t("backups.order_items_desc") },
     { key: "products", table: "products", file: "products", icon: Package, label: t("backups.products"), desc: t("backups.products_desc") },
@@ -127,7 +127,7 @@ function AdminBackupsPage() {
                 variant="outline"
                 className="w-full"
                 disabled={loading}
-                onClick={() => exportTable(c.key, c.table, c.file)}
+                onClick={() => exportTable(c.key, c.table, c.file, c.select ?? "*")}
               >
                 {loading ? <Loader2 className="me-2 h-3.5 w-3.5 animate-spin" /> : <Download className="me-2 h-3.5 w-3.5" />}
                 {t("backups.export_csv")}
