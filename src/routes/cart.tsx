@@ -203,15 +203,63 @@ function CartPage() {
   };
 
   const handleCheckout = async () => {
-    if (!userId) { nav({ to: "/auth" }); return; }
     if (items.length === 0) return;
     if (!method) { toast.error(t("cart.select_method_err")); return; }
-    if (method.requires_proof && !proofFile) { toast.error(t("cart.upload_proof_err")); return; }
+    if (digitalShortage.length > 0) { toast.error(`${digitalShortage[0].name} — ${L("digital_out")}`); return; }
+    if (isGuest && !guestAllowed) { nav({ to: "/auth" }); return; }
+    if (isGuest && method.requires_proof) { toast.error(L("proof_needs_account")); return; }
+    if (isGuest && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guest.email.trim())) { toast.error(L("guest_invalid_email")); return; }
+    if (!isGuest && method.requires_proof && !proofFile) { toast.error(t("cart.upload_proof_err")); return; }
     if (needsFulfillment && fulfillment === "delivery") {
-      const hasAddr = !!selectedAddress || (!!manualAddress.full_name && !!manualAddress.address_line);
+      const hasAddr = isGuest
+        ? !!manualAddress.full_name && !!manualAddress.address_line
+        : !!selectedAddress || (!!manualAddress.full_name && !!manualAddress.address_line);
       if (!hasAddr) { toast.error(L("address_required")); return; }
       if ((shippingRates ?? []).length > 0 && !rate) { toast.error(L("shipping_required")); return; }
     }
+
+    // Guest checkout runs fully server-side (prices, stock and totals re-verified)
+    if (isGuest) {
+      setPlacing(true);
+      try {
+        idemRef.current = idemRef.current ?? (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`);
+        const res = await placeGuest({
+          data: {
+            items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
+            buyer_email: guest.email.trim(),
+            buyer_name: guest.name.trim() || null,
+            buyer_phone: guest.phone.trim() || null,
+            payment_method_id: method.id,
+            payment_reference: reference || null,
+            customer_notes: customerNotes || null,
+            coupon_code: coupon?.code ?? null,
+            fulfillment: needsFulfillment ? fulfillment : "pickup",
+            shipping_rate_id: needsFulfillment && fulfillment === "delivery" ? rate?.id ?? null : null,
+            shipping_address: needsFulfillment && fulfillment === "delivery" ? { ...manualAddress } : null,
+            idempotency_key: idemRef.current,
+          },
+        });
+        clear();
+        if (res.gateway === "afs") {
+          nav({ to: "/guest-pay/$id", params: { id: res.order_id }, search: { t: res.guest_token } });
+        } else {
+          toast.success(t("cart.order_placed"));
+          nav({ to: "/guest-order/$id", params: { id: res.order_id }, search: { t: res.guest_token } });
+        }
+      } catch (e) {
+        const msg = (e as Error).message;
+        toast.error(
+          msg === "digital_stock_unavailable" ? L("digital_out")
+          : msg === "guest_checkout_disabled" ? L("guest_disabled")
+          : msg
+        );
+      } finally {
+        setPlacing(false);
+      }
+      return;
+    }
+
+
 
 
     setPlacing(true);
