@@ -40,7 +40,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         ]);
 
         (cats.data ?? []).forEach((c) =>
-          entries.push({ path: `/shop?category=${c.slug}`, lastmod: c.updated_at?.slice(0, 10), changefreq: "weekly", priority: "0.7" }),
+          entries.push({ path: `/category/${c.slug}`, lastmod: c.updated_at?.slice(0, 10), changefreq: "weekly", priority: "0.7" }),
         );
         (prods.data ?? []).forEach((p) =>
           entries.push({ path: `/product/${p.slug}`, lastmod: p.updated_at?.slice(0, 10), changefreq: "weekly", priority: "0.8" }),
