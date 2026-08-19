@@ -509,13 +509,32 @@ function CartPage() {
 
             {/* Summary */}
             <div className="h-fit rounded-xl border border-primary/20 bg-card p-6">
+              <div className="mb-2 font-display text-sm font-bold text-muted-foreground">{L("order_summary")}</div>
+              <div className="mb-3 space-y-1.5 border-b border-primary/10 pb-3">
+                {items.map((i) => (
+                  <div key={i.product_id} className="flex justify-between gap-2 text-xs">
+                    <span className="truncate text-muted-foreground">{i.name} × {i.quantity}</span>
+                    <span className="shrink-0 font-mono">{formatPrice(i.price * i.quantity)}</span>
+                  </div>
+                ))}
+              </div>
               <div className="flex justify-between py-2"><span>{t("shop.subtotal")}</span><span className="font-mono">{formatPrice(subtotal)}</span></div>
-              {rate && (
+              {needsFulfillment && (
                 <div className="flex justify-between py-2 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1"><Truck className="h-3.5 w-3.5" />{t("cart.select_shipping")}</span>
+                  <span className="flex items-center gap-1">
+                    {fulfillment === "pickup" ? <Store className="h-3.5 w-3.5" /> : <Truck className="h-3.5 w-3.5" />}
+                    {fulfillment === "pickup" ? L("pickup") : t("cart.select_shipping")}
+                  </span>
                   <span className="font-mono">{shippingCost === 0 ? t("cart.shipping_free") : formatPrice(shippingCost)}</span>
                 </div>
               )}
+              {!needsFulfillment && (
+                <div className="flex justify-between py-2 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1"><Zap className="h-3.5 w-3.5 text-primary" />{L("digital_title")}</span>
+                  <span className="font-mono">{t("cart.shipping_free")}</span>
+                </div>
+              )}
+
               {fee > 0 && (
                 <div className="flex justify-between py-2 text-sm text-muted-foreground">
                   <span>{t("cart.payment_fee")}</span>
