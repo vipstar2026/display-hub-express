@@ -38,7 +38,7 @@ function PayPage() {
   const { id } = Route.useParams();
   const { lang } = useI18n();
   const start = useServerFn(createAfsCheckout);
-  const mounted = useRef(false);
+  const nav = useNavigate();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["afs-checkout", id],
@@ -47,14 +47,6 @@ function PayPage() {
     retry: false,
   });
 
-  useEffect(() => {
-    if (!data?.scriptUrl || mounted.current) return;
-    mounted.current = true;
-    const s = document.createElement("script");
-    s.src = data.scriptUrl;
-    s.async = true;
-    document.body.appendChild(s);
-  }, [data?.scriptUrl]);
 
   const heading = lang === "ar" ? "إتمام الدفع" : lang === "ur" ? "ادائیگی مکمل کریں" : lang === "bn" ? "পেমেন্ট সম্পন্ন করুন" : "Complete payment";
   const secure =
