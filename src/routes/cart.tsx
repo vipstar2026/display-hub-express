@@ -23,8 +23,31 @@ const ICONS: Record<string, typeof Landmark> = {
   landmark: Landmark, smartphone: Smartphone, banknote: Banknote, wallet: Wallet, "credit-card": CreditCard,
 };
 
+type Lang = "ar" | "en" | "ur" | "bn";
+const TX = {
+  fulfillment: { ar: "طريقة الاستلام", en: "Fulfillment method", ur: "وصولی کا طریقہ", bn: "ডেলিভারি পদ্ধতি" },
+  delivery: { ar: "توصيل إلى العنوان", en: "Delivery to address", ur: "پتے پر ڈیلیوری", bn: "ঠিকানায় ডেলিভারি" },
+  pickup: { ar: "استلام من المحل", en: "Pickup from store", ur: "دکان سے وصولی", bn: "দোকান থেকে সংগ্রহ" },
+  pickup_free: { ar: "مجاني", en: "Free", ur: "مفت", bn: "ফ্রি" },
+  digital_title: { ar: "منتجات رقمية — تسليم فوري", en: "Digital products — instant delivery", ur: "ڈیجیٹل مصنوعات — فوری ترسیل", bn: "ডিজিটাল পণ্য — তাৎক্ষণিক ডেলিভারি" },
+  digital_desc: {
+    ar: "لا يوجد شحن للمنتجات الرقمية. تُرسل الأكواد/الاشتراكات إلى بريدك الإلكتروني وتظهر في صفحة الطلب فور تأكيد الدفع.",
+    en: "No shipping for digital items. Codes/subscriptions are emailed to you and shown on the order page as soon as payment is confirmed.",
+    ur: "ڈیجیٹل اشیاء کے لیے شپنگ نہیں۔ ادائیگی کی تصدیق پر کوڈ ای میل کیے جاتے ہیں۔",
+    bn: "ডিজিটাল আইটেমে শিপিং নেই। পেমেন্ট নিশ্চিত হলে কোড ইমেইলে পাঠানো হয়।",
+  },
+  physical_title: { ar: "منتجات تحتاج شحن أو استلام", en: "Items requiring delivery or pickup", ur: "ڈیلیوری یا پک اپ درکار", bn: "ডেলিভারি বা পিকআপ প্রয়োজন" },
+  digital_badge: { ar: "رقمي", en: "Digital", ur: "ڈیجیٹل", bn: "ডিজিটাল" },
+  physical_badge: { ar: "شحن", en: "Shipped", ur: "شپنگ", bn: "শিপিং" },
+  address_required: { ar: "أدخل عنوان التوصيل", en: "Enter a delivery address", ur: "ڈیلیوری پتہ درج کریں", bn: "ডেলিভারি ঠিকানা দিন" },
+  shipping_required: { ar: "اختر خدمة الشحن", en: "Select a shipping method", ur: "شپنگ سروس منتخب کریں", bn: "শিপিং পদ্ধতি নির্বাচন করুন" },
+  pickup_note: { ar: "سنتواصل معك عند جهوز الطلب للاستلام من المحل.", en: "We will contact you when your order is ready for pickup at the store.", ur: "آرڈر تیار ہونے پر رابطہ کریں گے۔", bn: "অর্ডার প্রস্তুত হলে আমরা যোগাযোগ করব।" },
+  order_summary: { ar: "ملخص الطلب", en: "Order summary", ur: "آرڈر کا خلاصہ", bn: "অর্ডার সারাংশ" },
+} as const;
+
 function CartPage() {
   const { t, lang } = useI18n();
+  const L = (k: keyof typeof TX) => TX[k][(lang as Lang) in TX[k] ? (lang as Lang) : "en"];
   const { items, setQty, remove, subtotal, clear } = useCart();
   const nav = useNavigate();
   const { data: settings } = useSiteSettings();
@@ -36,12 +59,18 @@ function CartPage() {
   const [customerNotes, setCustomerNotes] = useState("");
   const [selectedRate, setSelectedRate] = useState<string | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const [fulfillment, setFulfillment] = useState<"delivery" | "pickup">("delivery");
   const [manualAddress, setManualAddress] = useState({ full_name: "", phone: "", address_line: "", city: "", country: "Bahrain" });
 
   // Coupon state
   const [couponInput, setCouponInput] = useState("");
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [coupon, setCoupon] = useState<{ id: string; code: string; discount: number } | null>(null);
+
+  const physicalItems = items.filter((i) => i.type === "physical");
+  const digitalItems = items.filter((i) => i.type !== "physical");
+  const needsFulfillment = physicalItems.length > 0;
+
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
