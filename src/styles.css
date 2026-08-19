@@ -182,3 +182,114 @@
 .admin-shell .recharts-wrapper {
   direction: ltr;
 }
+
+/* ---- AFS / Payon hosted card widget: themed to match the site ---- */
+.afs-widget .wpwl-form {
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  direction: ltr;
+}
+.afs-widget .wpwl-container,
+.afs-widget .wpwl-wrapper,
+.afs-widget .wpwl-group {
+  margin-bottom: 0.9rem;
+}
+.afs-widget .wpwl-label {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.35rem;
+  display: block;
+  text-align: left;
+  width: 100%;
+  padding: 0;
+}
+.afs-widget .wpwl-control,
+.afs-widget select.wpwl-control-brand {
+  background: var(--input);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  height: 2.75rem;
+  padding: 0 0.75rem;
+  font-size: 0.95rem;
+  box-shadow: none;
+  width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.afs-widget .wpwl-control::placeholder {
+  color: color-mix(in oklab, var(--muted-foreground) 80%, transparent);
+}
+.afs-widget .wpwl-control:focus {
+  border-color: var(--ring);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 25%, transparent);
+}
+.afs-widget .wpwl-control-iframe,
+.afs-widget .wpwl-control-cardNumber,
+.afs-widget .wpwl-control-cvv {
+  padding-top: 0.6rem;
+}
+.afs-widget .wpwl-has-error .wpwl-control {
+  border-color: var(--destructive);
+}
+.afs-widget .wpwl-hint,
+.afs-widget .wpwl-message {
+  color: var(--destructive);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+.afs-widget .wpwl-button-pay,
+.afs-widget .wpwl-button {
+  background: var(--gradient-brand, var(--primary));
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border: 0;
+  border-radius: var(--radius-md);
+  height: 3rem;
+  width: 100%;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  box-shadow: 0 8px 24px -12px color-mix(in oklab, var(--primary) 70%, transparent);
+  transition: filter 0.2s ease, transform 0.15s ease;
+}
+.afs-widget .wpwl-button-pay:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.afs-widget .wpwl-button-pay:disabled {
+  opacity: 0.6;
+}
+.afs-widget .wpwl-brand-card {
+  filter: none;
+}
+.afs-widget .wpwl-group-brand,
+.afs-widget .wpwl-brand-VISA,
+.afs-widget .wpwl-brand-MASTER {
+  opacity: 1;
+}
+.afs-widget .wpwl-group-cardNumber,
+.afs-widget .wpwl-group-cardHolder {
+  width: 100%;
+}
+@media (min-width: 640px) {
+  .afs-widget .wpwl-group-expiry,
+  .afs-widget .wpwl-group-cvv {
+    width: 48%;
+    display: inline-block;
+    vertical-align: top;
+  }
+  .afs-widget .wpwl-group-expiry {
+    margin-right: 4%;
+  }
+  [dir="rtl"] .afs-widget .wpwl-group-expiry {
+    margin-right: 0;
+    margin-left: 4%;
+  }
+}
