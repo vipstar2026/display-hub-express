@@ -15,6 +15,8 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { CookieConsent } from "@/components/CookieConsent";
 import { CompareBar } from "@/components/CompareBar";
 import { LiveChatWidget } from "@/components/LiveChatWidget";
+import { Analytics } from "@/components/Analytics";
+
 
 function NotFoundComponent() {
   return (
@@ -59,7 +61,9 @@ export function App() {
           <WishlistProvider>
             <CompareProvider>
               <ThemeApplier />
+              <Analytics />
               <Outlet />
+
               <MobileBottomNav />
               <PWAInstaller />
               <FloatingWhatsApp />

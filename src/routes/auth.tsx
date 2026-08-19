@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Satellite } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
+import { analytics } from "@/lib/analytics";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -37,8 +38,10 @@ function AuthPage() {
           options: { emailRedirectTo: window.location.origin, data: { display_name: name } },
         });
         if (error) throw error;
+        analytics.signUp("email");
         toast.success("Account created!");
         nav({ to: "/" });
+
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;

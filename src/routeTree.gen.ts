@@ -34,6 +34,9 @@ import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticat
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as GuestOrderIdRouteImport } from './routes/guest-order.$id'
+import { Route as GuestPayIdRouteImport } from './routes/guest-pay.$id'
+import { Route as GuestPayResultRouteImport } from './routes/guest-pay.result'
 import { Route as PayLinkTokenRouteImport } from './routes/pay-link.$token'
 import { Route as PayLinkResultRouteImport } from './routes/pay-link.result'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
@@ -206,6 +209,21 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestOrderIdRoute = GuestOrderIdRouteImport.update({
+  id: '/guest-order/$id',
+  path: '/guest-order/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestPayIdRoute = GuestPayIdRouteImport.update({
+  id: '/guest-pay/$id',
+  path: '/guest-pay/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestPayResultRoute = GuestPayResultRouteImport.update({
+  id: '/guest-pay/result',
+  path: '/guest-pay/result',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PayLinkTokenRoute = PayLinkTokenRouteImport.update({
@@ -513,6 +531,9 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/guest-order/$id': typeof GuestOrderIdRoute
+  '/guest-pay/$id': typeof GuestPayIdRoute
+  '/guest-pay/result': typeof GuestPayResultRoute
   '/pay-link/$token': typeof PayLinkTokenRoute
   '/pay-link/result': typeof PayLinkResultRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -587,6 +608,9 @@ export interface FileRoutesByTo {
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/guest-order/$id': typeof GuestOrderIdRoute
+  '/guest-pay/$id': typeof GuestPayIdRoute
+  '/guest-pay/result': typeof GuestPayResultRoute
   '/pay-link/$token': typeof PayLinkTokenRoute
   '/pay-link/result': typeof PayLinkResultRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -664,6 +688,9 @@ export interface FileRoutesById {
   '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/guest-order/$id': typeof GuestOrderIdRoute
+  '/guest-pay/$id': typeof GuestPayIdRoute
+  '/guest-pay/result': typeof GuestPayResultRoute
   '/pay-link/$token': typeof PayLinkTokenRoute
   '/pay-link/result': typeof PayLinkResultRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -741,6 +768,9 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/guest-order/$id'
+    | '/guest-pay/$id'
+    | '/guest-pay/result'
     | '/pay-link/$token'
     | '/pay-link/result'
     | '/product/$slug'
@@ -815,6 +845,9 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/guest-order/$id'
+    | '/guest-pay/$id'
+    | '/guest-pay/result'
     | '/pay-link/$token'
     | '/pay-link/result'
     | '/product/$slug'
@@ -891,6 +924,9 @@ export interface FileRouteTypes {
     | '/_authenticated/wishlist'
     | '/blog/$slug'
     | '/email/unsubscribe'
+    | '/guest-order/$id'
+    | '/guest-pay/$id'
+    | '/guest-pay/result'
     | '/pay-link/$token'
     | '/pay-link/result'
     | '/product/$slug'
@@ -965,6 +1001,9 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   BlogSlugRoute: typeof BlogSlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  GuestOrderIdRoute: typeof GuestOrderIdRoute
+  GuestPayIdRoute: typeof GuestPayIdRoute
+  GuestPayResultRoute: typeof GuestPayResultRoute
   PayLinkTokenRoute: typeof PayLinkTokenRoute
   PayLinkResultRoute: typeof PayLinkResultRoute
   ProductSlugRoute: typeof ProductSlugRoute
@@ -1154,6 +1193,27 @@ declare module '@tanstack/react-router' {
       path: '/email/unsubscribe'
       fullPath: '/email/unsubscribe'
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guest-order/$id': {
+      id: '/guest-order/$id'
+      path: '/guest-order/$id'
+      fullPath: '/guest-order/$id'
+      preLoaderRoute: typeof GuestOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guest-pay/$id': {
+      id: '/guest-pay/$id'
+      path: '/guest-pay/$id'
+      fullPath: '/guest-pay/$id'
+      preLoaderRoute: typeof GuestPayIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guest-pay/result': {
+      id: '/guest-pay/result'
+      path: '/guest-pay/result'
+      fullPath: '/guest-pay/result'
+      preLoaderRoute: typeof GuestPayResultRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pay-link/$token': {
@@ -1634,6 +1694,9 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   BlogSlugRoute: BlogSlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  GuestOrderIdRoute: GuestOrderIdRoute,
+  GuestPayIdRoute: GuestPayIdRoute,
+  GuestPayResultRoute: GuestPayResultRoute,
   PayLinkTokenRoute: PayLinkTokenRoute,
   PayLinkResultRoute: PayLinkResultRoute,
   ProductSlugRoute: ProductSlugRoute,

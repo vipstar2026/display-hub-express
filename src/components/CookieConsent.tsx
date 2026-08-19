@@ -20,8 +20,10 @@ export function CookieConsent() {
 
   const decide = (choice: "all" | "essential") => {
     try { localStorage.setItem(KEY, JSON.stringify({ choice, at: Date.now() })); } catch { /* ignore */ }
+    try { window.dispatchEvent(new CustomEvent("vipstar:consent", { detail: { choice } })); } catch { /* ignore */ }
     setShow(false);
   };
+
 
   if (!show) return null;
   return (

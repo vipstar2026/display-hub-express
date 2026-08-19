@@ -10,6 +10,7 @@ import { formatPrice, firstImage } from "@/lib/format";
 import { Package, ShoppingCart, Download, Copy, Tv, Calendar, Sparkles, ShieldCheck } from "lucide-react";
 import { warrantyLabel, WARRANTY_LABEL_I18N } from "@/lib/category-presets";
 import { toast } from "sonner";
+import { analytics } from "@/lib/analytics";
 import { useState } from "react";
 import { WishlistButton } from "@/components/WishlistButton";
 import { ReviewSection } from "@/components/ReviewSection";
@@ -95,6 +96,11 @@ function ProductPage() {
   });
 
   useEffect(() => { if (p?.id) trackRecentlyViewed(p.id); }, [p?.id]);
+  useEffect(() => {
+    if (!p?.id) return;
+    analytics.viewItem({ id: p.id, name: localizedName(p, "name", lang), price: Number(p.price) }, p.currency ?? "BHD");
+  }, [p?.id, lang]);
+
 
   if (isLoading) return <div className="min-h-screen bg-background"><Header /><div className="container mx-auto py-20 text-center text-muted-foreground">...</div></div>;
   if (!p) return null;
@@ -186,6 +192,7 @@ function ProductPage() {
               disabled={oos}
               onClick={() => {
                 add({ product_id: p.id, slug: p.slug, name, image: img, price: Number(p.price), type: p.type }, qty);
+                analytics.addToCart({ id: p.id, name, price: Number(p.price), quantity: qty });
                 toast.success(t("shop.addToCart"));
               }}
               className="flex-1 bg-primary text-background hover:bg-primary"

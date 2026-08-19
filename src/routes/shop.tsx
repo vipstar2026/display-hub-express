@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
+import { analytics } from "@/lib/analytics";
 
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -93,7 +94,7 @@ function ShopPage() {
           <h1 className="font-display text-3xl font-bold">{t("nav.shop")}</h1>
           <form
             className="relative ms-auto flex-1 md:max-w-md"
-            onSubmit={(e) => { e.preventDefault(); nav({ search: (s: ShopSearch) => ({ ...s, q: searchText }) }); }}
+            onSubmit={(e) => { e.preventDefault(); if (searchText.trim()) analytics.search(searchText.trim()); nav({ search: (s: ShopSearch) => ({ ...s, q: searchText }) }); }}
           >
             <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input

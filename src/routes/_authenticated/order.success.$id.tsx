@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Copy, Package, ShieldCheck, Download } from "lucide-react";
 import { generateInvoicePDF } from "@/lib/invoice-pdf";
 import { toast } from "sonner";
+import { useEffect } from "react";
+import { analytics } from "@/lib/analytics";
 
 export const Route = createFileRoute("/_authenticated/order/success/$id")({
   component: OrderSuccess,
@@ -23,6 +25,16 @@ function OrderSuccess() {
     queryFn: async () => (await supabase.from("orders").select("*, order_items(*)").eq("id", id).maybeSingle()).data,
     refetchInterval: (q) => (q.state.data?.payment_status === "succeeded" ? false : 5000),
   });
+
+  useEffect(() => {
+    if (order?.payment_status !== "succeeded") return;
+    analytics.purchase(
+      id,
+      ((order.order_items ?? []) as { product_id: string; product_name: string; unit_price: number; quantity: number }[]).map((i) => ({ id: i.product_id, name: i.product_name, price: Number(i.unit_price), quantity: i.quantity })),
+      Number(order.total),
+      order.currency ?? "BHD"
+    );
+  }, [order?.payment_status, order, id]);
 
   if (isLoading) {
     return <div className="min-h-screen bg-background"><Header /><div className="container mx-auto py-24 text-center text-muted-foreground">...</div></div>;

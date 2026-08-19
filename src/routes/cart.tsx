@@ -8,12 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatPrice } from "@/lib/format";
-import { Trash2, ShoppingBag, Package, Upload, CheckCircle2, Landmark, Smartphone, Banknote, Wallet, CreditCard, Tag, X, Truck, MapPin, Store, Zap } from "lucide-react";
+import { Trash2, ShoppingBag, Package, Upload, CheckCircle2, Landmark, Smartphone, Banknote, Wallet, CreditCard, Tag, X, Truck, MapPin, Store, Zap, UserRound, LogIn, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { useSiteSettings } from "@/lib/site-settings";
+import { placeGuestOrder } from "@/lib/guest-checkout.functions";
+import { analytics } from "@/lib/analytics";
+
 
 export const Route = createFileRoute("/cart")({
   component: CartPage,
@@ -43,7 +47,24 @@ const TX = {
   shipping_required: { ar: "اختر خدمة الشحن", en: "Select a shipping method", ur: "شپنگ سروس منتخب کریں", bn: "শিপিং পদ্ধতি নির্বাচন করুন" },
   pickup_note: { ar: "سنتواصل معك عند جهوز الطلب للاستلام من المحل.", en: "We will contact you when your order is ready for pickup at the store.", ur: "آرڈر تیار ہونے پر رابطہ کریں گے۔", bn: "অর্ডার প্রস্তুত হলে আমরা যোগাযোগ করব।" },
   order_summary: { ar: "ملخص الطلب", en: "Order summary", ur: "آرڈر کا خلاصہ", bn: "অর্ডার সারাংশ" },
+  guest_title: { ar: "بيانات التواصل", en: "Contact details", ur: "رابطہ کی تفصیلات", bn: "যোগাযোগের তথ্য" },
+  guest_desc: {
+    ar: "أكمل الطلب كضيف — سنرسل تأكيد الطلب والأكواد الرقمية إلى بريدك الإلكتروني.",
+    en: "Check out as a guest — we will email your order confirmation and any digital codes.",
+    ur: "بطور مہمان خریداری — تصدیق اور کوڈز ای میل کیے جائیں گے۔",
+    bn: "গেস্ট হিসেবে অর্ডার করুন — নিশ্চিতকরণ ও কোড ইমেইলে পাঠানো হবে।",
+  },
+  guest_email: { ar: "البريد الإلكتروني", en: "Email address", ur: "ای میل", bn: "ইমেইল" },
+  guest_name: { ar: "الاسم", en: "Full name", ur: "نام", bn: "নাম" },
+  guest_phone: { ar: "رقم الهاتف", en: "Phone number", ur: "فون نمبر", bn: "ফোন নম্বর" },
+  guest_invalid_email: { ar: "أدخل بريداً إلكترونياً صحيحاً", en: "Enter a valid email address", ur: "درست ای میل درج کریں", bn: "সঠিক ইমেইল দিন" },
+  have_account: { ar: "لديك حساب؟ سجّل الدخول", en: "Have an account? Sign in", ur: "اکاؤنٹ ہے؟ سائن ان", bn: "অ্যাকাউন্ট আছে? সাইন ইন" },
+  guest_disabled: { ar: "يجب تسجيل الدخول لإتمام الطلب.", en: "Please sign in to complete your order.", ur: "آرڈر مکمل کرنے کے لیے سائن ان کریں۔", bn: "অর্ডার সম্পূর্ণ করতে সাইন ইন করুন।" },
+  sign_in: { ar: "تسجيل الدخول", en: "Sign in", ur: "سائن ان", bn: "সাইন ইন" },
+  proof_needs_account: { ar: "طريقة الدفع هذه تتطلب تسجيل الدخول لرفع إثبات الدفع.", en: "This payment method requires signing in to upload proof of payment.", ur: "اس طریقے کے لیے سائن ان ضروری ہے۔", bn: "এই পদ্ধতির জন্য সাইন ইন প্রয়োজন।" },
+  digital_out: { ar: "نفدت الأكواد المتاحة لهذا المنتج حالياً", en: "This digital product is currently out of stock", ur: "اس ڈیجیٹل پروڈکٹ کا اسٹاک ختم ہے", bn: "এই ডিজিটাল পণ্যের স্টক শেষ" },
 } as const;
+
 
 function CartPage() {
   const { t, lang } = useI18n();
@@ -61,6 +82,10 @@ function CartPage() {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [fulfillment, setFulfillment] = useState<"delivery" | "pickup">("delivery");
   const [manualAddress, setManualAddress] = useState({ full_name: "", phone: "", address_line: "", city: "", country: "Bahrain" });
+  const [guest, setGuest] = useState({ email: "", name: "", phone: "" });
+  const [authReady, setAuthReady] = useState(false);
+  const idemRef = useRef<string | null>(null);
+  const checkoutTracked = useRef(false);
 
   // Coupon state
   const [couponInput, setCouponInput] = useState("");
@@ -70,11 +95,47 @@ function CartPage() {
   const physicalItems = items.filter((i) => i.type === "physical");
   const digitalItems = items.filter((i) => i.type !== "physical");
   const needsFulfillment = physicalItems.length > 0;
+  const guestAllowed = settings?.allow_guest_checkout !== false;
+  const isGuest = authReady && !userId;
 
+  const placeGuest = useServerFn(placeGuestOrder);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    supabase.auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id ?? null);
+      setAuthReady(true);
+    });
   }, []);
+
+  // Analytics: begin_checkout once per cart view
+  useEffect(() => {
+    if (items.length === 0 || checkoutTracked.current) return;
+    checkoutTracked.current = true;
+    analytics.beginCheckout(
+      items.map((i) => ({ id: i.product_id, name: i.name, price: i.price, quantity: i.quantity })),
+      settings?.default_currency || "BHD"
+    );
+  }, [items, settings?.default_currency]);
+
+  // Availability of digital codes (prevents selling what we cannot deliver)
+  const { data: digitalStock } = useQuery({
+    queryKey: ["digital-stock", digitalItems.map((i) => i.product_id).sort().join(",")],
+    enabled: digitalItems.length > 0,
+    queryFn: async () => {
+      const out: Record<string, number> = {};
+      for (const i of digitalItems) {
+        const { data } = await supabase.rpc("digital_stock_available", { _product_id: i.product_id });
+        out[i.product_id] = Number(data ?? 0);
+      }
+      return out;
+    },
+  });
+
+  const digitalShortage = useMemo(
+    () => digitalItems.filter((i) => digitalStock && (digitalStock[i.product_id] ?? 0) < i.quantity),
+    [digitalItems, digitalStock]
+  );
+
 
   const { data: methods } = useQuery({
     queryKey: ["payment-methods-active"],
@@ -142,15 +203,64 @@ function CartPage() {
   };
 
   const handleCheckout = async () => {
-    if (!userId) { nav({ to: "/auth" }); return; }
     if (items.length === 0) return;
     if (!method) { toast.error(t("cart.select_method_err")); return; }
-    if (method.requires_proof && !proofFile) { toast.error(t("cart.upload_proof_err")); return; }
+    if (digitalShortage.length > 0) { toast.error(`${digitalShortage[0].name} — ${L("digital_out")}`); return; }
+    if (isGuest && !guestAllowed) { nav({ to: "/auth" }); return; }
+    if (isGuest && method.requires_proof) { toast.error(L("proof_needs_account")); return; }
+    if (isGuest && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guest.email.trim())) { toast.error(L("guest_invalid_email")); return; }
+    if (!isGuest && method.requires_proof && !proofFile) { toast.error(t("cart.upload_proof_err")); return; }
     if (needsFulfillment && fulfillment === "delivery") {
-      const hasAddr = !!selectedAddress || (!!manualAddress.full_name && !!manualAddress.address_line);
+      const hasAddr = isGuest
+        ? !!manualAddress.full_name && !!manualAddress.address_line
+        : !!selectedAddress || (!!manualAddress.full_name && !!manualAddress.address_line);
       if (!hasAddr) { toast.error(L("address_required")); return; }
       if ((shippingRates ?? []).length > 0 && !rate) { toast.error(L("shipping_required")); return; }
     }
+
+    // Guest checkout runs fully server-side (prices, stock and totals re-verified)
+    if (isGuest) {
+      setPlacing(true);
+      try {
+        idemRef.current = idemRef.current ?? (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`);
+        const res = await placeGuest({
+          data: {
+            items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
+            buyer_email: guest.email.trim(),
+            buyer_name: guest.name.trim() || null,
+            buyer_phone: guest.phone.trim() || null,
+            payment_method_id: String(method.id),
+
+            payment_reference: reference || null,
+            customer_notes: customerNotes || null,
+            coupon_code: coupon?.code ?? null,
+            fulfillment: needsFulfillment ? fulfillment : "pickup",
+            shipping_rate_id: needsFulfillment && fulfillment === "delivery" ? rate?.id ?? null : null,
+            shipping_address: needsFulfillment && fulfillment === "delivery" ? { ...manualAddress } : null,
+            idempotency_key: idemRef.current,
+          },
+        });
+        clear();
+        if (res.gateway === "afs") {
+          nav({ to: "/guest-pay/$id", params: { id: res.order_id }, search: { t: res.guest_token } });
+        } else {
+          toast.success(t("cart.order_placed"));
+          nav({ to: "/guest-order/$id", params: { id: res.order_id }, search: { t: res.guest_token } });
+        }
+      } catch (e) {
+        const msg = (e as Error).message;
+        toast.error(
+          msg === "digital_stock_unavailable" ? L("digital_out")
+          : msg === "guest_checkout_disabled" ? L("guest_disabled")
+          : msg
+        );
+      } finally {
+        setPlacing(false);
+      }
+      return;
+    }
+
+
 
 
     setPlacing(true);
@@ -174,9 +284,12 @@ function CartPage() {
 
 
       const { data: user } = await supabase.auth.getUser();
+      idemRef.current = idemRef.current ?? (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`);
       const { data: order, error } = await supabase.from("orders").insert({
+        idempotency_key: idemRef.current,
         buyer_id: userId,
         buyer_email: user.user?.email ?? "",
+
         buyer_name: user.user?.user_metadata?.display_name ?? null,
         subtotal,
         discount,
@@ -230,7 +343,10 @@ function CartPage() {
       nav({ to: "/order/success/$id", params: { id: order.id } });
 
     } catch (e) {
-      toast.error((e as Error).message);
+      idemRef.current = null;
+      const msg = (e as Error).message;
+      toast.error(msg.includes("digital_stock_unavailable") ? L("digital_out") : msg);
+
     } finally {
       setPlacing(false);
     }
@@ -431,6 +547,48 @@ function CartPage() {
                 </div>
               )}
 
+              {/* Guest contact details / sign-in prompt */}
+              {isGuest && (
+                guestAllowed ? (
+                  <div className="rounded-xl border border-primary/20 bg-card p-5">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <h2 className="flex items-center gap-2 font-display text-lg font-bold"><UserRound className="h-4 w-4 text-primary" />{L("guest_title")}</h2>
+                      <Link to="/auth" className="flex items-center gap-1 text-xs text-primary hover:underline"><LogIn className="h-3.5 w-3.5" />{L("have_account")}</Link>
+                    </div>
+                    <p className="mb-3 text-xs text-muted-foreground">{L("guest_desc")}</p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div className="sm:col-span-2">
+                        <Label className="text-xs">{L("guest_email")}</Label>
+                        <Input type="email" inputMode="email" autoComplete="email" value={guest.email} onChange={(e) => setGuest({ ...guest, email: e.target.value })} placeholder="name@example.com" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">{L("guest_name")}</Label>
+                        <Input autoComplete="name" value={guest.name} onChange={(e) => setGuest({ ...guest, name: e.target.value })} />
+                      </div>
+                      <div>
+                        <Label className="text-xs">{L("guest_phone")}</Label>
+                        <Input inputMode="tel" autoComplete="tel" value={guest.phone} onChange={(e) => setGuest({ ...guest, phone: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-3 rounded-xl border border-primary/20 bg-card p-5">
+                    <p className="text-sm text-muted-foreground">{L("guest_disabled")}</p>
+                    <Link to="/auth" className="ms-auto"><Button className="bg-primary text-background hover:bg-primary">{L("sign_in")}</Button></Link>
+                  </div>
+                )
+              )}
+
+              {digitalShortage.length > 0 && (
+                <div className="flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                  <div>
+                    {digitalShortage.map((i) => (
+                      <div key={i.product_id}>{i.name} — {L("digital_out")}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="rounded-xl border border-primary/20 bg-card p-5">
                 <h2 className="mb-3 font-display text-lg font-bold">{t("cart.payment_method")}</h2>
@@ -438,7 +596,8 @@ function CartPage() {
                   <p className="text-sm text-muted-foreground">{t("cart.no_methods")}</p>
                 )}
                 <div className="grid gap-2 sm:grid-cols-2">
-                  {(methods ?? []).map((m) => {
+                  {(methods ?? []).filter((m) => !(isGuest && m.requires_proof)).map((m) => {
+
                     const Icon = ICONS[m.icon ?? ""] ?? CreditCard;
                     const active = m.id === selectedMethod;
                     return (
@@ -558,7 +717,7 @@ function CartPage() {
               )}
               <div className="my-3 border-t border-primary/20" />
               <div className="flex justify-between py-2 text-lg font-bold"><span>{t("shop.total")}</span><span className="font-mono text-primary">{formatPrice(grandTotal)}</span></div>
-              <Button onClick={handleCheckout} disabled={placing || !method} className="mt-4 w-full bg-primary text-background hover:bg-primary">
+              <Button onClick={handleCheckout} disabled={placing || !method || digitalShortage.length > 0 || (isGuest && !guestAllowed)} className="mt-4 w-full bg-primary text-background hover:bg-primary">
                 {placing ? "..." : t("shop.checkout")}
               </Button>
               {!method && <p className="mt-2 text-center text-xs text-muted-foreground">{t("cart.select_method")}</p>}

@@ -28,16 +28,20 @@ export async function loadEmailConfig(): Promise<EmailConfig | null> {
     .eq("id", 1)
     .maybeSingle();
   const row = data as Record<string, any> | null;
-  if (!row || !row.api_enabled || !row.api_key || !row.from_email) return null;
+  if (!row || !row.api_enabled || !row.from_email) return null;
+  // A secret stored in the project's secret store always wins over the DB copy.
+  const apiKey = process.env["EMAIL_API_KEY"] || row.api_key;
+  if (!apiKey) return null;
   return {
     provider: (row.api_provider || "resend").toLowerCase(),
-    apiKey: row.api_key,
+    apiKey,
     endpoint: row.api_endpoint,
     fromEmail: row.from_email,
     fromName: row.from_name,
     replyTo: row.reply_to,
   };
 }
+
 
 function htmlBody(text: string) {
   return `<div style="font-family:system-ui,Segoe UI,Arial,sans-serif;white-space:pre-wrap;font-size:14px;line-height:1.7">${text

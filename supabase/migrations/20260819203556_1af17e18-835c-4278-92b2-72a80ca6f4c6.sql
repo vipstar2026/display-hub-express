@@ -1,0 +1,1 @@
+ALTER VIEW public.payment_methods_public SET (security_invoker = false);
