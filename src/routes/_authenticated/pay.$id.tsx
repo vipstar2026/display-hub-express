@@ -95,7 +95,7 @@ function PayPage() {
             </div>
 
             <div className="space-y-2 border-b border-primary/10 pb-3">
-              {(order.order_items ?? []).map((it, idx) => (
+              {((order.order_items ?? []) as { product_name: string; quantity: number; unit_price: number; total: number; product_type: string }[]).map((it, idx: number) => (
                 <div key={idx} className="flex items-start justify-between gap-3 text-sm">
                   <div className="min-w-0">
                     <div className="truncate">{it.product_name}</div>
