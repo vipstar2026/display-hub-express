@@ -146,6 +146,12 @@ function CartPage() {
     if (items.length === 0) return;
     if (!method) { toast.error(t("cart.select_method_err")); return; }
     if (method.requires_proof && !proofFile) { toast.error(t("cart.upload_proof_err")); return; }
+    if (needsFulfillment && fulfillment === "delivery") {
+      const hasAddr = !!selectedAddress || (!!manualAddress.full_name && !!manualAddress.address_line);
+      if (!hasAddr) { toast.error(L("address_required")); return; }
+      if ((shippingRates ?? []).length > 0 && !rate) { toast.error(L("shipping_required")); return; }
+    }
+
 
     setPlacing(true);
     try {
