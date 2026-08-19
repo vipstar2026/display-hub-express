@@ -259,8 +259,14 @@ function CartPage() {
                       {i.image ? <img src={i.image} alt={i.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-8 w-8 text-primary/30" /></div>}
                     </div>
                     <div className="flex flex-1 flex-col">
-                      <Link to="/product/$slug" params={{ slug: i.slug }} className="font-medium hover:text-primary">{i.name}</Link>
+                      <div className="flex items-start gap-2">
+                        <Link to="/product/$slug" params={{ slug: i.slug }} className="font-medium hover:text-primary">{i.name}</Link>
+                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${i.type === "physical" ? "bg-primary/15 text-primary" : "bg-accent/20 text-accent-foreground"}`}>
+                          {i.type === "physical" ? L("physical_badge") : L("digital_badge")}
+                        </span>
+                      </div>
                       <div className="mt-1 font-mono text-primary">{formatPrice(i.price)}</div>
+
                       <div className="mt-auto flex items-center gap-2">
                         <div className="flex items-center rounded-md border border-primary/20">
                           <button onClick={() => setQty(i.product_id, i.quantity - 1)} className="px-2 py-1 hover:bg-primary/10">−</button>
