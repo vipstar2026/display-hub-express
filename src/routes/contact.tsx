@@ -63,8 +63,8 @@ function ContactPage() {
             <p className="text-muted-foreground">{t("contact.subtitle")}</p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-5">
-            <div className="space-y-4 md:col-span-2">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-5">
+            <div className="min-w-0 space-y-4 md:col-span-2">
               {settings?.contact_email && (
                 <InfoCard icon={<Mail className="h-5 w-5" />} label="Email" value={settings.contact_email} href={`mailto:${settings.contact_email}`} />
               )}
@@ -141,5 +141,5 @@ function InfoCard({ icon, label, value, href, onClick }: { icon: React.ReactNode
       </div>
     </div>
   );
-  return href ? <a href={href} target="_blank" rel="noopener noreferrer" onClick={onClick}>{inner}</a> : inner;
+  return href ? <a href={href} target="_blank" rel="noopener noreferrer" onClick={onClick} className="block min-w-0">{inner}</a> : inner;
 }
