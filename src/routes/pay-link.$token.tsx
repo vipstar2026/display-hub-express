@@ -137,14 +137,15 @@ function PayLinkPage() {
         ) : (
           <>
             {checkout.data.testMode && <AfsTestCards />}
-            <div className="rounded-xl border border-primary/10 bg-card p-4">
-              <form
-                action={`${window.location.origin}/pay-link/result?token=${token}`}
-                className="paymentWidgets"
-                data-brands={checkout.data.brands || "VISA MASTER"}
-                data-lang={checkout.data.widgetLang || (lang === "ar" ? "ar" : "en")}
-              />
-            </div>
+            <AfsPaymentWidget
+              scriptUrl={checkout.data.scriptUrl}
+              action={`${window.location.origin}/pay-link/result?token=${token}`}
+              brands={checkout.data.brands}
+              widgetLang={checkout.data.widgetLang}
+              amount={Number(link.amount).toFixed(3)}
+              currency={link.currency}
+              onCancel={() => nav({ to: "/" })}
+            />
           </>
         )}
       </div>
