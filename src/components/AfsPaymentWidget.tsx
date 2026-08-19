@@ -194,7 +194,7 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
       }
     }, 6000);
     return () => clearTimeout(timer);
-  }, [scriptUrl, locale, brands, s]);
+  }, [scriptUrl, locale, brands, s, action]);
 
   const brandList = (brands || "VISA MASTER").split(/\s+/).filter(Boolean);
 
