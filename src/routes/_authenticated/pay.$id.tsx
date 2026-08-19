@@ -6,7 +6,9 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
 import { createAfsCheckout } from "@/lib/afs.functions";
-import { ShieldCheck, Loader2 } from "lucide-react";
+import { ShieldCheck, Loader2, Receipt, Truck, Store, Zap } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
 import { Button } from "@/components/ui/button";
 import { AfsTestCards } from "@/components/AfsTestCards";
 import { AfsPaymentWidget } from "@/components/AfsPaymentWidget";
