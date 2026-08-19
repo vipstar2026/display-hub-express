@@ -96,6 +96,11 @@ function ProductPage() {
   });
 
   useEffect(() => { if (p?.id) trackRecentlyViewed(p.id); }, [p?.id]);
+  useEffect(() => {
+    if (!p?.id) return;
+    analytics.viewItem({ id: p.id, name: localizedName(p, "name", lang), price: Number(p.price) }, p.currency ?? "BHD");
+  }, [p?.id, lang]);
+
 
   if (isLoading) return <div className="min-h-screen bg-background"><Header /><div className="container mx-auto py-20 text-center text-muted-foreground">...</div></div>;
   if (!p) return null;
