@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/Header";
@@ -48,7 +48,7 @@ function PayLinkPage() {
   const nav = useNavigate();
   const fetchLink = useServerFn(getPaymentLinkPublic);
   const start = useServerFn(startPaymentLinkCheckout);
-  const mounted = useRef(false);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
