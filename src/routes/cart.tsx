@@ -164,13 +164,14 @@ function CartPage() {
         proofUrl = up.data.path;
       }
 
-      // Resolve shipping address snapshot
+      // Resolve shipping address snapshot (only for physical delivery orders)
       const addr = selectedAddress ? addresses?.find((a) => a.id === selectedAddress) : null;
-      const shipping_address = addr
-        ? { full_name: addr.full_name, phone: addr.phone, address_line: addr.address_line, city: addr.city, country: addr.country, postal_code: addr.postal_code }
-        : (manualAddress.full_name || manualAddress.address_line
-            ? manualAddress
-            : null);
+      const shipping_address = !needsFulfillment || fulfillment === "pickup"
+        ? null
+        : addr
+          ? { full_name: addr.full_name, phone: addr.phone, address_line: addr.address_line, city: addr.city, country: addr.country, postal_code: addr.postal_code }
+          : (manualAddress.full_name || manualAddress.address_line ? manualAddress : null);
+
 
       const { data: user } = await supabase.auth.getUser();
       const { data: order, error } = await supabase.from("orders").insert({
