@@ -68,13 +68,6 @@ function PayPage() {
           <ShieldCheck className="h-4 w-4 text-primary" /> {secure}
         </p>
 
-        {data && (
-          <div className="mb-4 rounded-xl border border-primary/10 bg-card p-4 text-sm">
-            <span className="text-muted-foreground">{lang === "ar" ? "المبلغ" : "Amount"}: </span>
-            <span className="font-bold text-primary">{data.amount} {data.currency}</span>
-          </div>
-        )}
-
         {data?.testMode && <AfsTestCards />}
 
 
