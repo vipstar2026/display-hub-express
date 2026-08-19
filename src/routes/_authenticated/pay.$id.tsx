@@ -48,6 +48,17 @@ function PayPage() {
     retry: false,
   });
 
+  const { data: order } = useQuery({
+    queryKey: ["pay-order", id],
+    queryFn: async () => {
+      const { data: o } = await supabase
+        .from("orders")
+        .select("order_number, subtotal, shipping_cost, discount, tax, total, currency, shipping_method, shipping_address, order_items(product_name, quantity, unit_price, total, product_type)")
+        .eq("id", id)
+        .maybeSingle();
+      return o;
+    },
+  });
 
   const heading = lang === "ar" ? "إتمام الدفع" : lang === "ur" ? "ادائیگی مکمل کریں" : lang === "bn" ? "পেমেন্ট সম্পন্ন করুন" : "Complete payment";
   const secure =
@@ -59,6 +70,9 @@ function PayPage() {
           ? "AFS পেমেন্ট গেটওয়ে দ্বারা সুরক্ষিত"
           : "Secured by AFS payment gateway";
 
+  const L = (ar: string, en: string, ur: string, bn: string) => (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? bn : en);
+  const money = (n: number) => `${Number(n).toFixed(3)} ${order?.currency ?? "BHD"}`;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -68,7 +82,72 @@ function PayPage() {
           <ShieldCheck className="h-4 w-4 text-primary" /> {secure}
         </p>
 
+        {order && (
+          <div className="mb-6 rounded-xl border border-primary/20 bg-card p-5">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h2 className="flex items-center gap-2 font-display text-base font-bold">
+                <Receipt className="h-4 w-4 text-primary" />
+                {L("تفاصيل الطلب", "Order details", "آرڈر کی تفصیلات", "অর্ডারের বিবরণ")}
+              </h2>
+              <span className="font-mono text-xs text-muted-foreground">#{order.order_number}</span>
+            </div>
+
+            <div className="space-y-2 border-b border-primary/10 pb-3">
+              {(order.order_items ?? []).map((it, idx) => (
+                <div key={idx} className="flex items-start justify-between gap-3 text-sm">
+                  <div className="min-w-0">
+                    <div className="truncate">{it.product_name}</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {it.quantity} × {money(Number(it.unit_price))}
+                      {" · "}
+                      {it.product_type === "physical"
+                        ? L("شحن/استلام", "Delivery", "ڈیلیوری", "ডেলিভারি")
+                        : L("تسليم فوري", "Instant delivery", "فوری ترسیل", "তাৎক্ষণিক")}
+                    </div>
+                  </div>
+                  <div className="shrink-0 font-mono">{money(Number(it.total))}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 space-y-1.5 text-sm">
+              <div className="flex justify-between text-muted-foreground">
+                <span>{L("المجموع الفرعي", "Subtotal", "ذیلی کل", "সাবটোটাল")}</span>
+                <span className="font-mono">{money(Number(order.subtotal))}</span>
+              </div>
+              {Number(order.discount) > 0 && (
+                <div className="flex justify-between text-primary">
+                  <span>{L("الخصم", "Discount", "رعایت", "ছাড়")}</span>
+                  <span className="font-mono">−{money(Number(order.discount))}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  {order.shipping_method === "digital" ? <Zap className="h-3.5 w-3.5 text-primary" /> : order.shipping_method === "pickup" ? <Store className="h-3.5 w-3.5" /> : <Truck className="h-3.5 w-3.5" />}
+                  {order.shipping_method === "digital"
+                    ? L("منتجات رقمية — بدون شحن", "Digital — no shipping", "ڈیجیٹل — شپنگ نہیں", "ডিজিটাল — শিপিং নেই")
+                    : order.shipping_method === "pickup"
+                      ? L("استلام من المحل", "Pickup from store", "دکان سے وصولی", "দোকান থেকে সংগ্রহ")
+                      : L("الشحن", "Shipping", "شپنگ", "শিপিং")}
+                </span>
+                <span className="font-mono">{Number(order.shipping_cost) > 0 ? money(Number(order.shipping_cost)) : L("مجاني", "Free", "مفت", "ফ্রি")}</span>
+              </div>
+              {Number(order.tax) > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <span>{L("الضريبة", "Tax", "ٹیکس", "কর")}</span>
+                  <span className="font-mono">{money(Number(order.tax))}</span>
+                </div>
+              )}
+              <div className="mt-2 flex justify-between border-t border-primary/20 pt-2 text-base font-bold">
+                <span>{L("الإجمالي المستحق", "Total due", "کل واجب الادا", "মোট প্রদেয়")}</span>
+                <span className="font-mono text-primary">{money(Number(order.total))}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {data?.testMode && <AfsTestCards />}
+
 
 
         {isLoading && (
