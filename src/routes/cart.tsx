@@ -82,6 +82,10 @@ function CartPage() {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [fulfillment, setFulfillment] = useState<"delivery" | "pickup">("delivery");
   const [manualAddress, setManualAddress] = useState({ full_name: "", phone: "", address_line: "", city: "", country: "Bahrain" });
+  const [guest, setGuest] = useState({ email: "", name: "", phone: "" });
+  const [authReady, setAuthReady] = useState(false);
+  const idemRef = useRef<string | null>(null);
+  const checkoutTracked = useRef(false);
 
   // Coupon state
   const [couponInput, setCouponInput] = useState("");
@@ -91,11 +95,47 @@ function CartPage() {
   const physicalItems = items.filter((i) => i.type === "physical");
   const digitalItems = items.filter((i) => i.type !== "physical");
   const needsFulfillment = physicalItems.length > 0;
+  const guestAllowed = settings?.allow_guest_checkout !== false;
+  const isGuest = authReady && !userId;
 
+  const placeGuest = useServerFn(placeGuestOrder);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    supabase.auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id ?? null);
+      setAuthReady(true);
+    });
   }, []);
+
+  // Analytics: begin_checkout once per cart view
+  useEffect(() => {
+    if (items.length === 0 || checkoutTracked.current) return;
+    checkoutTracked.current = true;
+    analytics.beginCheckout(
+      items.map((i) => ({ id: i.product_id, name: i.name, price: i.price, quantity: i.quantity })),
+      settings?.default_currency || "BHD"
+    );
+  }, [items, settings?.default_currency]);
+
+  // Availability of digital codes (prevents selling what we cannot deliver)
+  const { data: digitalStock } = useQuery({
+    queryKey: ["digital-stock", digitalItems.map((i) => i.product_id).sort().join(",")],
+    enabled: digitalItems.length > 0,
+    queryFn: async () => {
+      const out: Record<string, number> = {};
+      for (const i of digitalItems) {
+        const { data } = await supabase.rpc("digital_stock_available", { _product_id: i.product_id });
+        out[i.product_id] = Number(data ?? 0);
+      }
+      return out;
+    },
+  });
+
+  const digitalShortage = useMemo(
+    () => digitalItems.filter((i) => digitalStock && (digitalStock[i.product_id] ?? 0) < i.quantity),
+    [digitalItems, digitalStock]
+  );
+
 
   const { data: methods } = useQuery({
     queryKey: ["payment-methods-active"],
