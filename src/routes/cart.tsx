@@ -100,12 +100,14 @@ function CartPage() {
     }
   }, [addresses, selectedAddress]);
 
+  const physicalSubtotal = useMemo(() => physicalItems.reduce((s, i) => s + i.price * i.quantity, 0), [physicalItems]);
   const rate = useMemo(() => shippingRates?.find((r) => r.id === selectedRate) ?? null, [shippingRates, selectedRate]);
   const shippingCost = useMemo(() => {
-    if (!rate) return 0;
-    if (rate.free_over && subtotal >= Number(rate.free_over)) return 0;
+    if (!needsFulfillment || fulfillment === "pickup" || !rate) return 0;
+    if (rate.free_over && physicalSubtotal >= Number(rate.free_over)) return 0;
     return Number(rate.price);
-  }, [rate, subtotal]);
+  }, [rate, physicalSubtotal, needsFulfillment, fulfillment]);
+
 
   const method = methods?.find((m) => m.id === selectedMethod) ?? null;
   const fee = method ? Number(method.fee_amount) + (subtotal * Number(method.fee_percent)) / 100 : 0;
