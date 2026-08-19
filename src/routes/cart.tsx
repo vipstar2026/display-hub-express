@@ -343,7 +343,10 @@ function CartPage() {
       nav({ to: "/order/success/$id", params: { id: order.id } });
 
     } catch (e) {
-      toast.error((e as Error).message);
+      idemRef.current = null;
+      const msg = (e as Error).message;
+      toast.error(msg.includes("digital_stock_unavailable") ? L("digital_out") : msg);
+
     } finally {
       setPlacing(false);
     }
