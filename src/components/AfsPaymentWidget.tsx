@@ -21,42 +21,167 @@ type Props = {
   onCancel?: () => void;
 };
 
+type Lang = "ar" | "en" | "ur" | "bn";
+
+const STRINGS: Record<Lang, Record<string, string>> = {
+  ar: {
+    cardNumber: "رقم البطاقة",
+    cardHolder: "اسم حامل البطاقة",
+    expiry: "تاريخ الانتهاء",
+    cvv: "رمز التحقق (CVV)",
+    month: "الشهر",
+    year: "السنة",
+    pay: "ادفع الآن",
+    detected: "تم التعرف على البطاقة",
+  },
+  en: {
+    cardNumber: "Card number",
+    cardHolder: "Cardholder name",
+    expiry: "Expiry date",
+    cvv: "Security code (CVV)",
+    month: "Month",
+    year: "Year",
+    pay: "Pay now",
+    detected: "Card detected",
+  },
+  ur: {
+    cardNumber: "کارڈ نمبر",
+    cardHolder: "کارڈ ہولڈر کا نام",
+    expiry: "میعاد ختم",
+    cvv: "سیکیورٹی کوڈ (CVV)",
+    month: "مہینہ",
+    year: "سال",
+    pay: "ابھی ادائیگی کریں",
+    detected: "کارڈ پہچان لیا گیا",
+  },
+  bn: {
+    cardNumber: "কার্ড নম্বর",
+    cardHolder: "কার্ডধারীর নাম",
+    expiry: "মেয়াদ শেষ",
+    cvv: "নিরাপত্তা কোড (CVV)",
+    month: "মাস",
+    year: "বছর",
+    pay: "এখনই পরিশোধ করুন",
+    detected: "কার্ড শনাক্ত হয়েছে",
+  },
+};
+
+const BRAND_LABEL: Record<string, string> = { VISA: "Visa", MASTER: "Mastercard", AMEX: "Amex", MADA: "mada" };
+
 export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount, currency, onCancel }: Props) {
   const { lang } = useI18n();
+  const uiLang: Lang = (["ar", "en", "ur", "bn"].includes(lang) ? lang : "en") as Lang;
+  const s = STRINGS[uiLang];
   const mounted = useRef(false);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [brand, setBrand] = useState<string | null>(null);
 
   const t = (ar: string, en: string, ur?: string, bn?: string) =>
-    lang === "ar" ? ar : lang === "ur" ? (ur ?? en) : lang === "bn" ? (bn ?? en) : en;
+    uiLang === "ar" ? ar : uiLang === "ur" ? (ur ?? en) : uiLang === "bn" ? (bn ?? en) : en;
 
-  const locale = widgetLang || (lang === "ar" ? "ar" : "en");
+  // The hosted widget only ships ar/en resources — everything else falls back to
+  // English inside the iframe, while our own labels stay in the chosen language.
+  const locale = widgetLang || (uiLang === "ar" ? "ar" : "en");
 
   useEffect(() => {
     if (!scriptUrl || mounted.current) return;
     mounted.current = true;
 
+    /** Swap the free-text expiry field for month/year dropdowns. */
+    const buildExpirySelects = () => {
+      const input = document.querySelector<HTMLInputElement>(".afs-widget .wpwl-control-expiry");
+      if (!input || input.dataset.afsEnhanced === "1") return;
+      input.dataset.afsEnhanced = "1";
+      input.classList.add("afs-expiry-hidden");
+
+      const wrap = document.createElement("div");
+      wrap.className = "afs-expiry-grid";
+
+      const mm = document.createElement("select");
+      mm.className = "afs-expiry-select";
+      mm.setAttribute("aria-label", s.month);
+      mm.innerHTML =
+        `<option value="">${s.month}</option>` +
+        Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"))
+          .map((m) => `<option value="${m}">${m}</option>`)
+          .join("");
+
+      const yy = document.createElement("select");
+      yy.className = "afs-expiry-select";
+      yy.setAttribute("aria-label", s.year);
+      const start = new Date().getFullYear();
+      yy.innerHTML =
+        `<option value="">${s.year}</option>` +
+        Array.from({ length: 15 }, (_, i) => start + i)
+          .map((y) => `<option value="${String(y).slice(2)}">${y}</option>`)
+          .join("");
+
+      const sync = () => {
+        input.value = mm.value && yy.value ? `${mm.value} / ${yy.value}` : "";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+      };
+      mm.addEventListener("change", sync);
+      yy.addEventListener("change", sync);
+
+      wrap.appendChild(mm);
+      wrap.appendChild(yy);
+      input.parentNode?.insertBefore(wrap, input.nextSibling);
+    };
+
+    const applyLabels = () => {
+      const map: Record<string, string> = {
+        ".wpwl-label-cardNumber": s.cardNumber,
+        ".wpwl-label-cardHolder": s.cardHolder,
+        ".wpwl-label-expiry": s.expiry,
+        ".wpwl-label-cvv": s.cvv,
+      };
+      Object.entries(map).forEach(([sel, text]) => {
+        const el = document.querySelector<HTMLElement>(`.afs-widget ${sel}`);
+        if (el) el.textContent = text;
+      });
+      const btn = document.querySelector<HTMLButtonElement>(".afs-widget .wpwl-button-pay");
+      if (btn) btn.textContent = s.pay;
+    };
+
     window.wpwlOptions = {
       style: "plain",
       locale,
+      // Detect the card scheme from the entered number instead of asking the user.
       brandDetection: true,
+      brandDetectionType: "binlist",
+      brandDetectionPriority: (brands || "VISA MASTER").split(/\s+/).filter(Boolean),
       showCVVHint: true,
       showLabels: true,
       showPlaceholders: true,
       maskCvv: true,
-      onReady: () => setReady(true),
+      onReady: () => {
+        setReady(true);
+        buildExpirySelects();
+        applyLabels();
+      },
+      onChangeBrand: (b: string) => setBrand(b || null),
+      onDetectBrand: (b: string) => setBrand(b || null),
       onError: () => setFailed(true),
     };
 
-    const s = document.createElement("script");
-    s.src = scriptUrl;
-    s.async = true;
-    s.onerror = () => setFailed(true);
-    document.body.appendChild(s);
+    const script = document.createElement("script");
+    script.src = scriptUrl;
+    script.async = true;
+    script.onerror = () => setFailed(true);
+    document.body.appendChild(script);
 
-    const timer = setTimeout(() => setReady((r) => r || document.querySelector(".wpwl-form") !== null), 6000);
+    const timer = setTimeout(() => {
+      if (document.querySelector(".wpwl-form")) {
+        setReady(true);
+        buildExpirySelects();
+        applyLabels();
+      }
+    }, 6000);
     return () => clearTimeout(timer);
-  }, [scriptUrl, locale]);
+  }, [scriptUrl, locale, brands, s]);
 
   const brandList = (brands || "VISA MASTER").split(/\s+/).filter(Boolean);
 
@@ -69,14 +194,21 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
           {t("الدفع بالبطاقة", "Card payment", "کارڈ سے ادائیگی", "কার্ড পেমেন্ট")}
         </div>
         <div className="flex items-center gap-1.5">
-          {brandList.map((b) => (
-            <span
-              key={b}
-              className="rounded-md border border-border/70 bg-background/70 px-2 py-1 text-[10px] font-bold tracking-wider text-muted-foreground"
-            >
-              {b === "MASTER" ? "MASTERCARD" : b}
-            </span>
-          ))}
+          {brandList.map((b) => {
+            const active = brand?.toUpperCase() === b;
+            return (
+              <span
+                key={b}
+                className={`rounded-md border px-2 py-1 text-[10px] font-bold tracking-wider transition-colors ${
+                  active
+                    ? "border-primary/60 bg-primary/15 text-primary"
+                    : "border-border/70 bg-background/70 text-muted-foreground"
+                }`}
+              >
+                {BRAND_LABEL[b] ?? b}
+              </span>
+            );
+          })}
         </div>
       </div>
 
@@ -91,7 +223,7 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
       )}
 
       {/* widget */}
-      <div className="afs-widget px-5 py-5">
+      <div className="afs-widget px-5 py-5" dir="ltr">
         {!ready && !failed && (
           <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -107,6 +239,12 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
               <RefreshCw className="me-2 h-4 w-4" />
               {t("إعادة المحاولة", "Try again", "دوبارہ کوشش", "আবার চেষ্টা")}
             </Button>
+          </div>
+        )}
+        {ready && brand && (
+          <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
+            <CreditCard className="h-3.5 w-3.5" />
+            {s.detected}: {BRAND_LABEL[brand.toUpperCase()] ?? brand}
           </div>
         )}
         <form action={action} className="paymentWidgets" data-brands={brands || "VISA MASTER"} data-lang={locale} />
