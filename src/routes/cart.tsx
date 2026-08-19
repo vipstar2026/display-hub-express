@@ -547,6 +547,48 @@ function CartPage() {
                 </div>
               )}
 
+              {/* Guest contact details / sign-in prompt */}
+              {isGuest && (
+                guestAllowed ? (
+                  <div className="rounded-xl border border-primary/20 bg-card p-5">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <h2 className="flex items-center gap-2 font-display text-lg font-bold"><UserRound className="h-4 w-4 text-primary" />{L("guest_title")}</h2>
+                      <Link to="/auth" className="flex items-center gap-1 text-xs text-primary hover:underline"><LogIn className="h-3.5 w-3.5" />{L("have_account")}</Link>
+                    </div>
+                    <p className="mb-3 text-xs text-muted-foreground">{L("guest_desc")}</p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div className="sm:col-span-2">
+                        <Label className="text-xs">{L("guest_email")}</Label>
+                        <Input type="email" inputMode="email" autoComplete="email" value={guest.email} onChange={(e) => setGuest({ ...guest, email: e.target.value })} placeholder="name@example.com" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">{L("guest_name")}</Label>
+                        <Input autoComplete="name" value={guest.name} onChange={(e) => setGuest({ ...guest, name: e.target.value })} />
+                      </div>
+                      <div>
+                        <Label className="text-xs">{L("guest_phone")}</Label>
+                        <Input inputMode="tel" autoComplete="tel" value={guest.phone} onChange={(e) => setGuest({ ...guest, phone: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-3 rounded-xl border border-primary/20 bg-card p-5">
+                    <p className="text-sm text-muted-foreground">{L("guest_disabled")}</p>
+                    <Link to="/auth" className="ms-auto"><Button className="bg-primary text-background hover:bg-primary">{L("sign_in")}</Button></Link>
+                  </div>
+                )
+              )}
+
+              {digitalShortage.length > 0 && (
+                <div className="flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                  <div>
+                    {digitalShortage.map((i) => (
+                      <div key={i.product_id}>{i.name} — {L("digital_out")}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="rounded-xl border border-primary/20 bg-card p-5">
                 <h2 className="mb-3 font-display text-lg font-bold">{t("cart.payment_method")}</h2>
@@ -554,7 +596,8 @@ function CartPage() {
                   <p className="text-sm text-muted-foreground">{t("cart.no_methods")}</p>
                 )}
                 <div className="grid gap-2 sm:grid-cols-2">
-                  {(methods ?? []).map((m) => {
+                  {(methods ?? []).filter((m) => !(isGuest && m.requires_proof)).map((m) => {
+
                     const Icon = ICONS[m.icon ?? ""] ?? CreditCard;
                     const active = m.id === selectedMethod;
                     return (
