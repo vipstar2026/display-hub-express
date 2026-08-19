@@ -87,8 +87,19 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
   const locale = widgetLang || (uiLang === "ar" ? "ar" : "en");
 
   useEffect(() => {
-    if (!scriptUrl || mounted.current) return;
+    if (!scriptUrl || mounted.current || !hostRef.current) return;
     mounted.current = true;
+
+    // Build the widget form outside React's control so the gateway script can
+    // freely mutate it without breaking React's DOM reconciliation.
+    const form = document.createElement("form");
+    form.setAttribute("action", action);
+    form.className = "paymentWidgets";
+    form.setAttribute("data-brands", brands || "VISA MASTER");
+    form.setAttribute("data-lang", locale);
+    hostRef.current.appendChild(form);
+
+
 
     /** Swap the free-text expiry field for month/year dropdowns. */
     const buildExpirySelects = () => {
