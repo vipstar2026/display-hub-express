@@ -284,9 +284,12 @@ function CartPage() {
 
 
       const { data: user } = await supabase.auth.getUser();
+      idemRef.current = idemRef.current ?? (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`);
       const { data: order, error } = await supabase.from("orders").insert({
+        idempotency_key: idemRef.current,
         buyer_id: userId,
         buyer_email: user.user?.email ?? "",
+
         buyer_name: user.user?.user_metadata?.display_name ?? null,
         subtotal,
         discount,
