@@ -73,9 +73,11 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
   const uiLang: Lang = (["ar", "en", "ur", "bn"].includes(lang) ? lang : "en") as Lang;
   const s = STRINGS[uiLang];
   const mounted = useRef(false);
+  const hostRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [brand, setBrand] = useState<string | null>(null);
+
 
   const t = (ar: string, en: string, ur?: string, bn?: string) =>
     uiLang === "ar" ? ar : uiLang === "ur" ? (ur ?? en) : uiLang === "bn" ? (bn ?? en) : en;
