@@ -229,7 +229,8 @@ function CartPage() {
             buyer_email: guest.email.trim(),
             buyer_name: guest.name.trim() || null,
             buyer_phone: guest.phone.trim() || null,
-            payment_method_id: method.id,
+            payment_method_id: String(method.id),
+
             payment_reference: reference || null,
             customer_notes: customerNotes || null,
             coupon_code: coupon?.code ?? null,
