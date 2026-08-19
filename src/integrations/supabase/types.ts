@@ -1210,7 +1210,9 @@ export type Database = {
           currency: string
           customer_notes: string | null
           discount: number
+          guest_token: string | null
           id: string
+          idempotency_key: string | null
           invoice_id: string | null
           notes: string | null
           order_number: string
@@ -1251,7 +1253,9 @@ export type Database = {
           currency?: string
           customer_notes?: string | null
           discount?: number
+          guest_token?: string | null
           id?: string
+          idempotency_key?: string | null
           invoice_id?: string | null
           notes?: string | null
           order_number?: string
@@ -1292,7 +1296,9 @@ export type Database = {
           currency?: string
           customer_notes?: string | null
           discount?: number
+          guest_token?: string | null
           id?: string
+          idempotency_key?: string | null
           invoice_id?: string | null
           notes?: string | null
           order_number?: string
@@ -2850,6 +2856,10 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      digital_stock_available: {
+        Args: { _product_id: string }
+        Returns: number
+      }
       email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
@@ -2863,30 +2873,24 @@ export type Database = {
         Args: never
         Returns: {
           api_enabled: boolean
-          api_endpoint: string | null
-          api_key: string | null
-          api_provider: string | null
+          api_endpoint: string
+          api_key_set: boolean
+          api_provider: string
           created_at: string
-          from_email: string | null
-          from_name: string | null
+          from_email: string
+          from_name: string
           id: number
-          reply_to: string | null
-          signature_ar: string | null
-          signature_en: string | null
+          reply_to: string
+          signature_ar: string
+          signature_en: string
           smtp_enabled: boolean
-          smtp_host: string | null
-          smtp_password: string | null
-          smtp_port: number | null
+          smtp_host: string
+          smtp_password_set: boolean
+          smtp_port: number
           smtp_secure: boolean
-          smtp_username: string | null
+          smtp_username: string
           updated_at: string
         }[]
-        SetofOptions: {
-          from: "*"
-          to: "email_settings"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
       get_payment_link: {
         Args: { _token: string }
@@ -3028,32 +3032,7 @@ export type Database = {
       }
       update_email_settings_admin: {
         Args: { payload: Json }
-        Returns: {
-          api_enabled: boolean
-          api_endpoint: string | null
-          api_key: string | null
-          api_provider: string | null
-          created_at: string
-          from_email: string | null
-          from_name: string | null
-          id: number
-          reply_to: string | null
-          signature_ar: string | null
-          signature_en: string | null
-          smtp_enabled: boolean
-          smtp_host: string | null
-          smtp_password: string | null
-          smtp_port: number | null
-          smtp_secure: boolean
-          smtp_username: string | null
-          updated_at: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "email_settings"
-          isOneToOne: true
-          isSetofReturn: false
-        }
+        Returns: undefined
       }
       update_site_settings_admin: {
         Args: { payload: Json }
