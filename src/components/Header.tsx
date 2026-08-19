@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ShoppingCart, User, Menu, X, Globe, Satellite, Heart } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
+import { GlobalSearch } from "@/components/GlobalSearch";
 import { useEffect, useState } from "react";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
@@ -56,6 +57,7 @@ export function Header() {
         </nav>
 
         <div className="ms-auto flex items-center gap-2">
+          <GlobalSearch />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Language">

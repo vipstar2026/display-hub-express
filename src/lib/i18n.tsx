@@ -1,3 +1,4 @@
+import { P2_AR, P2_EN, P2_UR, P2_BN } from "@/lib/i18n.phase2";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export type Lang = "ar" | "en" | "ur" | "bn";
@@ -2619,7 +2620,12 @@ const BN: Dict = {
   "backups.coupons_desc": "ডিসকাউন্ট কুপন এবং অফার",
 };
 
-const dictionaries: Record<Lang, Dict> = { ar: AR, en: EN, ur: UR, bn: BN };
+const dictionaries: Record<Lang, Dict> = {
+  ar: { ...AR, ...P2_AR },
+  en: { ...EN, ...P2_EN },
+  ur: { ...UR, ...P2_UR },
+  bn: { ...BN, ...P2_BN },
+};
 
 interface I18nCtx {
   lang: Lang;

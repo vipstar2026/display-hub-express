@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { analytics } from "@/lib/analytics";
@@ -138,13 +138,14 @@ function ShopPage() {
             {t("shop.all")}
           </button>
           {(categories ?? []).map((c) => (
-            <button
+            <Link
               key={c.id}
-              onClick={() => nav({ search: (s: ShopSearch) => ({ ...s, category: c.slug }) })}
+              to="/category/$slug"
+              params={{ slug: c.slug }}
               className={`rounded-full border px-3 py-1 text-sm transition ${category === c.slug ? "border-primary bg-primary/10 text-primary" : "border-primary/20 hover:border-primary/50"}`}
             >
               {localizedName(c, "name", lang)}
-            </button>
+            </Link>
           ))}
         </div>
 
@@ -160,7 +161,7 @@ function ShopPage() {
                       <span className="rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-xs text-primary">{items.length}</span>
                     </div>
                     {cat.slug && (
-                      <button onClick={() => nav({ search: (s: ShopSearch) => ({ ...s, category: cat.slug }) })} className="text-xs text-primary hover:text-primary">{t("shop.all")} →</button>
+                      <Link to="/category/$slug" params={{ slug: cat.slug }} className="text-xs text-primary hover:text-primary">{t("shop.all")} →</Link>
                     )}
                   </div>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">

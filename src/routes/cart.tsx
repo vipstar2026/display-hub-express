@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { CartCrossSell } from "@/components/CartCrossSell";
 import { useI18n, localizedName } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
@@ -725,6 +726,7 @@ function CartPage() {
           </div>
         )}
       </div>
+      <div className="container mx-auto px-4 pb-12"><CartCrossSell /></div>
       <Footer />
     </div>
   );
