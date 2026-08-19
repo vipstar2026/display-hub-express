@@ -73,9 +73,11 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
   const uiLang: Lang = (["ar", "en", "ur", "bn"].includes(lang) ? lang : "en") as Lang;
   const s = STRINGS[uiLang];
   const mounted = useRef(false);
+  const hostRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [brand, setBrand] = useState<string | null>(null);
+
 
   const t = (ar: string, en: string, ur?: string, bn?: string) =>
     uiLang === "ar" ? ar : uiLang === "ur" ? (ur ?? en) : uiLang === "bn" ? (bn ?? en) : en;
@@ -85,8 +87,19 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
   const locale = widgetLang || (uiLang === "ar" ? "ar" : "en");
 
   useEffect(() => {
-    if (!scriptUrl || mounted.current) return;
+    if (!scriptUrl || mounted.current || !hostRef.current) return;
     mounted.current = true;
+
+    // Build the widget form outside React's control so the gateway script can
+    // freely mutate it without breaking React's DOM reconciliation.
+    const form = document.createElement("form");
+    form.setAttribute("action", action);
+    form.className = "paymentWidgets";
+    form.setAttribute("data-brands", brands || "VISA MASTER");
+    form.setAttribute("data-lang", locale);
+    hostRef.current.appendChild(form);
+
+
 
     /** Swap the free-text expiry field for month/year dropdowns. */
     const buildExpirySelects = () => {
@@ -181,7 +194,7 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
       }
     }, 6000);
     return () => clearTimeout(timer);
-  }, [scriptUrl, locale, brands, s]);
+  }, [scriptUrl, locale, brands, s, action]);
 
   const brandList = (brands || "VISA MASTER").split(/\s+/).filter(Boolean);
 
@@ -224,31 +237,35 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
 
       {/* widget */}
       <div className="afs-widget px-5 py-5" dir="ltr">
-        {!ready && !failed && (
-          <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            {t("جارٍ تحميل نموذج الدفع الآمن…", "Loading the secure payment form…", "محفوظ فارم لوڈ ہو رہا ہے…", "সুরক্ষিত ফর্ম লোড হচ্ছে…")}
-          </div>
-        )}
-        {failed && (
-          <div className="py-8 text-center">
-            <p className="mb-3 text-sm text-destructive">
-              {t("تعذر تحميل نموذج الدفع.", "The payment form could not be loaded.", "فارم لوڈ نہیں ہو سکا۔", "ফর্ম লোড করা যায়নি।")}
-            </p>
-            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-              <RefreshCw className="me-2 h-4 w-4" />
-              {t("إعادة المحاولة", "Try again", "دوبارہ کوشش", "আবার চেষ্টা")}
-            </Button>
-          </div>
-        )}
-        {ready && brand && (
-          <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
-            <CreditCard className="h-3.5 w-3.5" />
-            {s.detected}: {BRAND_LABEL[brand.toUpperCase()] ?? brand}
-          </div>
-        )}
-        <form action={action} className="paymentWidgets" data-brands={brands || "VISA MASTER"} data-lang={locale} />
+        <div>
+          {!ready && !failed && (
+            <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {t("جارٍ تحميل نموذج الدفع الآمن…", "Loading the secure payment form…", "محفوظ فارم لوڈ ہو رہا ہے…", "সুরক্ষিত ফর্ম লোড হচ্ছে…")}
+            </div>
+          )}
+          {failed && (
+            <div className="py-8 text-center">
+              <p className="mb-3 text-sm text-destructive">
+                {t("تعذر تحميل نموذج الدفع.", "The payment form could not be loaded.", "فارم لوڈ نہیں ہو سکا۔", "ফর্ম লোড করা যায়নি।")}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                <RefreshCw className="me-2 h-4 w-4" />
+                {t("إعادة المحاولة", "Try again", "دوبارہ کوشش", "আবার চেষ্টা")}
+              </Button>
+            </div>
+          )}
+          {ready && brand && (
+            <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
+              <CreditCard className="h-3.5 w-3.5" />
+              {s.detected}: {BRAND_LABEL[brand.toUpperCase()] ?? brand}
+            </div>
+          )}
+        </div>
+        {/* Host node owned by the gateway script — React must never render children here. */}
+        <div ref={hostRef} suppressHydrationWarning />
       </div>
+
 
       {/* trust footer */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 bg-secondary/30 px-5 py-3 text-[11px] text-muted-foreground">
