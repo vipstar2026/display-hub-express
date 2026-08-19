@@ -73,15 +73,6 @@ function PayLinkPage() {
     mutationFn: () => start({ data: { token, name, email, phone } }),
   });
 
-  useEffect(() => {
-    const url = checkout.data?.scriptUrl;
-    if (!url || mounted.current) return;
-    mounted.current = true;
-    const s = document.createElement("script");
-    s.src = url;
-    s.async = true;
-    document.body.appendChild(s);
-  }, [checkout.data?.scriptUrl]);
 
   if (isLoading) {
     return (
