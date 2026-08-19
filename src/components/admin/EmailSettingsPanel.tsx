@@ -146,7 +146,7 @@ export function EmailSettingsPanel() {
             <Input
               type="password"
               autoComplete="new-password"
-              placeholder="••••••••"
+              placeholder={form.api_key_set ? "•••••••• (محفوظ)" : "••••••••"}
               value={form.api_key ?? ""}
               onChange={(e) => set("api_key", e.target.value)}
             />
