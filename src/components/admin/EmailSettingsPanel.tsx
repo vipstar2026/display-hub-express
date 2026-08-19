@@ -40,10 +40,15 @@ export function EmailSettingsPanel() {
     setSaving(true);
     const { id, created_at, updated_at, ...payload } = form;
     payload.smtp_port = payload.smtp_port === "" || payload.smtp_port == null ? 587 : Number(payload.smtp_port);
-    const { data: saved, error } = await (supabase as any).rpc("update_email_settings_admin", { payload });
+    // Secrets are write-only: an empty box keeps the stored value.
+    if (!payload.smtp_password) delete payload.smtp_password;
+    if (!payload.api_key) delete payload.api_key;
+    delete payload.smtp_password_set;
+    delete payload.api_key_set;
+    const { error } = await (supabase as any).rpc("update_email_settings_admin", { payload });
     setSaving(false);
     if (error) return toast.error(error.message);
-    if (saved) setForm({ ...saved });
+    setForm((f) => ({ ...(f as Row), smtp_password: "", api_key: "" }));
     toast.success("تم حفظ إعدادات البريد");
   }
 
@@ -89,7 +94,7 @@ export function EmailSettingsPanel() {
           <Input
             type="password"
             autoComplete="new-password"
-            placeholder="••••••••"
+            placeholder={form.smtp_password_set ? "•••••••• (محفوظة)" : "••••••••"}
             value={form.smtp_password ?? ""}
             onChange={(e) => set("smtp_password", e.target.value)}
           />
