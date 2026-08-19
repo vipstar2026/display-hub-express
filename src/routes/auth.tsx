@@ -37,8 +37,10 @@ function AuthPage() {
           options: { emailRedirectTo: window.location.origin, data: { display_name: name } },
         });
         if (error) throw error;
+        analytics.signUp("email");
         toast.success("Account created!");
         nav({ to: "/" });
+
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
