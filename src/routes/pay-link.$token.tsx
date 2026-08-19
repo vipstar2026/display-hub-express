@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/Header";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ShieldCheck, Loader2, CheckCircle2 } from "lucide-react";
 import { AfsTestCards } from "@/components/AfsTestCards";
+import { AfsPaymentWidget } from "@/components/AfsPaymentWidget";
 
 export const Route = createFileRoute("/pay-link/$token")({
   ssr: false,
@@ -47,7 +48,7 @@ function PayLinkPage() {
   const nav = useNavigate();
   const fetchLink = useServerFn(getPaymentLinkPublic);
   const start = useServerFn(startPaymentLinkCheckout);
-  const mounted = useRef(false);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -72,15 +73,6 @@ function PayLinkPage() {
     mutationFn: () => start({ data: { token, name, email, phone } }),
   });
 
-  useEffect(() => {
-    const url = checkout.data?.scriptUrl;
-    if (!url || mounted.current) return;
-    mounted.current = true;
-    const s = document.createElement("script");
-    s.src = url;
-    s.async = true;
-    document.body.appendChild(s);
-  }, [checkout.data?.scriptUrl]);
 
   if (isLoading) {
     return (
@@ -137,14 +129,15 @@ function PayLinkPage() {
         ) : (
           <>
             {checkout.data.testMode && <AfsTestCards />}
-            <div className="rounded-xl border border-primary/10 bg-card p-4">
-              <form
-                action={`${window.location.origin}/pay-link/result?token=${token}`}
-                className="paymentWidgets"
-                data-brands={checkout.data.brands || "VISA MASTER"}
-                data-lang={checkout.data.widgetLang || (lang === "ar" ? "ar" : "en")}
-              />
-            </div>
+            <AfsPaymentWidget
+              scriptUrl={checkout.data.scriptUrl}
+              action={`${window.location.origin}/pay-link/result?token=${token}`}
+              brands={checkout.data.brands}
+              widgetLang={checkout.data.widgetLang}
+              amount={Number(link.amount).toFixed(3)}
+              currency={link.currency}
+              onCancel={() => nav({ to: "/" })}
+            />
           </>
         )}
       </div>

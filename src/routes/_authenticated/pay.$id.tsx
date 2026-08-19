@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/Header";
@@ -9,6 +9,7 @@ import { createAfsCheckout } from "@/lib/afs.functions";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AfsTestCards } from "@/components/AfsTestCards";
+import { AfsPaymentWidget } from "@/components/AfsPaymentWidget";
 
 export const Route = createFileRoute("/_authenticated/pay/$id")({
   ssr: false,
@@ -38,7 +39,7 @@ function PayPage() {
   const { id } = Route.useParams();
   const { lang } = useI18n();
   const start = useServerFn(createAfsCheckout);
-  const mounted = useRef(false);
+  const nav = useNavigate();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["afs-checkout", id],
@@ -47,14 +48,6 @@ function PayPage() {
     retry: false,
   });
 
-  useEffect(() => {
-    if (!data?.scriptUrl || mounted.current) return;
-    mounted.current = true;
-    const s = document.createElement("script");
-    s.src = data.scriptUrl;
-    s.async = true;
-    document.body.appendChild(s);
-  }, [data?.scriptUrl]);
 
   const heading = lang === "ar" ? "إتمام الدفع" : lang === "ur" ? "ادائیگی مکمل کریں" : lang === "bn" ? "পেমেন্ট সম্পন্ন করুন" : "Complete payment";
   const secure =
@@ -75,32 +68,30 @@ function PayPage() {
           <ShieldCheck className="h-4 w-4 text-primary" /> {secure}
         </p>
 
-        {data && (
-          <div className="mb-4 rounded-xl border border-primary/10 bg-card p-4 text-sm">
-            <span className="text-muted-foreground">{lang === "ar" ? "المبلغ" : "Amount"}: </span>
-            <span className="font-bold text-primary">{data.amount} {data.currency}</span>
-          </div>
-        )}
-
         {data?.testMode && <AfsTestCards />}
 
 
-        <div className="rounded-xl border border-primary/10 bg-card p-4">
-          {isLoading && (
-            <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> …
-            </div>
-          )}
-          {error && <PayErrorInline message={(error as Error).message} />}
-          {data && (
-            <form
-              action={`${data.resultUrl || `${window.location.origin}/pay/result`}?order=${id}`}
-              className="paymentWidgets"
-              data-brands={data.brands || "VISA MASTER"}
-              data-lang={data.widgetLang || (lang === "ar" ? "ar" : "en")}
-            />
-          )}
-        </div>
+        {isLoading && (
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-primary/10 bg-card py-10 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> …
+          </div>
+        )}
+        {error && (
+          <div className="rounded-xl border border-primary/10 bg-card p-4">
+            <PayErrorInline message={(error as Error).message} />
+          </div>
+        )}
+        {data && (
+          <AfsPaymentWidget
+            scriptUrl={data.scriptUrl}
+            action={`${data.resultUrl || `${window.location.origin}/pay/result`}?order=${id}`}
+            brands={data.brands}
+            widgetLang={data.widgetLang}
+            amount={data.amount}
+            currency={data.currency}
+            onCancel={() => nav({ to: "/cart" })}
+          />
+        )}
       </div>
       <Footer />
     </div>
