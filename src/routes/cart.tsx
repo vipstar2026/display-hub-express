@@ -300,7 +300,15 @@ function CartPage() {
                 )}
               </div>
 
+              {needsFulfillment && digitalItems.length > 0 && (
+                <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+                  <div className="mb-1 flex items-center gap-2 text-sm font-bold"><Zap className="h-4 w-4 text-primary" />{L("digital_title")}</div>
+                  <p className="text-xs text-muted-foreground">{L("digital_desc")}</p>
+                </div>
+              )}
+
               {/* Fulfillment: only for physical items */}
+
               {needsFulfillment ? (
                 <>
                   <div className="rounded-xl border border-primary/20 bg-card p-5">
