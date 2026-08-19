@@ -85,22 +85,27 @@ function PayPage() {
         {data?.testMode && <AfsTestCards />}
 
 
-        <div className="rounded-xl border border-primary/10 bg-card p-4">
-          {isLoading && (
-            <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> …
-            </div>
-          )}
-          {error && <PayErrorInline message={(error as Error).message} />}
-          {data && (
-            <form
-              action={`${data.resultUrl || `${window.location.origin}/pay/result`}?order=${id}`}
-              className="paymentWidgets"
-              data-brands={data.brands || "VISA MASTER"}
-              data-lang={data.widgetLang || (lang === "ar" ? "ar" : "en")}
-            />
-          )}
-        </div>
+        {isLoading && (
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-primary/10 bg-card py-10 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> …
+          </div>
+        )}
+        {error && (
+          <div className="rounded-xl border border-primary/10 bg-card p-4">
+            <PayErrorInline message={(error as Error).message} />
+          </div>
+        )}
+        {data && (
+          <AfsPaymentWidget
+            scriptUrl={data.scriptUrl}
+            action={`${data.resultUrl || `${window.location.origin}/pay/result`}?order=${id}`}
+            brands={data.brands}
+            widgetLang={data.widgetLang}
+            amount={data.amount}
+            currency={data.currency}
+            onCancel={() => nav({ to: "/cart" })}
+          />
+        )}
       </div>
       <Footer />
     </div>
