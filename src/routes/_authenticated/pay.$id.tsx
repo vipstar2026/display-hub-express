@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/Header";
@@ -9,6 +9,7 @@ import { createAfsCheckout } from "@/lib/afs.functions";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AfsTestCards } from "@/components/AfsTestCards";
+import { AfsPaymentWidget } from "@/components/AfsPaymentWidget";
 
 export const Route = createFileRoute("/_authenticated/pay/$id")({
   ssr: false,
