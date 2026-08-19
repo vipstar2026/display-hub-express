@@ -47,7 +47,24 @@ const TX = {
   shipping_required: { ar: "اختر خدمة الشحن", en: "Select a shipping method", ur: "شپنگ سروس منتخب کریں", bn: "শিপিং পদ্ধতি নির্বাচন করুন" },
   pickup_note: { ar: "سنتواصل معك عند جهوز الطلب للاستلام من المحل.", en: "We will contact you when your order is ready for pickup at the store.", ur: "آرڈر تیار ہونے پر رابطہ کریں گے۔", bn: "অর্ডার প্রস্তুত হলে আমরা যোগাযোগ করব।" },
   order_summary: { ar: "ملخص الطلب", en: "Order summary", ur: "آرڈر کا خلاصہ", bn: "অর্ডার সারাংশ" },
+  guest_title: { ar: "بيانات التواصل", en: "Contact details", ur: "رابطہ کی تفصیلات", bn: "যোগাযোগের তথ্য" },
+  guest_desc: {
+    ar: "أكمل الطلب كضيف — سنرسل تأكيد الطلب والأكواد الرقمية إلى بريدك الإلكتروني.",
+    en: "Check out as a guest — we will email your order confirmation and any digital codes.",
+    ur: "بطور مہمان خریداری — تصدیق اور کوڈز ای میل کیے جائیں گے۔",
+    bn: "গেস্ট হিসেবে অর্ডার করুন — নিশ্চিতকরণ ও কোড ইমেইলে পাঠানো হবে।",
+  },
+  guest_email: { ar: "البريد الإلكتروني", en: "Email address", ur: "ای میل", bn: "ইমেইল" },
+  guest_name: { ar: "الاسم", en: "Full name", ur: "نام", bn: "নাম" },
+  guest_phone: { ar: "رقم الهاتف", en: "Phone number", ur: "فون نمبر", bn: "ফোন নম্বর" },
+  guest_invalid_email: { ar: "أدخل بريداً إلكترونياً صحيحاً", en: "Enter a valid email address", ur: "درست ای میل درج کریں", bn: "সঠিক ইমেইল দিন" },
+  have_account: { ar: "لديك حساب؟ سجّل الدخول", en: "Have an account? Sign in", ur: "اکاؤنٹ ہے؟ سائن ان", bn: "অ্যাকাউন্ট আছে? সাইন ইন" },
+  guest_disabled: { ar: "يجب تسجيل الدخول لإتمام الطلب.", en: "Please sign in to complete your order.", ur: "آرڈر مکمل کرنے کے لیے سائن ان کریں۔", bn: "অর্ডার সম্পূর্ণ করতে সাইন ইন করুন।" },
+  sign_in: { ar: "تسجيل الدخول", en: "Sign in", ur: "سائن ان", bn: "সাইন ইন" },
+  proof_needs_account: { ar: "طريقة الدفع هذه تتطلب تسجيل الدخول لرفع إثبات الدفع.", en: "This payment method requires signing in to upload proof of payment.", ur: "اس طریقے کے لیے سائن ان ضروری ہے۔", bn: "এই পদ্ধতির জন্য সাইন ইন প্রয়োজন।" },
+  digital_out: { ar: "نفدت الأكواد المتاحة لهذا المنتج حالياً", en: "This digital product is currently out of stock", ur: "اس ڈیجیٹل پروڈکٹ کا اسٹاک ختم ہے", bn: "এই ডিজিটাল পণ্যের স্টক শেষ" },
 } as const;
+
 
 function CartPage() {
   const { t, lang } = useI18n();
