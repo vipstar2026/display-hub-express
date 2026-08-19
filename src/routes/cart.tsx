@@ -717,7 +717,7 @@ function CartPage() {
               )}
               <div className="my-3 border-t border-primary/20" />
               <div className="flex justify-between py-2 text-lg font-bold"><span>{t("shop.total")}</span><span className="font-mono text-primary">{formatPrice(grandTotal)}</span></div>
-              <Button onClick={handleCheckout} disabled={placing || !method} className="mt-4 w-full bg-primary text-background hover:bg-primary">
+              <Button onClick={handleCheckout} disabled={placing || !method || digitalShortage.length > 0 || (isGuest && !guestAllowed)} className="mt-4 w-full bg-primary text-background hover:bg-primary">
                 {placing ? "..." : t("shop.checkout")}
               </Button>
               {!method && <p className="mt-2 text-center text-xs text-muted-foreground">{t("cart.select_method")}</p>}
