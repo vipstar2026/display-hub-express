@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatPrice } from "@/lib/format";
-import { Trash2, ShoppingBag, Package, Upload, CheckCircle2, Landmark, Smartphone, Banknote, Wallet, CreditCard, Tag, X, Truck, MapPin } from "lucide-react";
+import { Trash2, ShoppingBag, Package, Upload, CheckCircle2, Landmark, Smartphone, Banknote, Wallet, CreditCard, Tag, X, Truck, MapPin, Store, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -23,8 +23,31 @@ const ICONS: Record<string, typeof Landmark> = {
   landmark: Landmark, smartphone: Smartphone, banknote: Banknote, wallet: Wallet, "credit-card": CreditCard,
 };
 
+type Lang = "ar" | "en" | "ur" | "bn";
+const TX = {
+  fulfillment: { ar: "طريقة الاستلام", en: "Fulfillment method", ur: "وصولی کا طریقہ", bn: "ডেলিভারি পদ্ধতি" },
+  delivery: { ar: "توصيل إلى العنوان", en: "Delivery to address", ur: "پتے پر ڈیلیوری", bn: "ঠিকানায় ডেলিভারি" },
+  pickup: { ar: "استلام من المحل", en: "Pickup from store", ur: "دکان سے وصولی", bn: "দোকান থেকে সংগ্রহ" },
+  pickup_free: { ar: "مجاني", en: "Free", ur: "مفت", bn: "ফ্রি" },
+  digital_title: { ar: "منتجات رقمية — تسليم فوري", en: "Digital products — instant delivery", ur: "ڈیجیٹل مصنوعات — فوری ترسیل", bn: "ডিজিটাল পণ্য — তাৎক্ষণিক ডেলিভারি" },
+  digital_desc: {
+    ar: "لا يوجد شحن للمنتجات الرقمية. تُرسل الأكواد/الاشتراكات إلى بريدك الإلكتروني وتظهر في صفحة الطلب فور تأكيد الدفع.",
+    en: "No shipping for digital items. Codes/subscriptions are emailed to you and shown on the order page as soon as payment is confirmed.",
+    ur: "ڈیجیٹل اشیاء کے لیے شپنگ نہیں۔ ادائیگی کی تصدیق پر کوڈ ای میل کیے جاتے ہیں۔",
+    bn: "ডিজিটাল আইটেমে শিপিং নেই। পেমেন্ট নিশ্চিত হলে কোড ইমেইলে পাঠানো হয়।",
+  },
+  physical_title: { ar: "منتجات تحتاج شحن أو استلام", en: "Items requiring delivery or pickup", ur: "ڈیلیوری یا پک اپ درکار", bn: "ডেলিভারি বা পিকআপ প্রয়োজন" },
+  digital_badge: { ar: "رقمي", en: "Digital", ur: "ڈیجیٹل", bn: "ডিজিটাল" },
+  physical_badge: { ar: "شحن", en: "Shipped", ur: "شپنگ", bn: "শিপিং" },
+  address_required: { ar: "أدخل عنوان التوصيل", en: "Enter a delivery address", ur: "ڈیلیوری پتہ درج کریں", bn: "ডেলিভারি ঠিকানা দিন" },
+  shipping_required: { ar: "اختر خدمة الشحن", en: "Select a shipping method", ur: "شپنگ سروس منتخب کریں", bn: "শিপিং পদ্ধতি নির্বাচন করুন" },
+  pickup_note: { ar: "سنتواصل معك عند جهوز الطلب للاستلام من المحل.", en: "We will contact you when your order is ready for pickup at the store.", ur: "آرڈر تیار ہونے پر رابطہ کریں گے۔", bn: "অর্ডার প্রস্তুত হলে আমরা যোগাযোগ করব।" },
+  order_summary: { ar: "ملخص الطلب", en: "Order summary", ur: "آرڈر کا خلاصہ", bn: "অর্ডার সারাংশ" },
+} as const;
+
 function CartPage() {
   const { t, lang } = useI18n();
+  const L = (k: keyof typeof TX) => TX[k][(lang as Lang) in TX[k] ? (lang as Lang) : "en"];
   const { items, setQty, remove, subtotal, clear } = useCart();
   const nav = useNavigate();
   const { data: settings } = useSiteSettings();
@@ -36,12 +59,18 @@ function CartPage() {
   const [customerNotes, setCustomerNotes] = useState("");
   const [selectedRate, setSelectedRate] = useState<string | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const [fulfillment, setFulfillment] = useState<"delivery" | "pickup">("delivery");
   const [manualAddress, setManualAddress] = useState({ full_name: "", phone: "", address_line: "", city: "", country: "Bahrain" });
 
   // Coupon state
   const [couponInput, setCouponInput] = useState("");
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [coupon, setCoupon] = useState<{ id: string; code: string; discount: number } | null>(null);
+
+  const physicalItems = items.filter((i) => i.type === "physical");
+  const digitalItems = items.filter((i) => i.type !== "physical");
+  const needsFulfillment = physicalItems.length > 0;
+
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -71,12 +100,14 @@ function CartPage() {
     }
   }, [addresses, selectedAddress]);
 
+  const physicalSubtotal = useMemo(() => physicalItems.reduce((s, i) => s + i.price * i.quantity, 0), [physicalItems]);
   const rate = useMemo(() => shippingRates?.find((r) => r.id === selectedRate) ?? null, [shippingRates, selectedRate]);
   const shippingCost = useMemo(() => {
-    if (!rate) return 0;
-    if (rate.free_over && subtotal >= Number(rate.free_over)) return 0;
+    if (!needsFulfillment || fulfillment === "pickup" || !rate) return 0;
+    if (rate.free_over && physicalSubtotal >= Number(rate.free_over)) return 0;
     return Number(rate.price);
-  }, [rate, subtotal]);
+  }, [rate, physicalSubtotal, needsFulfillment, fulfillment]);
+
 
   const method = methods?.find((m) => m.id === selectedMethod) ?? null;
   const fee = method ? Number(method.fee_amount) + (subtotal * Number(method.fee_percent)) / 100 : 0;
@@ -115,6 +146,12 @@ function CartPage() {
     if (items.length === 0) return;
     if (!method) { toast.error(t("cart.select_method_err")); return; }
     if (method.requires_proof && !proofFile) { toast.error(t("cart.upload_proof_err")); return; }
+    if (needsFulfillment && fulfillment === "delivery") {
+      const hasAddr = !!selectedAddress || (!!manualAddress.full_name && !!manualAddress.address_line);
+      if (!hasAddr) { toast.error(L("address_required")); return; }
+      if ((shippingRates ?? []).length > 0 && !rate) { toast.error(L("shipping_required")); return; }
+    }
+
 
     setPlacing(true);
     try {
@@ -127,13 +164,14 @@ function CartPage() {
         proofUrl = up.data.path;
       }
 
-      // Resolve shipping address snapshot
+      // Resolve shipping address snapshot (only for physical delivery orders)
       const addr = selectedAddress ? addresses?.find((a) => a.id === selectedAddress) : null;
-      const shipping_address = addr
-        ? { full_name: addr.full_name, phone: addr.phone, address_line: addr.address_line, city: addr.city, country: addr.country, postal_code: addr.postal_code }
-        : (manualAddress.full_name || manualAddress.address_line
-            ? manualAddress
-            : null);
+      const shipping_address = !needsFulfillment || fulfillment === "pickup"
+        ? null
+        : addr
+          ? { full_name: addr.full_name, phone: addr.phone, address_line: addr.address_line, city: addr.city, country: addr.country, postal_code: addr.postal_code }
+          : (manualAddress.full_name || manualAddress.address_line ? manualAddress : null);
+
 
       const { data: user } = await supabase.auth.getUser();
       const { data: order, error } = await supabase.from("orders").insert({
@@ -154,10 +192,11 @@ function CartPage() {
         customer_notes: customerNotes || null,
         coupon_id: coupon?.id ?? null,
         coupon_code: coupon?.code ?? null,
-        shipping_rate_id: rate?.id ?? null,
-        shipping_method: rate?.method ?? null,
+        shipping_rate_id: needsFulfillment && fulfillment === "delivery" ? rate?.id ?? null : null,
+        shipping_method: !needsFulfillment ? "digital" : fulfillment === "pickup" ? "pickup" : rate?.method ?? null,
         shipping_cost: shippingCost,
-        address_id: selectedAddress,
+        address_id: needsFulfillment && fulfillment === "delivery" ? selectedAddress : null,
+
         shipping_address: shipping_address as never,
       }).select().single();
       if (error) throw error;
@@ -220,8 +259,14 @@ function CartPage() {
                       {i.image ? <img src={i.image} alt={i.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-8 w-8 text-primary/30" /></div>}
                     </div>
                     <div className="flex flex-1 flex-col">
-                      <Link to="/product/$slug" params={{ slug: i.slug }} className="font-medium hover:text-primary">{i.name}</Link>
+                      <div className="flex items-start gap-2">
+                        <Link to="/product/$slug" params={{ slug: i.slug }} className="font-medium hover:text-primary">{i.name}</Link>
+                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${i.type === "physical" ? "bg-primary/15 text-primary" : "bg-accent/20 text-accent-foreground"}`}>
+                          {i.type === "physical" ? L("physical_badge") : L("digital_badge")}
+                        </span>
+                      </div>
                       <div className="mt-1 font-mono text-primary">{formatPrice(i.price)}</div>
+
                       <div className="mt-auto flex items-center gap-2">
                         <div className="flex items-center rounded-md border border-primary/20">
                           <button onClick={() => setQty(i.product_id, i.quantity - 1)} className="px-2 py-1 hover:bg-primary/10">−</button>
@@ -255,80 +300,137 @@ function CartPage() {
                 )}
               </div>
 
-              {/* Shipping Address */}
-              <div className="rounded-xl border border-primary/20 bg-card p-5">
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <h2 className="flex items-center gap-2 font-display text-lg font-bold"><MapPin className="h-4 w-4 text-primary" />{t("cart.saved_address")}</h2>
-                  <Link to="/account/addresses" className="text-xs text-primary hover:underline">{t("cart.manage_addresses")}</Link>
+              {needsFulfillment && digitalItems.length > 0 && (
+                <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+                  <div className="mb-1 flex items-center gap-2 text-sm font-bold"><Zap className="h-4 w-4 text-primary" />{L("digital_title")}</div>
+                  <p className="text-xs text-muted-foreground">{L("digital_desc")}</p>
                 </div>
-                {(addresses ?? []).length > 0 ? (
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {(addresses ?? []).map((a) => {
-                      const active = a.id === selectedAddress;
-                      return (
-                        <button
-                          key={a.id}
-                          type="button"
-                          onClick={() => setSelectedAddress(a.id)}
-                          className={`rounded-lg border p-3 text-start text-sm transition-all ${active ? "border-primary bg-primary/10" : "border-primary/20 hover:border-primary/50"}`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{a.full_name}</span>
-                            {a.is_default && <span className="rounded-full bg-primary/15 px-1.5 py-0 text-[10px] text-primary">{t("addresses.default")}</span>}
-                            {active && <CheckCircle2 className="ms-auto h-3.5 w-3.5 text-primary" />}
-                          </div>
-                          <div className="mt-1 text-xs text-muted-foreground">{a.phone}</div>
-                          <div className="text-xs text-muted-foreground">{a.address_line}, {a.city}</div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <Input placeholder={t("addresses.full_name")} value={manualAddress.full_name} onChange={(e) => setManualAddress({ ...manualAddress, full_name: e.target.value })} />
-                    <Input placeholder={t("addresses.phone")} value={manualAddress.phone} onChange={(e) => setManualAddress({ ...manualAddress, phone: e.target.value })} />
-                    <Input className="sm:col-span-2" placeholder={t("addresses.address_line")} value={manualAddress.address_line} onChange={(e) => setManualAddress({ ...manualAddress, address_line: e.target.value })} />
-                    <Input placeholder={t("addresses.city")} value={manualAddress.city} onChange={(e) => setManualAddress({ ...manualAddress, city: e.target.value })} />
-                    <Input placeholder={t("addresses.country")} value={manualAddress.country} onChange={(e) => setManualAddress({ ...manualAddress, country: e.target.value })} />
-                  </div>
-                )}
-              </div>
+              )}
 
-              {/* Shipping methods */}
-              <div className="rounded-xl border border-primary/20 bg-card p-5">
-                <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold"><Truck className="h-4 w-4 text-primary" />{t("cart.select_shipping")}</h2>
-                {(shippingRates ?? []).length === 0 ? (
-                  <p className="text-sm text-muted-foreground">{t("cart.no_shipping")}</p>
-                ) : (
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {(shippingRates ?? []).map((r) => {
-                      const active = r.id === selectedRate;
-                      const isFree = r.free_over && subtotal >= Number(r.free_over);
-                      const rname = localizedName(r as unknown as Record<string, unknown>, "name", lang);
-                      return (
-                        <button
-                          key={r.id}
-                          type="button"
-                          onClick={() => setSelectedRate(r.id)}
-                          className={`flex items-center gap-3 rounded-lg border p-3 text-start transition-all ${active ? "border-primary bg-primary/10 shadow-lg shadow-primary/10" : "border-primary/20 hover:border-primary/50"}`}
-                        >
-                          <div className={`grid h-9 w-9 place-items-center rounded-md ${active ? "bg-primary text-background" : "bg-primary/10 text-primary"}`}>
-                            <Truck className="h-4 w-4" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="text-sm font-medium">{rname}</div>
-                            <div className="text-[11px] text-muted-foreground">{r.min_delivery_days}-{r.max_delivery_days} {t("shipping.days")}</div>
-                          </div>
-                          <div className="font-mono text-sm font-bold text-primary">
-                            {isFree ? t("cart.shipping_free") : formatPrice(Number(r.price))}
-                          </div>
-                          {active && <CheckCircle2 className="h-4 w-4 text-primary" />}
-                        </button>
-                      );
-                    })}
+              {/* Fulfillment: only for physical items */}
+
+              {needsFulfillment ? (
+                <>
+                  <div className="rounded-xl border border-primary/20 bg-card p-5">
+                    <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold"><Truck className="h-4 w-4 text-primary" />{L("fulfillment")}</h2>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {([
+                        { key: "delivery" as const, icon: Truck, label: L("delivery") },
+                        { key: "pickup" as const, icon: Store, label: L("pickup") },
+                      ]).map((opt) => {
+                        const active = fulfillment === opt.key;
+                        const Icon = opt.icon;
+                        return (
+                          <button
+                            key={opt.key}
+                            type="button"
+                            onClick={() => setFulfillment(opt.key)}
+                            className={`flex items-center gap-3 rounded-lg border p-3 text-start transition-all ${active ? "border-primary bg-primary/10 shadow-lg shadow-primary/10" : "border-primary/20 hover:border-primary/50"}`}
+                          >
+                            <div className={`grid h-9 w-9 place-items-center rounded-md ${active ? "bg-primary text-background" : "bg-primary/10 text-primary"}`}>
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1 text-sm font-medium">{opt.label}</div>
+                            {opt.key === "pickup" && <span className="font-mono text-sm font-bold text-primary">{L("pickup_free")}</span>}
+                            {active && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {fulfillment === "pickup" && (
+                      <p className="mt-3 rounded-lg border border-primary/20 bg-background/50 p-3 text-xs text-muted-foreground">
+                        {L("pickup_note")}
+                        {settings?.company_address ? <span className="mt-1 block text-foreground">{settings.company_address}</span> : null}
+                      </p>
+                    )}
                   </div>
-                )}
-              </div>
+
+                  {fulfillment === "delivery" && (
+                    <>
+                      {/* Shipping Address */}
+                      <div className="rounded-xl border border-primary/20 bg-card p-5">
+                        <div className="mb-3 flex items-center justify-between gap-2">
+                          <h2 className="flex items-center gap-2 font-display text-lg font-bold"><MapPin className="h-4 w-4 text-primary" />{t("cart.saved_address")}</h2>
+                          <Link to="/account/addresses" className="text-xs text-primary hover:underline">{t("cart.manage_addresses")}</Link>
+                        </div>
+                        {(addresses ?? []).length > 0 ? (
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {(addresses ?? []).map((a) => {
+                              const active = a.id === selectedAddress;
+                              return (
+                                <button
+                                  key={a.id}
+                                  type="button"
+                                  onClick={() => setSelectedAddress(a.id)}
+                                  className={`rounded-lg border p-3 text-start text-sm transition-all ${active ? "border-primary bg-primary/10" : "border-primary/20 hover:border-primary/50"}`}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium">{a.full_name}</span>
+                                    {a.is_default && <span className="rounded-full bg-primary/15 px-1.5 py-0 text-[10px] text-primary">{t("addresses.default")}</span>}
+                                    {active && <CheckCircle2 className="ms-auto h-3.5 w-3.5 text-primary" />}
+                                  </div>
+                                  <div className="mt-1 text-xs text-muted-foreground">{a.phone}</div>
+                                  <div className="text-xs text-muted-foreground">{a.address_line}, {a.city}</div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            <Input placeholder={t("addresses.full_name")} value={manualAddress.full_name} onChange={(e) => setManualAddress({ ...manualAddress, full_name: e.target.value })} />
+                            <Input placeholder={t("addresses.phone")} value={manualAddress.phone} onChange={(e) => setManualAddress({ ...manualAddress, phone: e.target.value })} />
+                            <Input className="sm:col-span-2" placeholder={t("addresses.address_line")} value={manualAddress.address_line} onChange={(e) => setManualAddress({ ...manualAddress, address_line: e.target.value })} />
+                            <Input placeholder={t("addresses.city")} value={manualAddress.city} onChange={(e) => setManualAddress({ ...manualAddress, city: e.target.value })} />
+                            <Input placeholder={t("addresses.country")} value={manualAddress.country} onChange={(e) => setManualAddress({ ...manualAddress, country: e.target.value })} />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Shipping methods */}
+                      <div className="rounded-xl border border-primary/20 bg-card p-5">
+                        <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold"><Truck className="h-4 w-4 text-primary" />{t("cart.select_shipping")}</h2>
+                        {(shippingRates ?? []).length === 0 ? (
+                          <p className="text-sm text-muted-foreground">{t("cart.no_shipping")}</p>
+                        ) : (
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {(shippingRates ?? []).map((r) => {
+                              const active = r.id === selectedRate;
+                              const isFree = r.free_over && physicalSubtotal >= Number(r.free_over);
+                              const rname = localizedName(r as unknown as Record<string, unknown>, "name", lang);
+                              return (
+                                <button
+                                  key={r.id}
+                                  type="button"
+                                  onClick={() => setSelectedRate(r.id)}
+                                  className={`flex items-center gap-3 rounded-lg border p-3 text-start transition-all ${active ? "border-primary bg-primary/10 shadow-lg shadow-primary/10" : "border-primary/20 hover:border-primary/50"}`}
+                                >
+                                  <div className={`grid h-9 w-9 place-items-center rounded-md ${active ? "bg-primary text-background" : "bg-primary/10 text-primary"}`}>
+                                    <Truck className="h-4 w-4" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="text-sm font-medium">{rname}</div>
+                                    <div className="text-[11px] text-muted-foreground">{r.min_delivery_days}-{r.max_delivery_days} {t("shipping.days")}</div>
+                                  </div>
+                                  <div className="font-mono text-sm font-bold text-primary">
+                                    {isFree ? t("cart.shipping_free") : formatPrice(Number(r.price))}
+                                  </div>
+                                  {active && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : (
+                <div className="rounded-xl border border-primary/30 bg-primary/5 p-5">
+                  <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-bold"><Zap className="h-4 w-4 text-primary" />{L("digital_title")}</h2>
+                  <p className="text-sm text-muted-foreground">{L("digital_desc")}</p>
+                </div>
+              )}
+
 
               <div className="rounded-xl border border-primary/20 bg-card p-5">
                 <h2 className="mb-3 font-display text-lg font-bold">{t("cart.payment_method")}</h2>
@@ -407,13 +509,32 @@ function CartPage() {
 
             {/* Summary */}
             <div className="h-fit rounded-xl border border-primary/20 bg-card p-6">
+              <div className="mb-2 font-display text-sm font-bold text-muted-foreground">{L("order_summary")}</div>
+              <div className="mb-3 space-y-1.5 border-b border-primary/10 pb-3">
+                {items.map((i) => (
+                  <div key={i.product_id} className="flex justify-between gap-2 text-xs">
+                    <span className="truncate text-muted-foreground">{i.name} × {i.quantity}</span>
+                    <span className="shrink-0 font-mono">{formatPrice(i.price * i.quantity)}</span>
+                  </div>
+                ))}
+              </div>
               <div className="flex justify-between py-2"><span>{t("shop.subtotal")}</span><span className="font-mono">{formatPrice(subtotal)}</span></div>
-              {rate && (
+              {needsFulfillment && (
                 <div className="flex justify-between py-2 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1"><Truck className="h-3.5 w-3.5" />{t("cart.select_shipping")}</span>
+                  <span className="flex items-center gap-1">
+                    {fulfillment === "pickup" ? <Store className="h-3.5 w-3.5" /> : <Truck className="h-3.5 w-3.5" />}
+                    {fulfillment === "pickup" ? L("pickup") : t("cart.select_shipping")}
+                  </span>
                   <span className="font-mono">{shippingCost === 0 ? t("cart.shipping_free") : formatPrice(shippingCost)}</span>
                 </div>
               )}
+              {!needsFulfillment && (
+                <div className="flex justify-between py-2 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1"><Zap className="h-3.5 w-3.5 text-primary" />{L("digital_title")}</span>
+                  <span className="font-mono">{t("cart.shipping_free")}</span>
+                </div>
+              )}
+
               {fee > 0 && (
                 <div className="flex justify-between py-2 text-sm text-muted-foreground">
                   <span>{t("cart.payment_fee")}</span>
