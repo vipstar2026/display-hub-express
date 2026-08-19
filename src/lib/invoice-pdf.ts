@@ -74,7 +74,7 @@ export async function generateInvoicePDF(order: Order, company: Company = {}) {
   doc.text(company.name || "VIPSTAR", 40, 40);
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text(Number(order.tax) > 0 ? "TAX INVOICE / فاتورة ضريبية" : "INVOICE / فاتورة", 40, 58);
+  doc.text(Number(order.tax) > 0 ? "TAX INVOICE" : "INVOICE", 40, 58);
 
   doc.setFontSize(11);
   doc.text(`#${order.order_number}`, pageWidth - 40, 40, { align: "right" });
@@ -171,7 +171,7 @@ export async function generateInvoicePDF(order: Order, company: Company = {}) {
 
   doc.setFontSize(8);
   doc.setTextColor(140);
-  doc.text("Thank you for your business • شكراً لتعاملكم معنا", pageWidth / 2, doc.internal.pageSize.getHeight() - 24, { align: "center" });
+  doc.text("Thank you for your business", pageWidth / 2, doc.internal.pageSize.getHeight() - 24, { align: "center" });
 
   doc.save(`invoice-${order.order_number}.pdf`);
 }
