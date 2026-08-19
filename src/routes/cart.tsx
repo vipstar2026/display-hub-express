@@ -192,10 +192,11 @@ function CartPage() {
         customer_notes: customerNotes || null,
         coupon_id: coupon?.id ?? null,
         coupon_code: coupon?.code ?? null,
-        shipping_rate_id: rate?.id ?? null,
-        shipping_method: rate?.method ?? null,
+        shipping_rate_id: needsFulfillment && fulfillment === "delivery" ? rate?.id ?? null : null,
+        shipping_method: !needsFulfillment ? "digital" : fulfillment === "pickup" ? "pickup" : rate?.method ?? null,
         shipping_cost: shippingCost,
-        address_id: selectedAddress,
+        address_id: needsFulfillment && fulfillment === "delivery" ? selectedAddress : null,
+
         shipping_address: shipping_address as never,
       }).select().single();
       if (error) throw error;
