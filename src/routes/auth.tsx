@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Satellite } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
+import { analytics } from "@/lib/analytics";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
