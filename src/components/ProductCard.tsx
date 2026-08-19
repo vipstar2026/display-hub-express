@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useI18n, localizedName } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
+import { analytics } from "@/lib/analytics";
 import { formatPrice, firstImage } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Package, GitCompareArrows } from "lucide-react";
@@ -89,6 +90,7 @@ export function ProductCard({ p }: { p: Product }) {
           className="h-8 w-full bg-primary text-xs text-background hover:bg-primary"
           onClick={() => {
             add({ product_id: p.id, slug: p.slug, name, image: img, price: Number(p.price), type: p.type });
+            analytics.addToCart({ id: p.id, name, price: Number(p.price), quantity: 1 });
             toast.success(t("shop.addToCart"));
           }}
         >
