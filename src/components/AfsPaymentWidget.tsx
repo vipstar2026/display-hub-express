@@ -82,9 +82,10 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
   const t = (ar: string, en: string, ur?: string, bn?: string) =>
     uiLang === "ar" ? ar : uiLang === "ur" ? (ur ?? en) : uiLang === "bn" ? (bn ?? en) : en;
 
-  // The hosted widget only ships ar/en resources — everything else falls back to
-  // English inside the iframe, while our own labels stay in the chosen language.
-  const locale = widgetLang || (uiLang === "ar" ? "ar" : "en");
+  // The hosted widget only ships ar/en resources. The selected site language
+  // always wins; the gateway config value is only a last-resort fallback.
+  const locale = uiLang === "ar" ? "ar" : uiLang === "en" || uiLang === "ur" || uiLang === "bn" ? "en" : (widgetLang || "en");
+
 
   useEffect(() => {
     if (!scriptUrl || mounted.current || !hostRef.current) return;
