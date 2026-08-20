@@ -43,7 +43,7 @@ export const Route = createFileRoute("/api/public/afs-reconcile")({
         const since = new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString();
         const { data: pending, error } = await supabaseAdmin
           .from("payment_transactions")
-          .select("id, order_id, provider_charge_id, status, created_at")
+          .select("id, order_id, provider_charge_id, provider_checkout_id, status, created_at")
           .eq("provider", "afs")
           .eq("status", "pending")
           .gte("created_at", since)
@@ -56,59 +56,48 @@ export const Route = createFileRoute("/api/public/afs-reconcile")({
           });
         }
 
+        const { verifyAfsPaymentForOrder, applyAfsPaymentResult } = await import(
+          "@/lib/afs-verify.server"
+        );
+
         let settled = 0;
         let failed = 0;
-        const cfg = await loadAfsConfig();
+        let review = 0;
 
         for (const tx of pending ?? []) {
-          if (!tx.provider_charge_id || !tx.order_id) continue;
-          let status;
-          try {
-            status = await afsGetStatus(tx.provider_charge_id, cfg);
-          } catch {
-            continue;
-          }
-          const code = status.result?.code;
-          if (afsIsPending(code)) continue;
+          const checkoutId =
+            (tx as { provider_checkout_id?: string | null }).provider_checkout_id ??
+            tx.provider_charge_id;
+          if (!checkoutId || !tx.order_id) continue;
 
-          const success = afsIsSuccess(code);
-          await supabaseAdmin
-            .from("payment_transactions")
-            .update({
-              status: success ? "succeeded" : "failed",
-              payment_method: status.paymentBrand ?? null,
-              raw_response: status as never,
-              failure_reason: success ? null : (status.result?.description ?? null),
-              paid_at: success ? new Date().toISOString() : null,
-            })
-            .eq("id", tx.id);
+          const { data: order } = await supabaseAdmin
+            .from("orders")
+            .select("id, order_number, total, currency, status, payment_status")
+            .eq("id", tx.order_id)
+            .maybeSingle();
+          if (!order) continue;
 
-          if (success) {
-            await supabaseAdmin
-              .from("orders")
-              .update({
-                payment_status: "succeeded",
-                status: "paid",
-                paid_at: new Date().toISOString(),
-                payment_method: "AFS",
-                payment_reference: status.id ?? tx.provider_charge_id,
-              })
-              .eq("id", tx.order_id)
-              .neq("payment_status", "succeeded");
-            settled++;
-          } else {
-            await supabaseAdmin
-              .from("orders")
-              .update({ payment_status: "failed" })
-              .eq("id", tx.order_id)
-              .neq("payment_status", "succeeded");
+          // Reconciliation uses the exact same verification gate as checkout.
+          const result = await verifyAfsPaymentForOrder({
+            order,
+            checkoutId,
+            expectedCheckoutId: checkoutId,
+            source: "reconcile",
+          });
+          if (!result.ok && result.pending) continue;
+
+          await applyAfsPaymentResult({ order, checkoutId, result, source: "reconcile" });
+
+          if (result.ok) settled++;
+          else if (result.category === "payment_failed" || result.category === "gateway_unknown")
             failed++;
-          }
+          else review++;
         }
 
-        return new Response(JSON.stringify({ checked: pending?.length ?? 0, settled, failed }), {
-          headers: { "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ checked: pending?.length ?? 0, settled, failed, review }),
+          { headers: { "Content-Type": "application/json" } },
+        );
       },
     },
   },
