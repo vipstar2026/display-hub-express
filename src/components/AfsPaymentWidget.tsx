@@ -130,7 +130,9 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
       // the widget opens the bank's ACS page inside an iframe, and most issuers
       // send X-Frame-Options: DENY — the shopper is then stuck on the
       // "You are being redirected…" spinner and the payment never completes.
-      threeDIframe: { enabled: false },
+      // COPYandPAY expects a boolean here. An object is truthy and therefore
+      // leaves the 3DS challenge inside the iframe despite `enabled: false`.
+      threeDIframe: false,
       // Detect the card scheme from the entered number instead of asking the user.
       brandDetection: true,
       brandDetectionType: "binlist",
