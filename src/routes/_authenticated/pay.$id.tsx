@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
 import { payInitMessage } from "@/lib/pay-messages";
+import { formatAmount } from "@/lib/afs-money";
 import { createAfsCheckout } from "@/lib/afs.functions";
 import { ShieldCheck, Loader2, Receipt, Truck, Store, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -178,7 +179,7 @@ function PayPage() {
             action={`${data.resultUrl || `${window.location.origin}/pay/result`}?order=${id}`}
             brands={data.brands}
             widgetLang={data.widgetLang}
-            amount={data.amount}
+            amount={formatAmount(order?.total ?? data.amount, data.currency)}
             currency={data.currency}
             onCancel={() => nav({ to: "/cart" })}
           />
