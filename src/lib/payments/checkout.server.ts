@@ -37,15 +37,23 @@ export async function startAfsCheckout(input: { orderId: string; attemptKey: str
       attemptKey: `${input.attemptKey}:refresh:${crypto.randomUUID()}`,
     });
   }
-  const gateway = await createAfsPayment(order, `${BASE}${input.returnPath}`);
+  const gateway = await createAfsPayment(order);
   await attachGatewayCheckout(attempt.id, gateway.checkoutId);
   return { attemptId: attempt.id, checkoutId: gateway.checkoutId, scriptUrl: gateway.scriptUrl, amount: order.total, currency: order.currency, testMode: gateway.config.testMode, brands: gateway.config.brands, widgetLang: gateway.config.widgetLang };
 }
 
-export async function confirmAfsCheckout(input: { orderId: string; checkoutId: string; source: string }) {
+export async function confirmAfsCheckout(input: { orderId: string; checkoutId: string; resourcePath?: string | null; source: string }) {
   const attempt = await getAttemptByCheckout("afs", input.checkoutId);
   if (attempt.order_id !== input.orderId) throw new Error("payment_attempt_mismatch");
   const order = await loadOrderForPayment(input.orderId);
-  const status = await getAfsPaymentStatus(input.checkoutId);
+  let status = await getAfsPaymentStatus(input.checkoutId, input.resourcePath);
+  // Immediately after the widget redirect, AFS can briefly return "session not
+  // found" before the new transaction is visible. Retry only this narrow race;
+  // all other gateway failures remain terminal.
+  for (const delay of [1_500, 3_000]) {
+    if (status.code !== "700.400.580" && status.code !== "200.300.404") break;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    status = await getAfsPaymentStatus(input.checkoutId, input.resourcePath);
+  }
   return applyGatewayStatus({ attempt, order, status, source: input.source });
 }

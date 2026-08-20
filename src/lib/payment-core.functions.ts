@@ -13,10 +13,10 @@ export const startUserAfsPayment = createServerFn({ method: "POST" })
 
 export const confirmUserAfsPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { order_id: string; checkout_id: string }) => input)
+  .inputValidator((input: { order_id: string; checkout_id: string; resource_path?: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: order } = await context.supabase.from("orders").select("id, buyer_id").eq("id", data.order_id).maybeSingle();
     if (!order || order.buyer_id !== context.userId) throw new Error("order_not_found");
     const { confirmAfsCheckout } = await import("@/lib/payments/checkout.server");
-    return confirmAfsCheckout({ orderId: order.id, checkoutId: data.checkout_id, source: "customer_return" });
+    return confirmAfsCheckout({ orderId: order.id, checkoutId: data.checkout_id, resourcePath: data.resource_path, source: "customer_return" });
   });

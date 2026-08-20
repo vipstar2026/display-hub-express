@@ -46,7 +46,7 @@ function PayLinkResult() {
     retry: false,
     refetchInterval: (query) => query.state.data?.pending ? 3_000 : false,
     refetchIntervalInBackground: true,
-    queryFn: () => confirm({ data: { token: search.token!, checkout_id: checkoutId! } }),
+    queryFn: () => confirm({ data: { token: search.token!, checkout_id: checkoutId!, resource_path: search.resourcePath } }),
   });
 
   const t = (ar: string, en: string, ur?: string, bn?: string) =>
