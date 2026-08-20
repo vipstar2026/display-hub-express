@@ -104,11 +104,21 @@ export async function verifyAfsPaymentForOrder(input: {
   const currency = (order.currency || "BHD").toUpperCase();
 
   let status: AfsStatus | null = input.status ?? null;
+  // "unknown reference" codes mean the id we hold is not a checkout id (it can
+  // be the payment id AFS appends as ?id= on the shopper return). Re-resolve it
+  // through the payment lookup instead of failing the shopper.
+  const unresolved = (s: AfsStatus | null) => {
+    const c = s?.result?.code ?? "";
+    return !c || /^(700\.400\.580|200\.300\.404|800\.[89])/.test(c);
+  };
   if (!status) {
     status = await afsGetStatus(input.checkoutId).catch(() => null);
-    if (!status?.result?.code) status = await afsVerifyNotification(input.checkoutId);
+    if (unresolved(status)) status = (await afsVerifyNotification(input.checkoutId)) ?? status;
+  } else if (unresolved(status)) {
+    status = (await afsVerifyNotification(input.checkoutId)) ?? status;
   }
   const code = status?.result?.code ?? "";
+
 
   const fail = async (category: GateFailure["category"], reason: string, pending = false): Promise<GateFailure> => {
     if (category !== "already_paid" && category !== "payment_pending") {
