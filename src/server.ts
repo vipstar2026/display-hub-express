@@ -25,6 +25,28 @@ function brandedErrorResponse(): Response {
   });
 }
 
+// The browser closed the connection mid-request (reload, navigation, tab close).
+// Node fires `Error: aborted` / `ECONNRESET` from abortIncoming for these — they are
+// expected client-disconnects, NOT server failures. Surfacing them as a 500 + branded
+// error page is what flashes the black "This page didn't load" screen. Treat them as
+// silent no-ops: nobody is on the other end to read the response anyway.
+function isClientDisconnectError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const msg = error.message?.toLowerCase() ?? "";
+  const cause = (error as { cause?: unknown }).cause;
+  const causeMsg =
+    cause instanceof Error ? (cause.message?.toLowerCase() ?? "") : "";
+  if (msg.includes("aborted") || msg.includes("econnreset") || msg.includes("socket hang up")) {
+    return true;
+  }
+  if (causeMsg.includes("aborted") || causeMsg.includes("econnreset") || causeMsg.includes("socket hang up")) {
+    return true;
+  }
+  // Node nests the real code on the cause
+  const code = (error as { code?: string }).code ?? (cause as { code?: string })?.code;
+  return code === "ECONNRESET" || code === "ECONNABORTED" || code === "ERR_ABORTED";
+}
+
 function isCatastrophicSsrErrorBody(body: string, responseStatus: number): boolean {
   let payload: unknown;
   try {
