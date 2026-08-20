@@ -8,7 +8,7 @@ import { useI18n } from "@/lib/i18n";
 import { payResultMessage } from "@/lib/pay-messages";
 import { confirmPaymentLinkPayment } from "@/lib/payment-links.functions";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/pay-link/result")({
   ssr: false,
@@ -67,7 +67,11 @@ function PayLinkResult() {
           </>
         ) : (
           <>
-            <XCircle className="mx-auto mb-4 h-14 w-14 text-destructive" />
+            {data.pending ? (
+              <Clock className="mx-auto mb-4 h-14 w-14 text-muted-foreground" />
+            ) : (
+              <XCircle className="mx-auto mb-4 h-14 w-14 text-destructive" />
+            )}
             <h1 className="font-display text-2xl font-bold">
               {data.pending ? t("الدفع قيد المعالجة", "Payment pending", "زیر عمل", "প্রক্রিয়াধীন") : t("فشل الدفع", "Payment failed", "ناکام", "ব্যর্থ")}
             </h1>
