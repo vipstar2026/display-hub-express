@@ -198,11 +198,6 @@ function HomePage() {
                   </span>
                 </h2>
                 {tagline && <p className="text-sm text-muted-foreground md:text-base">{tagline}</p>}
-                <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                  {["CCTV", "Dish Repair", "IPTV", "beIN Sports", "Satellite"].map((tag) => (
-                    <span key={tag} className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-primary">{tag}</span>
-                  ))}
-                </div>
               </div>
 
               {/* Right contact panel */}
