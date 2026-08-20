@@ -17,7 +17,7 @@ const searchSchema = z.object({
   resourcePath: z.string().optional(),
 });
 
-export const Route = createFileRoute("/_authenticated/pay/result")({
+export const Route = createFileRoute("/pay/result")({
   ssr: false,
   validateSearch: searchSchema,
   component: PayResult,
