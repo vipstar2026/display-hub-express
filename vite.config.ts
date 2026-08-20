@@ -23,7 +23,15 @@ export default defineConfig({
     // Force a single pre-bundled React instance; without this the router's
     // un-optimized ESM can pull a second copy and hooks read a null dispatcher.
     optimizeDeps: {
-      include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime"],
+      include: [
+        "react",
+        "react-dom",
+        "react-dom/client",
+        "react/jsx-runtime",
+        "react/jsx-dev-runtime",
+        "@tanstack/react-router",
+        "@tanstack/react-query",
+      ],
     },
     resolve: {
       dedupe: ["react", "react-dom"],
