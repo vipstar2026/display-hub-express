@@ -230,11 +230,14 @@ export const createGuestAfsCheckout = createServerFn({ method: "POST" })
     if (order.payment_status === "succeeded") bad("order_already_paid");
 
     const { afsPrepareCheckout, loadAfsConfig } = await import("@/lib/afs.server");
+    const { formatAmount } = await import("@/lib/afs-money");
     const cfg = await loadAfsConfig();
+    const currency = String(cfg.currency || order.currency || "BHD").toUpperCase();
+    const amount = formatAmount(order.total, currency);
     const [givenName, ...rest] = String(order.buyer_name ?? "").trim().split(" ");
     const { checkoutId } = await afsPrepareCheckout({
-      amount: Number(order.total).toFixed(2),
-      currency: order.currency || "BHD",
+      amount,
+      currency,
       merchantTransactionId: order.order_number,
       email: order.buyer_email,
       givenName: givenName || null,
@@ -247,8 +250,9 @@ export const createGuestAfsCheckout = createServerFn({ method: "POST" })
         order_id: order.id,
         provider: "afs",
         provider_charge_id: checkoutId,
+        provider_checkout_id: checkoutId,
         amount: Number(order.total),
-        currency: cfg.currency || order.currency || "BHD",
+        currency,
         status: "pending",
       });
     } catch { /* non-fatal */ }
@@ -256,8 +260,8 @@ export const createGuestAfsCheckout = createServerFn({ method: "POST" })
     return {
       checkoutId,
       scriptUrl: `${cfg.widgetBase}?checkoutId=${checkoutId}`,
-      amount: Number(order.total).toFixed(2),
-      currency: cfg.currency || order.currency || "BHD",
+      amount,
+      currency,
       testMode: cfg.testMode,
       brands: cfg.brands,
       widgetLang: cfg.widgetLang,
@@ -267,51 +271,44 @@ export const createGuestAfsCheckout = createServerFn({ method: "POST" })
 export const confirmGuestAfsPayment = createServerFn({ method: "POST" })
   .inputValidator((input: { order_id: string; token: string; checkout_id: string }) => input)
   .handler(async ({ data }) => {
-    const { admin, order } = await loadGuestOrder(data.order_id, data.token);
-    const { afsGetStatus, afsIsSuccess, afsIsPending } = await import("@/lib/afs.server");
+    const { order } = await loadGuestOrder(data.order_id, data.token);
+    const { verifyAfsPaymentForOrder, applyAfsPaymentResult } = await import(
+      "@/lib/afs-verify.server"
+    );
 
-    const status = await afsGetStatus(data.checkout_id);
-    const code = status.result?.code;
-    const success = afsIsSuccess(code);
-    const pending = afsIsPending(code);
-
-    const txPayload = {
-      order_id: order.id,
-      provider: "afs",
-      provider_charge_id: status.id ?? data.checkout_id,
-      amount: Number(status.amount ?? order.total),
-      currency: status.currency ?? "BHD",
-      status: success ? "succeeded" : pending ? "pending" : "failed",
-      payment_method: status.paymentBrand ?? null,
-      raw_response: status,
-      failure_reason: success ? null : (status.result?.description ?? null),
-      paid_at: success ? new Date().toISOString() : null,
+    // Same centralised gate as authenticated checkout / webhook / reconciliation.
+    const gateOrder = {
+      id: order.id as string,
+      order_number: order.order_number as string,
+      total: order.total as number,
+      currency: (order.currency ?? "BHD") as string,
+      payment_status: (order.payment_status ?? "pending") as string,
+      status: (order.status ?? null) as string | null,
     };
 
-    const { data: existing } = await admin
-      .from("payment_transactions")
-      .select("id")
-      .eq("order_id", order.id)
-      .eq("provider", "afs")
-      .eq("provider_charge_id", data.checkout_id)
-      .eq("status", "pending")
-      .maybeSingle();
-    if (existing) await admin.from("payment_transactions").update(txPayload).eq("id", existing.id);
-    else await admin.from("payment_transactions").insert(txPayload);
+    const result = await verifyAfsPaymentForOrder({
+      order: gateOrder,
+      checkoutId: data.checkout_id,
+      source: "confirm_guest",
+    });
+    await applyAfsPaymentResult({
+      order: gateOrder,
+      checkoutId: data.checkout_id,
+      result,
+      source: "confirm_guest",
+    });
 
-    // Fulfilment is driven by the DB trigger on the pending -> succeeded change,
-    // so re-confirming an already paid order is a no-op.
-    if (success && order.payment_status !== "succeeded") {
-      await admin.from("orders").update({
-        payment_status: "succeeded",
-        status: "paid",
-        paid_at: new Date().toISOString(),
-        payment_method: "AFS",
-        payment_reference: status.id ?? data.checkout_id,
-      }).eq("id", order.id);
-    } else if (!success && !pending && order.payment_status !== "succeeded") {
-      await admin.from("orders").update({ payment_status: "failed" }).eq("id", order.id);
-    }
-
-    return { success, pending, code: code ?? "", message: status.result?.description ?? "" };
+    const alreadyPaid = !result.ok && result.category === "already_paid";
+    return {
+      success: result.ok || alreadyPaid,
+      pending: !result.ok && result.pending,
+      code: result.code,
+      message: result.ok
+        ? (result.status.result?.description ?? "")
+        : alreadyPaid
+          ? ""
+          : result.category === "payment_failed"
+            ? result.reason
+            : "payment_verification_failed",
+    };
   });

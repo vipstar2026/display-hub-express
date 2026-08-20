@@ -1533,6 +1533,8 @@ export type Database = {
           payment_method: string | null
           provider: string
           provider_charge_id: string | null
+          provider_checkout_id: string | null
+          provider_payment_id: string | null
           raw_response: Json | null
           redirect_url: string | null
           status: string
@@ -1549,6 +1551,8 @@ export type Database = {
           payment_method?: string | null
           provider?: string
           provider_charge_id?: string | null
+          provider_checkout_id?: string | null
+          provider_payment_id?: string | null
           raw_response?: Json | null
           redirect_url?: string | null
           status?: string
@@ -1565,6 +1569,8 @@ export type Database = {
           payment_method?: string | null
           provider?: string
           provider_charge_id?: string | null
+          provider_checkout_id?: string | null
+          provider_payment_id?: string | null
           raw_response?: Json | null
           redirect_url?: string | null
           status?: string

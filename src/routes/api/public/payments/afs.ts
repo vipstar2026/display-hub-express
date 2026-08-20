@@ -69,6 +69,7 @@ export const Route = createFileRoute("/api/public/payments/afs")({
           request.headers.get("x-authentication-tag") ?? request.headers.get("x-auth-tag") ?? "";
 
         let payload: Record<string, unknown> = {};
+        let encrypted = false;
         if (ivHex && tagHex) {
           if (!cfg.webhookKey) {
             await log("missing_key", { ivHex });
@@ -85,8 +86,10 @@ export const Route = createFileRoute("/api/public/payments/afs")({
             await log("decryption_failed", { ivHex, message: (e as Error).message });
             return json({ received: true, error: "decryption failed" });
           }
+          encrypted = true;
         } else {
-          // Unencrypted probe / connectivity test from the bank.
+          // Unencrypted body: only ever treated as a connectivity probe. It is
+          // NEVER allowed to mutate payment or order state.
           try {
             payload = JSON.parse(raw) as Record<string, unknown>;
           } catch {
@@ -97,96 +100,81 @@ export const Route = createFileRoute("/api/public/payments/afs")({
         const pay = (payload["payload"] ?? payload) as Record<string, unknown>;
         const checkoutId = (pay["id"] as string) ?? (pay["ndc"] as string) ?? null;
         const orderNumber = (pay["merchantTransactionId"] as string) ?? null;
-        await log("received", { checkoutId, orderNumber, type: payload["type"] ?? null });
+        await log("received", {
+          checkoutId,
+          orderNumber,
+          encrypted,
+          type: payload["type"] ?? null,
+        });
+
+        if (!encrypted) {
+          await log("unencrypted_probe_ignored", { checkoutId, orderNumber });
+          return json({ received: true, ignored: "unencrypted notification (probe only)" });
+        }
         if (!checkoutId && !orderNumber) return json({ received: true, ignored: true });
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        type OrderRow = { id: string; total: number; currency: string; payment_status: string };
+        type OrderRow = {
+          id: string;
+          order_number: string;
+          total: number;
+          currency: string;
+          status: string;
+          payment_status: string;
+        };
+        const cols = "id, order_number, total, currency, status, payment_status";
         let order: OrderRow | null = null;
+        let txCheckoutId: string | null = null;
         if (orderNumber) {
           const { data } = await supabaseAdmin
             .from("orders")
-            .select("id, total, currency, payment_status")
+            .select(cols)
             .eq("order_number", orderNumber)
             .maybeSingle();
           order = data as OrderRow | null;
         }
-        if (!order && checkoutId) {
+        if (checkoutId) {
           const { data: tx } = await supabaseAdmin
             .from("payment_transactions")
-            .select("order_id")
+            .select("order_id, provider_checkout_id, provider_charge_id")
             .eq("provider", "afs")
-            .eq("provider_charge_id", checkoutId)
+            .or(`provider_checkout_id.eq.${checkoutId},provider_charge_id.eq.${checkoutId}`)
+            .order("created_at", { ascending: false })
+            .limit(1)
             .maybeSingle();
-          if (tx?.order_id) {
-            const { data } = await supabaseAdmin
-              .from("orders")
-              .select("id, total, currency, payment_status")
-              .eq("id", tx.order_id)
-              .maybeSingle();
-            order = data as OrderRow | null;
+          if (tx) {
+            txCheckoutId = (tx.provider_checkout_id as string) ?? (tx.provider_charge_id as string);
+            if (!order && tx.order_id) {
+              const { data } = await supabaseAdmin
+                .from("orders")
+                .select(cols)
+                .eq("id", tx.order_id)
+                .maybeSingle();
+              order = data as OrderRow | null;
+            }
           }
         }
         // A bank test notification has no matching order — acknowledge it.
-        if (!order) return json({ received: true, ignored: "order not found" });
+        if (!order || !checkoutId) return json({ received: true, ignored: "order not found" });
 
+        const { verifyAfsPaymentForOrder, applyAfsPaymentResult } = await import(
+          "@/lib/afs-verify.server"
+        );
+        // Never trust the notification body: the gate re-queries the gateway
+        // and validates amount / currency / reference / association.
+        const result = await verifyAfsPaymentForOrder({
+          order,
+          checkoutId,
+          expectedCheckoutId: txCheckoutId,
+          source: "webhook",
+        });
+        await applyAfsPaymentResult({ order, checkoutId, result, source: "webhook" });
 
-        // Never trust the notification body: ask the gateway for the real status.
-        const status = checkoutId ? await afsVerifyNotification(checkoutId) : null;
-        const verified = !!status?.result?.code;
-        const code = status?.result?.code ?? "";
-        const success = verified && afsIsSuccess(code);
-        const pending = !verified || afsIsPending(code);
-
-
-        const txPayload = {
-          order_id: order.id,
-          provider: "afs",
-          provider_charge_id: status?.id ?? checkoutId ?? orderNumber ?? "",
-          amount: Number(status?.amount ?? order.total),
-          currency: status?.currency ?? order.currency ?? "BHD",
-          status: success ? "succeeded" : pending ? "pending" : "failed",
-          payment_method: status?.paymentBrand ?? "CARD",
-          raw_response: (status ?? payload) as never,
-          failure_reason: success ? null : (status?.result?.description ?? null),
-          paid_at: success ? new Date().toISOString() : null,
-        };
-
-        const { data: existing } = await supabaseAdmin
-          .from("payment_transactions")
-          .select("id")
-          .eq("order_id", order.id)
-          .eq("provider", "afs")
-          .eq("status", "pending")
-          .maybeSingle();
-
-        if (existing) {
-          await supabaseAdmin.from("payment_transactions").update(txPayload).eq("id", existing.id);
-        } else {
-          await supabaseAdmin.from("payment_transactions").insert(txPayload);
-        }
-
-        if (success && order.payment_status !== "succeeded") {
-          await supabaseAdmin
-            .from("orders")
-            .update({
-              payment_status: "succeeded",
-              status: "paid",
-              paid_at: new Date().toISOString(),
-              payment_method: "AFS",
-              payment_reference: status?.id ?? checkoutId,
-            })
-            .eq("id", order.id);
-        } else if (verified && !success && !pending) {
-          await supabaseAdmin
-            .from("orders")
-            .update({ payment_status: "failed" })
-            .eq("id", order.id);
-        }
-
-
-        return json({ received: true, status: txPayload.status });
+        return json({
+          received: true,
+          status: result.ok ? "succeeded" : result.pending ? "pending" : result.category,
+        });
       },
     },
   },
