@@ -159,7 +159,16 @@ function PayPage() {
         )}
         {error && (
           <div className="rounded-xl border border-primary/10 bg-card p-4">
-            <PayErrorInline message={(error as Error).message} />
+            <PayErrorInline message={payInitMessage(lang)} />
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="rounded-lg border border-primary/30 px-4 py-2 text-sm text-foreground hover:bg-primary/10"
+              >
+                {lang === "ar" ? "إعادة المحاولة" : lang === "ur" ? "دوبارہ کوشش کریں" : lang === "bn" ? "আবার চেষ্টা করুন" : "Try again"}
+              </button>
+            </div>
           </div>
         )}
         {data && (
