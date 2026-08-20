@@ -57,88 +57,30 @@ export const Route = createFileRoute("/api/public/payments/benefit")({
           null;
         if (!checkoutId && !orderNumber) return json({ error: "missing reference" }, 400);
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { bpayGetStatus, bpayIsSuccess, bpayIsPending } = await import("@/lib/bpay.server");
-
-        const { data: order } = orderNumber
-          ? await supabaseAdmin
-              .from("orders")
-              .select("id, total, currency, payment_status")
-              .eq("order_number", orderNumber)
-              .maybeSingle()
-          : { data: null };
-
-        let resolvedOrder = order;
-        if (!resolvedOrder && checkoutId) {
-          const { data: tx } = await supabaseAdmin
-            .from("payment_transactions")
-            .select("order_id")
-            .eq("provider", "benefit")
-            .eq("provider_charge_id", checkoutId)
-            .maybeSingle();
-          if (tx?.order_id) {
-            const { data: o } = await supabaseAdmin
-              .from("orders")
-              .select("id, total, currency, payment_status")
-              .eq("id", tx.order_id)
-              .maybeSingle();
-            resolvedOrder = o;
-          }
-        }
-        if (!resolvedOrder) return json({ error: "order not found" }, 404);
-
-        // Always verify with the gateway rather than trusting the callback body.
-        const status = checkoutId ? await bpayGetStatus(checkoutId, cfg) : null;
-        const code = status?.result?.code;
-        const success = bpayIsSuccess(code);
-        const pending = bpayIsPending(code);
-
-        const txPayload = {
-          order_id: resolvedOrder.id,
-          provider: "benefit",
-          provider_charge_id: status?.id ?? checkoutId ?? orderNumber ?? "",
-          amount: Number(status?.amount ?? resolvedOrder.total),
-          currency: status?.currency ?? resolvedOrder.currency ?? "BHD",
-          status: success ? "succeeded" : pending ? "pending" : "failed",
-          payment_method: status?.paymentBrand ?? "BENEFIT",
-          raw_response: (status ?? payload) as never,
-          failure_reason: success ? null : (status?.result?.description ?? null),
-          paid_at: success ? new Date().toISOString() : null,
-        };
-
-        const { data: existing } = await supabaseAdmin
-          .from("payment_transactions")
-          .select("id")
-          .eq("order_id", resolvedOrder.id)
-          .eq("provider", "benefit")
-          .eq("status", "pending")
-          .maybeSingle();
-
-        if (existing) {
-          await supabaseAdmin.from("payment_transactions").update(txPayload).eq("id", existing.id);
-        } else {
-          await supabaseAdmin.from("payment_transactions").insert(txPayload);
-        }
-
-        if (success && resolvedOrder.payment_status !== "succeeded") {
-          await supabaseAdmin
-            .from("orders")
-            .update({
-              payment_status: "succeeded",
-              status: "paid",
-              paid_at: new Date().toISOString(),
-              payment_method: "BENEFIT",
-              payment_reference: status?.id ?? checkoutId,
-            })
-            .eq("id", resolvedOrder.id);
-        } else if (!success && !pending) {
-          await supabaseAdmin
-            .from("orders")
-            .update({ payment_status: "failed" })
-            .eq("id", resolvedOrder.id);
-        }
-
-        return json({ received: true, status: txPayload.status });
+        if (!checkoutId) return json({ error: "missing checkout reference" }, 400);
+        const { getAttemptByCheckout, loadOrderForPayment, applyGatewayStatus } = await import("@/lib/payments/core.server");
+        const attempt = await getAttemptByCheckout("benefit", checkoutId);
+        const order = await loadOrderForPayment(attempt.order_id);
+        if (orderNumber && order.order_number !== orderNumber) return json({ error: "reference mismatch" }, 400);
+        const status = await bpayGetStatus(checkoutId, cfg);
+        const code = status.result?.code;
+        const result = await applyGatewayStatus({
+          attempt,
+          order,
+          status: {
+            externalPaymentId: status.id ?? null,
+            merchantReference: status.merchantTransactionId ?? null,
+            amount: status.amount ?? null,
+            currency: status.currency ?? null,
+            brand: status.paymentBrand ?? "BENEFIT",
+            code: code ?? "",
+            description: status.result?.description ?? "",
+            state: bpayIsSuccess(code) ? "succeeded" : bpayIsPending(code) ? "processing" : code ? "failed" : "unknown",
+          },
+          source: "webhook",
+        });
+        return json({ received: true, status: result.success ? "succeeded" : result.pending ? "pending" : "failed" });
       },
       GET: async () => new Response("ok"),
     },
