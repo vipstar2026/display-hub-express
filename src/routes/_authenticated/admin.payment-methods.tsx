@@ -238,6 +238,9 @@ function AdminPaymentMethods() {
                             onChange={(e) => setVal(fl.key, e.target.value)}
                           />
                         )}
+                        {(ar ? fl.hint_ar : fl.hint_en) && (
+                          <p className="mt-1 text-[11px] text-muted-foreground">{ar ? fl.hint_ar : fl.hint_en}</p>
+                        )}
                       </div>
                     ))}
                   </div>
