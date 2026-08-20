@@ -24,7 +24,16 @@ function value(source: Record<string, unknown>, key: string) {
   return typeof v === "string" && v.trim() ? v.trim() : null;
 }
 
-export async function loadAfsPaymentConfig(): Promise<Config> {
+type AfsEnvironment = "test" | "live";
+
+export function getAfsCheckoutEnvironment(checkoutId: string): AfsEnvironment | null {
+  const hostMarker = checkoutId.toLowerCase();
+  if (hostMarker.includes(".uat")) return "test";
+  if (hostMarker.includes(".prod")) return "live";
+  return null;
+}
+
+export async function loadAfsPaymentConfig(environment?: AfsEnvironment | null): Promise<Config> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
     .from("payment_methods")
@@ -36,7 +45,10 @@ export async function loadAfsPaymentConfig(): Promise<Config> {
     .maybeSingle();
   if (!data) throw new Error("payment_method_unavailable");
   const source = { ...((data.config ?? {}) as Record<string, unknown>), ...((data.credentials ?? {}) as Record<string, unknown>) };
-  const live = data.test_mode === false;
+  // A checkout must be loaded and queried on the environment that issued its
+  // ID. This matters when the merchant switches from test to live while an
+  // older checkout is still open in a shopper's browser.
+  const live = environment ? environment === "live" : data.test_mode === false;
   const entityId = (live ? value(source, "live_entity_id") : null) ?? value(source, "entity_id");
   const token = (live ? value(source, "live_access_token") : null) ?? value(source, "access_token");
   if (!entityId || !token) throw new Error("gateway_not_configured");
@@ -114,7 +126,7 @@ function normalizeStatus(body: Record<string, unknown>): GatewayStatus {
 }
 
 export async function getAfsPaymentStatus(checkoutId: string, resourcePath?: string | null) {
-  const config = await loadAfsPaymentConfig();
+  const config = await loadAfsPaymentConfig(getAfsCheckoutEnvironment(checkoutId));
   const expectedPath = `/v1/checkouts/${checkoutId}/payment`;
   const path = resourcePath || expectedPath;
   if (decodeURIComponent(path) !== expectedPath) throw new Error("payment_resource_mismatch");
