@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -35,11 +35,7 @@ function PayResult() {
     (search.resourcePath ? search.resourcePath.split("/")[3] : undefined) ?? search.id;
 
   const attemptsKey = `afs-recheck:${search.order ?? ""}:${checkoutId ?? ""}`;
-  const [autoTries, setAutoTries] = useState(() => {
-    if (typeof window === "undefined") return 0;
-    return Number(window.sessionStorage.getItem(attemptsKey) ?? "0");
-  });
-  const triesRef = useRef(autoTries);
+  const triesRef = useRef(typeof window === "undefined" ? 0 : Number(window.sessionStorage.getItem(attemptsKey) ?? "0"));
   const MAX_AUTO_TRIES = 5;
 
   const { data, isLoading, isFetching, refetch } = useQuery({
@@ -60,7 +56,6 @@ function PayResult() {
     if (!data?.pending) return;
     const next = triesRef.current + 1;
     triesRef.current = next;
-    setAutoTries(next);
     if (typeof window !== "undefined") window.sessionStorage.setItem(attemptsKey, String(next));
   }, [data, attemptsKey]);
 
@@ -120,7 +115,15 @@ function PayResult() {
                   {txt("إعادة المحاولة", "Try again", "دوبارہ کوشش")}
                 </Button>
               )}
-              <Button variant="outline" onClick={() => nav({ to: "/cart" })}>{txt("السلة", "Cart", "کارٹ")}</Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  // Send the shopper back to the payment-method step, not a new order.
+                  window.sessionStorage.setItem("checkout:step", "payment");
+                  window.sessionStorage.removeItem(attemptsKey);
+                  nav({ to: "/cart" });
+                }}
+              >{txt("السلة", "Cart", "کارٹ")}</Button>
             </div>
           </>
         )}
