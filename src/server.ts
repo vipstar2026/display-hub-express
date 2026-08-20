@@ -84,7 +84,14 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
     return response;
   }
 
-  console.error(consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`));
+  const captured = consumeLastCapturedError();
+  // If the swallowed error was a client disconnect, don't surface the 500 error page —
+  // the client is already gone. Log nothing and return a silent 499.
+  if (isClientDisconnectError(captured)) {
+    return new Response(null, { status: 499, headers: { "content-length": "0" } });
+  }
+
+  console.error(captured ?? new Error(`h3 swallowed SSR error: ${body}`));
   return brandedErrorResponse();
 }
 
