@@ -64,7 +64,7 @@ export const startPaymentLinkCheckout = createServerFn({ method: "POST" })
   });
 
 export const confirmPaymentLinkPayment = createServerFn({ method: "POST" })
-  .inputValidator((input: { token: string; checkout_id: string }) => input)
+  .inputValidator((input: { token: string; checkout_id: string; resource_path?: string }) => input)
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -76,7 +76,7 @@ export const confirmPaymentLinkPayment = createServerFn({ method: "POST" })
     if (!link?.order_id) throw new Error("Payment link not found");
 
     const { confirmAfsCheckout } = await import("@/lib/payments/checkout.server");
-    const result = await confirmAfsCheckout({ orderId: link.order_id, checkoutId: data.checkout_id, source: "customer_return" });
+    const result = await confirmAfsCheckout({ orderId: link.order_id, checkoutId: data.checkout_id, resourcePath: data.resource_path, source: "customer_return" });
     if (result.success) {
       const now = new Date().toISOString();
       await supabaseAdmin.from("payment_links").update({ status: "paid", paid_at: now }).eq("id", link.id);

@@ -46,7 +46,7 @@ function GuestPayResult() {
     retry: false,
     refetchInterval: (query) => query.state.data?.pending ? 3_000 : false,
     refetchIntervalInBackground: true,
-    queryFn: () => confirm({ data: { order_id: search.order!, token: search.t!, checkout_id: checkoutId! } }),
+    queryFn: () => confirm({ data: { order_id: search.order!, token: search.t!, checkout_id: checkoutId!, resource_path: search.resourcePath } }),
   });
 
   useEffect(() => {

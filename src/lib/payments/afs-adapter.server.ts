@@ -63,7 +63,7 @@ async function request(path: string, config: Config, init?: RequestInit) {
   return { response, body };
 }
 
-export async function createAfsPayment(order: PaymentOrder, returnUrl: string) {
+export async function createAfsPayment(order: PaymentOrder) {
   const config = await loadAfsPaymentConfig();
   const names = (order.buyer_name ?? "").trim().split(/\s+/).filter(Boolean);
   const form = new URLSearchParams({
@@ -72,10 +72,6 @@ export async function createAfsPayment(order: PaymentOrder, returnUrl: string) {
     currency: order.currency.toUpperCase(),
     paymentType: config.paymentType,
     merchantTransactionId: order.order_number,
-    // REQUIRED by COPYandPAY. Without shopperResultUrl the widget cannot
-    // complete the redirect flow, no transaction is created, and the status
-    // query later returns 700.400.580 ("cannot find transaction").
-    shopperResultUrl: returnUrl,
   });
   if (order.buyer_email) form.set("customer.email", order.buyer_email);
   if (names[0]) form.set("customer.givenName", names[0].slice(0, 48));
@@ -110,9 +106,13 @@ function normalizeStatus(body: Record<string, unknown>): GatewayStatus {
   };
 }
 
-export async function getAfsPaymentStatus(checkoutId: string) {
+export async function getAfsPaymentStatus(checkoutId: string, resourcePath?: string | null) {
   const config = await loadAfsPaymentConfig();
-  const { body } = await request(`/v1/checkouts/${encodeURIComponent(checkoutId)}/payment?entityId=${encodeURIComponent(config.entityId)}`, config);
+  const expectedPath = `/v1/checkouts/${checkoutId}/payment`;
+  const path = resourcePath || expectedPath;
+  if (decodeURIComponent(path) !== expectedPath) throw new Error("payment_resource_mismatch");
+  const separator = path.includes("?") ? "&" : "?";
+  const { body } = await request(`${path}${separator}entityId=${encodeURIComponent(config.entityId)}`, config);
   return normalizeStatus(body);
 }
 

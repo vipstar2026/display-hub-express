@@ -237,9 +237,9 @@ export const createGuestAfsCheckout = createServerFn({ method: "POST" })
   });
 
 export const confirmGuestAfsPayment = createServerFn({ method: "POST" })
-  .inputValidator((input: { order_id: string; token: string; checkout_id: string }) => input)
+  .inputValidator((input: { order_id: string; token: string; checkout_id: string; resource_path?: string }) => input)
   .handler(async ({ data }) => {
     const { order } = await loadGuestOrder(data.order_id, data.token);
     const { confirmAfsCheckout } = await import("@/lib/payments/checkout.server");
-    return confirmAfsCheckout({ orderId: order.id, checkoutId: data.checkout_id, source: "customer_return" });
+    return confirmAfsCheckout({ orderId: order.id, checkoutId: data.checkout_id, resourcePath: data.resource_path, source: "customer_return" });
   });
