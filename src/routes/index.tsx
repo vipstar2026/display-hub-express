@@ -29,9 +29,10 @@ export const Route = createFileRoute("/")({
       type: "application/ld+json",
       children: JSON.stringify({
         "@context": "https://schema.org",
-        "@type": "Organization",
+        "@type": "Store",
         name: "VIPSTAR",
         url: "https://vipstar.cc",
+        description: "Shop satellite receivers, dishes, LNBs, IPTV subscriptions and accessories in Bahrain.",
         address: { "@type": "PostalAddress", addressCountry: "BH" },
       }),
     }],
