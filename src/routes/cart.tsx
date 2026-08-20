@@ -17,6 +17,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { useSiteSettings } from "@/lib/site-settings";
 import { placeGuestOrder } from "@/lib/guest-checkout.functions";
+import { placeUserOrder } from "@/lib/user-checkout.functions";
 import { analytics } from "@/lib/analytics";
 
 
