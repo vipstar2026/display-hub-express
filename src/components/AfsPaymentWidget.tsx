@@ -126,13 +126,9 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
     window.wpwlOptions = {
       style: "plain",
       locale,
-      // 3-D Secure must take over the whole browser window. Left on its default
-      // the widget opens the bank's ACS page inside an iframe, and most issuers
-      // send X-Frame-Options: DENY — the shopper is then stuck on the
-      // "You are being redirected…" spinner and the payment never completes.
-      // COPYandPAY expects a boolean here. An object is truthy and therefore
-      // leaves the 3DS challenge inside the iframe despite `enabled: false`.
-      threeDIframe: false,
+      // Official COPYandPAY option: 5 opens the 3DS challenge full-screen.
+      // This avoids issuer ACS pages being blocked inside a smaller iframe.
+      browser: { threeDChallengeWindow: 5 },
       // Detect the card scheme from the entered number instead of asking the user.
       brandDetection: true,
       brandDetectionType: "binlist",
