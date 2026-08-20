@@ -63,7 +63,7 @@ async function request(path: string, config: Config, init?: RequestInit) {
   return { response, body };
 }
 
-export async function createAfsPayment(order: PaymentOrder) {
+export async function createAfsPayment(order: PaymentOrder, returnUrl: string) {
   const config = await loadAfsPaymentConfig();
   const names = (order.buyer_name ?? "").trim().split(/\s+/).filter(Boolean);
   const form = new URLSearchParams({
@@ -72,6 +72,10 @@ export async function createAfsPayment(order: PaymentOrder) {
     currency: order.currency.toUpperCase(),
     paymentType: config.paymentType,
     merchantTransactionId: order.order_number,
+    // REQUIRED by COPYandPAY. Without shopperResultUrl the widget cannot
+    // complete the redirect flow, no transaction is created, and the status
+    // query later returns 700.400.580 ("cannot find transaction").
+    shopperResultUrl: returnUrl,
   });
   if (order.buyer_email) form.set("customer.email", order.buyer_email);
   if (names[0]) form.set("customer.givenName", names[0].slice(0, 48));
