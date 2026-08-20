@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
+import { payResultMessage } from "@/lib/pay-messages";
 import { confirmAfsPayment } from "@/lib/afs.functions";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
@@ -69,7 +70,7 @@ function PayResult() {
             <h1 className="font-display text-2xl font-bold">
               {data.pending ? txt("الدفع قيد المعالجة", "Payment pending", "ادائیگی زیر عمل") : txt("فشل الدفع", "Payment failed", "ادائیگی ناکام")}
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground">{data.message} ({data.code})</p>
+            <p className="mt-2 text-sm text-muted-foreground">{payResultMessage(lang, !!data.pending)}</p>
             <div className="mt-6 flex justify-center gap-2">
               {search.order && (
                 <Button onClick={() => nav({ to: "/pay/$id", params: { id: search.order! } })}>

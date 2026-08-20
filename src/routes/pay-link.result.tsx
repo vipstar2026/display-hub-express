@@ -5,6 +5,7 @@ import { z } from "zod";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
+import { payResultMessage } from "@/lib/pay-messages";
 import { confirmPaymentLinkPayment } from "@/lib/payment-links.functions";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
@@ -70,7 +71,7 @@ function PayLinkResult() {
             <h1 className="font-display text-2xl font-bold">
               {data.pending ? t("الدفع قيد المعالجة", "Payment pending", "زیر عمل", "প্রক্রিয়াধীন") : t("فشل الدفع", "Payment failed", "ناکام", "ব্যর্থ")}
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground">{data.message} ({data.code})</p>
+            <p className="mt-2 text-sm text-muted-foreground">{payResultMessage(lang, !!data.pending)}</p>
             {search.token && (
               <Button className="mt-6" onClick={() => nav({ to: "/pay-link/$token", params: { token: search.token! } })}>
                 {t("إعادة المحاولة", "Try again", "دوبارہ کوشش", "আবার চেষ্টা করুন")}
