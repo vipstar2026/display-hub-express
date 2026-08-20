@@ -231,6 +231,37 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
       )}
 
       {/* widget */}
+      {embedded ? (
+        <div className="px-5 py-8 text-center">
+          <p className="mb-1 text-sm font-semibold">
+            {t(
+              "افتح صفحة الدفع في نافذة كاملة",
+              "Open the payment page in a full window",
+              "ادائیگی مکمل ونڈو میں کھولیں",
+              "পেমেন্ট পেজ পূর্ণ উইন্ডোতে খুলুন",
+            )}
+          </p>
+          <p className="mb-4 text-xs text-muted-foreground">
+            {t(
+              "بوابة البطاقة والتحقق 3D Secure لا يعملان داخل نافذة المعاينة المضمّنة.",
+              "The card gateway and 3D Secure cannot run inside an embedded preview window.",
+              "کارڈ گیٹ وے اور 3D Secure ایمبیڈڈ پریویو میں نہیں چل سکتے۔",
+              "কার্ড গেটওয়ে ও 3D Secure এমবেডেড প্রিভিউতে চলে না।",
+            )}
+          </p>
+          <Button
+            onClick={() =>
+              window.open(
+                `${window.location.origin}${window.location.pathname}${window.location.search}`,
+                "_blank",
+                "noopener",
+              )
+            }
+          >
+            {t("متابعة الدفع", "Continue to payment", "ادائیگی جاری رکھیں", "পেমেন্ট চালিয়ে যান")}
+          </Button>
+        </div>
+      ) : (
       <div className="afs-widget px-5 py-5" dir="ltr">
         <div>
           {!ready && !failed && (
