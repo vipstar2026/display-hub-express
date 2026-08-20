@@ -7,7 +7,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
 import { payResultMessage } from "@/lib/pay-messages";
-import { confirmAfsPayment } from "@/lib/afs.functions";
+import { confirmUserAfsPayment } from "@/lib/payment-core.functions";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Clock, Loader2 } from "lucide-react";
 
@@ -29,7 +29,7 @@ function PayResult() {
   const search = Route.useSearch();
   const { lang } = useI18n();
   const nav = useNavigate();
-  const confirm = useServerFn(confirmAfsPayment);
+  const confirm = useServerFn(confirmUserAfsPayment);
 
   const checkoutId =
     (search.resourcePath ? search.resourcePath.split("/")[3] : undefined) ?? search.id;

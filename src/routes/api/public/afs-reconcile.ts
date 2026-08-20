@@ -46,11 +46,11 @@ export const Route = createFileRoute("/api/public/afs-reconcile")({
 
 
         const since = new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString();
-        const { data: pending, error } = await supabaseAdmin
-          .from("payment_transactions")
-          .select("id, order_id, provider_charge_id, provider_checkout_id, status, created_at")
+        const { data: pending, error } = await (supabaseAdmin as any)
+          .from("payment_attempts")
+          .select("*")
           .eq("provider", "afs")
-          .eq("status", "pending")
+          .in("state", ["awaiting_customer", "processing"])
           .gte("created_at", since)
           .limit(50);
 
@@ -61,42 +61,26 @@ export const Route = createFileRoute("/api/public/afs-reconcile")({
           });
         }
 
-        const { verifyAfsPaymentForOrder, applyAfsPaymentResult } = await import(
-          "@/lib/afs-verify.server"
-        );
+        const { loadOrderForPayment, applyGatewayStatus } = await import("@/lib/payments/core.server");
+        const { getAfsPaymentStatus } = await import("@/lib/payments/afs-adapter.server");
 
         let settled = 0;
         let failed = 0;
         let review = 0;
 
-        for (const tx of pending ?? []) {
-          const checkoutId =
-            (tx as { provider_checkout_id?: string | null }).provider_checkout_id ??
-            tx.provider_charge_id;
-          if (!checkoutId || !tx.order_id) continue;
-
-          const { data: order } = await supabaseAdmin
-            .from("orders")
-            .select("id, order_number, total, currency, status, payment_status")
-            .eq("id", tx.order_id)
-            .maybeSingle();
-          if (!order) continue;
-
-          // Reconciliation uses the exact same verification gate as checkout.
-          const result = await verifyAfsPaymentForOrder({
-            order,
-            checkoutId,
-            expectedCheckoutId: checkoutId,
-            source: "reconcile",
-          });
-          await applyAfsPaymentResult({ order, checkoutId, result, source: "reconcile" });
-
-          if (!result.ok && result.pending) continue;
-
-          if (result.ok) settled++;
-          else if (result.category === "payment_failed")
-            failed++;
-          else review++;
+        for (const attempt of pending ?? []) {
+          if (!attempt.external_checkout_id || !attempt.order_id) continue;
+          try {
+            const order = await loadOrderForPayment(attempt.order_id);
+            const status = await getAfsPaymentStatus(attempt.external_checkout_id);
+            const result = await applyGatewayStatus({ attempt, order, status, source: "reconciliation" });
+            if (result.success) settled++;
+            else if (result.pending) continue;
+            else if (result.message === "gateway_result_integrity_mismatch") review++;
+            else failed++;
+          } catch {
+            review++;
+          }
         }
 
         return new Response(

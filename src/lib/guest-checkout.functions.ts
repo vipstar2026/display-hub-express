@@ -224,104 +224,22 @@ export const getGuestOrder = createServerFn({ method: "POST" })
   });
 
 export const createGuestAfsCheckout = createServerFn({ method: "POST" })
-  .inputValidator((input: { order_id: string; token: string }) => input)
+  .inputValidator((input: { order_id: string; token: string; attempt_key: string }) => input)
   .handler(async ({ data }) => {
-    const { admin, order } = await loadGuestOrder(data.order_id, data.token);
+    const { order } = await loadGuestOrder(data.order_id, data.token);
     if (order.payment_status === "succeeded") bad("order_already_paid");
-
-    const { afsPrepareCheckout, loadAfsConfig } = await import("@/lib/afs.server");
-    const { formatGatewayAmount } = await import("@/lib/afs-money");
-    const cfg = await loadAfsConfig();
-    const currency = String(cfg.currency || order.currency || "BHD").toUpperCase();
-    const amount = formatGatewayAmount(order.total, currency);
-    const [givenName, ...rest] = String(order.buyer_name ?? "").trim().split(" ");
-    const { checkoutId } = await afsPrepareCheckout({
-      amount,
-      currency,
-      merchantTransactionId: order.order_number,
-      email: order.buyer_email,
-      givenName: givenName || null,
-      surname: rest.join(" ") || null,
-      cfg,
+    const { startAfsCheckout } = await import("@/lib/payments/checkout.server");
+    return startAfsCheckout({
+      orderId: order.id,
+      attemptKey: data.attempt_key,
+      returnPath: `/guest-pay/result?order=${order.id}&t=${encodeURIComponent(data.token)}`,
     });
-
-    try {
-      await admin.from("payment_transactions").insert({
-        order_id: order.id,
-        provider: "afs",
-        provider_charge_id: checkoutId,
-        provider_checkout_id: checkoutId,
-        amount: Number(order.total),
-        currency,
-        status: "pending",
-      });
-    } catch { /* non-fatal */ }
-
-    return {
-      checkoutId,
-      scriptUrl: `${cfg.widgetBase}?checkoutId=${checkoutId}`,
-      amount,
-      currency,
-      testMode: cfg.testMode,
-      brands: cfg.brands,
-      widgetLang: cfg.widgetLang,
-    };
   });
 
 export const confirmGuestAfsPayment = createServerFn({ method: "POST" })
   .inputValidator((input: { order_id: string; token: string; checkout_id: string }) => input)
   .handler(async ({ data }) => {
     const { order } = await loadGuestOrder(data.order_id, data.token);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { verifyAfsPaymentForOrder, applyAfsPaymentResult } = await import(
-      "@/lib/afs-verify.server"
-    );
-
-    const { data: attempt } = await supabaseAdmin
-      .from("payment_transactions")
-      .select("provider_checkout_id, provider_charge_id")
-      .eq("order_id", order.id)
-      .eq("provider", "afs")
-      .or(`provider_checkout_id.eq.${data.checkout_id},provider_charge_id.eq.${data.checkout_id}`)
-      .limit(1)
-      .maybeSingle();
-    if (!attempt) throw new Error("Payment attempt not found");
-    const expectedCheckoutId = attempt.provider_checkout_id ?? attempt.provider_charge_id;
-
-    // Same centralised gate as authenticated checkout / webhook / reconciliation.
-    const gateOrder = {
-      id: order.id as string,
-      order_number: order.order_number as string,
-      total: order.total as number,
-      currency: (order.currency ?? "BHD") as string,
-      payment_status: (order.payment_status ?? "pending") as string,
-      status: (order.status ?? null) as string | null,
-    };
-
-    const result = await verifyAfsPaymentForOrder({
-      order: gateOrder,
-      checkoutId: data.checkout_id,
-      expectedCheckoutId,
-      source: "confirm_guest",
-    });
-    await applyAfsPaymentResult({
-      order: gateOrder,
-      checkoutId: data.checkout_id,
-      result,
-      source: "confirm_guest",
-    });
-
-    const alreadyPaid = !result.ok && result.category === "already_paid";
-    return {
-      success: result.ok || alreadyPaid,
-      pending: !result.ok && result.pending,
-      code: result.code,
-      message: result.ok
-        ? (result.status.result?.description ?? "")
-        : alreadyPaid
-          ? ""
-          : result.category === "payment_failed"
-            ? result.reason
-            : "payment_verification_failed",
-    };
+    const { confirmAfsCheckout } = await import("@/lib/payments/checkout.server");
+    return confirmAfsCheckout({ orderId: order.id, checkoutId: data.checkout_id, source: "customer_return" });
   });

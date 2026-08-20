@@ -1,5 +1,6 @@
 import { BASE } from "@/lib/site-url";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -36,6 +37,7 @@ function GuestPayPage() {
   const nav = useNavigate();
   const start = useServerFn(createGuestAfsCheckout);
   const fetchOrder = useServerFn(getGuestOrder);
+  const [attemptKey] = useState(() => `guest-afs:${id}:${crypto.randomUUID()}`);
 
   const L = (ar: string, en: string, ur: string, bn: string) => (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? bn : en);
 
@@ -51,7 +53,7 @@ function GuestPayPage() {
     enabled: !!token,
     staleTime: Infinity,
     retry: false,
-    queryFn: () => start({ data: { order_id: id, token: token! } }),
+    queryFn: () => start({ data: { order_id: id, token: token!, attempt_key: attemptKey } }),
   });
 
   const money = (n: number) => `${Number(n).toFixed(3)} ${order?.currency ?? "BHD"}`;
