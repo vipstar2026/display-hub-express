@@ -44,18 +44,24 @@ export async function startAfsCheckout(input: { orderId: string; attemptKey: str
   return { attemptId: attempt.id, checkoutId: gateway.checkoutId, scriptUrl: gateway.scriptUrl, scriptIntegrity: gateway.integrity, amount: order.total, currency: order.currency, testMode: gateway.config.testMode, brands: gateway.config.brands, widgetLang: gateway.config.widgetLang };
 }
 
-export async function confirmAfsCheckout(input: { orderId: string; checkoutId: string; resourcePath?: string | null; source: string }) {
+export async function confirmAfsCheckout(input: { orderId: string; checkoutId: string; resourcePath?: string | null; source: string; background?: boolean }) {
   const attempt = await getAttemptByCheckout("afs", input.checkoutId);
   if (attempt.order_id !== input.orderId) throw new Error("payment_attempt_mismatch");
   const order = await loadOrderForPayment(input.orderId);
   let status = await getAfsPaymentStatus(input.checkoutId, input.resourcePath);
-  // Immediately after the widget redirect, AFS can briefly return "session not
-  // found" before the new transaction is visible. Retry only this narrow race;
-  // all other gateway failures remain terminal.
-  for (const delay of [1_500, 3_000]) {
-    if (status.code !== "700.400.580" && status.code !== "200.300.404") break;
-    await new Promise((resolve) => setTimeout(resolve, delay));
-    status = await getAfsPaymentStatus(input.checkoutId, input.resourcePath);
+  // Immediately after the widget redirect, AFS can briefly return "cannot find
+  // transaction" or a rate-limit code before the transaction becomes visible.
+  // Retry that narrow race on the customer return path only (4 attempts total),
+  // backing off further when the gateway is rate limiting us.
+  // A background sweep gets a single attempt with no retries.
+  if (!input.background) {
+    for (let attemptNo = 1; attemptNo <= 3; attemptNo++) {
+      const retryable = status.state === "unknown" || status.state === "processing";
+      if (!retryable) break;
+      const delay = 2_000 + attemptNo * 1_500 + (status.rateLimited ? 2_000 + attemptNo * 1_500 : 0);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      status = await getAfsPaymentStatus(input.checkoutId, input.resourcePath);
+    }
   }
-  return applyGatewayStatus({ attempt, order, status, source: input.source });
+  return applyGatewayStatus({ attempt, order, status, source: input.source, background: input.background });
 }

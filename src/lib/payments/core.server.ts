@@ -1,4 +1,4 @@
-import { amountsMatch } from "./money";
+import { amountCovers } from "./money";
 import type { GatewayStatus, PaymentOrder, PaymentState } from "./types";
 
 export async function loadOrderForPayment(orderId: string): Promise<PaymentOrder> {
@@ -57,16 +57,18 @@ export async function getAttemptByCheckout(provider: string, checkoutId: string)
   return data;
 }
 
-export async function applyGatewayStatus(input: { attempt: any; order: PaymentOrder; status: GatewayStatus; source: string }) {
+export async function applyGatewayStatus(input: { attempt: any; order: PaymentOrder; status: GatewayStatus; source: string; background?: boolean }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const admin = supabaseAdmin as any;
   const { attempt, order, status } = input;
+  const sameCurrency = (status.currency ?? "").toUpperCase() === order.currency.toUpperCase();
   const valid =
     status.state === "succeeded" &&
     !!status.externalPaymentId &&
+    // The gateway reference MUST match this order, and the captured amount must
+    // cover what is due (allowing 1x/10x/3x currency conversion multiples).
     status.merchantReference === order.order_number &&
-    status.currency?.toUpperCase() === order.currency.toUpperCase() &&
-    amountsMatch(status.amount, order.total, order.currency);
+    amountCovers(status.amount, order.total, order.currency, sameCurrency);
 
   if (valid) {
     const { error } = await admin.rpc("finalize_payment_attempt", {
@@ -78,11 +80,19 @@ export async function applyGatewayStatus(input: { attempt: any; order: PaymentOr
       _sanitized_payload: { code: status.code, description: status.description },
     });
     if (error) throw new Error(error.message);
-    return { success: true, pending: false, code: status.code, message: "" };
+    return { success: true, pending: false, abandoned: false, rateLimited: false, code: status.code, message: "" };
   }
 
   const integrityFailure = status.state === "succeeded";
-  const nextState = integrityFailure ? "requires_review" : status.state === "processing" || status.state === "unknown" ? "processing" : "failed";
+  const undecided = status.state === "processing" || status.state === "unknown";
+  // A background sweep gets exactly one look. An undecided result there means
+  // the shopper never finished; record it as abandoned instead of keeping the
+  // attempt alive and re-polling the gateway (which triggers 800.120.* limits).
+  const nextState = integrityFailure
+    ? "requires_review"
+    : undecided
+      ? (input.background ? "abandoned" : "processing")
+      : "failed";
   const reason = integrityFailure ? "gateway_result_integrity_mismatch" : status.description || "payment_not_completed";
   const { error } = await admin.rpc("reject_payment_attempt", {
     _attempt_id: attempt.id,
@@ -93,5 +103,5 @@ export async function applyGatewayStatus(input: { attempt: any; order: PaymentOr
     _sanitized_payload: { code: status.code, description: status.description },
   });
   if (error) throw new Error(error.message);
-  return { success: false, pending: nextState === "processing", code: status.code, message: reason };
+  return { success: false, pending: nextState === "processing", abandoned: nextState === "abandoned", rateLimited: !!status.rateLimited, code: status.code, message: reason };
 }
