@@ -1,0 +1,1 @@
+update public.payment_methods set config = jsonb_set(config::jsonb, '{brands}', '"VISA MASTER MAESTRO BENEFIT AMEX DINERS DISCOVER JCB UNIONPAY MADA"') where gateway_provider = 'afs';
