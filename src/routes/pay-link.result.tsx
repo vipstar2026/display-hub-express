@@ -77,7 +77,7 @@ function PayLinkResult() {
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">{payResultMessage(lang, !!data.pending)}</p>
             {search.token && (
-              <Button className="mt-6" onClick={() => nav({ to: "/pay-link/$token", params: { token: search.token! } })}>
+              <Button className="mt-6" onClick={() => window.location.assign(`/pay-link/${encodeURIComponent(search.token!)}`)}>
                 {t("إعادة المحاولة", "Try again", "دوبارہ کوشش", "আবার চেষ্টা করুন")}
               </Button>
             )}

@@ -89,18 +89,20 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
 
   useEffect(() => {
     if (!scriptUrl || mounted.current || !hostRef.current) return;
+
+    // COPYandPAY installs a page-global runtime that cannot be safely unloaded.
+    // If the shopper reached another payment attempt through SPA navigation, a
+    // previous runtime may still intercept the new form with its old checkout
+    // session. Start the attempt in a fresh document instead of mixing sessions.
+    const previousRuntime = document.querySelector<HTMLScriptElement>(
+      'script[data-afs-copyandpay="true"]',
+    );
+    if (previousRuntime) {
+      window.location.reload();
+      return;
+    }
+
     mounted.current = true;
-
-    // Build the widget form outside React's control so the gateway script can
-    // freely mutate it without breaking React's DOM reconciliation.
-    const form = document.createElement("form");
-    form.setAttribute("action", action);
-    form.className = "paymentWidgets";
-    form.setAttribute("data-brands", brands || "VISA MASTER");
-    form.setAttribute("data-lang", locale);
-    hostRef.current.appendChild(form);
-
-
 
     // NOTE: the expiry field is owned entirely by the COPYandPAY widget.
     // A previous custom month/year dropdown wrote into .wpwl-control-expiry
@@ -151,9 +153,20 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
       onError: () => setFailed(true),
     };
 
+    // Set wpwlOptions before exposing the form to the page. COPYandPAY can
+    // discover paymentWidgets forms immediately, so the reverse order creates
+    // a race where it initializes with stale/default navigation settings.
+    const form = document.createElement("form");
+    form.setAttribute("action", action);
+    form.className = "paymentWidgets";
+    form.setAttribute("data-brands", brands || "VISA MASTER");
+    form.setAttribute("data-lang", locale);
+    hostRef.current.appendChild(form);
+
     const script = document.createElement("script");
     script.src = scriptUrl;
     script.async = true;
+    script.dataset.afsCopyandpay = "true";
     script.onerror = () => setFailed(true);
     document.body.appendChild(script);
 

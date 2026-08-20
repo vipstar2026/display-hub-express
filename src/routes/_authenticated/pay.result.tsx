@@ -77,7 +77,7 @@ function PayResult() {
             <p className="mt-2 text-sm text-muted-foreground">{payResultMessage(lang, !!data.pending)}</p>
             <div className="mt-6 flex justify-center gap-2">
               {search.order && (
-                <Button onClick={() => nav({ to: "/pay/$id", params: { id: search.order! } })}>
+                <Button onClick={() => window.location.assign(`/pay/${encodeURIComponent(search.order!)}`)}>
                   {txt("إعادة المحاولة", "Try again", "دوبارہ کوشش")}
                 </Button>
               )}

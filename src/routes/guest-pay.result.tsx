@@ -81,7 +81,7 @@ function GuestPayResult() {
             <p className="mt-2 text-sm text-muted-foreground">{payResultMessage(lang, !!data.pending)}</p>
             <div className="mt-6 flex justify-center gap-2">
               {search.order && search.t && (
-                <Button onClick={() => nav({ to: "/guest-pay/$id", params: { id: search.order! }, search: { t: search.t! } })}>
+                <Button onClick={() => window.location.assign(`/guest-pay/${encodeURIComponent(search.order!)}?t=${encodeURIComponent(search.t!)}`)}>
                   {txt("إعادة المحاولة", "Try again", "دوبارہ کوشش", "আবার চেষ্টা")}
                 </Button>
               )}
