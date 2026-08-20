@@ -104,19 +104,19 @@ export async function verifyAfsPaymentForOrder(input: {
   const currency = (order.currency || "BHD").toUpperCase();
 
   let status: AfsStatus | null = input.status ?? null;
-  // "unknown reference" codes mean the id we hold is not a checkout id (it can
-  // be the payment id AFS appends as ?id= on the shopper return). Re-resolve it
-  // through the payment lookup instead of failing the shopper.
+  // "unknown reference" codes mean the id we hold could not be resolved by that
+  // endpoint (the shopper return may carry a payment id instead of a checkout
+  // id). Try the other lookup, but never let a worse answer replace a good one.
   const unresolved = (s: AfsStatus | null) => {
     const c = s?.result?.code ?? "";
-    return !c || /^(700\.400\.580|200\.300\.404|800\.[89])/.test(c);
+    return !c || /^(700\.400\.580|200\.300\.404|100\.100\.104|800\.[89])/.test(c);
   };
-  if (!status) {
-    status = await afsGetStatus(input.checkoutId).catch(() => null);
-    if (unresolved(status)) status = (await afsVerifyNotification(input.checkoutId)) ?? status;
-  } else if (unresolved(status)) {
-    status = (await afsVerifyNotification(input.checkoutId)) ?? status;
+  if (!status) status = await afsGetStatus(input.checkoutId).catch(() => null);
+  if (unresolved(status)) {
+    const alt = await afsVerifyNotification(input.checkoutId).catch(() => null);
+    if (!unresolved(alt)) status = alt;
   }
+
   const code = status?.result?.code ?? "";
 
 
