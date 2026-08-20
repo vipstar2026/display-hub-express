@@ -119,6 +119,13 @@ function HomePage() {
         </div>
       </section>
 
+      {/* Arabic intro paragraph */}
+      <section className="container mx-auto px-4 py-8" aria-label="مقدمة">
+        <p className="mx-auto max-w-3xl text-center text-sm leading-relaxed text-muted-foreground md:text-base">
+          اكتشف مجموعة VIPSTAR من أجهزة الرسيفر، أطباق الستلايت، LNB، اشتراكات IPTV والإكسسوارات في البحرين. اختر المنتجات المناسبة لاحتياجاتك واستفد من دعمنا وخدماتنا.
+        </p>
+      </section>
+
       <FlashSalesSection />
 
       {/* Categories */}
