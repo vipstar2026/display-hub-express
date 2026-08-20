@@ -101,6 +101,8 @@ function CartPage() {
   const isGuest = authReady && !userId;
 
   const placeGuest = useServerFn(placeGuestOrder);
+  const placeUser = useServerFn(placeUserOrder);
+
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
