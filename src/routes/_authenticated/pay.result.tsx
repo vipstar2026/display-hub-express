@@ -31,7 +31,7 @@ function PayResult() {
   const confirm = useServerFn(confirmAfsPayment);
 
   const checkoutId =
-    search.id ?? (search.resourcePath ? search.resourcePath.split("/")[3] : undefined);
+    (search.resourcePath ? search.resourcePath.split("/")[3] : undefined) ?? search.id;
 
   const { data, isLoading } = useQuery({
     queryKey: ["afs-result", search.order, checkoutId],

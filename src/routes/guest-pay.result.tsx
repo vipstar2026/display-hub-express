@@ -36,7 +36,7 @@ function GuestPayResult() {
   const nav = useNavigate();
   const confirm = useServerFn(confirmGuestAfsPayment);
 
-  const checkoutId = search.id ?? (search.resourcePath ? search.resourcePath.split("/")[3] : undefined);
+  const checkoutId = (search.resourcePath ? search.resourcePath.split("/")[3] : undefined) ?? search.id;
   const txt = (ar: string, en: string, ur: string, bn: string) => (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? bn : en);
 
   const { data, isLoading } = useQuery({

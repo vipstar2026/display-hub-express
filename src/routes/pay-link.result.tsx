@@ -37,7 +37,7 @@ function PayLinkResult() {
   const nav = useNavigate();
   const confirm = useServerFn(confirmPaymentLinkPayment);
 
-  const checkoutId = search.id ?? (search.resourcePath ? search.resourcePath.split("/")[3] : undefined);
+  const checkoutId = (search.resourcePath ? search.resourcePath.split("/")[3] : undefined) ?? search.id;
 
   const { data, isLoading } = useQuery({
     queryKey: ["pay-link-result", search.token, checkoutId],
