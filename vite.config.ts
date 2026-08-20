@@ -20,37 +20,10 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    // Force a single pre-bundled React instance; without this the router's
-    // un-optimized ESM can pull a second copy and hooks read a null dispatcher.
-    optimizeDeps: {
-      include: [
-        "react",
-        "react-dom",
-        "react-dom/client",
-        "react/jsx-runtime",
-        "react/jsx-dev-runtime",
-        "@tanstack/react-router",
-        "@tanstack/react-query",
-        "@tanstack/react-store",
-        "@tanstack/store",
-        "@tanstack/react-start",
-        "@tanstack/history",
-        // Admin-only deps: pre-bundle them so navigating to /admin never triggers a
-        // mid-session dependency re-optimization (which mixes old/new dep hashes and
-        // leaves React with a null hook dispatcher).
-        "recharts",
-        "date-fns",
-        "sonner",
-        "cmdk",
-        "react-hook-form",
-        "zod",
-        "embla-carousel-react",
-        "react-day-picker",
-        "@supabase/supabase-js",
-      ],
-    },
+    // React/TanStack optimization and deduplication are owned by the Lovable
+    // TanStack config. Overriding them here can pre-bundle server-only Start code
+    // into the browser and can produce mixed dependency hashes after HMR.
     resolve: {
-      dedupe: ["react", "react-dom"],
       alias: {
         "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/lib/decode.js"),
         "entities/lib/encode.js": path.resolve(__dirname, "node_modules/entities/lib/encode.js"),
