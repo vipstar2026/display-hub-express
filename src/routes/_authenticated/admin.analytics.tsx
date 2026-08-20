@@ -209,7 +209,7 @@ function Analytics() {
                   <div key={i} className="flex items-center gap-3 rounded-md bg-muted/30 p-2 text-sm">
                     <div className="grid h-8 w-8 place-items-center rounded-md bg-primary/20 font-bold text-primary">{i + 1}</div>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate font-medium">{p.name_en ?? p.name_ar}</div>
+                      <div className="truncate font-medium">{p.name}</div>
                       <div className="text-xs text-muted-foreground">{L.qty}: {p.qty}</div>
                     </div>
                     <div className="text-end font-mono text-sm">{formatPrice(p.revenue)}</div>
