@@ -9,7 +9,7 @@ import { useI18n } from "@/lib/i18n";
 import { payResultMessage } from "@/lib/pay-messages";
 import { confirmGuestAfsPayment } from "@/lib/guest-checkout.functions";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Loader2 } from "lucide-react";
 
 const searchSchema = z.object({
   order: z.string().optional(),
@@ -70,7 +70,11 @@ function GuestPayResult() {
           </>
         ) : (
           <>
-            <XCircle className="mx-auto mb-4 h-14 w-14 text-destructive" />
+            {data.pending ? (
+              <Clock className="mx-auto mb-4 h-14 w-14 text-muted-foreground" />
+            ) : (
+              <XCircle className="mx-auto mb-4 h-14 w-14 text-destructive" />
+            )}
             <h1 className="font-display text-2xl font-bold">
               {data.pending ? txt("الدفع قيد المعالجة", "Payment pending", "ادائیگی زیر عمل", "পেমেন্ট প্রক্রিয়াধীন") : txt("فشل الدفع", "Payment failed", "ادائیگی ناکام", "পেমেন্ট ব্যর্থ")}
             </h1>
