@@ -17,13 +17,18 @@ export const Route = createFileRoute("/api/public/afs-reconcile")({
           });
         }
 
-        const { afsGetStatus, afsIsSuccess, afsIsPending, loadAfsConfig } = await import(
-          "@/lib/afs.server"
-        );
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+        // Constant-time comparison so the shared secret cannot be probed byte-by-byte.
+        const safeEqual = (a: string, b: string) => {
+          if (a.length !== b.length) return false;
+          let diff = 0;
+          for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+          return diff === 0;
+        };
+
         const envSecret = process.env.AFS_RECONCILE_SECRET;
-        let authorized = !!envSecret && provided === envSecret;
+        let authorized = !!envSecret && safeEqual(provided, envSecret);
         if (!authorized) {
           const { data: ok } = await supabaseAdmin.rpc("verify_cron_key", {
             _name: "afs_reconcile",
