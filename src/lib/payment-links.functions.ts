@@ -3,7 +3,6 @@ import { createServerFn } from "@tanstack/react-start";
 export const startPaymentLinkCheckout = createServerFn({ method: "POST" })
   .inputValidator((input: { token: string; name?: string; email?: string; phone?: string }) => input)
   .handler(async ({ data }) => {
-    const { afsPrepareCheckout, loadAfsConfig } = await import("@/lib/afs.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: link } = await supabaseAdmin
@@ -21,7 +20,6 @@ export const startPaymentLinkCheckout = createServerFn({ method: "POST" })
     const name = (data.name || link.customer_name || "").trim();
 
     let orderId = link.order_id as string | null;
-    let orderNumber: string | null = null;
 
     if (orderId) {
       const { data: existing } = await supabaseAdmin
@@ -29,8 +27,7 @@ export const startPaymentLinkCheckout = createServerFn({ method: "POST" })
         .select("id, order_number, payment_status")
         .eq("id", orderId)
         .maybeSingle();
-      if (existing && existing.payment_status !== "succeeded") orderNumber = existing.order_number;
-      else orderId = null;
+      if (!existing || existing.payment_status === "succeeded") orderId = null;
     }
 
     if (!orderId) {
@@ -51,55 +48,24 @@ export const startPaymentLinkCheckout = createServerFn({ method: "POST" })
         .single();
       if (error) throw new Error(error.message);
       orderId = order.id;
-      orderNumber = order.order_number;
       await supabaseAdmin
         .from("payment_links")
         .update({ order_id: orderId, customer_email: email, customer_name: name || link.customer_name })
         .eq("id", link.id);
     }
 
-    const cfg = await loadAfsConfig();
-    const [givenName, ...rest] = name.split(" ");
-    const { checkoutId } = await afsPrepareCheckout({
-      amount: Number(link.amount).toFixed(2),
-      currency: link.currency || cfg.currency || "BHD",
-      merchantTransactionId: orderNumber!,
-      email,
-      givenName: givenName || null,
-      surname: rest.join(" ") || null,
-      cfg,
+    const { startAfsCheckout } = await import("@/lib/payments/checkout.server");
+    const checkout = await startAfsCheckout({
+      orderId: orderId!,
+      attemptKey: `pay-link:${link.id}:${crypto.randomUUID()}`,
+      returnPath: `/pay-link/result?token=${encodeURIComponent(data.token)}`,
     });
-
-    try {
-      await supabaseAdmin.from("payment_transactions").insert({
-        order_id: orderId,
-        provider: "afs",
-        provider_charge_id: checkoutId,
-        provider_checkout_id: checkoutId,
-        amount: Number(link.amount),
-        currency: link.currency || cfg.currency || "BHD",
-        status: "pending",
-      });
-    } catch {
-      /* non-fatal */
-    }
-
-    return {
-      checkoutId,
-      orderId,
-      scriptUrl: `${cfg.widgetBase}?checkoutId=${checkoutId}`,
-      amount: Number(link.amount).toFixed(2),
-      currency: link.currency || cfg.currency || "BHD",
-      testMode: cfg.testMode,
-      brands: cfg.brands,
-      widgetLang: cfg.widgetLang,
-    };
+    return { ...checkout, orderId };
   });
 
 export const confirmPaymentLinkPayment = createServerFn({ method: "POST" })
   .inputValidator((input: { token: string; checkout_id: string }) => input)
   .handler(async ({ data }) => {
-    const { afsGetStatus, afsIsSuccess, afsIsPending } = await import("@/lib/afs.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: link } = await supabaseAdmin
@@ -109,59 +75,13 @@ export const confirmPaymentLinkPayment = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!link?.order_id) throw new Error("Payment link not found");
 
-    const status = await afsGetStatus(data.checkout_id);
-    const code = status.result?.code;
-    const success = afsIsSuccess(code);
-    const pending = afsIsPending(code);
-
-    const txPayload = {
-      order_id: link.order_id,
-      provider: "afs",
-      provider_charge_id: status.id ?? data.checkout_id,
-      amount: Number(status.amount ?? link.amount),
-      currency: status.currency ?? link.currency ?? "BHD",
-      status: success ? "succeeded" : pending ? "pending" : "failed",
-      payment_method: status.paymentBrand ?? null,
-      raw_response: status as never,
-      failure_reason: success ? null : (status.result?.description ?? null),
-      paid_at: success ? new Date().toISOString() : null,
-    };
-
-    const { data: existing } = await supabaseAdmin
-      .from("payment_transactions")
-      .select("id")
-      .eq("order_id", link.order_id)
-      .eq("provider", "afs")
-      .eq("provider_charge_id", data.checkout_id)
-      .maybeSingle();
-
-    if (existing) await supabaseAdmin.from("payment_transactions").update(txPayload).eq("id", existing.id);
-    else await supabaseAdmin.from("payment_transactions").insert(txPayload);
-
-    if (success) {
+    const { confirmAfsCheckout } = await import("@/lib/payments/checkout.server");
+    const result = await confirmAfsCheckout({ orderId: link.order_id, checkoutId: data.checkout_id, source: "customer_return" });
+    if (result.success) {
       const now = new Date().toISOString();
-      await supabaseAdmin
-        .from("orders")
-        .update({
-          payment_status: "succeeded",
-          status: "paid",
-          paid_at: now,
-          payment_method: "AFS",
-          payment_reference: status.id ?? data.checkout_id,
-        })
-        .eq("id", link.order_id);
       await supabaseAdmin.from("payment_links").update({ status: "paid", paid_at: now }).eq("id", link.id);
-    } else if (!pending) {
-      await supabaseAdmin.from("orders").update({ payment_status: "failed" }).eq("id", link.order_id);
     }
-
-    return {
-      success,
-      pending,
-      code: code ?? "",
-      message: status.result?.description ?? "",
-      orderId: link.order_id,
-    };
+    return { ...result, orderId: link.order_id };
   });
 
 export const getPaymentLinkPublic = createServerFn({ method: "POST" })

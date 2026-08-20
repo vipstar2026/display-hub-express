@@ -9,7 +9,7 @@ export const bpayStatus = createServerFn({ method: "GET" }).handler(async () => 
 
 export const createBpayCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { order_id: string }) => input)
+  .inputValidator((input: { order_id: string; attempt_key?: string }) => input)
   .handler(async ({ data, context }) => {
     const { bpayPrepareCheckout, loadBpayConfig } = await import("@/lib/bpay.server");
     const cfg = await loadBpayConfig();
@@ -34,20 +34,16 @@ export const createBpayCheckout = createServerFn({ method: "POST" })
       cfg,
     });
 
-    try {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await supabaseAdmin.from("payment_transactions").insert({
-        order_id: order.id,
-        provider: "benefit",
-        provider_charge_id: checkoutId || order.order_number,
-        amount: Number(order.total),
-        currency: cfg.currency || order.currency || "BHD",
-        status: "pending",
-        redirect_url: redirectUrl,
-      });
-    } catch {
-      /* non-fatal */
-    }
+    if (!checkoutId) throw new Error("benefit_checkout_reference_missing");
+    const { createPaymentAttempt, attachGatewayCheckout } = await import("@/lib/payments/core.server");
+    const attempt = await createPaymentAttempt({
+      order: { ...order, total: Number(order.total), status: "pending" },
+      provider: "benefit",
+      kind: "gateway",
+      attemptKey: data.attempt_key ?? `benefit:${order.id}:${crypto.randomUUID()}`,
+      returnUrl: cfg.resultUrl,
+    });
+    await attachGatewayCheckout(attempt.id, checkoutId);
 
     return {
       checkoutId,
@@ -71,7 +67,7 @@ export const confirmBpayPayment = createServerFn({ method: "POST" })
 
     const { data: order, error } = await context.supabase
       .from("orders")
-      .select("id, order_number, total, buyer_id")
+      .select("id, order_number, total, currency, payment_status, status, buyer_id")
       .eq("id", data.order_id)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -79,52 +75,21 @@ export const confirmBpayPayment = createServerFn({ method: "POST" })
 
     const status = await bpayGetStatus(data.checkout_id);
     const code = status.result?.code;
-    const success = bpayIsSuccess(code);
-    const pending = bpayIsPending(code);
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const txPayload = {
-      order_id: order.id,
-      provider: "benefit",
-      provider_charge_id: status.id ?? data.checkout_id,
-      amount: Number(status.amount ?? order.total),
-      currency: status.currency ?? "BHD",
-      status: success ? "succeeded" : pending ? "pending" : "failed",
-      payment_method: status.paymentBrand ?? "BENEFIT",
-      raw_response: status as never,
-      failure_reason: success ? null : (status.result?.description ?? null),
-      paid_at: success ? new Date().toISOString() : null,
-    };
-
-    const { data: existing } = await supabaseAdmin
-      .from("payment_transactions")
-      .select("id")
-      .eq("order_id", order.id)
-      .eq("provider", "benefit")
-      .eq("status", "pending")
-      .maybeSingle();
-
-    if (existing) {
-      await supabaseAdmin.from("payment_transactions").update(txPayload).eq("id", existing.id);
-    } else {
-      await supabaseAdmin.from("payment_transactions").insert(txPayload);
-    }
-
-    if (success) {
-      await supabaseAdmin
-        .from("orders")
-        .update({
-          payment_status: "succeeded",
-          status: "paid",
-          paid_at: new Date().toISOString(),
-          payment_method: "BENEFIT",
-          payment_reference: status.id ?? data.checkout_id,
-        })
-        .eq("id", order.id);
-    } else if (!pending) {
-      await supabaseAdmin.from("orders").update({ payment_status: "failed" }).eq("id", order.id);
-    }
-
-    return { success, pending, code: code ?? "", message: status.result?.description ?? "" };
+    const { getAttemptByCheckout, applyGatewayStatus } = await import("@/lib/payments/core.server");
+    const attempt = await getAttemptByCheckout("benefit", data.checkout_id);
+    return applyGatewayStatus({
+      attempt,
+      order: { ...order, total: Number(order.total) },
+      status: {
+        externalPaymentId: status.id ?? null,
+        merchantReference: status.merchantTransactionId ?? null,
+        amount: status.amount ?? null,
+        currency: status.currency ?? null,
+        brand: status.paymentBrand ?? "BENEFIT",
+        code: code ?? "",
+        description: status.result?.description ?? "",
+        state: bpayIsSuccess(code) ? "succeeded" : bpayIsPending(code) ? "processing" : code ? "failed" : "unknown",
+      },
+      source: "customer_return",
+    });
   });

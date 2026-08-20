@@ -1003,6 +1003,53 @@ export type Database = {
           },
         ]
       }
+      manual_payment_reviews: {
+        Row: {
+          attempt_id: string
+          created_at: string
+          customer_reference: string | null
+          id: string
+          proof_path: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_id: string
+          created_at?: string
+          customer_reference?: string | null
+          id?: string
+          proof_path?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_id?: string
+          created_at?: string
+          customer_reference?: string | null
+          id?: string
+          proof_path?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_payment_reviews_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: true
+            referencedRelation: "payment_attempts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletter_campaigns: {
         Row: {
           audience_count: number
@@ -1363,6 +1410,154 @@ export type Database = {
           },
         ]
       }
+      payment_attempts: {
+        Row: {
+          attempt_key: string
+          created_at: string
+          currency: string
+          customer_return_url: string | null
+          expected_amount: number
+          expires_at: string | null
+          external_checkout_id: string | null
+          external_payment_id: string | null
+          failed_at: string | null
+          failure_code: string | null
+          failure_reason: string | null
+          id: string
+          kind: string
+          legacy_transaction_id: string | null
+          merchant_reference: string
+          metadata: Json
+          order_id: string
+          payment_brand: string | null
+          payment_method_id: string | null
+          provider: string
+          state: string
+          succeeded_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempt_key: string
+          created_at?: string
+          currency: string
+          customer_return_url?: string | null
+          expected_amount: number
+          expires_at?: string | null
+          external_checkout_id?: string | null
+          external_payment_id?: string | null
+          failed_at?: string | null
+          failure_code?: string | null
+          failure_reason?: string | null
+          id?: string
+          kind: string
+          legacy_transaction_id?: string | null
+          merchant_reference: string
+          metadata?: Json
+          order_id: string
+          payment_brand?: string | null
+          payment_method_id?: string | null
+          provider: string
+          state?: string
+          succeeded_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempt_key?: string
+          created_at?: string
+          currency?: string
+          customer_return_url?: string | null
+          expected_amount?: number
+          expires_at?: string | null
+          external_checkout_id?: string | null
+          external_payment_id?: string | null
+          failed_at?: string | null
+          failure_code?: string | null
+          failure_reason?: string | null
+          id?: string
+          kind?: string
+          legacy_transaction_id?: string | null
+          merchant_reference?: string
+          metadata?: Json
+          order_id?: string
+          payment_brand?: string | null
+          payment_method_id?: string | null
+          provider?: string
+          state?: string
+          succeeded_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_attempts_legacy_transaction_id_fkey"
+            columns: ["legacy_transaction_id"]
+            isOneToOne: true
+            referencedRelation: "payment_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_attempts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_attempts_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_attempts_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_events: {
+        Row: {
+          attempt_id: string
+          created_at: string
+          event_type: string
+          id: string
+          message: string | null
+          provider_code: string | null
+          sanitized_payload: Json
+          source: string
+        }
+        Insert: {
+          attempt_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          message?: string | null
+          provider_code?: string | null
+          sanitized_payload?: Json
+          source: string
+        }
+        Update: {
+          attempt_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          message?: string | null
+          provider_code?: string | null
+          sanitized_payload?: Json
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_events_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "payment_attempts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_links: {
         Row: {
           amount: number
@@ -1520,6 +1715,65 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      payment_refunds: {
+        Row: {
+          amount: number
+          attempt_id: string
+          created_at: string
+          currency: string
+          failure_code: string | null
+          failure_reason: string | null
+          id: string
+          idempotency_key: string
+          processed_at: string | null
+          provider_refund_id: string | null
+          reason: string | null
+          requested_by: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          attempt_id: string
+          created_at?: string
+          currency: string
+          failure_code?: string | null
+          failure_reason?: string | null
+          id?: string
+          idempotency_key: string
+          processed_at?: string | null
+          provider_refund_id?: string | null
+          reason?: string | null
+          requested_by?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          attempt_id?: string
+          created_at?: string
+          currency?: string
+          failure_code?: string | null
+          failure_reason?: string | null
+          id?: string
+          idempotency_key?: string
+          processed_at?: string | null
+          provider_refund_id?: string | null
+          reason?: string | null
+          requested_by?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_refunds_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "payment_attempts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payment_transactions: {
         Row: {
@@ -2882,6 +3136,25 @@ export type Database = {
         Args: { _coupon_id: string; _discount: number; _order_id: string }
         Returns: undefined
       }
+      finalize_payment_attempt: {
+        Args: {
+          _attempt_id: string
+          _external_payment_id: string
+          _payment_brand: string
+          _provider_code?: string
+          _sanitized_payload?: Json
+          _source: string
+        }
+        Returns: boolean
+      }
+      finalize_payment_refund: {
+        Args: {
+          _provider_code?: string
+          _provider_refund_id: string
+          _refund_id: string
+        }
+        Returns: boolean
+      }
       get_email_settings_admin: {
         Args: never
         Returns: {
@@ -3036,6 +3309,26 @@ export type Database = {
           coupon_id: string
           discount: number
         }[]
+      }
+      reject_payment_attempt: {
+        Args: {
+          _attempt_id: string
+          _provider_code?: string
+          _reason?: string
+          _sanitized_payload?: Json
+          _source: string
+          _state: string
+        }
+        Returns: undefined
+      }
+      review_manual_payment_attempt: {
+        Args: {
+          _approved: boolean
+          _attempt_id: string
+          _notes?: string
+          _reviewed_by: string
+        }
+        Returns: undefined
       }
       track_order: {
         Args: { _email: string; _order_number: string }

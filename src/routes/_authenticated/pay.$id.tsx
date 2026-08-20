@@ -8,11 +8,12 @@ import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
 import { payInitMessage } from "@/lib/pay-messages";
 import { formatAmount } from "@/lib/afs-money";
-import { createAfsCheckout } from "@/lib/afs.functions";
+import { startUserAfsPayment } from "@/lib/payment-core.functions";
 import { ShieldCheck, Loader2, Receipt, Truck, Store, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { AfsTestCards } from "@/components/AfsTestCards";
 import { AfsPaymentWidget } from "@/components/AfsPaymentWidget";
 
@@ -43,12 +44,13 @@ function PayError() {
 function PayPage() {
   const { id } = Route.useParams();
   const { lang } = useI18n();
-  const start = useServerFn(createAfsCheckout);
+  const start = useServerFn(startUserAfsPayment);
   const nav = useNavigate();
+  const [attemptKey] = useState(() => `afs:${id}:${crypto.randomUUID()}`);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["afs-checkout", id],
-    queryFn: () => start({ data: { order_id: id } }),
+    queryFn: () => start({ data: { order_id: id, attempt_key: attemptKey } }),
     staleTime: Infinity,
     retry: false,
   });

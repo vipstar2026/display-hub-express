@@ -16,6 +16,7 @@ export const runPaymentSimulation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { scenario: "success" | "failed" | "pending"; product_id?: string }) => input)
   .handler(async ({ data, context }) => {
+    if (process.env["NODE_ENV"] === "production") throw new Error("payment_simulation_disabled");
     const { data: isAdmin } = await context.supabase
       .from("user_roles")
       .select("role")
