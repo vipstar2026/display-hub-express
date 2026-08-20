@@ -63,7 +63,12 @@ async function request(path: string, config: Config, init?: RequestInit) {
   return { response, body };
 }
 
-export async function createAfsPayment(order: PaymentOrder, shopperResultUrl: string) {
+// IMPORTANT: never send `shopperResultUrl` here. COPYandPAY takes the return
+// URL from the widget form's `action` attribute; sending it at checkout
+// creation too makes AFS reject the card submission with
+// 200.300.404 "shopperResultUrl was already set and cannot be overwritten",
+// so no transaction is ever created. Verified end-to-end against AFS.
+export async function createAfsPayment(order: PaymentOrder) {
   const config = await loadAfsPaymentConfig();
   const names = (order.buyer_name ?? "").trim().split(/\s+/).filter(Boolean);
   const form = new URLSearchParams({
@@ -72,7 +77,6 @@ export async function createAfsPayment(order: PaymentOrder, shopperResultUrl: st
     currency: order.currency.toUpperCase(),
     paymentType: config.paymentType,
     merchantTransactionId: order.order_number,
-    shopperResultUrl,
     integrity: "true",
   });
   if (order.buyer_email) form.set("customer.email", order.buyer_email);
