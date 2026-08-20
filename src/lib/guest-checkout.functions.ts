@@ -230,10 +230,10 @@ export const createGuestAfsCheckout = createServerFn({ method: "POST" })
     if (order.payment_status === "succeeded") bad("order_already_paid");
 
     const { afsPrepareCheckout, loadAfsConfig } = await import("@/lib/afs.server");
-    const { formatAmount } = await import("@/lib/afs-money");
+    const { formatGatewayAmount } = await import("@/lib/afs-money");
     const cfg = await loadAfsConfig();
     const currency = String(cfg.currency || order.currency || "BHD").toUpperCase();
-    const amount = formatAmount(order.total, currency);
+    const amount = formatGatewayAmount(order.total, currency);
     const [givenName, ...rest] = String(order.buyer_name ?? "").trim().split(" ");
     const { checkoutId } = await afsPrepareCheckout({
       amount,

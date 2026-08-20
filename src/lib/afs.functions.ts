@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { formatAmount } from "@/lib/afs-money";
+import { formatGatewayAmount } from "@/lib/afs-money";
 
 export const createAfsCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -19,7 +19,7 @@ export const createAfsCheckout = createServerFn({ method: "POST" })
     if (order.payment_status === "succeeded") throw new Error("Order already paid");
 
     const currency = (cfg.currency || order.currency || "BHD").toUpperCase();
-    const amount = formatAmount(order.total, currency);
+    const amount = formatGatewayAmount(order.total, currency);
 
     const [givenName, ...rest] = (order.buyer_name ?? "").trim().split(" ");
     const { checkoutId } = await afsPrepareCheckout({
