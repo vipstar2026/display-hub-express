@@ -16,10 +16,10 @@ export const Route = createFileRoute("/")({
   component: HomePage,
   head: () => ({
     meta: [
-      { title: "VIPSTAR — Satellite Receivers, Dishes & IPTV Subscriptions" },
-      { name: "description", content: "متجر VIPSTAR للأقمار الصناعية و IPTV في البحرين. رسيفرات، أطباق، LNB، اشتراكات IPTV، برمجيات، وقطع غيار — بأسعار الجملة والتجزئة." },
-      { property: "og:title", content: "VIPSTAR — Satellite & IPTV Store" },
-      { property: "og:description", content: "Premium satellite receivers, dishes, LNB, IPTV subscriptions and accessories in Bahrain." },
+      { title: "VIPSTAR Bahrain | Satellite Receivers, Dishes & IPTV" },
+      { name: "description", content: "Shop satellite receivers, dishes, LNBs, IPTV subscriptions and accessories in Bahrain. Discover VIPSTAR products with reliable delivery and customer support." },
+      { property: "og:title", content: "VIPSTAR Bahrain | Satellite Receivers, Dishes & IPTV" },
+      { property: "og:description", content: "Shop satellite receivers, dishes, LNBs, IPTV subscriptions and accessories in Bahrain. Discover VIPSTAR products with reliable delivery and customer support." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://vipstar.cc/" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -29,9 +29,10 @@ export const Route = createFileRoute("/")({
       type: "application/ld+json",
       children: JSON.stringify({
         "@context": "https://schema.org",
-        "@type": "Organization",
+        "@type": "Store",
         name: "VIPSTAR",
         url: "https://vipstar.cc",
+        description: "Shop satellite receivers, dishes, LNBs, IPTV subscriptions and accessories in Bahrain.",
         address: { "@type": "PostalAddress", addressCountry: "BH" },
       }),
     }],
@@ -69,7 +70,9 @@ function HomePage() {
 
   const tagline = pickLocalized(lang, { ar: settings?.tagline_ar, en: settings?.tagline_en, ur: settings?.tagline_ur, bn: settings?.tagline_bn });
   const heroBadge = settings?.hero_badge_text || "VIPSTAR.CC";
-  const heroTitle = pickLocalized(lang, { ar: settings?.hero_title_ar, en: settings?.hero_title_en, ur: settings?.hero_title_ur, bn: settings?.hero_title_bn }) || t("home.hero.title");
+  const heroTitle = lang === "ar"
+    ? "أفضل أجهزة الستلايت و IPTV في البحرين"
+    : pickLocalized(lang, { ar: settings?.hero_title_ar, en: settings?.hero_title_en, ur: settings?.hero_title_ur, bn: settings?.hero_title_bn }) || t("home.hero.title");
   const heroSub = pickLocalized(lang, { ar: settings?.hero_subtitle_ar, en: settings?.hero_subtitle_en, ur: settings?.hero_subtitle_ur, bn: settings?.hero_subtitle_bn }) || t("home.hero.sub");
   const heroCta = pickLocalized(lang, { ar: settings?.hero_cta_ar, en: settings?.hero_cta_en, ur: settings?.hero_cta_ur, bn: settings?.hero_cta_bn }) || t("home.hero.cta");
   const whatsappNumber = cleanPhoneNumber(settings?.whatsapp);
@@ -114,6 +117,13 @@ function HomePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Arabic intro paragraph */}
+      <section className="container mx-auto px-4 py-8" aria-label="مقدمة">
+        <p className="mx-auto max-w-3xl text-center text-sm leading-relaxed text-muted-foreground md:text-base">
+          اكتشف مجموعة VIPSTAR من أجهزة الرسيفر، أطباق الستلايت، LNB، اشتراكات IPTV والإكسسوارات في البحرين. اختر المنتجات المناسبة لاحتياجاتك واستفد من دعمنا وخدماتنا.
+        </p>
       </section>
 
       <FlashSalesSection />
@@ -188,11 +198,6 @@ function HomePage() {
                   </span>
                 </h2>
                 {tagline && <p className="text-sm text-muted-foreground md:text-base">{tagline}</p>}
-                <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                  {["CCTV", "Dish Repair", "IPTV", "beIN Sports", "Satellite"].map((tag) => (
-                    <span key={tag} className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-primary">{tag}</span>
-                  ))}
-                </div>
               </div>
 
               {/* Right contact panel */}
