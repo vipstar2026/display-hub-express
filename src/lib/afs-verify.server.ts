@@ -137,9 +137,11 @@ export async function verifyAfsPaymentForOrder(input: {
     return { ok: false, category, reason, pending, status, code };
   };
 
-  if (!status || !code) return fail("gateway_unknown", "gateway did not recognise the payment");
+  if (!status || !code || unresolved(status))
+    return fail("gateway_unknown", "gateway did not recognise the payment reference");
   if (afsIsPending(code)) return fail("payment_pending", "payment still pending", true);
-  if (!afsIsSuccess(code)) return fail("payment_failed", status.result?.description ?? "declined");
+  if (!afsIsSuccess(code)) return fail("payment_failed", "declined by the gateway");
+
 
   // 6/7 — order eligibility
   if (order.payment_status === "succeeded") return fail("already_paid", "order already paid");
