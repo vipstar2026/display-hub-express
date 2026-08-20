@@ -16,8 +16,8 @@ export const Route = createFileRoute("/")({
   component: HomePage,
   head: () => ({
     meta: [
-      { title: "VIPSTAR — Satellite Receivers, Dishes & IPTV Subscriptions" },
-      { name: "description", content: "متجر VIPSTAR للأقمار الصناعية و IPTV في البحرين. رسيفرات، أطباق، LNB، اشتراكات IPTV، برمجيات، وقطع غيار — بأسعار الجملة والتجزئة." },
+      { title: "VIPSTAR Bahrain | Satellite Receivers, Dishes & IPTV" },
+      { name: "description", content: "Shop satellite receivers, dishes, LNBs, IPTV subscriptions and accessories in Bahrain. Discover VIPSTAR products with reliable delivery and customer support." },
       { property: "og:title", content: "VIPSTAR — Satellite & IPTV Store" },
       { property: "og:description", content: "Premium satellite receivers, dishes, LNB, IPTV subscriptions and accessories in Bahrain." },
       { property: "og:type", content: "website" },
