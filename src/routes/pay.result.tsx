@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -34,14 +34,35 @@ function PayResult() {
   const checkoutId =
     (search.resourcePath ? search.resourcePath.split("/")[3] : undefined) ?? search.id;
 
-  const { data, isLoading } = useQuery({
+  const attemptsKey = `afs-recheck:${search.order ?? ""}:${checkoutId ?? ""}`;
+  const [autoTries, setAutoTries] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    return Number(window.sessionStorage.getItem(attemptsKey) ?? "0");
+  });
+  const triesRef = useRef(autoTries);
+  const MAX_AUTO_TRIES = 5;
+
+  const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["afs-result", search.order, checkoutId],
     enabled: !!search.order && !!checkoutId,
     retry: false,
-    refetchInterval: (query) => query.state.data?.pending ? 3_000 : false,
+    refetchInterval: (query) => {
+      const result = query.state.data;
+      if (!result?.pending || triesRef.current >= MAX_AUTO_TRIES) return false;
+      // Back off hard while the gateway is rate limiting us.
+      return result.rateLimited ? Math.min(30 + triesRef.current * 20, 90) * 1_000 : 8_000;
+    },
     refetchIntervalInBackground: true,
     queryFn: () => confirm({ data: { order_id: search.order!, checkout_id: checkoutId!, resource_path: search.resourcePath } }),
   });
+
+  useEffect(() => {
+    if (!data?.pending) return;
+    const next = triesRef.current + 1;
+    triesRef.current = next;
+    setAutoTries(next);
+    if (typeof window !== "undefined") window.sessionStorage.setItem(attemptsKey, String(next));
+  }, [data, attemptsKey]);
 
   useEffect(() => {
     if (data?.success && search.order) {
@@ -69,7 +90,7 @@ function PayResult() {
         ) : (
           <>
             {data.pending ? (
-              <Clock className="mx-auto mb-4 h-14 w-14 text-muted-foreground" />
+              <Clock className="mx-auto mb-4 h-14 w-14 text-orange-500" />
             ) : (
               <XCircle className="mx-auto mb-4 h-14 w-14 text-destructive" />
             )}
@@ -77,8 +98,24 @@ function PayResult() {
               {data.pending ? txt("الدفع قيد المعالجة", "Payment pending", "ادائیگی زیر عمل") : txt("فشل الدفع", "Payment failed", "ادائیگی ناکام")}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">{payResultMessage(lang, !!data.pending)}</p>
-            <div className="mt-6 flex justify-center gap-2">
-              {search.order && (
+            {data.pending && (
+              <p className="mx-auto mt-3 max-w-md rounded-lg border border-orange-500/30 bg-orange-500/10 px-4 py-3 text-sm font-medium text-orange-600 dark:text-orange-400">
+                {txt(
+                  "لم يُرفض طلبك — لا تُعد عملية الدفع ولا تدفع مرة أخرى.",
+                  "Your order was not declined — do not pay again.",
+                  "آپ کا آرڈر مسترد نہیں ہوا — دوبارہ ادائیگی نہ کریں۔",
+                  "আপনার অর্ডার বাতিল হয়নি — আবার পেমেন্ট করবেন না।",
+                )}
+              </p>
+            )}
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              {data.pending && (
+                <Button onClick={() => refetch()} disabled={isFetching}>
+                  {isFetching && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {txt("التحقق الآن", "Check now", "ابھی چیک کریں", "এখনই যাচাই করুন")}
+                </Button>
+              )}
+              {!data.pending && search.order && (
                 <Button onClick={() => window.location.assign(`/pay/${encodeURIComponent(search.order!)}`)}>
                   {txt("إعادة المحاولة", "Try again", "دوبارہ کوشش")}
                 </Button>
