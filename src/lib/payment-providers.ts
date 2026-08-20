@@ -15,6 +15,15 @@ export interface ProviderField {
   required?: boolean;
 }
 
+export interface ProviderEndpoint {
+  label_ar: string;
+  label_en: string;
+  /** absolute path on this site, e.g. /api/public/payments/afs */
+  path: string;
+  hint_ar?: string;
+  hint_en?: string;
+}
+
 export interface PaymentProvider {
   code: string;
   name_ar: string;
@@ -26,9 +35,12 @@ export interface PaymentProvider {
   currencies: string[];
   docs?: string;
   fields: ProviderField[];
+  /** Read-only URLs the merchant must register with the provider */
+  endpoints?: ProviderEndpoint[];
   steps_ar: string[];
   steps_en: string[];
 }
+
 
 const cardTypes = "card";
 
@@ -590,49 +602,50 @@ export const PAYMENT_PROVIDERS: PaymentProvider[] = [
     currencies: ["BHD", "USD", "SAR", "AED", "EUR"],
     docs: "https://afs.docs.oppwa.com/",
     fields: [
-      { key: "entity_id", label_ar: "Entity ID (معرّف الكيان)", label_en: "Entity ID", placeholder: "8ac7a4c7...", required: true,
-        hint_ar: "يصلك من AFS في رسالة التفعيل — لكل عملة/قناة معرّف مختلف.", hint_en: "Sent by AFS on activation — each currency/channel has its own ID." },
-      { key: "access_token", label_ar: "Access Token (رمز الوصول)", label_en: "Access Token", kind: "password", required: true,
+      { key: "entity_id", label_ar: "Entity ID (معرّف الكيان) — LIVE", label_en: "Entity ID — LIVE", placeholder: "8ac7a4c7...", required: true,
+        hint_ar: "معرّف الإنتاج من AFS — لكل عملة/قناة معرّف مختلف.", hint_en: "Production entity from AFS — each currency/channel has its own ID." },
+      { key: "access_token", label_ar: "Access Token (رمز الوصول) — LIVE", label_en: "Access Token — LIVE", kind: "password", required: true,
         hint_ar: "سرّي تماماً — يُستخدم من الخادم فقط.", hint_en: "Strictly secret — used server-side only." },
-      { key: "mode", label_ar: "البيئة", label_en: "Environment", kind: "select", options: ["test", "live"], required: true,
-        hint_ar: "test = eu-test.oppwa.com، live = eu-prod.oppwa.com", hint_en: "test = eu-test.oppwa.com, live = eu-prod.oppwa.com" },
       { key: "payment_type", label_ar: "نوع العملية", label_en: "Payment type", kind: "select", options: ["DB", "PA"],
         hint_ar: "DB = خصم مباشر، PA = حجز مبلغ ثم تحصيل لاحقاً.", hint_en: "DB = direct debit, PA = pre-authorize then capture." },
       { key: "brands", label_ar: "البطاقات المسموحة", label_en: "Allowed card brands", placeholder: "VISA MASTER",
         hint_ar: "افصل بمسافة: VISA MASTER AMEX MADA BENEFIT", hint_en: "Space separated: VISA MASTER AMEX MADA BENEFIT" },
-      { key: "currency", label_ar: "عملة البوابة", label_en: "Gateway currency", placeholder: "BHD",
-        hint_ar: "اتركه فارغاً لاستخدام عملة الطلب.", hint_en: "Leave empty to use the order currency." },
       { key: "widget_lang", label_ar: "لغة نموذج الدفع", label_en: "Widget language", kind: "select", options: ["ar", "en"] },
-      { key: "merchant_name", label_ar: "اسم التاجر الظاهر", label_en: "Merchant display name", placeholder: "VIP STAR SATELLITE" },
-      { key: "shopper_result_url", label_ar: "رابط نتيجة الدفع", label_en: "Shopper result URL", kind: "url", placeholder: "https://vipstar.cc/pay/result",
-        hint_ar: "الصفحة التي يعود إليها العميل بعد 3D Secure.", hint_en: "Where the customer returns after 3D Secure." },
-      { key: "live_entity_id", label_ar: "Entity ID للإنتاج", label_en: "Production Entity ID", placeholder: "8acda4cd...",
-        hint_ar: "يُستخدم تلقائياً عندما تكون البيئة «live».", hint_en: "Used automatically when the environment is “live”." },
-      { key: "live_access_token", label_ar: "Access Token للإنتاج", label_en: "Production Access Token", kind: "password",
-        hint_ar: "بيانات الإنتاج من AFS/Payon — سرّية تماماً.", hint_en: "Production credentials from AFS/Payon — strictly secret." },
+      { key: "live_entity_id", label_ar: "Entity ID بديل (اختياري)", label_en: "Override Entity ID (optional)", placeholder: "8acda4cd...",
+        hint_ar: "إن مُلئ فسيُستخدم بدل الحقل الأعلى.", hint_en: "If set, it overrides the Entity ID above." },
+      { key: "live_access_token", label_ar: "Access Token بديل (اختياري)", label_en: "Override Access Token (optional)", kind: "password",
+        hint_ar: "إن مُلئ فسيُستخدم بدل الحقل الأعلى.", hint_en: "If set, it overrides the Access Token above." },
       { key: "webhook_decryption_key", label_ar: "مفتاح فك تشفير الويب هوك", label_en: "Webhook decryption key", kind: "password",
-        hint_ar: "مفتاح hex يرسله البنك بعد تسجيل رابط الإشعارات: https://vipstar.cc/api/public/payments/afs",
-        hint_en: "Hex key issued by the bank after registering the webhook: https://vipstar.cc/api/public/payments/afs" },
-      { key: "webhook_secret", label_ar: "سر الويب هوك (اختياري)", label_en: "Webhook secret (optional)", kind: "password" },
+        hint_ar: "مفتاح hex يرسله البنك بعد تسجيل رابط الإشعارات أدناه.",
+        hint_en: "Hex key issued by the bank after registering the webhook URL below." },
+    ],
+    endpoints: [
+      { label_ar: "رابط الإشعارات (Webhook)", label_en: "Webhook / notification URL", path: "/api/public/payments/afs",
+        hint_ar: "سجّله لدى AFS ثم اطلب مفتاح فك التشفير (hex).", hint_en: "Register with AFS, then request the hex decryption key." },
+      { label_ar: "رابط نتيجة الدفع (3D Secure)", label_en: "Shopper result URL (3D Secure)", path: "/pay/result",
+        hint_ar: "يُرسل تلقائياً مع كل عملية — سجّله لدى AFS كنطاق عودة مسموح.", hint_en: "Sent automatically per transaction — register it with AFS as an allowed return URL." },
+      { label_ar: "رابط المطابقة التلقائية (Cron)", label_en: "Reconciliation endpoint (cron)", path: "/api/public/afs-reconcile",
+        hint_ar: "يعمل دورياً لتحديث العمليات المعلّقة.", hint_en: "Runs periodically to settle pending attempts." },
     ],
     steps_ar: [
-      "افتح بريد التفعيل من AFS وانسخ Entity ID و Access Token.",
-      "اختر البيئة: «test» للتجربة ببطاقات الاختبار، و«live» بعد اعتماد الحساب ودفع الرسوم.",
+      "افتح بريد التفعيل من AFS وانسخ Entity ID و Access Token الخاصين بالإنتاج (LIVE).",
       "اختر نوع العملية DB (خصم فوري) إلا إذا اتفقت مع AFS على الحجز PA.",
       "اكتب البطاقات المسموحة كما فُعّلت لك في العقد (VISA MASTER عادة، وBENEFIT للبطاقات البحرينية).",
-      "ضع رابط نتيجة الدفع: https://vipstar.cc/pay/result وسجّله لدى AFS.",
-      "احفظ ثم جرّب طلباً بمبلغ صغير؛ راجع النتيجة في «سجل عمليات الدفع».",
-      "عند الانتقال للإنتاج غيّر البيئة إلى live وبدّل Entity ID و Access Token ببيانات الإنتاج.",
+      "انسخ «رابط الإشعارات» من قسم الروابط أدناه وسجّله لدى AFS.",
+      "بعد التسجيل اطلب من AFS مفتاح فك التشفير (hex) وضعه في حقل مفتاح فك تشفير الويب هوك.",
+      "سجّل «رابط نتيجة الدفع» لدى AFS كنطاق عودة مسموح.",
+      "احفظ ثم جرّب طلباً بمبلغ صغير وراجع «سجل عمليات الدفع».",
     ],
     steps_en: [
-      "Open the AFS activation email and copy the Entity ID and Access Token.",
-      "Pick the environment: “test” for test cards, “live” after your account is approved.",
+      "Open the AFS activation email and copy the LIVE Entity ID and Access Token.",
       "Choose payment type DB (immediate debit) unless AFS agreed on PA pre-auth.",
       "List the card brands enabled in your contract (usually VISA MASTER, plus BENEFIT for Bahrain).",
-      "Set the shopper result URL to https://vipstar.cc/pay/result and register it with AFS.",
-      "Save, then run a small test order and check the payment transactions log.",
-      "For production switch the environment to live and replace both credentials with live values.",
+      "Copy the webhook URL from the endpoints box below and register it with AFS.",
+      "Once registered, ask AFS for the hex decryption key and paste it into the webhook decryption key field.",
+      "Register the shopper result URL with AFS as an allowed return URL.",
+      "Save, then run a small live order and review the payment transactions log.",
     ],
+
   },
 ];
 
