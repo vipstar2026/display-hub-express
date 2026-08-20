@@ -52,7 +52,7 @@ export async function loadAfsPaymentConfig(_environment?: AfsEnvironment | null)
     token,
     baseUrl,
     widgetUrl: `${baseUrl}/v1/paymentWidgets.js`,
-    testMode: !live,
+    testMode: false,
     paymentType: value(source, "payment_type") ?? "DB",
     brands: value(source, "brands") ?? "VISA MASTER",
     widgetLang: value(source, "widget_lang"),
