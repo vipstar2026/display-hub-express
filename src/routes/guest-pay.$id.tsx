@@ -144,7 +144,18 @@ function GuestPayPage() {
             <Loader2 className="h-4 w-4 animate-spin" /> …
           </div>
         )}
-        {error && <p className="py-6 text-center text-sm text-destructive">{(error as Error).message}</p>}
+        {error && (
+          <div className="py-6 text-center">
+            <p className="text-sm text-destructive">{payInitMessage(lang)}</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mt-3 rounded-lg border border-primary/30 px-4 py-2 text-sm text-foreground hover:bg-primary/10"
+            >
+              {lang === "ar" ? "إعادة المحاولة" : lang === "ur" ? "دوبارہ کوشش کریں" : lang === "bn" ? "আবার চেষ্টা করুন" : "Try again"}
+            </button>
+          </div>
+        )}
         {data && (
           <AfsPaymentWidget
             scriptUrl={data.scriptUrl}
