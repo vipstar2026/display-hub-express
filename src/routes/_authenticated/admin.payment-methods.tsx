@@ -241,6 +241,35 @@ function AdminPaymentMethods() {
                 </div>
               )}
 
+              {/* Integration endpoints (read-only, copyable) */}
+              {preset?.endpoints?.length ? (
+                <div className="rounded-lg border border-primary/20 bg-background/40 p-3">
+                  <div className="mb-3 flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4 text-primary" />
+                    <Label className="text-base font-semibold">{t("روابط التكامل (سجّلها لدى المزوّد)", "Integration URLs (register with provider)")}</Label>
+                  </div>
+                  <div className="space-y-3">
+                    {preset.endpoints.map((ep) => {
+                      const url = `${siteOrigin()}${ep.path}`;
+                      return (
+                        <div key={ep.path}>
+                          <Label className="text-xs">{ar ? ep.label_ar : ep.label_en}</Label>
+                          <div className="flex gap-2">
+                            <Input readOnly dir="ltr" value={url} onFocus={(e) => e.currentTarget.select()} className="font-mono text-xs" />
+                            <Button type="button" variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(url); toast.success(t("تم النسخ", "Copied")); }}>
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          {(ar ? ep.hint_ar : ep.hint_en) && (
+                            <p className="mt-1 text-[11px] text-muted-foreground">{ar ? ep.hint_ar : ep.hint_en}</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+
               {/* Basics */}
               <Accordion type="single" collapsible defaultValue="basics">
                 <AccordionItem value="basics">
