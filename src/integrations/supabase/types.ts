@@ -2994,6 +2994,13 @@ export type Database = {
         Args: { _permission: string; _user_id: string }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       increment_blog_views: { Args: { _slug: string }; Returns: undefined }
       move_to_dlq: {
         Args: {
