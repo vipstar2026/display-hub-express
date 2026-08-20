@@ -275,73 +275,37 @@ function CartPage() {
         proofUrl = up.data.path;
       }
 
-      // Resolve shipping address snapshot (only for physical delivery orders)
-      const addr = selectedAddress ? addresses?.find((a) => a.id === selectedAddress) : null;
-      const shipping_address = !needsFulfillment || fulfillment === "pickup"
-        ? null
-        : addr
-          ? { full_name: addr.full_name, phone: addr.phone, address_line: addr.address_line, city: addr.city, country: addr.country, postal_code: addr.postal_code }
-          : (manualAddress.full_name || manualAddress.address_line ? manualAddress : null);
-
-
-      const { data: user } = await supabase.auth.getUser();
       idemRef.current = idemRef.current ?? (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`);
-      const { data: order, error } = await supabase.from("orders").insert({
-        idempotency_key: idemRef.current,
-        buyer_id: userId,
-        buyer_email: user.user?.email ?? "",
 
-        buyer_name: user.user?.user_metadata?.display_name ?? null,
-        subtotal,
-        discount,
-        tax,
-        shipping: shippingCost,
-        total: grandTotal,
-        currency: settings?.default_currency || "BHD",
-        status: "pending",
-        payment_status: "pending",
-        payment_method_id: method.id,
-        payment_proof_url: proofUrl,
-        payment_reference: reference || null,
-        customer_notes: customerNotes || null,
-        coupon_id: coupon?.id ?? null,
-        coupon_code: coupon?.code ?? null,
-        shipping_rate_id: needsFulfillment && fulfillment === "delivery" ? rate?.id ?? null : null,
-        shipping_method: !needsFulfillment ? "digital" : fulfillment === "pickup" ? "pickup" : rate?.method ?? null,
-        shipping_cost: shippingCost,
-        address_id: needsFulfillment && fulfillment === "delivery" ? selectedAddress : null,
-
-        shipping_address: shipping_address as never,
-      }).select().single();
-      if (error) throw error;
-
-      const { error: itemsError } = await supabase.from("order_items").insert(
-        items.map((i) => ({
-          order_id: order.id,
-          product_id: i.product_id,
-          product_name: i.name,
-          product_type: i.type,
-          unit_price: i.price,
-          quantity: i.quantity,
-          total: i.price * i.quantity,
-        }))
-      );
-      if (itemsError) throw itemsError;
-
-      if (coupon) {
-        await supabase.rpc("finalize_coupon_use", { _coupon_id: coupon.id, _order_id: order.id, _discount: discount });
-      }
+      // Prices, stock, shipping, coupon and totals are recomputed server-side.
+      const res = await placeUser({
+        data: {
+          items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
+          payment_method_id: String(method.id),
+          payment_reference: reference || null,
+          payment_proof_url: proofUrl,
+          customer_notes: customerNotes || null,
+          coupon_code: coupon?.code ?? null,
+          fulfillment: needsFulfillment ? fulfillment : "pickup",
+          shipping_rate_id: needsFulfillment && fulfillment === "delivery" ? rate?.id ?? null : null,
+          address_id: needsFulfillment && fulfillment === "delivery" ? selectedAddress : null,
+          shipping_address:
+            needsFulfillment && fulfillment === "delivery" && !selectedAddress ? { ...manualAddress } : null,
+          idempotency_key: idemRef.current,
+        },
+      });
 
       clear();
 
       // Online gateway (AFS) → go to hosted card payment page
-      if (method.is_gateway && (method.gateway_provider === "afs" || method.code === "afs")) {
-        nav({ to: "/pay/$id", params: { id: order.id } });
+      if (res.gateway === "afs") {
+        nav({ to: "/pay/$id", params: { id: res.order_id } });
         return;
       }
 
       toast.success(t("cart.order_placed"));
-      nav({ to: "/order/success/$id", params: { id: order.id } });
+      nav({ to: "/order/success/$id", params: { id: res.order_id } });
+
 
     } catch (e) {
       idemRef.current = null;
