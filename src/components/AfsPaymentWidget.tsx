@@ -139,14 +139,9 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
     window.wpwlOptions = {
       style: "plain",
       locale,
-      // Keep paymentTarget unset. COPYandPAY must post the sensitive card
-      // fields through its own PCI iframe; forcing that request into _top can
-      // skip transaction creation and return 700.400.580. Only the completed
-      // shopper-result redirect should leave the gateway iframe.
-      shopperResultTarget: "_top",
-      // Official COPYandPAY option: 5 opens the 3DS challenge full-screen.
-      // This avoids issuer ACS pages being blocked inside a smaller iframe.
-      browser: { threeDChallengeWindow: 5 },
+      // Keep navigation targets unset. COPYandPAY owns the PCI form submission,
+      // 3DS challenge, and final redirect. Overriding either target can make the
+      // browser hit our result URL without AFS creating a payment transaction.
       // Detect the card scheme from the entered number instead of asking the user.
       brandDetection: true,
       brandDetectionType: "binlist",
