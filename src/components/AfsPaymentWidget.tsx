@@ -102,48 +102,11 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
 
 
 
-    /** Swap the free-text expiry field for month/year dropdowns. */
-    const buildExpirySelects = () => {
-      const input = document.querySelector<HTMLInputElement>(".afs-widget .wpwl-control-expiry");
-      if (!input || input.dataset.afsEnhanced === "1") return;
-      input.dataset.afsEnhanced = "1";
-      input.classList.add("afs-expiry-hidden");
+    // NOTE: the expiry field is owned entirely by the COPYandPAY widget.
+    // A previous custom month/year dropdown wrote into .wpwl-control-expiry
+    // programmatically, which the widget's masked-input validator rejected
+    // ("Invalid expiry date"). Never set payment field values from our code.
 
-      const wrap = document.createElement("div");
-      wrap.className = "afs-expiry-grid";
-
-      const mm = document.createElement("select");
-      mm.className = "afs-expiry-select";
-      mm.setAttribute("aria-label", s.month);
-      mm.innerHTML =
-        `<option value="">${s.month}</option>` +
-        Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"))
-          .map((m) => `<option value="${m}">${m}</option>`)
-          .join("");
-
-      const yy = document.createElement("select");
-      yy.className = "afs-expiry-select";
-      yy.setAttribute("aria-label", s.year);
-      const start = new Date().getFullYear();
-      yy.innerHTML =
-        `<option value="">${s.year}</option>` +
-        Array.from({ length: 15 }, (_, i) => start + i)
-          .map((y) => `<option value="${String(y).slice(2)}">${y}</option>`)
-          .join("");
-
-      const sync = () => {
-        input.value = mm.value && yy.value ? `${mm.value} / ${yy.value}` : "";
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-        input.dispatchEvent(new Event("change", { bubbles: true }));
-        input.dispatchEvent(new Event("blur", { bubbles: true }));
-      };
-      mm.addEventListener("change", sync);
-      yy.addEventListener("change", sync);
-
-      wrap.appendChild(mm);
-      wrap.appendChild(yy);
-      input.parentNode?.insertBefore(wrap, input.nextSibling);
-    };
 
     const applyLabels = () => {
       const map: Record<string, string> = {
