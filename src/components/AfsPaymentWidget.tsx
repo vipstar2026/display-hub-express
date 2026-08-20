@@ -77,6 +77,17 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [brand, setBrand] = useState<string | null>(null);
+  // COPYandPAY submits and runs the 3DS challenge in the TOP window. Inside an
+  // embedded preview/iframe that navigation is blocked, so the card details are
+  // never posted and AFS never creates a transaction (result 700.400.580).
+  const [embedded, setEmbedded] = useState(false);
+  useEffect(() => {
+    try {
+      setEmbedded(window.top !== window.self);
+    } catch {
+      setEmbedded(true);
+    }
+  }, []);
 
 
   const t = (ar: string, en: string, ur?: string, bn?: string) =>
