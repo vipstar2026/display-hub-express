@@ -27,7 +27,7 @@ function Reports() {
         supabase.from("orders").select("id, total, subtotal, discount, tax, shipping, payment_status, status, buyer_email, created_at, payment_method").gte("created_at", since),
         supabase.from("order_items").select("product_id, product_name, quantity, total, unit_price, created_at").gte("created_at", since),
         supabase.from("pos_sales").select("id, total, subtotal, discount, tax, customer_name, customer_phone, created_at, payment_method, status").gte("created_at", since),
-        supabase.from("pos_sale_items").select("product_id, product_name, quantity, total, unit_price").gte("created_at", since),
+        supabase.from("pos_sale_items").select("product_id, product_name, quantity, total, unit_price, pos_sales!inner(created_at)").gte("pos_sales.created_at", since),
       ]);
       return { orders: orders.data ?? [], items: items.data ?? [], posSales: posSales.data ?? [], posItems: posItems.data ?? [] };
     },
