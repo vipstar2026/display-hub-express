@@ -85,13 +85,15 @@ export async function applyGatewayStatus(input: { attempt: any; order: PaymentOr
 
   const integrityFailure = status.state === "succeeded";
   const undecided = status.state === "processing" || status.state === "unknown";
-  // A background sweep gets exactly one look. An undecided result there means
-  // the shopper never finished; record it as abandoned instead of keeping the
-  // attempt alive and re-polling the gateway (which triggers 800.120.* limits).
+  // A background sweep gets exactly one look. Only a genuinely UNKNOWN result
+  // (e.g. 700.400.580 "cannot find transaction") means the shopper never
+  // finished, so it is recorded as abandoned. An explicit gateway PENDING
+  // (000.200.*) is a live transaction — 3-D Secure in progress — and must stay
+  // "processing" or a real payment would be thrown away.
   const nextState = integrityFailure
     ? "requires_review"
     : undecided
-      ? (input.background ? "abandoned" : "processing")
+      ? (input.background && status.state === "unknown" ? "abandoned" : "processing")
       : "failed";
   const reason = integrityFailure ? "gateway_result_integrity_mismatch" : status.description || "payment_not_completed";
   const { error } = await admin.rpc("reject_payment_attempt", {
