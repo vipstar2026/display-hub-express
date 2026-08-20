@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,6 +16,7 @@ import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { makeAdminTE } from "@/lib/admin-i18n";
+import { reviewManualPayment } from "@/lib/admin-payment.functions";
 
 type OrderStatus = "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled" | "refunded";
 type PayStatus = "pending" | "succeeded" | "failed" | "refunded";
@@ -32,6 +34,7 @@ function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
   const [payFilter, setPayFilter] = useState<"all" | PayStatus>("all");
   const [search, setSearch] = useState("");
+  const reviewPayment = useServerFn(reviewManualPayment);
 
   const { data } = useQuery({
     queryKey: ["admin-orders"],
@@ -65,25 +68,19 @@ function AdminOrders() {
   };
 
   const confirmPayment = async (id: string) => {
-    const { data: u } = await supabase.auth.getUser();
-    const { error } = await supabase.from("orders").update({
-      payment_status: "succeeded" as PayStatus,
-      status: "processing" as OrderStatus,
-      payment_confirmed_at: new Date().toISOString(),
-      payment_confirmed_by: u.user?.id ?? null,
-    }).eq("id", id);
-    if (error) toast.error(error.message);
-    else { toast.success(te("Payment confirmed")); qc.invalidateQueries({ queryKey: ["admin-orders"] }); }
+    try {
+      await reviewPayment({ data: { order_id: id, approved: true } });
+      toast.success(te("Payment confirmed"));
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+    } catch (error) { toast.error((error as Error).message); }
   };
 
   const rejectPayment = async (id: string, notes: string) => {
-    const { error } = await supabase.from("orders").update({
-      payment_status: "failed" as PayStatus,
-      status: "cancelled" as OrderStatus,
-      admin_notes: notes,
-    }).eq("id", id);
-    if (error) toast.error(error.message);
-    else { toast.success(te("Payment rejected")); qc.invalidateQueries({ queryKey: ["admin-orders"] }); }
+    try {
+      await reviewPayment({ data: { order_id: id, approved: false, notes } });
+      toast.success(te("Payment rejected"));
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+    } catch (error) { toast.error((error as Error).message); }
   };
 
   const saveNotes = async (id: string, notes: string) => {
