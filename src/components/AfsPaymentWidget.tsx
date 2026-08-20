@@ -77,6 +77,17 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [brand, setBrand] = useState<string | null>(null);
+  // COPYandPAY submits and runs the 3DS challenge in the TOP window. Inside an
+  // embedded preview/iframe that navigation is blocked, so the card details are
+  // never posted and AFS never creates a transaction (result 700.400.580).
+  const [embedded, setEmbedded] = useState(false);
+  useEffect(() => {
+    try {
+      setEmbedded(window.top !== window.self);
+    } catch {
+      setEmbedded(true);
+    }
+  }, []);
 
 
   const t = (ar: string, en: string, ur?: string, bn?: string) =>
@@ -88,7 +99,7 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
 
 
   useEffect(() => {
-    if (!scriptUrl || mounted.current || !hostRef.current) return;
+    if (!scriptUrl || mounted.current || !hostRef.current || embedded) return;
 
     // COPYandPAY installs a page-global runtime that cannot be safely unloaded.
     // If the shopper reached another payment attempt through SPA navigation, a
@@ -178,7 +189,7 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
       }
     }, 6000);
     return () => clearTimeout(timer);
-  }, [scriptUrl, locale, brands, s, action]);
+  }, [scriptUrl, locale, brands, s, action, embedded]);
 
   const brandList = (brands || "VISA MASTER").split(/\s+/).filter(Boolean);
 
@@ -220,6 +231,37 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
       )}
 
       {/* widget */}
+      {embedded ? (
+        <div className="px-5 py-8 text-center">
+          <p className="mb-1 text-sm font-semibold">
+            {t(
+              "افتح صفحة الدفع في نافذة كاملة",
+              "Open the payment page in a full window",
+              "ادائیگی مکمل ونڈو میں کھولیں",
+              "পেমেন্ট পেজ পূর্ণ উইন্ডোতে খুলুন",
+            )}
+          </p>
+          <p className="mb-4 text-xs text-muted-foreground">
+            {t(
+              "بوابة البطاقة والتحقق 3D Secure لا يعملان داخل نافذة المعاينة المضمّنة.",
+              "The card gateway and 3D Secure cannot run inside an embedded preview window.",
+              "کارڈ گیٹ وے اور 3D Secure ایمبیڈڈ پریویو میں نہیں چل سکتے۔",
+              "কার্ড গেটওয়ে ও 3D Secure এমবেডেড প্রিভিউতে চলে না।",
+            )}
+          </p>
+          <Button
+            onClick={() =>
+              window.open(
+                `${window.location.origin}${window.location.pathname}${window.location.search}`,
+                "_blank",
+                "noopener",
+              )
+            }
+          >
+            {t("متابعة الدفع", "Continue to payment", "ادائیگی جاری رکھیں", "পেমেন্ট চালিয়ে যান")}
+          </Button>
+        </div>
+      ) : (
       <div className="afs-widget px-5 py-5" dir="ltr">
         <div>
           {!ready && !failed && (
@@ -249,7 +291,7 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
         {/* Host node owned by the gateway script — React must never render children here. */}
         <div ref={hostRef} suppressHydrationWarning />
       </div>
-
+      )}
 
       {/* trust footer */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 bg-secondary/30 px-5 py-3 text-[11px] text-muted-foreground">
