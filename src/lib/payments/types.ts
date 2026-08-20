@@ -28,5 +28,6 @@ export type GatewayStatus = {
   brand: string | null;
   code: string;
   description: string;
+  rateLimited?: boolean;
   state: "succeeded" | "processing" | "failed" | "unknown";
 };
