@@ -1,0 +1,1 @@
+UPDATE public.products SET status = 'draft', updated_at = now() WHERE id IN ('35d56076-eb51-4ebf-8163-533d1543112b','c2520721-0ccd-4669-b7da-181a2c70511b');
