@@ -32,7 +32,7 @@ function Analytics() {
         supabase.from("orders").select("id,total,subtotal,discount,tax,shipping,currency,status,payment_status,created_at,buyer_email").gte("created_at", since).order("created_at"),
         supabase.from("orders").select("id,total,created_at").gte("created_at", prevSince).lt("created_at", since),
         supabase.from("order_items").select("product_id,product_name,quantity,unit_price,order_id,orders!inner(created_at,payment_status)").gte("orders.created_at", since),
-        supabase.from("products").select("id,name,category_id,stock,price,categories(name)"),
+        supabase.from("products").select("id,name_ar,name_en,category_id,stock,price,categories(name_ar,name_en)"),
         supabase.from("orders").select("buyer_email,total,created_at").not("buyer_email", "is", null),
       ]);
       return {
@@ -96,7 +96,7 @@ function Analytics() {
 
   const categoryShare = useMemo(() => {
     if (!data) return [];
-    const catByProduct = new Map(data.products.map((p: any) => [p.id, p.categories?.name ?? "—"]));
+    const catByProduct = new Map(data.products.map((p: any) => [p.id, p.categories?.name_en ?? p.categories?.name_ar ?? "—"]));
     const map = new Map<string, number>();
     data.items.forEach((it: any) => {
       const orderPaid = it.orders?.payment_status === "paid" || it.orders?.payment_status === "succeeded";
@@ -209,7 +209,7 @@ function Analytics() {
                   <div key={i} className="flex items-center gap-3 rounded-md bg-muted/30 p-2 text-sm">
                     <div className="grid h-8 w-8 place-items-center rounded-md bg-primary/20 font-bold text-primary">{i + 1}</div>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate font-medium">{p.name}</div>
+                      <div className="truncate font-medium">{p.name_en ?? p.name_ar}</div>
                       <div className="text-xs text-muted-foreground">{L.qty}: {p.qty}</div>
                     </div>
                     <div className="text-end font-mono text-sm">{formatPrice(p.revenue)}</div>
@@ -262,7 +262,7 @@ function Analytics() {
               <div className="grid gap-2 md:grid-cols-2">
                 {lowStock.map((p: any) => (
                   <div key={p.id} className="flex items-center justify-between rounded-md border border-red-500/30 bg-red-500/5 p-2 text-sm">
-                    <span className="truncate">{p.name}</span>
+                    <span className="truncate">{p.name_en ?? p.name_ar}</span>
                     <span className="font-mono text-red-400">{L.stock}: {p.stock}</span>
                   </div>
                 ))}
