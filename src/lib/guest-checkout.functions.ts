@@ -272,9 +272,21 @@ export const confirmGuestAfsPayment = createServerFn({ method: "POST" })
   .inputValidator((input: { order_id: string; token: string; checkout_id: string }) => input)
   .handler(async ({ data }) => {
     const { order } = await loadGuestOrder(data.order_id, data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { verifyAfsPaymentForOrder, applyAfsPaymentResult } = await import(
       "@/lib/afs-verify.server"
     );
+
+    const { data: attempt } = await supabaseAdmin
+      .from("payment_transactions")
+      .select("provider_checkout_id, provider_charge_id")
+      .eq("order_id", order.id)
+      .eq("provider", "afs")
+      .or(`provider_checkout_id.eq.${data.checkout_id},provider_charge_id.eq.${data.checkout_id}`)
+      .limit(1)
+      .maybeSingle();
+    if (!attempt) throw new Error("Payment attempt not found");
+    const expectedCheckoutId = attempt.provider_checkout_id ?? attempt.provider_charge_id;
 
     // Same centralised gate as authenticated checkout / webhook / reconciliation.
     const gateOrder = {
@@ -289,6 +301,7 @@ export const confirmGuestAfsPayment = createServerFn({ method: "POST" })
     const result = await verifyAfsPaymentForOrder({
       order: gateOrder,
       checkoutId: data.checkout_id,
+      expectedCheckoutId,
       source: "confirm_guest",
     });
     await applyAfsPaymentResult({
