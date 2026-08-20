@@ -96,7 +96,6 @@ export async function afsPrepareCheckout(params: {
   amount: string;
   currency: string;
   merchantTransactionId: string;
-  shopperResultUrl: string;
   email?: string | null;
   givenName?: string | null;
   surname?: string | null;
@@ -109,7 +108,6 @@ export async function afsPrepareCheckout(params: {
     currency: cfg.currency || params.currency,
     paymentType: cfg.paymentType,
     merchantTransactionId: params.merchantTransactionId,
-    shopperResultUrl: params.shopperResultUrl,
   });
   if (cfg.merchantName) body.set("merchantTransactionId", params.merchantTransactionId);
   if (params.email) body.set("customer.email", params.email);

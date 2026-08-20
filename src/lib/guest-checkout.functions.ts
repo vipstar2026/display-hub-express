@@ -239,7 +239,6 @@ export const createGuestAfsCheckout = createServerFn({ method: "POST" })
       amount,
       currency,
       merchantTransactionId: order.order_number,
-      shopperResultUrl: `https://vipstar.cc/guest-pay/result?order=${encodeURIComponent(order.id)}&t=${encodeURIComponent(data.token)}`,
       email: order.buyer_email,
       givenName: givenName || null,
       surname: rest.join(" ") || null,
