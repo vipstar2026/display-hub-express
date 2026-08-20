@@ -280,45 +280,9 @@
   width: 100%;
 }
 
-/* Month / year dropdowns replacing the free-text expiry input */
-.afs-widget .afs-expiry-hidden {
-  position: absolute !important;
-  opacity: 0;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
-}
-.afs-widget .afs-expiry-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-}
-.afs-widget .afs-expiry-select {
-  background: var(--input);
-  color: var(--foreground);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  height: 2.75rem;
-  padding: 0 0.6rem;
-  font-size: 0.95rem;
-  width: 100%;
-  appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%),
-    linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
-  background-position: calc(100% - 18px) 1.2rem, calc(100% - 13px) 1.2rem;
-  background-size: 5px 5px, 5px 5px;
-  background-repeat: no-repeat;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.afs-widget .afs-expiry-select:focus {
-  border-color: var(--ring);
-  outline: none;
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 25%, transparent);
-}
-.afs-widget .afs-expiry-select option {
-  background: var(--card);
-  color: var(--foreground);
-}
+/* Expiry field is rendered and validated by the COPYandPAY widget itself. */
+
+
 
 @media (min-width: 640px) {
   .afs-widget .wpwl-group-expiry,
