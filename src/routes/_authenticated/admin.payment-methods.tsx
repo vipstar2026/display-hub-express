@@ -18,7 +18,9 @@ import { makeAdminT } from "@/lib/admin-i18n";
 import { PAYMENT_PROVIDERS, providerByCode, type PaymentProvider } from "@/lib/payment-providers";
 import { BASE } from "@/lib/site-url";
 
-const siteOrigin = () => (typeof window !== "undefined" ? window.location.origin.replace(/^https?:\/\/(id-preview|localhost).*$/, BASE) : BASE);
+/** Integration URLs must always use the canonical production domain (vipstar.cc),
+ *  never the preview/localhost origin — AFS registers these exact URLs. */
+const siteOrigin = () => BASE;
 
 export const Route = createFileRoute("/_authenticated/admin/payment-methods")({
   component: AdminPaymentMethods,
