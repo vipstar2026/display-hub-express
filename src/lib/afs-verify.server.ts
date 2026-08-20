@@ -138,7 +138,7 @@ export async function verifyAfsPaymentForOrder(input: {
   };
 
   if (!status || !code || unresolved(status))
-    return fail("gateway_unknown", "gateway did not recognise the payment reference");
+    return fail("gateway_unknown", "gateway has not resolved the payment reference yet", true);
   if (afsIsPending(code)) return fail("payment_pending", "payment still pending", true);
   if (!afsIsSuccess(code)) return fail("payment_failed", "declined by the gateway");
 
@@ -233,6 +233,7 @@ export async function applyAfsPaymentResult(params: {
     .select("id")
     .eq("order_id", order.id)
     .eq("provider", "afs")
+    .or(`provider_checkout_id.eq.${checkoutId},provider_charge_id.eq.${checkoutId}`)
     .eq("status", "pending")
     .order("created_at", { ascending: false })
     .limit(1)

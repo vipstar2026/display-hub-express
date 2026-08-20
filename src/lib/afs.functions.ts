@@ -76,9 +76,22 @@ export const confirmAfsPayment = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!order || order.buyer_id !== context.userId) throw new Error("Order not found");
 
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: attempt } = await supabaseAdmin
+      .from("payment_transactions")
+      .select("provider_checkout_id, provider_charge_id")
+      .eq("order_id", order.id)
+      .eq("provider", "afs")
+      .or(`provider_checkout_id.eq.${data.checkout_id},provider_charge_id.eq.${data.checkout_id}`)
+      .limit(1)
+      .maybeSingle();
+    if (!attempt) throw new Error("Payment attempt not found");
+    const expectedCheckoutId = attempt.provider_checkout_id ?? attempt.provider_charge_id;
+
     const result = await verifyAfsPaymentForOrder({
       order,
       checkoutId: data.checkout_id,
+      expectedCheckoutId,
       source: "confirm_authenticated",
     });
     await applyAfsPaymentResult({
