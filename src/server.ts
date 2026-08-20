@@ -95,6 +95,11 @@ export default {
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
+      // Client disconnected mid-request — expected, not an error. Return a minimal
+      // 499 (client closed) with an empty body instead of flashing the 500 error page.
+      if (isClientDisconnectError(error)) {
+        return new Response(null, { status: 499, headers: { "content-length": "0" } });
+      }
       console.error(error);
       return brandedErrorResponse();
     }
