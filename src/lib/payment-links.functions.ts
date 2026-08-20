@@ -64,7 +64,6 @@ export const startPaymentLinkCheckout = createServerFn({ method: "POST" })
       amount: Number(link.amount).toFixed(2),
       currency: link.currency || cfg.currency || "BHD",
       merchantTransactionId: orderNumber!,
-      shopperResultUrl: `https://vipstar.cc/pay-link/result?token=${encodeURIComponent(data.token)}`,
       email,
       givenName: givenName || null,
       surname: rest.join(" ") || null,
