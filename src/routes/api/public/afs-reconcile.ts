@@ -51,12 +51,17 @@ export const Route = createFileRoute("/api/public/afs-reconcile")({
         await admin.rpc("abandon_stale_payment_attempts", { _minutes: 30 });
 
         const windowStart = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+        // Never touch an attempt the shopper may still be completing: the hosted
+        // card page plus 3-D Secure can legitimately take several minutes, and
+        // querying it early is what produced premature "abandoned" results.
+        const settleGrace = new Date(Date.now() - 8 * 60 * 1000).toISOString();
         const { data: pending, error } = await admin
           .from("payment_attempts")
           .select("*")
           .eq("provider", "afs")
           .in("state", ["awaiting_customer", "processing"])
           .gte("created_at", windowStart)
+          .lte("created_at", settleGrace)
           .order("created_at", { ascending: true })
           .limit(40);
 
