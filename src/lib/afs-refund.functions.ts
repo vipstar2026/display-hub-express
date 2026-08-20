@@ -1,6 +1,20 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { formatAmount, toMinorUnits } from "@/lib/afs-money";
 
+/**
+ * Admin refund of a captured AFS payment.
+ *
+ * Guards enforced before anything is sent to the gateway:
+ *  - caller is an admin
+ *  - the order is actually paid and not already fully refunded
+ *  - a *final AFS payment id* can be established (never a bare checkout id)
+ *  - 0 < amount <= remaining refundable amount, compared in exact minor units
+ *
+ * NOTE (owner decisions, unchanged by design):
+ *  - a refund does NOT restock physical items (payment refund != product return)
+ *  - a refund does NOT revoke or return delivered digital codes
+ */
 export const refundAfsPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { order_id: string; amount?: number; reason?: string }) => input)
@@ -15,7 +29,10 @@ export const refundAfsPayment = createServerFn({ method: "POST" })
     if (!role) throw new Error("not_authorized");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { afsRefund, afsIsSuccess, loadAfsConfig } = await import("@/lib/afs.server");
+    const { afsRefund, afsIsSuccess, loadAfsConfig, afsGetStatus } = await import(
+      "@/lib/afs.server"
+    );
+    const { logIntegrityEvent } = await import("@/lib/afs-verify.server");
 
     const { data: order } = await supabaseAdmin
       .from("orders")
@@ -25,25 +42,87 @@ export const refundAfsPayment = createServerFn({ method: "POST" })
     if (!order) throw new Error("order_not_found");
     if (order.payment_status !== "succeeded") throw new Error("order_not_paid");
 
-    const { data: tx } = await supabaseAdmin
+    const currency = (order.currency || "BHD").toUpperCase();
+
+    // All AFS rows for this order: the capture plus any previous refunds.
+    const { data: rows } = await supabaseAdmin
       .from("payment_transactions")
-      .select("id, provider_charge_id, amount, currency")
+      .select("id, provider_charge_id, provider_checkout_id, provider_payment_id, amount, currency, status, raw_response, created_at")
       .eq("order_id", order.id)
       .eq("provider", "afs")
-      .eq("status", "succeeded")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (!tx?.provider_charge_id) throw new Error("no_afs_transaction");
+      .order("created_at", { ascending: false });
 
-    const amount = Number(data.amount ?? order.total);
-    if (!(amount > 0) || amount > Number(tx.amount ?? order.total)) throw new Error("invalid_amount");
+    const all = (rows ?? []) as Array<Record<string, unknown>>;
+    const capture = all.find((r) => r["status"] === "succeeded" && Number(r["amount"]) > 0);
+    if (!capture) throw new Error("no_afs_transaction");
+
+    // --- Establish the FINAL payment id (never a bare checkout id) ---------
+    let paymentId =
+      (capture["provider_payment_id"] as string | null) ??
+      ((capture["raw_response"] as { id?: string } | null)?.id ?? null);
+
+    if (!paymentId) {
+      // Historical row: resolve unambiguously via the gateway using the checkout id.
+      const checkoutId =
+        (capture["provider_checkout_id"] as string | null) ??
+        (capture["provider_charge_id"] as string | null);
+      if (checkoutId) {
+        const st = await afsGetStatus(checkoutId).catch(() => null);
+        if (
+          st?.id &&
+          st.merchantTransactionId === order.order_number &&
+          (st.currency ?? "").toUpperCase() === currency
+        ) {
+          paymentId = st.id;
+          await supabaseAdmin
+            .from("payment_transactions")
+            .update({ provider_payment_id: st.id, provider_checkout_id: checkoutId } as never)
+            .eq("id", capture["id"] as string);
+        }
+      }
+    }
+
+    if (!paymentId) {
+      await logIntegrityEvent({
+        category: "refund_reference_unresolved",
+        reason: "final AFS payment id could not be established",
+        order_id: order.id,
+        order_number: order.order_number,
+        transaction_id: capture["id"] as string,
+        currency,
+        source: "refund",
+      });
+      throw new Error("Payment reference could not be verified for refund.");
+    }
+
+    // --- Amount validation in exact minor units ---------------------------
+    const capturedUnits = toMinorUnits(Number(capture["amount"]), currency);
+    const refundedUnits = all
+      .filter((r) => r["status"] === "refunded")
+      .reduce((sum, r) => sum + (toMinorUnits(Math.abs(Number(r["amount"])), currency) ?? 0n), 0n);
+    if (capturedUnits === null) throw new Error("invalid_amount");
+
+    const remaining = capturedUnits - refundedUnits;
+    if (remaining <= 0n) throw new Error("already_refunded");
+
+    const requestedUnits =
+      data.amount === undefined ? remaining : toMinorUnits(data.amount, currency);
+    if (requestedUnits === null || requestedUnits <= 0n) throw new Error("invalid_amount");
+    if (requestedUnits > remaining) throw new Error("refund_exceeds_remaining");
+
+    const amountStr = formatAmount(
+      (Number(requestedUnits) / 10 ** (currency === "BHD" ? 3 : 2)).toFixed(
+        currency === "BHD" ? 3 : 2,
+      ),
+      currency,
+    );
+    const amount = Number(amountStr);
 
     const cfg = await loadAfsConfig();
     const res = await afsRefund({
-      paymentId: tx.provider_charge_id,
-      amount: amount.toFixed(2),
-      currency: tx.currency || order.currency || "BHD",
+      paymentId,
+      amount: amountStr,
+      currency,
       cfg,
     });
 
@@ -52,17 +131,18 @@ export const refundAfsPayment = createServerFn({ method: "POST" })
     await supabaseAdmin.from("payment_transactions").insert({
       order_id: order.id,
       provider: "afs",
-      provider_charge_id: res.id ?? tx.provider_charge_id,
+      provider_charge_id: res.id ?? paymentId,
+      provider_payment_id: res.id ?? null,
       amount: -amount,
-      currency: tx.currency || order.currency || "BHD",
+      currency,
       status: ok ? "refunded" : "failed",
       payment_method: "AFS refund",
       raw_response: res as never,
       failure_reason: ok ? null : (res.result?.description ?? "refund failed"),
-    });
+    } as never);
 
     if (ok) {
-      const full = amount >= Number(order.total) - 0.001;
+      const full = requestedUnits >= remaining;
       await supabaseAdmin
         .from("orders")
         .update({
@@ -76,6 +156,7 @@ export const refundAfsPayment = createServerFn({ method: "POST" })
     return {
       success: ok,
       amount,
+      partial: ok && requestedUnits < remaining,
       code: res.result?.code ?? "",
       message: res.result?.description ?? "",
     };
