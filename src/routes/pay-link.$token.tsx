@@ -1,3 +1,4 @@
+import { BASE } from "@/lib/site-url";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
