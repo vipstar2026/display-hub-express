@@ -126,6 +126,11 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
     window.wpwlOptions = {
       style: "plain",
       locale,
+      // 3-D Secure must take over the whole browser window. Left on its default
+      // the widget opens the bank's ACS page inside an iframe, and most issuers
+      // send X-Frame-Options: DENY — the shopper is then stuck on the
+      // "You are being redirected…" spinner and the payment never completes.
+      threeDIframe: { enabled: false },
       // Detect the card scheme from the entered number instead of asking the user.
       brandDetection: true,
       brandDetectionType: "binlist",
@@ -134,6 +139,7 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
       showLabels: true,
       showPlaceholders: true,
       maskCvv: true,
+
       onReady: () => {
         setReady(true);
         applyLabels();
