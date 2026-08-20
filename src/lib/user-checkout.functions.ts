@@ -240,25 +240,25 @@ export const placeUserOrder = createServerFn({ method: "POST" })
         .eq("id", couponId);
     }
 
-    const { createPaymentAttempt } = await import("@/lib/payments/core.server");
     const kind = method.is_gateway ? "gateway" : method.requires_proof ? "manual" : "cash";
-    const attempt = await createPaymentAttempt({
-      order: {
-        id: order.id,
-        order_number: (await admin.from("orders").select("order_number").eq("id", order.id).single()).data.order_number,
-        total,
-        currency: settings?.default_currency || "BHD",
-        payment_status: "pending",
-        status: "pending",
-        buyer_email: email,
-        buyer_name: profile?.display_name ?? null,
-      },
-      paymentMethodId: method.id,
-      provider: method.gateway_provider || method.code,
-      kind,
-      attemptKey: `order:${order.id}:${method.id}`,
-    });
     if (kind === "manual") {
+      const { createPaymentAttempt } = await import("@/lib/payments/core.server");
+      const attempt = await createPaymentAttempt({
+        order: {
+          id: order.id,
+          order_number: (await admin.from("orders").select("order_number").eq("id", order.id).single()).data.order_number,
+          total,
+          currency: settings?.default_currency || "BHD",
+          payment_status: "pending",
+          status: "pending",
+          buyer_email: email,
+          buyer_name: profile?.display_name ?? null,
+        },
+        paymentMethodId: method.id,
+        provider: method.gateway_provider || method.code,
+        kind,
+        attemptKey: `manual:${order.id}:${method.id}`,
+      });
       await admin.from("manual_payment_reviews").insert({
         attempt_id: attempt.id,
         proof_path: data.payment_proof_url || null,

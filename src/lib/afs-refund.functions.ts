@@ -27,7 +27,6 @@ export const refundAfsPayment = createServerFn({ method: "POST" })
       requested_by: context.userId,
     }).select("id").single();
     if (insertError) throw new Error(insertError.message);
-    const { formatInternalAmount } = await import("@/lib/payments/money");
     const { refundAfsPaymentById } = await import("@/lib/payments/afs-adapter.server");
     const result = await refundAfsPaymentById(attempt.external_payment_id, Number(amount).toFixed(2), attempt.currency);
     if (result.state !== "succeeded" || !result.externalPaymentId) {
@@ -36,6 +35,5 @@ export const refundAfsPayment = createServerFn({ method: "POST" })
     }
     const { error } = await admin.rpc("finalize_payment_refund", { _refund_id: refund.id, _provider_refund_id: result.externalPaymentId, _provider_code: result.code });
     if (error) throw new Error(error.message);
-    void formatInternalAmount;
     return { success: true, amount, partial: amount < remaining, code: result.code, message: result.description };
   });
