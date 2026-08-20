@@ -99,7 +99,7 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
 
 
   useEffect(() => {
-    if (!scriptUrl || mounted.current || !hostRef.current) return;
+    if (!scriptUrl || mounted.current || !hostRef.current || embedded) return;
 
     // COPYandPAY installs a page-global runtime that cannot be safely unloaded.
     // If the shopper reached another payment attempt through SPA navigation, a
