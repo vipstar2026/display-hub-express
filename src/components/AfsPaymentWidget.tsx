@@ -147,7 +147,7 @@ export function AfsPaymentWidget({ scriptUrl, scriptIntegrity, action, brands, w
       // Detect the card scheme from the entered number instead of asking the user.
       brandDetection: true,
       brandDetectionType: "binlist",
-      brandDetectionPriority: (brands || "VISA MASTER").split(/\s+/).filter(Boolean),
+      brandDetectionPriority: (brands || ALL_BRANDS).split(/\s+/).filter(Boolean),
       showCVVHint: true,
       showLabels: true,
       showPlaceholders: true,
@@ -169,7 +169,7 @@ export function AfsPaymentWidget({ scriptUrl, scriptIntegrity, action, brands, w
     const form = document.createElement("form");
     form.setAttribute("action", action);
     form.className = "paymentWidgets";
-    form.setAttribute("data-brands", brands || "VISA MASTER");
+    form.setAttribute("data-brands", brands || ALL_BRANDS);
     form.setAttribute("data-lang", locale);
     hostRef.current.appendChild(form);
 
@@ -194,7 +194,7 @@ export function AfsPaymentWidget({ scriptUrl, scriptIntegrity, action, brands, w
     return () => clearTimeout(timer);
   }, [scriptUrl, scriptIntegrity, locale, brands, s, action, embedded]);
 
-  const brandList = (brands || "VISA MASTER").split(/\s+/).filter(Boolean);
+  const brandList = (brands || ALL_BRANDS).split(/\s+/).filter(Boolean);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-primary/15 bg-card shadow-lg">
