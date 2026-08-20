@@ -213,10 +213,7 @@ function AdminPaymentMethods() {
                       {preset.kind === "gateway" ? (t("بيانات الاتصال بالبوابة", "Gateway credentials")) : (t("بيانات الحساب", "Account details"))}
                     </Label>
                     {preset.kind === "gateway" && (
-                      <div className="ms-auto flex items-center gap-2">
-                        <Switch checked={form.test_mode} onCheckedChange={(v) => setForm({ ...form, test_mode: v })} />
-                        <span className="text-xs text-muted-foreground">{t("وضع الاختبار", "Test mode")}</span>
-                      </div>
+                      <span className="ms-auto text-xs font-medium text-muted-foreground">{t("وضع الإنتاج (LIVE) فقط", "LIVE mode only")}</span>
                     )}
                   </div>
                   <div className="grid gap-3 md:grid-cols-2">
