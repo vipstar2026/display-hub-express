@@ -5,6 +5,8 @@ import { z } from "zod";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
+import { payInitMessage } from "@/lib/pay-messages";
+import { formatAmount } from "@/lib/afs-money";
 import { createGuestAfsCheckout, getGuestOrder } from "@/lib/guest-checkout.functions";
 import { ShieldCheck, Loader2, Receipt, Truck, Store, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -144,14 +146,25 @@ function GuestPayPage() {
             <Loader2 className="h-4 w-4 animate-spin" /> …
           </div>
         )}
-        {error && <p className="py-6 text-center text-sm text-destructive">{(error as Error).message}</p>}
+        {error && (
+          <div className="py-6 text-center">
+            <p className="text-sm text-destructive">{payInitMessage(lang)}</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mt-3 rounded-lg border border-primary/30 px-4 py-2 text-sm text-foreground hover:bg-primary/10"
+            >
+              {lang === "ar" ? "إعادة المحاولة" : lang === "ur" ? "دوبارہ کوشش کریں" : lang === "bn" ? "আবার চেষ্টা করুন" : "Try again"}
+            </button>
+          </div>
+        )}
         {data && (
           <AfsPaymentWidget
             scriptUrl={data.scriptUrl}
             action={`${window.location.origin}/guest-pay/result?order=${id}&t=${encodeURIComponent(token)}`}
             brands={data.brands}
             widgetLang={data.widgetLang}
-            amount={data.amount}
+            amount={formatAmount(order?.total ?? data.amount, data.currency)}
             currency={data.currency}
             onCancel={() => nav({ to: "/cart" })}
           />

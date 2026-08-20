@@ -124,9 +124,32 @@ export async function afsPrepareCheckout(params: {
   });
   const json = (await res.json()) as {
     id?: string;
-    result?: { code: string; description: string };
+    result?: {
+      code: string;
+      description: string;
+      parameterErrors?: { name: string; value?: string; message?: string }[];
+    };
   };
-  if (!json.id) throw new Error(json.result?.description ?? "AFS checkout failed");
+  if (!json.id) {
+    // Server-side diagnostic only — never contains credentials or card data.
+    console.error("[afs] checkout creation failed", {
+      httpStatus: res.status,
+      contentType: res.headers.get("content-type"),
+      resultCode: json.result?.code,
+      resultDescription: json.result?.description,
+      parameterErrors: json.result?.parameterErrors?.map((p) => ({
+        name: p.name,
+        value: p.value,
+        message: p.message,
+      })),
+      sentFields: [...body.keys()].filter((k) => k !== "entityId"),
+      amount: params.amount,
+      currency: body.get("currency"),
+      merchantTransactionId: params.merchantTransactionId,
+    });
+    // Generic error for the shopper; details stay in the server log.
+    throw new Error("afs_init_failed");
+  }
   return { checkoutId: json.id, resultCode: json.result?.code ?? "" };
 }
 

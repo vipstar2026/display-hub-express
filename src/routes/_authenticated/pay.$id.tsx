@@ -5,6 +5,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
+import { payInitMessage } from "@/lib/pay-messages";
+import { formatAmount } from "@/lib/afs-money";
 import { createAfsCheckout } from "@/lib/afs.functions";
 import { ShieldCheck, Loader2, Receipt, Truck, Store, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -159,7 +161,16 @@ function PayPage() {
         )}
         {error && (
           <div className="rounded-xl border border-primary/10 bg-card p-4">
-            <PayErrorInline message={(error as Error).message} />
+            <PayErrorInline message={payInitMessage(lang)} />
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="rounded-lg border border-primary/30 px-4 py-2 text-sm text-foreground hover:bg-primary/10"
+              >
+                {lang === "ar" ? "إعادة المحاولة" : lang === "ur" ? "دوبارہ کوشش کریں" : lang === "bn" ? "আবার চেষ্টা করুন" : "Try again"}
+              </button>
+            </div>
           </div>
         )}
         {data && (
@@ -168,7 +179,7 @@ function PayPage() {
             action={`${data.resultUrl || `${window.location.origin}/pay/result`}?order=${id}`}
             brands={data.brands}
             widgetLang={data.widgetLang}
-            amount={data.amount}
+            amount={formatAmount(order?.total ?? data.amount, data.currency)}
             currency={data.currency}
             onCancel={() => nav({ to: "/cart" })}
           />
