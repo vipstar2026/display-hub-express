@@ -40,6 +40,7 @@ import { Route as GuestPayIdRouteImport } from './routes/guest-pay.$id'
 import { Route as GuestPayResultRouteImport } from './routes/guest-pay.result'
 import { Route as PayLinkTokenRouteImport } from './routes/pay-link.$token'
 import { Route as PayLinkResultRouteImport } from './routes/pay-link.result'
+import { Route as PayResultRouteImport } from './routes/pay.result'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as AuthenticatedAccountAddressesRouteImport } from './routes/_authenticated/account.addresses'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
@@ -75,7 +76,6 @@ import { Route as AuthenticatedAdminShippingRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminSuppliersRouteImport } from './routes/_authenticated/admin.suppliers'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedPayIdRouteImport } from './routes/_authenticated/pay.$id'
-import { Route as AuthenticatedPayResultRouteImport } from './routes/_authenticated/pay.result'
 import { Route as ApiPublicAfsReconcileRouteImport } from './routes/api/public/afs-reconcile'
 import { Route as ApiPublicSendEmailsRouteImport } from './routes/api/public/send-emails'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -240,6 +240,11 @@ const PayLinkTokenRoute = PayLinkTokenRouteImport.update({
 const PayLinkResultRoute = PayLinkResultRouteImport.update({
   id: '/pay-link/result',
   path: '/pay-link/result',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PayResultRoute = PayResultRouteImport.update({
+  id: '/pay/result',
+  path: '/pay/result',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductSlugRoute = ProductSlugRouteImport.update({
@@ -445,11 +450,6 @@ const AuthenticatedPayIdRoute = AuthenticatedPayIdRouteImport.update({
   path: '/pay/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedPayResultRoute = AuthenticatedPayResultRouteImport.update({
-  id: '/pay/result',
-  path: '/pay/result',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const ApiPublicAfsReconcileRoute = ApiPublicAfsReconcileRouteImport.update({
   id: '/api/public/afs-reconcile',
   path: '/api/public/afs-reconcile',
@@ -543,6 +543,7 @@ export interface FileRoutesByFullPath {
   '/guest-pay/result': typeof GuestPayResultRoute
   '/pay-link/$token': typeof PayLinkTokenRoute
   '/pay-link/result': typeof PayLinkResultRoute
+  '/pay/result': typeof PayResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/account/addresses': typeof AuthenticatedAccountAddressesRoute
@@ -578,7 +579,6 @@ export interface FileRoutesByFullPath {
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/pay/$id': typeof AuthenticatedPayIdRoute
-  '/pay/result': typeof AuthenticatedPayResultRoute
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -621,6 +621,7 @@ export interface FileRoutesByTo {
   '/guest-pay/result': typeof GuestPayResultRoute
   '/pay-link/$token': typeof PayLinkTokenRoute
   '/pay-link/result': typeof PayLinkResultRoute
+  '/pay/result': typeof PayResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/blog': typeof BlogIndexRoute
   '/account/addresses': typeof AuthenticatedAccountAddressesRoute
@@ -656,7 +657,6 @@ export interface FileRoutesByTo {
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/pay/$id': typeof AuthenticatedPayIdRoute
-  '/pay/result': typeof AuthenticatedPayResultRoute
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -702,6 +702,7 @@ export interface FileRoutesById {
   '/guest-pay/result': typeof GuestPayResultRoute
   '/pay-link/$token': typeof PayLinkTokenRoute
   '/pay-link/result': typeof PayLinkResultRoute
+  '/pay/result': typeof PayResultRoute
   '/product/$slug': typeof ProductSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/_authenticated/account/addresses': typeof AuthenticatedAccountAddressesRoute
@@ -737,7 +738,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/pay/$id': typeof AuthenticatedPayIdRoute
-  '/_authenticated/pay/result': typeof AuthenticatedPayResultRoute
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -783,6 +783,7 @@ export interface FileRouteTypes {
     | '/guest-pay/result'
     | '/pay-link/$token'
     | '/pay-link/result'
+    | '/pay/result'
     | '/product/$slug'
     | '/blog/'
     | '/account/addresses'
@@ -818,7 +819,6 @@ export interface FileRouteTypes {
     | '/admin/suppliers'
     | '/admin/users'
     | '/pay/$id'
-    | '/pay/result'
     | '/api/public/afs-reconcile'
     | '/api/public/send-emails'
     | '/lovable/email/suppression'
@@ -861,6 +861,7 @@ export interface FileRouteTypes {
     | '/guest-pay/result'
     | '/pay-link/$token'
     | '/pay-link/result'
+    | '/pay/result'
     | '/product/$slug'
     | '/blog'
     | '/account/addresses'
@@ -896,7 +897,6 @@ export interface FileRouteTypes {
     | '/admin/suppliers'
     | '/admin/users'
     | '/pay/$id'
-    | '/pay/result'
     | '/api/public/afs-reconcile'
     | '/api/public/send-emails'
     | '/lovable/email/suppression'
@@ -941,6 +941,7 @@ export interface FileRouteTypes {
     | '/guest-pay/result'
     | '/pay-link/$token'
     | '/pay-link/result'
+    | '/pay/result'
     | '/product/$slug'
     | '/blog/'
     | '/_authenticated/account/addresses'
@@ -976,7 +977,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/suppliers'
     | '/_authenticated/admin/users'
     | '/_authenticated/pay/$id'
-    | '/_authenticated/pay/result'
     | '/api/public/afs-reconcile'
     | '/api/public/send-emails'
     | '/lovable/email/suppression'
@@ -1019,6 +1019,7 @@ export interface RootRouteChildren {
   GuestPayResultRoute: typeof GuestPayResultRoute
   PayLinkTokenRoute: typeof PayLinkTokenRoute
   PayLinkResultRoute: typeof PayLinkResultRoute
+  PayResultRoute: typeof PayResultRoute
   ProductSlugRoute: typeof ProductSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ApiPublicAfsReconcileRoute: typeof ApiPublicAfsReconcileRoute
@@ -1248,6 +1249,13 @@ declare module '@tanstack/react-router' {
       path: '/pay-link/result'
       fullPath: '/pay-link/result'
       preLoaderRoute: typeof PayLinkResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pay/result': {
+      id: '/pay/result'
+      path: '/pay/result'
+      fullPath: '/pay/result'
+      preLoaderRoute: typeof PayResultRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/product/$slug': {
@@ -1495,13 +1503,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPayIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/pay/result': {
-      id: '/_authenticated/pay/result'
-      path: '/pay/result'
-      fullPath: '/pay/result'
-      preLoaderRoute: typeof AuthenticatedPayResultRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/api/public/afs-reconcile': {
       id: '/api/public/afs-reconcile'
       path: '/api/public/afs-reconcile'
@@ -1676,7 +1677,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
   AuthenticatedPayIdRoute: typeof AuthenticatedPayIdRoute
-  AuthenticatedPayResultRoute: typeof AuthenticatedPayResultRoute
   AuthenticatedOrderSuccessIdRoute: typeof AuthenticatedOrderSuccessIdRoute
 }
 
@@ -1685,7 +1685,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
   AuthenticatedPayIdRoute: AuthenticatedPayIdRoute,
-  AuthenticatedPayResultRoute: AuthenticatedPayResultRoute,
   AuthenticatedOrderSuccessIdRoute: AuthenticatedOrderSuccessIdRoute,
 }
 
@@ -1720,6 +1719,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuestPayResultRoute: GuestPayResultRoute,
   PayLinkTokenRoute: PayLinkTokenRoute,
   PayLinkResultRoute: PayLinkResultRoute,
+  PayResultRoute: PayResultRoute,
   ProductSlugRoute: ProductSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
   ApiPublicAfsReconcileRoute: ApiPublicAfsReconcileRoute,
