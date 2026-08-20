@@ -31,6 +31,18 @@ export default defineConfig({
         "react/jsx-dev-runtime",
         "@tanstack/react-router",
         "@tanstack/react-query",
+        // Admin-only deps: pre-bundle them so navigating to /admin never triggers a
+        // mid-session dependency re-optimization (which mixes old/new dep hashes and
+        // leaves React with a null hook dispatcher).
+        "recharts",
+        "date-fns",
+        "sonner",
+        "cmdk",
+        "react-hook-form",
+        "zod",
+        "embla-carousel-react",
+        "react-day-picker",
+        "@supabase/supabase-js",
       ],
     },
     resolve: {
