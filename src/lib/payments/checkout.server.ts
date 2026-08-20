@@ -1,5 +1,5 @@
 import { BASE } from "@/lib/site-url";
-import { createAfsPayment, getAfsPaymentStatus } from "./afs-adapter.server";
+import { createAfsPayment, getAfsCheckoutEnvironment, getAfsPaymentStatus } from "./afs-adapter.server";
 import { applyGatewayStatus, attachGatewayCheckout, createPaymentAttempt, getAttemptByCheckout, loadOrderForPayment } from "./core.server";
 
 const CHECKOUT_TTL_MS = 25 * 60 * 1000;
@@ -20,7 +20,9 @@ export async function startAfsCheckout(input: { orderId: string; attemptKey: str
     attempt.created_at &&
     Date.now() - new Date(attempt.created_at).getTime() < CHECKOUT_TTL_MS;
   if (checkoutIsFresh) {
-    const config = await import("./afs-adapter.server").then((m) => m.loadAfsPaymentConfig());
+    const config = await import("./afs-adapter.server").then((m) =>
+      m.loadAfsPaymentConfig(getAfsCheckoutEnvironment(attempt.external_checkout_id)),
+    );
     return { attemptId: attempt.id, checkoutId: attempt.external_checkout_id, scriptUrl: `${config.widgetUrl}?checkoutId=${encodeURIComponent(attempt.external_checkout_id)}`, amount: order.total, currency: order.currency, testMode: config.testMode, brands: config.brands, widgetLang: config.widgetLang };
   }
   // AFS checkout IDs expire after roughly 30 minutes. A repeated server call
