@@ -24,20 +24,18 @@ function value(source: Record<string, unknown>, key: string) {
   return typeof v === "string" && v.trim() ? v.trim() : null;
 }
 
-type AfsEnvironment = "test" | "live";
+// AFS runs in LIVE mode only. Test/UAT support was removed on purpose.
+export type AfsEnvironment = "live";
 
-export function getAfsCheckoutEnvironment(checkoutId: string): AfsEnvironment | null {
-  const hostMarker = checkoutId.toLowerCase();
-  if (hostMarker.includes(".uat")) return "test";
-  if (hostMarker.includes(".prod")) return "live";
-  return null;
+export function getAfsCheckoutEnvironment(_checkoutId: string): AfsEnvironment {
+  return "live";
 }
 
-export async function loadAfsPaymentConfig(environment?: AfsEnvironment | null): Promise<Config> {
+export async function loadAfsPaymentConfig(_environment?: AfsEnvironment | null): Promise<Config> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
     .from("payment_methods")
-    .select("credentials, config, test_mode, is_active")
+    .select("credentials, config, is_active")
     .eq("gateway_provider", "afs")
     .eq("is_active", true)
     .order("sort_order")
@@ -45,14 +43,10 @@ export async function loadAfsPaymentConfig(environment?: AfsEnvironment | null):
     .maybeSingle();
   if (!data) throw new Error("payment_method_unavailable");
   const source = { ...((data.config ?? {}) as Record<string, unknown>), ...((data.credentials ?? {}) as Record<string, unknown>) };
-  // A checkout must be loaded and queried on the environment that issued its
-  // ID. This matters when the merchant switches from test to live while an
-  // older checkout is still open in a shopper's browser.
-  const live = environment ? environment === "live" : data.test_mode === false;
-  const entityId = (live ? value(source, "live_entity_id") : null) ?? value(source, "entity_id");
-  const token = (live ? value(source, "live_access_token") : null) ?? value(source, "access_token");
+  const entityId = value(source, "live_entity_id") ?? value(source, "entity_id");
+  const token = value(source, "live_access_token") ?? value(source, "access_token");
   if (!entityId || !token) throw new Error("gateway_not_configured");
-  const baseUrl = live ? "https://eu-prod.oppwa.com" : "https://eu-test.oppwa.com";
+  const baseUrl = "https://eu-prod.oppwa.com";
   return {
     entityId,
     token,
