@@ -2860,6 +2860,10 @@ export type Database = {
       }
     }
     Functions: {
+      abandon_stale_payment_attempts: {
+        Args: { _minutes?: number }
+        Returns: number
+      }
       admin_broadcast_notification: {
         Args: {
           _link?: string
