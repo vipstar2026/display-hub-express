@@ -139,8 +139,11 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
     window.wpwlOptions = {
       style: "plain",
       locale,
-      // Submit/redirect in the top-level window so the gateway (and any 3DS
-      // redirect) is never trapped inside a frame.
+      // COPYandPAY uses paymentTarget for the actual card authorization
+      // request and shopperResultTarget for the final merchant redirect.
+      // Both must escape any frame; omitting paymentTarget can create a
+      // checkout without ever creating the underlying payment transaction.
+      paymentTarget: "_top",
       shopperResultTarget: "_top",
       // Official COPYandPAY option: 5 opens the 3DS challenge full-screen.
       // This avoids issuer ACS pages being blocked inside a smaller iframe.
@@ -169,6 +172,7 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
     // a race where it initializes with stale/default navigation settings.
     const form = document.createElement("form");
     form.setAttribute("action", action);
+    form.setAttribute("target", "_top");
     form.className = "paymentWidgets";
     form.setAttribute("data-brands", brands || "VISA MASTER");
     form.setAttribute("data-lang", locale);
