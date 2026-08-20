@@ -76,7 +76,8 @@ export const confirmAfsPayment = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!order || order.buyer_id !== context.userId) throw new Error("Order not found");
 
-    const { data: attempt } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: attempt } = await supabaseAdmin
       .from("payment_transactions")
       .select("provider_checkout_id, provider_charge_id")
       .eq("order_id", order.id)
