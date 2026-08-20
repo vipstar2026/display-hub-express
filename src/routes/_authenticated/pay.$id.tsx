@@ -1,3 +1,4 @@
+import { BASE } from "@/lib/site-url";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import { useQuery } from "@tanstack/react-query";
@@ -176,7 +177,7 @@ function PayPage() {
         {data && (
           <AfsPaymentWidget
             scriptUrl={data.scriptUrl}
-            action={`${window.location.origin}/pay/result?order=${id}`}
+            action={`${BASE}/pay/result?order=${id}`}
             brands={data.brands}
             widgetLang={data.widgetLang}
             amount={formatAmount(order?.total ?? data.amount, data.currency)}
