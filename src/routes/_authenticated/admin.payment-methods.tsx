@@ -45,7 +45,7 @@ const empty: Form = {
   type: "bank_transfer", icon: "landmark", logo_url: "",
   instructions_ar: "", instructions_en: "", instructions_ur: "", instructions_bn: "",
   values: {}, is_gateway: false, gateway_provider: "",
-  test_mode: true, config: "{}", supported_currencies: "BHD",
+  test_mode: false, config: "{}", supported_currencies: "BHD",
   requires_proof: true, is_active: true,
   sort_order: "0", fee_amount: "0", fee_percent: "0", min_amount: "0", max_amount: "",
 };
@@ -112,7 +112,7 @@ function AdminPaymentMethods() {
       account_details: (form.is_gateway ? {} : filled) as never,
       is_gateway: form.is_gateway,
       gateway_provider: form.is_gateway ? (form.gateway_provider || form.provider || null) : null,
-      test_mode: form.test_mode,
+      test_mode: false,
       credentials: (form.is_gateway ? filled : {}) as never,
       config: cfg as never,
       supported_currencies: form.supported_currencies.split(",").map((s) => s.trim()).filter(Boolean),
@@ -213,10 +213,7 @@ function AdminPaymentMethods() {
                       {preset.kind === "gateway" ? (t("بيانات الاتصال بالبوابة", "Gateway credentials")) : (t("بيانات الحساب", "Account details"))}
                     </Label>
                     {preset.kind === "gateway" && (
-                      <div className="ms-auto flex items-center gap-2">
-                        <Switch checked={form.test_mode} onCheckedChange={(v) => setForm({ ...form, test_mode: v })} />
-                        <span className="text-xs text-muted-foreground">{t("وضع الاختبار", "Test mode")}</span>
-                      </div>
+                      <span className="ms-auto text-xs font-medium text-muted-foreground">{t("وضع الإنتاج (LIVE) فقط", "LIVE mode only")}</span>
                     )}
                   </div>
                   <div className="grid gap-3 md:grid-cols-2">
@@ -338,7 +335,7 @@ function AdminPaymentMethods() {
                     {isGw
                       ? <Badge variant="outline" className="border-primary/40 text-primary text-[10px]"><Zap className="me-0.5 h-3 w-3" />{t("بوابة", "Gateway")}</Badge>
                       : <Badge variant="outline" className="text-[10px]">{t("يدوي", "Manual")}</Badge>}
-                    {isGw && mx.test_mode && <Badge variant="outline" className="text-[10px]">TEST</Badge>}
+                    
                     {!ready && <Badge variant="outline" className="border-amber-500/40 text-amber-400 text-[10px]">{t("البيانات ناقصة", "Data missing")}</Badge>}
                   </div>
                   <div className="text-xs text-muted-foreground">{m.type} · <code>{m.code}</code>{isGw && mx.gateway_provider ? ` · ${mx.gateway_provider}` : ""}</div>
@@ -363,7 +360,7 @@ function AdminPaymentMethods() {
                     instructions_ar: m.instructions_ar ?? "", instructions_en: m.instructions_en ?? "", instructions_ur: m.instructions_ur ?? "", instructions_bn: (m as any).instructions_bn ?? "",
                     values,
                     is_gateway: isGw, gateway_provider: mx.gateway_provider ?? "",
-                    test_mode: mx.test_mode ?? true,
+                    test_mode: false,
                     config: JSON.stringify(mx.config ?? {}, null, 2),
                     supported_currencies: (mx.supported_currencies ?? ["BHD"]).join(", "),
                     requires_proof: !!m.requires_proof, is_active: !!m.is_active,
