@@ -291,7 +291,7 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
         {/* Host node owned by the gateway script — React must never render children here. */}
         <div ref={hostRef} suppressHydrationWarning />
       </div>
-
+      )}
 
       {/* trust footer */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 bg-secondary/30 px-5 py-3 text-[11px] text-muted-foreground">
