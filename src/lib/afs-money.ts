@@ -54,6 +54,29 @@ export function formatAmount(value: string | number, currency: string): string {
   return neg ? `-${body}` : body;
 }
 
+/** AFS (COPYandPAY) requires the wire `amount` parameter with exactly 2
+ *  decimals for every currency — sending BHD with 3 decimals is rejected with
+ *  "invalid or missing parameter". Internal comparisons keep full currency
+ *  precision; only the transmitted string is 2 decimals. Throws instead of
+ *  rounding when a non-zero sub-fils remainder exists, so we can never charge
+ *  an amount different from the order total. */
+export function formatGatewayAmount(value: string | number, currency: string): string {
+  const units = toMinorUnits(value, currency);
+  if (units === null) throw new Error("Order amount has unsupported precision");
+  const d = currencyDecimals(currency);
+  let units2: bigint;
+  if (d > 2) {
+    const scale = BigInt(10) ** BigInt(d - 2);
+    if (units % scale !== 0n) throw new Error("Order amount cannot be charged at gateway precision");
+    units2 = units / scale;
+  } else {
+    units2 = units * BigInt(10) ** BigInt(2 - d);
+  }
+  const neg = units2 < 0n;
+  const s = (neg ? -units2 : units2).toString().padStart(3, "0");
+  return `${neg ? "-" : ""}${s.slice(0, -2)}.${s.slice(-2)}`;
+}
+
 export function amountsEqual(a: string | number, b: string | number, currency: string): boolean {
   const x = toMinorUnits(a, currency);
   const y = toMinorUnits(b, currency);

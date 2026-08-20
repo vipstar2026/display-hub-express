@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { formatAmount, toMinorUnits } from "@/lib/afs-money";
+import { currencyDecimals, formatAmount, formatGatewayAmount, toMinorUnits } from "@/lib/afs-money";
 
 /**
  * Admin refund of a captured AFS payment.
@@ -110,13 +110,14 @@ export const refundAfsPayment = createServerFn({ method: "POST" })
     if (requestedUnits === null || requestedUnits <= 0n) throw new Error("invalid_amount");
     if (requestedUnits > remaining) throw new Error("refund_exceeds_remaining");
 
-    const amountStr = formatAmount(
-      (Number(requestedUnits) / 10 ** (currency === "BHD" ? 3 : 2)).toFixed(
-        currency === "BHD" ? 3 : 2,
+    const exact = formatAmount(
+      (Number(requestedUnits) / 10 ** currencyDecimals(currency)).toFixed(
+        currencyDecimals(currency),
       ),
       currency,
     );
-    const amount = Number(amountStr);
+    const amountStr = formatGatewayAmount(exact, currency);
+    const amount = Number(exact);
 
     const cfg = await loadAfsConfig();
     const res = await afsRefund({
