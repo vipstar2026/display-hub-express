@@ -136,8 +136,8 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
       maskCvv: true,
       onReady: () => {
         setReady(true);
-        buildExpirySelects();
         applyLabels();
+
       },
       onChangeBrand: (b: string) => setBrand(b || null),
       onDetectBrand: (b: string) => setBrand(b || null),
