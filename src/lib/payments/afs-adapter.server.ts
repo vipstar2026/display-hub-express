@@ -73,6 +73,7 @@ export async function createAfsPayment(order: PaymentOrder, shopperResultUrl: st
     paymentType: config.paymentType,
     merchantTransactionId: order.order_number,
     shopperResultUrl,
+    integrity: "true",
   });
   if (order.buyer_email) form.set("customer.email", order.buyer_email);
   if (names[0]) form.set("customer.givenName", names[0].slice(0, 48));
@@ -88,7 +89,8 @@ export async function createAfsPayment(order: PaymentOrder, shopperResultUrl: st
     console.error("[payment:afs] checkout rejected", { status: response.status, code: result?.code, description: result?.description });
     throw new Error("gateway_checkout_failed");
   }
-  return { checkoutId, scriptUrl: `${config.widgetUrl}?checkoutId=${encodeURIComponent(checkoutId)}`, config };
+  const integrity = typeof body.integrity === "string" ? body.integrity : null;
+  return { checkoutId, scriptUrl: `${config.widgetUrl}?checkoutId=${encodeURIComponent(checkoutId)}`, integrity, config };
 }
 
 function normalizeStatus(body: Record<string, unknown>): GatewayStatus {

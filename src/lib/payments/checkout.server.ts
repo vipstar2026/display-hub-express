@@ -39,7 +39,7 @@ export async function startAfsCheckout(input: { orderId: string; attemptKey: str
   }
   const gateway = await createAfsPayment(order, `${BASE}${input.returnPath}`);
   await attachGatewayCheckout(attempt.id, gateway.checkoutId);
-  return { attemptId: attempt.id, checkoutId: gateway.checkoutId, scriptUrl: gateway.scriptUrl, amount: order.total, currency: order.currency, testMode: gateway.config.testMode, brands: gateway.config.brands, widgetLang: gateway.config.widgetLang };
+  return { attemptId: attempt.id, checkoutId: gateway.checkoutId, scriptUrl: gateway.scriptUrl, scriptIntegrity: gateway.integrity, amount: order.total, currency: order.currency, testMode: gateway.config.testMode, brands: gateway.config.brands, widgetLang: gateway.config.widgetLang };
 }
 
 export async function confirmAfsCheckout(input: { orderId: string; checkoutId: string; resourcePath?: string | null; source: string }) {

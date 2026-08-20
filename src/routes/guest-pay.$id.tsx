@@ -164,6 +164,7 @@ function GuestPayPage() {
         {data && (
           <AfsPaymentWidget
             scriptUrl={data.scriptUrl}
+            scriptIntegrity={data.scriptIntegrity}
             action={`${BASE}/guest-pay/result?order=${id}&t=${encodeURIComponent(token)}`}
             brands={data.brands}
             widgetLang={data.widgetLang}

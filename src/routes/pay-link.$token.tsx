@@ -132,6 +132,7 @@ function PayLinkPage() {
             {checkout.data.testMode && <AfsTestCards />}
             <AfsPaymentWidget
               scriptUrl={checkout.data.scriptUrl}
+              scriptIntegrity={checkout.data.scriptIntegrity}
               action={`${BASE}/pay-link/result?token=${token}`}
               brands={checkout.data.brands}
               widgetLang={checkout.data.widgetLang}

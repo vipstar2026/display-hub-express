@@ -12,6 +12,8 @@ declare global {
 type Props = {
   /** Payon widget script URL (includes checkoutId) */
   scriptUrl: string;
+  /** Subresource integrity value returned with the checkout */
+  scriptIntegrity?: string | null;
   /** Where the gateway posts the result */
   action: string;
   brands?: string | null;
@@ -68,7 +70,7 @@ const STRINGS: Record<Lang, Record<string, string>> = {
 
 const BRAND_LABEL: Record<string, string> = { VISA: "Visa", MASTER: "Mastercard", AMEX: "Amex", MADA: "mada" };
 
-export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount, currency, onCancel }: Props) {
+export function AfsPaymentWidget({ scriptUrl, scriptIntegrity, action, brands, widgetLang, amount, currency, onCancel }: Props) {
   const { lang } = useI18n();
   const uiLang: Lang = (["ar", "en", "ur", "bn"].includes(lang) ? lang : "en") as Lang;
   const s = STRINGS[uiLang];
@@ -174,6 +176,10 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
     const script = document.createElement("script");
     script.src = scriptUrl;
     script.async = true;
+    if (scriptIntegrity) {
+      script.integrity = scriptIntegrity;
+      script.crossOrigin = "anonymous";
+    }
     script.dataset.afsCopyandpay = "true";
     script.onerror = () => setFailed(true);
     document.body.appendChild(script);
@@ -186,7 +192,7 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
       }
     }, 6000);
     return () => clearTimeout(timer);
-  }, [scriptUrl, locale, brands, s, action, embedded]);
+  }, [scriptUrl, scriptIntegrity, locale, brands, s, action, embedded]);
 
   const brandList = (brands || "VISA MASTER").split(/\s+/).filter(Boolean);
 

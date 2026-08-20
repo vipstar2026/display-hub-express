@@ -179,6 +179,7 @@ function PayPage() {
         {data && (
           <AfsPaymentWidget
             scriptUrl={data.scriptUrl}
+            scriptIntegrity={data.scriptIntegrity}
             action={`${BASE}/pay/result?order=${id}`}
             brands={data.brands}
             widgetLang={data.widgetLang}
