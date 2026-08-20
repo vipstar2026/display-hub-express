@@ -15,6 +15,15 @@ export interface ProviderField {
   required?: boolean;
 }
 
+export interface ProviderEndpoint {
+  label_ar: string;
+  label_en: string;
+  /** absolute path on this site, e.g. /api/public/payments/afs */
+  path: string;
+  hint_ar?: string;
+  hint_en?: string;
+}
+
 export interface PaymentProvider {
   code: string;
   name_ar: string;
@@ -26,9 +35,12 @@ export interface PaymentProvider {
   currencies: string[];
   docs?: string;
   fields: ProviderField[];
+  /** Read-only URLs the merchant must register with the provider */
+  endpoints?: ProviderEndpoint[];
   steps_ar: string[];
   steps_en: string[];
 }
+
 
 const cardTypes = "card";
 
