@@ -69,6 +69,7 @@ export const Route = createFileRoute("/api/public/payments/afs")({
           request.headers.get("x-authentication-tag") ?? request.headers.get("x-auth-tag") ?? "";
 
         let payload: Record<string, unknown> = {};
+        let encrypted = false;
         if (ivHex && tagHex) {
           if (!cfg.webhookKey) {
             await log("missing_key", { ivHex });
