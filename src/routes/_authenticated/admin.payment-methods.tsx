@@ -10,12 +10,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Plus, Edit, Trash2, Landmark, Smartphone, Banknote, Wallet, CreditCard, Zap, KeyRound, BookOpen, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash2, Landmark, Smartphone, Banknote, Wallet, CreditCard, Zap, KeyRound, BookOpen, ExternalLink, Link as LinkIcon, Copy } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
 import { makeAdminT } from "@/lib/admin-i18n";
 import { PAYMENT_PROVIDERS, providerByCode, type PaymentProvider } from "@/lib/payment-providers";
+import { BASE } from "@/lib/site-url";
+
+const siteOrigin = () => (typeof window !== "undefined" ? window.location.origin.replace(/^https?:\/\/(id-preview|localhost).*$/, BASE) : BASE);
 
 export const Route = createFileRoute("/_authenticated/admin/payment-methods")({
   component: AdminPaymentMethods,
