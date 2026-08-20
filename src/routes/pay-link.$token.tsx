@@ -131,7 +131,7 @@ function PayLinkPage() {
             {checkout.data.testMode && <AfsTestCards />}
             <AfsPaymentWidget
               scriptUrl={checkout.data.scriptUrl}
-              action={`${window.location.origin}/pay-link/result?token=${token}`}
+              action={`${BASE}/pay-link/result?token=${token}`}
               brands={checkout.data.brands}
               widgetLang={checkout.data.widgetLang}
               amount={Number(link.amount).toFixed(3)}

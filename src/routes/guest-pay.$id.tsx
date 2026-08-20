@@ -161,7 +161,7 @@ function GuestPayPage() {
         {data && (
           <AfsPaymentWidget
             scriptUrl={data.scriptUrl}
-            action={`${window.location.origin}/guest-pay/result?order=${id}&t=${encodeURIComponent(token)}`}
+            action={`${BASE}/guest-pay/result?order=${id}&t=${encodeURIComponent(token)}`}
             brands={data.brands}
             widgetLang={data.widgetLang}
             amount={formatAmount(order?.total ?? data.amount, data.currency)}

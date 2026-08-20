@@ -176,7 +176,7 @@ function PayPage() {
         {data && (
           <AfsPaymentWidget
             scriptUrl={data.scriptUrl}
-            action={`${window.location.origin}/pay/result?order=${id}`}
+            action={`${BASE}/pay/result?order=${id}`}
             brands={data.brands}
             widgetLang={data.widgetLang}
             amount={formatAmount(order?.total ?? data.amount, data.currency)}

@@ -126,6 +126,9 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
     window.wpwlOptions = {
       style: "plain",
       locale,
+      // Submit/redirect in the top-level window so the gateway (and any 3DS
+      // redirect) is never trapped inside a frame.
+      paymentTarget: "_top",
       // Official COPYandPAY option: 5 opens the 3DS challenge full-screen.
       // This avoids issuer ACS pages being blocked inside a smaller iframe.
       browser: { threeDChallengeWindow: 5 },
