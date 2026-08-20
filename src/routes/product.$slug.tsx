@@ -21,8 +21,8 @@ import { RelatedProducts, RecentlyViewed, trackRecentlyViewed } from "@/componen
 import { Breadcrumbs, breadcrumbJsonLd } from "@/components/Breadcrumbs";
 import { ProductGallery } from "@/components/ProductGallery";
 import { useDigitalStock, isDigital } from "@/lib/digital-stock";
+import { BASE } from "@/lib/site-url";
 
-const BASE = "https://vipstar.cc";
 
 export const Route = createFileRoute("/product/$slug")({
   component: ProductPage,

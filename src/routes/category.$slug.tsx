@@ -8,8 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n, localizedName } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { PackageSearch } from "lucide-react";
+import { BASE } from "@/lib/site-url";
 
-const BASE = "https://vipstar.cc";
 
 export const Route = createFileRoute("/category/$slug")({
   component: CategoryPage,
