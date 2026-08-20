@@ -68,7 +68,22 @@ const STRINGS: Record<Lang, Record<string, string>> = {
   },
 };
 
-const BRAND_LABEL: Record<string, string> = { VISA: "Visa", MASTER: "Mastercard", AMEX: "Amex", MADA: "mada" };
+const BRAND_LABEL: Record<string, string> = {
+  VISA: "Visa",
+  MASTER: "Mastercard",
+  MAESTRO: "Maestro",
+  BENEFIT: "Benefit",
+  AMEX: "Amex",
+  MADA: "mada",
+  DINERS: "Diners",
+  DISCOVER: "Discover",
+  JCB: "JCB",
+  UNIONPAY: "UnionPay",
+};
+
+// Every brand COPYandPAY can render. The gateway still authorises only the
+// brands enabled in the merchant's AFS contract.
+const ALL_BRANDS = "VISA MASTER MAESTRO BENEFIT AMEX DINERS DISCOVER JCB UNIONPAY MADA";
 
 export function AfsPaymentWidget({ scriptUrl, scriptIntegrity, action, brands, widgetLang, amount, currency, onCancel }: Props) {
   const { lang } = useI18n();
