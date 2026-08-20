@@ -12,7 +12,7 @@ export const startUserAfsPayment = createServerFn({ method: "POST" })
   });
 
 export const confirmUserAfsPayment = createServerFn({ method: "POST" })
-  .inputValidator((input: { order_id: string; checkout_id: string; resource_path?: string }) => input)
+  .inputValidator((input: { order_id: string; checkout_id: string; resource_path?: string; background?: boolean }) => input)
   .handler(async ({ data }) => {
     // The gateway returns in a new top-level navigation. Browser privacy and
     // cross-site 3DS flows can omit the customer's auth session on that first
@@ -27,5 +27,5 @@ export const confirmUserAfsPayment = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!attempt || attempt.order_id !== data.order_id) throw new Error("payment_attempt_mismatch");
     const { confirmAfsCheckout } = await import("@/lib/payments/checkout.server");
-    return confirmAfsCheckout({ orderId: data.order_id, checkoutId: data.checkout_id, resourcePath: data.resource_path, source: "customer_return" });
+    return confirmAfsCheckout({ orderId: data.order_id, checkoutId: data.checkout_id, resourcePath: data.resource_path, source: data.background ? "background_check" : "customer_return", background: !!data.background });
   });
