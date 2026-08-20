@@ -153,8 +153,8 @@ export function AfsPaymentWidget({ scriptUrl, action, brands, widgetLang, amount
     const timer = setTimeout(() => {
       if (document.querySelector(".wpwl-form")) {
         setReady(true);
-        buildExpirySelects();
         applyLabels();
+
       }
     }, 6000);
     return () => clearTimeout(timer);
