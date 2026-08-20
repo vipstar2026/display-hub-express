@@ -89,12 +89,12 @@ export const Route = createFileRoute("/api/public/afs-reconcile")({
             expectedCheckoutId: checkoutId,
             source: "reconcile",
           });
-          if (!result.ok && result.pending) continue;
-
           await applyAfsPaymentResult({ order, checkoutId, result, source: "reconcile" });
 
+          if (!result.ok && result.pending) continue;
+
           if (result.ok) settled++;
-          else if (result.category === "payment_failed" || result.category === "gateway_unknown")
+          else if (result.category === "payment_failed")
             failed++;
           else review++;
         }
