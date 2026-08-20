@@ -44,6 +44,8 @@ function GuestPayResult() {
     queryKey: ["guest-afs-result", search.order, checkoutId],
     enabled: !!search.order && !!search.t && !!checkoutId,
     retry: false,
+    refetchInterval: (query) => query.state.data?.pending ? 3_000 : false,
+    refetchIntervalInBackground: true,
     queryFn: () => confirm({ data: { order_id: search.order!, token: search.t!, checkout_id: checkoutId! } }),
   });
 

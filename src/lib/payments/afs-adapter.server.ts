@@ -14,7 +14,10 @@ type Config = {
 
 const SUCCESS = /^(000\.000\.|000\.100\.1|000\.[36]|000\.400\.0[^3]|000\.400\.100)/;
 const PROCESSING = /^(000\.200|800\.400\.5|100\.400\.500)/;
-const UNKNOWN = /^(700\.400\.580|200\.300\.404|100\.100\.104|800\.[89])/;
+// 700.400.580 means AFS cannot find a transaction for this checkout, and
+// 200.300.404 means the checkout itself is invalid. Neither can become paid
+// later, so treating them as "unknown" leaves the shopper pending forever.
+const UNKNOWN = /^(100\.100\.104|800\.[89])/;
 
 function value(source: Record<string, unknown>, key: string) {
   const v = source[key];

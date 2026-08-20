@@ -44,6 +44,8 @@ function PayLinkResult() {
     queryKey: ["pay-link-result", search.token, checkoutId],
     enabled: !!search.token && !!checkoutId,
     retry: false,
+    refetchInterval: (query) => query.state.data?.pending ? 3_000 : false,
+    refetchIntervalInBackground: true,
     queryFn: () => confirm({ data: { token: search.token!, checkout_id: checkoutId! } }),
   });
 

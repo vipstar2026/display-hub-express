@@ -45,13 +45,12 @@ export const Route = createFileRoute("/api/public/afs-reconcile")({
 
 
 
-        const since = new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString();
         const { data: pending, error } = await (supabaseAdmin as any)
           .from("payment_attempts")
           .select("*")
           .eq("provider", "afs")
           .in("state", ["awaiting_customer", "processing"])
-          .gte("created_at", since)
+          .order("created_at", { ascending: true })
           .limit(50);
 
         if (error) {

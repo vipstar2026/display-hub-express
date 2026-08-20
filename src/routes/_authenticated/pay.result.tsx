@@ -38,6 +38,8 @@ function PayResult() {
     queryKey: ["afs-result", search.order, checkoutId],
     enabled: !!search.order && !!checkoutId,
     retry: false,
+    refetchInterval: (query) => query.state.data?.pending ? 3_000 : false,
+    refetchIntervalInBackground: true,
     queryFn: () => confirm({ data: { order_id: search.order!, checkout_id: checkoutId! } }),
   });
 
