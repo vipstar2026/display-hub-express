@@ -54,7 +54,7 @@ export async function loadAfsPaymentConfig(_environment?: AfsEnvironment | null)
     widgetUrl: `${baseUrl}/v1/paymentWidgets.js`,
     testMode: false,
     paymentType: value(source, "payment_type") ?? "DB",
-    brands: value(source, "brands") ?? "VISA MASTER",
+    brands: value(source, "brands") ?? "VISA MASTER MAESTRO BENEFIT AMEX DINERS DISCOVER JCB UNIONPAY MADA",
     widgetLang: value(source, "widget_lang"),
     webhookKey: value(source, "webhook_decryption_key"),
   };
