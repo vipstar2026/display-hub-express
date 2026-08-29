@@ -83,6 +83,14 @@ export async function applyGatewayStatus(input: { attempt: any; order: PaymentOr
     return { success: true, pending: false, abandoned: false, rateLimited: false, code: status.code, message: "" };
   }
 
+  // A terminal attempt must never be rewritten by a later duplicate status
+  // call (e.g. the result page retrying seconds after a real decline and
+  // getting a transient gateway error like 200.300.404). Keep the original,
+  // truthful decline reason so support and the shopper see what the bank said.
+  if (attempt.state === "failed" || attempt.state === "succeeded") {
+    return { success: attempt.state === "succeeded", pending: false, abandoned: false, rateLimited: false, code: status.code, message: attempt.failure_reason ?? "" };
+  }
+
   const integrityFailure = status.state === "succeeded";
   const undecided = status.state === "processing" || status.state === "unknown";
   // A background sweep gets exactly one look. Only a genuinely UNKNOWN result
