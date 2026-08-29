@@ -12,7 +12,7 @@ import { formatAmount } from "@/lib/afs-money";
 import { createGuestAfsCheckout, getGuestOrder } from "@/lib/guest-checkout.functions";
 import { ShieldCheck, Loader2, Receipt, Truck, Store, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AfsTestCards } from "@/components/AfsTestCards";
+
 import { AfsPaymentWidget } from "@/components/AfsPaymentWidget";
 
 const searchSchema = z.object({ t: z.string().optional() });
@@ -141,8 +141,6 @@ function GuestPayPage() {
             </div>
           </div>
         )}
-
-        {data?.testMode && <AfsTestCards />}
 
         {isLoading && (
           <div className="flex items-center justify-center gap-2 rounded-xl border border-primary/10 bg-card py-10 text-muted-foreground">
