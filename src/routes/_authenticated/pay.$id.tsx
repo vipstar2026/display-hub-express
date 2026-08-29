@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { AfsTestCards } from "@/components/AfsTestCards";
+
 import { AfsPaymentWidget } from "@/components/AfsPaymentWidget";
 
 export const Route = createFileRoute("/_authenticated/pay/$id")({
@@ -152,10 +152,6 @@ function PayPage() {
             </div>
           </div>
         )}
-
-        {data?.testMode && <AfsTestCards />}
-
-
 
         {isLoading && (
           <div className="flex items-center justify-center gap-2 rounded-xl border border-primary/10 bg-card py-10 text-muted-foreground">
