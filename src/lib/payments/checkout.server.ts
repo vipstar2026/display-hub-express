@@ -23,7 +23,7 @@ export async function startAfsCheckout(input: { orderId: string; attemptKey: str
     const config = await import("./afs-adapter.server").then((m) =>
       m.loadAfsPaymentConfig(getAfsCheckoutEnvironment(attempt.external_checkout_id)),
     );
-    return { attemptId: attempt.id, checkoutId: attempt.external_checkout_id, scriptUrl: `${config.widgetUrl}?checkoutId=${encodeURIComponent(attempt.external_checkout_id)}`, amount: order.total, currency: order.currency, testMode: config.testMode, brands: config.brands, widgetLang: config.widgetLang };
+    return { attemptId: attempt.id, checkoutId: attempt.external_checkout_id, scriptUrl: `${config.widgetUrl}?checkoutId=${encodeURIComponent(attempt.external_checkout_id)}`, amount: order.total, currency: order.currency, brands: config.brands, widgetLang: config.widgetLang };
   }
   // AFS checkout IDs expire after roughly 30 minutes. A repeated server call
   // with the same idempotency key must never revive an expired widget session.
@@ -41,7 +41,7 @@ export async function startAfsCheckout(input: { orderId: string; attemptKey: str
   }
   const gateway = await createAfsPayment(order);
   await attachGatewayCheckout(attempt.id, gateway.checkoutId);
-  return { attemptId: attempt.id, checkoutId: gateway.checkoutId, scriptUrl: gateway.scriptUrl, scriptIntegrity: gateway.integrity, amount: order.total, currency: order.currency, testMode: gateway.config.testMode, brands: gateway.config.brands, widgetLang: gateway.config.widgetLang };
+  return { attemptId: attempt.id, checkoutId: gateway.checkoutId, scriptUrl: gateway.scriptUrl, scriptIntegrity: gateway.integrity, amount: order.total, currency: order.currency, brands: gateway.config.brands, widgetLang: gateway.config.widgetLang };
 }
 
 export async function confirmAfsCheckout(input: { orderId: string; checkoutId: string; resourcePath?: string | null; source: string; background?: boolean }) {
