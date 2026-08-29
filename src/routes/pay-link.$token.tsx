@@ -10,7 +10,7 @@ import { getPaymentLinkPublic, startPaymentLinkCheckout } from "@/lib/payment-li
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ShieldCheck, Loader2, CheckCircle2 } from "lucide-react";
-import { AfsTestCards } from "@/components/AfsTestCards";
+
 import { AfsPaymentWidget } from "@/components/AfsPaymentWidget";
 
 export const Route = createFileRoute("/pay-link/$token")({
@@ -129,7 +129,6 @@ function PayLinkPage() {
           </div>
         ) : (
           <>
-            {checkout.data.testMode && <AfsTestCards />}
             <AfsPaymentWidget
               scriptUrl={checkout.data.scriptUrl}
               scriptIntegrity={checkout.data.scriptIntegrity}
