@@ -2,6 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
+import { BASE_CURRENCY, convertToBase } from "@/lib/payments/money";
+
+/** Every roll-up below normalises to the base currency first — mixed
+ *  currencies are never added together raw. */
+const base = (amount: unknown, currency?: string | null) => convertToBase(Number(amount || 0), currency || BASE_CURRENCY) ?? 0;
 import { useI18n } from "@/lib/i18n";
 import { useMemo, useState } from "react";
 import { subDays, startOfDay, format, eachDayOfInterval } from "date-fns";
@@ -30,10 +35,10 @@ function Analytics() {
     queryFn: async () => {
       const [orders, prevOrders, items, products, customers] = await Promise.all([
         supabase.from("orders").select("id,total,subtotal,discount,tax,shipping,currency,status,payment_status,created_at,buyer_email").gte("created_at", since).order("created_at"),
-        supabase.from("orders").select("id,total,created_at").gte("created_at", prevSince).lt("created_at", since),
-        supabase.from("order_items").select("product_id,product_name,quantity,unit_price,order_id,orders!inner(created_at,payment_status)").gte("orders.created_at", since),
+        supabase.from("orders").select("id,total,currency,created_at").gte("created_at", prevSince).lt("created_at", since),
+        supabase.from("order_items").select("product_id,product_name,quantity,unit_price,order_id,orders!inner(created_at,payment_status,currency)").gte("orders.created_at", since),
         supabase.from("products").select("id,name_ar,name_en,category_id,stock,price,categories(name_ar,name_en)"),
-        supabase.from("orders").select("buyer_email,total,created_at").not("buyer_email", "is", null),
+        supabase.from("orders").select("buyer_email,total,currency,created_at").not("buyer_email", "is", null),
       ]);
       return {
         orders: orders.data ?? [],
@@ -48,9 +53,9 @@ function Analytics() {
   const kpis = useMemo(() => {
     if (!data) return null;
     const paid = data.orders.filter((o: any) => o.payment_status === "paid" || o.payment_status === "succeeded");
-    const revenue = paid.reduce((s: number, o: any) => s + Number(o.total || 0), 0);
+    const revenue = paid.reduce((s: number, o: any) => s + base(o.total, o.currency), 0);
     const prevPaid = data.prevOrders;
-    const prevRevenue = prevPaid.reduce((s: number, o: any) => s + Number(o.total || 0), 0);
+    const prevRevenue = prevPaid.reduce((s: number, o: any) => s + base(o.total, o.currency), 0);
     const revGrowth = prevRevenue > 0 ? ((revenue - prevRevenue) / prevRevenue) * 100 : 0;
     const aov = paid.length ? revenue / paid.length : 0;
     const conversion = data.orders.length ? (paid.length / data.orders.length) * 100 : 0;
@@ -73,7 +78,7 @@ function Analytics() {
       const bucket = byDay.get(k);
       if (!bucket) return;
       if (o.payment_status === "paid" || o.payment_status === "succeeded") {
-        bucket.revenue += Number(o.total || 0);
+        bucket.revenue += base(o.total, o.currency);
         bucket.orders += 1;
       }
     });
@@ -88,7 +93,7 @@ function Analytics() {
       if (!orderPaid) return;
       const cur = map.get(it.product_id) ?? { name: it.product_name, qty: 0, revenue: 0 };
       cur.qty += Number(it.quantity || 0);
-      cur.revenue += Number(it.quantity || 0) * Number(it.unit_price || 0);
+      cur.revenue += base(Number(it.quantity || 0) * Number(it.unit_price || 0), it.orders?.currency);
       map.set(it.product_id, cur);
     });
     return Array.from(map.values()).sort((a, b) => b.revenue - a.revenue).slice(0, 8);
@@ -102,7 +107,7 @@ function Analytics() {
       const orderPaid = it.orders?.payment_status === "paid" || it.orders?.payment_status === "succeeded";
       if (!orderPaid) return;
       const cat = String(catByProduct.get(it.product_id) ?? "—");
-      map.set(cat, (map.get(cat) ?? 0) + Number(it.quantity || 0) * Number(it.unit_price || 0));
+      map.set(cat, (map.get(cat) ?? 0) + base(Number(it.quantity || 0) * Number(it.unit_price || 0), it.orders?.currency));
     });
     return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 6);
   }, [data]);
@@ -171,9 +176,9 @@ function Analytics() {
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <KpiCard icon={DollarSign} label={L.revenue} value={formatPrice(kpis.revenue)} growth={kpis.revGrowth} />
+            <KpiCard icon={DollarSign} label={L.revenue} value={formatPrice(kpis.revenue, BASE_CURRENCY)} growth={kpis.revGrowth} />
             <KpiCard icon={ShoppingBag} label={L.orders} value={String(kpis.orders)} growth={kpis.ordersGrowth} />
-            <KpiCard icon={TrendingUp} label={L.aov} value={formatPrice(kpis.aov)} />
+            <KpiCard icon={TrendingUp} label={L.aov} value={formatPrice(kpis.aov, BASE_CURRENCY)} />
             <KpiCard icon={Percent} label={L.conversion} value={`${kpis.conversion.toFixed(1)}%`} />
           </div>
 
@@ -212,7 +217,7 @@ function Analytics() {
                       <div className="truncate font-medium">{p.name}</div>
                       <div className="text-xs text-muted-foreground">{L.qty}: {p.qty}</div>
                     </div>
-                    <div className="text-end font-mono text-sm">{formatPrice(p.revenue)}</div>
+                    <div className="text-end font-mono text-sm">{formatPrice(p.revenue, BASE_CURRENCY)}</div>
                   </div>
                 ))}
               </div>
@@ -227,7 +232,7 @@ function Analytics() {
                     <Pie data={categoryShare} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>
                       {categoryShare.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
-                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} formatter={(v: any) => formatPrice(Number(v))} />
+                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} formatter={(v: any) => formatPrice(Number(v), BASE_CURRENCY)} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
                   </PieChart>
                 </ResponsiveContainer></div>
