@@ -19,6 +19,17 @@ export const confirmUserAfsPayment = createServerFn({ method: "POST" })
     // request, so authorize this callback by the unguessable checkout id and
     // its server-side order binding instead of requiring a browser bearer.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Database first: a webhook may already have settled this order, in which
+    // case we answer "paid" without touching the gateway at all.
+    const { data: paidOrder } = await supabaseAdmin
+      .from("orders")
+      .select("payment_status")
+      .eq("id", data.order_id)
+      .maybeSingle();
+    if (paidOrder?.payment_status === "succeeded") {
+      return { success: true, pending: false, abandoned: false, cancelled: false, rateLimited: false, code: "", message: "" };
+    }
+
     const { data: attempt } = await supabaseAdmin
       .from("payment_attempts")
       .select("order_id")
