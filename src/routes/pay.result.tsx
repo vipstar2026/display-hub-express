@@ -6,7 +6,7 @@ import { z } from "zod";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
-import { payResultMessage } from "@/lib/pay-messages";
+import { payResultMessage, payFailureReason } from "@/lib/pay-messages";
 import { confirmUserAfsPayment } from "@/lib/payment-core.functions";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Clock, Loader2 } from "lucide-react";
@@ -93,6 +93,11 @@ function PayResult() {
               {data.pending ? txt("الدفع قيد المعالجة", "Payment pending", "ادائیگی زیر عمل") : txt("فشل الدفع", "Payment failed", "ادائیگی ناکام")}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">{payResultMessage(lang, !!data.pending)}</p>
+            {!data.pending && payFailureReason(lang, data.code) && (
+              <p className="mx-auto mt-3 max-w-md rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+                {payFailureReason(lang, data.code)}
+              </p>
+            )}
             {data.pending && (
               <p className="mx-auto mt-3 max-w-md rounded-lg border border-orange-500/30 bg-orange-500/10 px-4 py-3 text-sm font-medium text-orange-600 dark:text-orange-400">
                 {txt(
