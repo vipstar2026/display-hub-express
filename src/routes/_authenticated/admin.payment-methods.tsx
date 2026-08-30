@@ -104,9 +104,13 @@ function AdminPaymentMethods() {
       return;
     }
 
-    const filled = Object.fromEntries(Object.entries(form.values).filter(([, v]) => String(v ?? "").trim() !== ""));
+    // Secrets are write-only: only fields the admin actually typed are sent,
+    // and masked placeholders are never written back.
+    const filled = Object.fromEntries(
+      Object.entries(form.values).filter(([, v]) => String(v ?? "").trim() !== "" && String(v) !== MASK),
+    );
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       code: form.code.trim(),
       name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null, name_bn: form.name_bn || null,
       type: form.type, icon: form.icon || null, logo_url: form.logo_url || null,
@@ -114,12 +118,10 @@ function AdminPaymentMethods() {
       instructions_en: form.instructions_en || null,
       instructions_ur: form.instructions_ur || null,
       instructions_bn: form.instructions_bn || null,
-      account_details: (form.is_gateway ? {} : filled) as never,
       is_gateway: form.is_gateway,
       gateway_provider: form.is_gateway ? (form.gateway_provider || form.provider || null) : null,
       test_mode: false,
-      credentials: (form.is_gateway ? filled : {}) as never,
-      config: cfg as never,
+      config: Object.fromEntries(Object.entries(cfg).filter(([, v]) => v !== MASK)),
       supported_currencies: form.supported_currencies.split(",").map((s) => s.trim()).filter(Boolean),
       requires_proof: form.is_gateway ? false : form.requires_proof,
       is_active: form.is_active,
@@ -129,11 +131,22 @@ function AdminPaymentMethods() {
       min_amount: Number(form.min_amount) || 0,
       max_amount: form.max_amount ? Number(form.max_amount) : null,
     };
+    if (!form.is_gateway) payload.account_details = filled;
 
-    const { error } = form.id
-      ? await supabase.from("payment_methods").update(payload).eq("id", form.id)
-      : await supabase.from("payment_methods").insert(payload);
-    if (error) { toast.error(error.message); return; }
+    let methodId = form.id;
+    if (methodId) {
+      const { error } = await supabase.from("payment_methods").update(payload as never).eq("id", methodId);
+      if (error) { toast.error(error.message); return; }
+    } else {
+      const { data: created, error } = await supabase.from("payment_methods").insert(payload as never).select("id").single();
+      if (error) { toast.error(error.message); return; }
+      methodId = created.id;
+    }
+
+    if (form.is_gateway && Object.keys(filled).length) {
+      const { error } = await supabase.rpc("admin_set_payment_credentials", { _id: methodId, _values: filled as never });
+      if (error) { toast.error(error.message); return; }
+    }
     toast.success(t("تم الحفظ", "Saved"));
     setOpen(false); setForm(empty);
     qc.invalidateQueries({ queryKey: ["admin-payment-methods"] });
