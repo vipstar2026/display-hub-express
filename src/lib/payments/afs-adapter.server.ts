@@ -1,4 +1,5 @@
 import type { GatewayStatus, PaymentOrder } from "./types";
+import { formatGatewayAmount } from "./money";
 
 type Config = {
   entityId: string;
