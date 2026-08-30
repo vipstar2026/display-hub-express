@@ -38,6 +38,7 @@ interface Form {
   type: PType; icon: string; logo_url: string;
   instructions_ar: string; instructions_en: string; instructions_ur: string; instructions_bn: string;
   values: Record<string, string>;
+  saved: Record<string, boolean>;
   is_gateway: boolean; gateway_provider: string; test_mode: boolean;
   config: string; supported_currencies: string;
   requires_proof: boolean; is_active: boolean;
@@ -45,11 +46,14 @@ interface Form {
   min_amount: string; max_amount: string;
 }
 
+// Masked marker returned by the server for stored gateway secrets.
+const MASK = "***set***";
+
 const empty: Form = {
   provider: "", code: "", name_ar: "", name_en: "", name_ur: "", name_bn: "",
   type: "bank_transfer", icon: "landmark", logo_url: "",
   instructions_ar: "", instructions_en: "", instructions_ur: "", instructions_bn: "",
-  values: {}, is_gateway: false, gateway_provider: "",
+  values: {}, saved: {}, is_gateway: false, gateway_provider: "",
   test_mode: false, config: "{}", supported_currencies: "BHD",
   requires_proof: true, is_active: true,
   sort_order: "0", fee_amount: "0", fee_percent: "0", min_amount: "0", max_amount: "",
@@ -98,15 +102,19 @@ function AdminPaymentMethods() {
     try { cfg = JSON.parse(form.config || "{}"); }
     catch { toast.error(t("الإعدادات الإضافية يجب أن تكون JSON صحيح", "Extra config must be valid JSON")); return; }
 
-    const missing = (preset?.fields ?? []).filter((fl) => fl.required && !(form.values[fl.key] ?? "").trim());
+    const missing = (preset?.fields ?? []).filter((fl) => fl.required && !(form.values[fl.key] ?? "").trim() && !form.saved[fl.key]);
     if (missing.length && form.is_active) {
       toast.error((t("حقول مطلوبة ناقصة: ", "Missing required fields: ")) + missing.map((m) => (ar ? m.label_ar : m.label_en)).join("، "));
       return;
     }
 
-    const filled = Object.fromEntries(Object.entries(form.values).filter(([, v]) => String(v ?? "").trim() !== ""));
+    // Secrets are write-only: only fields the admin actually typed are sent,
+    // and masked placeholders are never written back.
+    const filled = Object.fromEntries(
+      Object.entries(form.values).filter(([, v]) => String(v ?? "").trim() !== "" && String(v) !== MASK),
+    );
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       code: form.code.trim(),
       name_ar: form.name_ar, name_en: form.name_en, name_ur: form.name_ur || null, name_bn: form.name_bn || null,
       type: form.type, icon: form.icon || null, logo_url: form.logo_url || null,
@@ -114,12 +122,9 @@ function AdminPaymentMethods() {
       instructions_en: form.instructions_en || null,
       instructions_ur: form.instructions_ur || null,
       instructions_bn: form.instructions_bn || null,
-      account_details: (form.is_gateway ? {} : filled) as never,
       is_gateway: form.is_gateway,
       gateway_provider: form.is_gateway ? (form.gateway_provider || form.provider || null) : null,
       test_mode: false,
-      credentials: (form.is_gateway ? filled : {}) as never,
-      config: cfg as never,
       supported_currencies: form.supported_currencies.split(",").map((s) => s.trim()).filter(Boolean),
       requires_proof: form.is_gateway ? false : form.requires_proof,
       is_active: form.is_active,
@@ -129,11 +134,25 @@ function AdminPaymentMethods() {
       min_amount: Number(form.min_amount) || 0,
       max_amount: form.max_amount ? Number(form.max_amount) : null,
     };
+    if (!form.is_gateway) payload.account_details = filled;
 
-    const { error } = form.id
-      ? await supabase.from("payment_methods").update(payload).eq("id", form.id)
-      : await supabase.from("payment_methods").insert(payload);
-    if (error) { toast.error(error.message); return; }
+    let methodId = form.id;
+    if (methodId) {
+      const { error } = await supabase.from("payment_methods").update(payload as never).eq("id", methodId);
+      if (error) { toast.error(error.message); return; }
+    } else {
+      const { data: created, error } = await supabase.from("payment_methods").insert(payload as never).select("id").single();
+      if (error) { toast.error(error.message); return; }
+      methodId = created.id;
+    }
+
+    const { error: cfgError } = await supabase.rpc("admin_set_payment_config", { _id: methodId, _config: cfg as never });
+    if (cfgError) { toast.error(cfgError.message); return; }
+
+    if (form.is_gateway && Object.keys(filled).length) {
+      const { error } = await supabase.rpc("admin_set_payment_credentials", { _id: methodId, _values: filled as never });
+      if (error) { toast.error(error.message); return; }
+    }
     toast.success(t("تم الحفظ", "Saved"));
     setOpen(false); setForm(empty);
     qc.invalidateQueries({ queryKey: ["admin-payment-methods"] });
@@ -236,7 +255,7 @@ function AdminPaymentMethods() {
                           <Input
                             type={fl.kind === "password" ? "password" : "text"}
                             value={form.values[fl.key] ?? ""}
-                            placeholder={fl.placeholder}
+                            placeholder={form.saved[fl.key] ? t("محفوظ — اتركه فارغاً لعدم التغيير", "Saved — leave empty to keep") : fl.placeholder}
                             onChange={(e) => setVal(fl.key, e.target.value)}
                           />
                         )}
@@ -388,14 +407,20 @@ function AdminPaymentMethods() {
                   const p = providerByCode(guess);
                   const stored = (isGw ? mx.credentials : (m.account_details as Record<string, unknown>)) ?? {};
                   const values: Record<string, string> = {};
-                  (p?.fields ?? []).forEach((fl) => { values[fl.key] = String(stored[fl.key] ?? ""); });
-                  Object.entries(stored).forEach(([k, v]) => { if (values[k] === undefined) values[k] = String(v ?? ""); });
+                  const saved: Record<string, boolean> = {};
+                  const put = (k: string, v: unknown) => {
+                    // Secrets come back masked; never echo the mask into the input.
+                    if (String(v ?? "") === MASK) { values[k] = ""; saved[k] = true; }
+                    else values[k] = String(v ?? "");
+                  };
+                  (p?.fields ?? []).forEach((fl) => put(fl.key, stored[fl.key]));
+                  Object.entries(stored).forEach(([k, v]) => { if (values[k] === undefined) put(k, v); });
                   setForm({
                     id: m.id, provider: p?.code ?? "", code: m.code,
                     name_ar: m.name_ar, name_en: m.name_en, name_ur: m.name_ur ?? "", name_bn: (m as any).name_bn ?? "",
                     type: m.type as PType, icon: m.icon ?? "landmark", logo_url: mx.logo_url ?? "",
                     instructions_ar: m.instructions_ar ?? "", instructions_en: m.instructions_en ?? "", instructions_ur: m.instructions_ur ?? "", instructions_bn: (m as any).instructions_bn ?? "",
-                    values,
+                    values, saved,
                     is_gateway: isGw, gateway_provider: mx.gateway_provider ?? "",
                     test_mode: false,
                     config: JSON.stringify(mx.config ?? {}, null, 2),

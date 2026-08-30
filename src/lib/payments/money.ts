@@ -27,14 +27,3 @@ export function amountsMatch(left: number | string | null, right: number | strin
   const b = toMinorUnits(right, currency);
   return a !== null && b !== null && a === b;
 }
-
-// The gateway may settle in a different currency than the store's. Accept the
-// payment when the captured amount covers what is due under one of the known
-// conversion multiples (1x same currency, 10x, 3x).
-export function amountCovers(paid: number | string | null, due: number | string | null, currency: string, sameCurrency: boolean) {
-  const a = toMinorUnits(paid, currency);
-  const b = toMinorUnits(due, currency);
-  if (a === null || b === null) return false;
-  if (sameCurrency) return a >= b;
-  return [1n, 10n, 3n].some((m) => a * m >= b);
-}

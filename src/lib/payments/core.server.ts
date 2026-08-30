@@ -1,4 +1,4 @@
-import { amountCovers } from "./money";
+import { amountsMatch } from "./money";
 import type { GatewayStatus, PaymentOrder, PaymentState } from "./types";
 
 export async function loadOrderForPayment(orderId: string): Promise<PaymentOrder> {
@@ -65,10 +65,11 @@ export async function applyGatewayStatus(input: { attempt: any; order: PaymentOr
   const valid =
     status.state === "succeeded" &&
     !!status.externalPaymentId &&
-    // The gateway reference MUST match this order, and the captured amount must
-    // cover what is due (allowing 1x/10x/3x currency conversion multiples).
+    // Strict: same order reference, same currency, exact same amount. Anything
+    // else is an amount_mismatch and must never be treated as paid.
     status.merchantReference === order.order_number &&
-    amountCovers(status.amount, order.total, order.currency, sameCurrency);
+    sameCurrency &&
+    amountsMatch(status.amount, order.total, order.currency);
 
   if (valid) {
     const { error } = await admin.rpc("finalize_payment_attempt", {
@@ -103,7 +104,7 @@ export async function applyGatewayStatus(input: { attempt: any; order: PaymentOr
     : undecided
       ? (input.background && status.state === "unknown" ? "abandoned" : "processing")
       : "failed";
-  const reason = integrityFailure ? "gateway_result_integrity_mismatch" : status.description || "payment_not_completed";
+  const reason = integrityFailure ? "amount_mismatch" : status.description || "payment_not_completed";
   const { error } = await admin.rpc("reject_payment_attempt", {
     _attempt_id: attempt.id,
     _state: nextState,

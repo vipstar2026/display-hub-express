@@ -9,31 +9,36 @@ export const refundAfsPayment = createServerFn({ method: "POST" })
     if (!isAdmin) throw new Error("not_authorized");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as any;
-    const { data: attempt } = await admin.from("payment_attempts").select("*").eq("order_id", data.order_id).eq("provider", "afs").in("state", ["succeeded", "refunded"]).order("created_at", { ascending: false }).limit(1).maybeSingle();
-    if (!attempt?.external_payment_id) throw new Error("no_refundable_payment");
-    const { data: previous } = await admin.from("payment_refunds").select("amount").eq("attempt_id", attempt.id).eq("state", "succeeded");
-    const alreadyRefunded = (previous ?? []).reduce((sum: number, row: { amount: number }) => sum + Number(row.amount), 0);
-    const remaining = Number((Number(attempt.expected_amount) - alreadyRefunded).toFixed(3));
-    const amount = data.amount ?? remaining;
-    if (!Number.isFinite(amount) || amount <= 0 || amount > remaining) throw new Error("invalid_refund_amount");
-    const idempotencyKey = `refund:${attempt.id}:${crypto.randomUUID()}`;
-    const { data: refund, error: insertError } = await admin.from("payment_refunds").insert({
-      attempt_id: attempt.id,
-      amount,
-      currency: attempt.currency,
-      state: "processing",
-      idempotency_key: idempotencyKey,
-      reason: data.reason ?? null,
-      requested_by: context.userId,
-    }).select("id").single();
-    if (insertError) throw new Error(insertError.message);
+
+    // The database owns refund safety: it locks the order + attempt rows and
+    // refuses any amount that would push the refunded total past what was paid.
+    const { data: started, error: startError } = await admin.rpc("begin_payment_refund", {
+      _actor: context.userId,
+      _order_id: data.order_id,
+      _amount: data.amount ?? null,
+      _reason: data.reason ?? null,
+    });
+    if (startError) throw new Error(startError.message);
+    const refund = Array.isArray(started) ? started[0] : started;
+    if (!refund) throw new Error("no_refundable_payment");
+    if (refund.provider !== "afs") throw new Error("refund_not_supported_for_provider");
+
+    const amount = Number(refund.amount);
     const { refundAfsPaymentById } = await import("@/lib/payments/afs-adapter.server");
-    const result = await refundAfsPaymentById(attempt.external_payment_id, Number(amount).toFixed(2), attempt.currency);
+    const result = await refundAfsPaymentById(refund.external_payment_id, amount.toFixed(2), refund.currency);
     if (result.state !== "succeeded" || !result.externalPaymentId) {
-      await admin.from("payment_refunds").update({ state: result.state === "unknown" ? "requires_review" : "failed", failure_code: result.code, failure_reason: result.description }).eq("id", refund.id);
-      return { success: false, amount, partial: amount < remaining, code: result.code, message: result.description };
+      await admin.from("payment_refunds").update({
+        state: result.state === "unknown" ? "requires_review" : "failed",
+        failure_code: result.code,
+        failure_reason: result.description,
+      }).eq("id", refund.refund_id);
+      return { success: false, amount, partial: amount < Number(refund.remaining), code: result.code, message: result.description };
     }
-    const { error } = await admin.rpc("finalize_payment_refund", { _refund_id: refund.id, _provider_refund_id: result.externalPaymentId, _provider_code: result.code });
+    const { error } = await admin.rpc("finalize_payment_refund", {
+      _refund_id: refund.refund_id,
+      _provider_refund_id: result.externalPaymentId,
+      _provider_code: result.code,
+    });
     if (error) throw new Error(error.message);
-    return { success: true, amount, partial: amount < remaining, code: result.code, message: result.description };
+    return { success: true, amount, partial: amount < Number(refund.remaining), code: result.code, message: result.description };
   });
