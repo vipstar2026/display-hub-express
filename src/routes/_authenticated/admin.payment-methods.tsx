@@ -125,7 +125,6 @@ function AdminPaymentMethods() {
       is_gateway: form.is_gateway,
       gateway_provider: form.is_gateway ? (form.gateway_provider || form.provider || null) : null,
       test_mode: false,
-      config: Object.fromEntries(Object.entries(cfg).filter(([, v]) => v !== MASK)),
       supported_currencies: form.supported_currencies.split(",").map((s) => s.trim()).filter(Boolean),
       requires_proof: form.is_gateway ? false : form.requires_proof,
       is_active: form.is_active,
@@ -146,6 +145,9 @@ function AdminPaymentMethods() {
       if (error) { toast.error(error.message); return; }
       methodId = created.id;
     }
+
+    const { error: cfgError } = await supabase.rpc("admin_set_payment_config", { _id: methodId, _config: cfg as never });
+    if (cfgError) { toast.error(cfgError.message); return; }
 
     if (form.is_gateway && Object.keys(filled).length) {
       const { error } = await supabase.rpc("admin_set_payment_credentials", { _id: methodId, _values: filled as never });
