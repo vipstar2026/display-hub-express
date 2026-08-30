@@ -45,15 +45,58 @@ function PayPage() {
   const { id } = Route.useParams();
   const { lang } = useI18n();
   const start = useServerFn(startUserAfsPayment);
+  const startBenefit = useServerFn(createBpayCheckout);
   const nav = useNavigate();
   const [attemptKey] = useState(() => `afs:${id}:${crypto.randomUUID()}`);
+  const [route, setRoute] = useState<"benefit" | "afs" | null>(null);
+  const [benefitBusy, setBenefitBusy] = useState(false);
+  const [benefitError, setBenefitError] = useState<string | null>(null);
+
+  // Independent gateway switches (no shared master flag).
+  const { data: flags } = useQuery({
+    queryKey: ["payment-flags"],
+    queryFn: async () => {
+      const { data: rows } = await supabase.from("app_settings").select("key, value");
+      const map = Object.fromEntries((rows ?? []).map((r) => [r.key, r.value]));
+      return {
+        afsEnabled: map["afs_enabled"] !== false,
+        bpgEnabled: map["bpg_enabled"] !== false,
+        bpgVisible: map["bpg_show_in_checkout"] === true,
+        binRouting: map["bin_routing_enabled"] !== false,
+      };
+    },
+    staleTime: 60_000,
+  });
+
+  const routingOn = !!flags?.binRouting && !!flags?.bpgEnabled;
+  const effectiveRoute = routingOn ? route : "afs";
+
+  const goBenefit = async () => {
+    setBenefitBusy(true);
+    setBenefitError(null);
+    try {
+      const res = await startBenefit({ data: { order_id: id } });
+      if (res.redirectUrl) {
+        // Gateways block iframes — always leave in the top-level window.
+        window.top?.location.assign(res.redirectUrl);
+        return;
+      }
+      setRoute("afs");
+    } catch {
+      setBenefitError(payInitMessage(lang));
+    } finally {
+      setBenefitBusy(false);
+    }
+  };
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["afs-checkout", id],
+    enabled: effectiveRoute === "afs",
     queryFn: () => start({ data: { order_id: id, attempt_key: attemptKey } }),
     staleTime: Infinity,
     retry: false,
   });
+
 
   const { data: order } = useQuery({
     queryKey: ["pay-order", id],
