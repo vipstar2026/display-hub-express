@@ -82,8 +82,9 @@ const BRAND_LABEL: Record<string, string> = {
 };
 
 // Every brand COPYandPAY can render. The gateway still authorises only the
-// brands enabled in the merchant's AFS contract.
-const ALL_BRANDS = "VISA MASTER MAESTRO BENEFIT AMEX DINERS DISCOVER JCB UNIONPAY MADA";
+// brands enabled in the merchant's AFS contract. BENEFIT is excluded: AFS
+// confirmed Benefit debit cards must use the Benefit Payment Gateway only.
+const ALL_BRANDS = "VISA MASTER MAESTRO AMEX DINERS DISCOVER JCB UNIONPAY MADA";
 
 export function AfsPaymentWidget({ scriptUrl, scriptIntegrity, action, brands, widgetLang, amount, currency, onCancel }: Props) {
   const { lang } = useI18n();
