@@ -99,12 +99,14 @@ export async function applyGatewayStatus(input: { attempt: any; order: PaymentOr
   // call (e.g. the result page retrying seconds after a real decline and
   // getting a transient gateway error like 200.300.404). Keep the original,
   // truthful decline reason so support and the shopper see what the bank said.
-  if (attempt.state === "failed" || attempt.state === "succeeded") {
-    return { success: attempt.state === "succeeded", pending: false, abandoned: false, rateLimited: false, code: status.code, message: attempt.failure_reason ?? "" };
+  const cancelled = CANCELLED.test(status.code);
+
+  if (attempt.state === "failed" || attempt.state === "succeeded" || attempt.state === "cancelled") {
+    return { success: attempt.state === "succeeded", pending: false, abandoned: false, cancelled: attempt.state === "cancelled", rateLimited: false, code: status.code, message: attempt.failure_reason ?? "" };
   }
 
   const integrityFailure = status.state === "succeeded";
-  const undecided = status.state === "processing" || status.state === "unknown";
+  const undecided = !cancelled && (status.state === "processing" || status.state === "unknown");
   // A background sweep gets exactly one look. Only a genuinely UNKNOWN result
   // (e.g. 700.400.580 "cannot find transaction") means the shopper never
   // finished, so it is recorded as abandoned. An explicit gateway PENDING
@@ -112,10 +114,12 @@ export async function applyGatewayStatus(input: { attempt: any; order: PaymentOr
   // "processing" or a real payment would be thrown away.
   const nextState = integrityFailure
     ? "requires_review"
-    : undecided
-      ? (input.background && status.state === "unknown" ? "abandoned" : "processing")
-      : "failed";
-  const reason = integrityFailure ? "amount_mismatch" : status.description || "payment_not_completed";
+    : cancelled
+      ? "cancelled"
+      : undecided
+        ? (input.background && status.state === "unknown" ? "abandoned" : "processing")
+        : "failed";
+  const reason = integrityFailure ? "amount_mismatch" : cancelled ? "payment_cancelled" : status.description || "payment_not_completed";
   const { error } = await admin.rpc("reject_payment_attempt", {
     _attempt_id: attempt.id,
     _state: nextState,
@@ -125,5 +129,6 @@ export async function applyGatewayStatus(input: { attempt: any; order: PaymentOr
     _sanitized_payload: { code: status.code, description: status.description },
   });
   if (error) throw new Error(error.message);
-  return { success: false, pending: nextState === "processing", abandoned: nextState === "abandoned", rateLimited: !!status.rateLimited, code: status.code, message: reason };
+  return { success: false, pending: nextState === "processing", abandoned: nextState === "abandoned", cancelled: nextState === "cancelled", rateLimited: !!status.rateLimited, code: status.code, message: reason };
+
 }
