@@ -40,3 +40,37 @@ export const confirmUserAfsPayment = createServerFn({ method: "POST" })
     const { confirmAfsCheckout } = await import("@/lib/payments/checkout.server");
     return confirmAfsCheckout({ orderId: data.order_id, checkoutId: data.checkout_id, resourcePath: data.resource_path, source: data.background ? "background_check" : "customer_return", background: !!data.background });
   });
+/**
+ * Database-first payment state for the result page. Returns "paid" as soon as
+ * the webhook has settled the order, without depending on the gateway.
+ * Authorized by the unguessable order id (returns status only, no PII).
+ */
+export const getOrderPaymentState = createServerFn({ method: "POST" })
+  .inputValidator((input: { order_id: string }) => input)
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: order } = await supabaseAdmin
+      .from("orders")
+      .select("payment_status, status")
+      .eq("id", data.order_id)
+      .maybeSingle();
+    if (!order) throw new Error("order_not_found");
+    const { data: attempt } = await (supabaseAdmin as any)
+      .from("payment_attempts")
+      .select("state, failure_code, failure_reason, payment_brand, external_payment_id")
+      .eq("order_id", data.order_id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const paid = order.payment_status === "succeeded";
+    const state: string = attempt?.state ?? (paid ? "succeeded" : "created");
+    return {
+      success: paid,
+      cancelled: !paid && (state === "cancelled" || order.status === "cancelled"),
+      pending: !paid && (state === "created" || state === "awaiting_customer" || state === "processing" || state === "requires_review"),
+      abandoned: state === "abandoned" || state === "expired",
+      rateLimited: false,
+      code: attempt?.failure_code ?? "",
+      message: attempt?.failure_reason ?? "",
+    };
+  });
