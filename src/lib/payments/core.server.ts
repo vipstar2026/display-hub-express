@@ -104,7 +104,7 @@ export async function applyGatewayStatus(input: { attempt: any; order: PaymentOr
     : undecided
       ? (input.background && status.state === "unknown" ? "abandoned" : "processing")
       : "failed";
-  const reason = integrityFailure ? "gateway_result_integrity_mismatch" : status.description || "payment_not_completed";
+  const reason = integrityFailure ? "amount_mismatch" : status.description || "payment_not_completed";
   const { error } = await admin.rpc("reject_payment_attempt", {
     _attempt_id: attempt.id,
     _state: nextState,
