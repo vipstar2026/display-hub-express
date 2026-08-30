@@ -154,7 +154,13 @@ function AdminOrders() {
         <KpiCard label={te("Shipped")} value={kpis.shipped} tone="text-emerald-400" />
       </div>
 
+      <div className="flex gap-2">
+        <Button size="sm" variant={view === "active" ? "default" : "outline"} onClick={() => setView("active")}>{te("Active orders")}</Button>
+        <Button size="sm" variant={view === "archive" ? "default" : "outline"} onClick={() => setView("archive")}>{te("Cancelled / refunded")}</Button>
+      </div>
+
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/10 bg-card/40 p-3">
+
         <div className="relative min-w-[240px] flex-1">
           <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={te("Search order #, email, name, tracking...")} className="ps-9" />
