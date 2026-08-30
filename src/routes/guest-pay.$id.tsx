@@ -8,7 +8,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
 import { payInitMessage } from "@/lib/pay-messages";
-import { formatAmount } from "@/lib/afs-money";
+import { formatAmount } from "@/lib/payments/money";
 import { createGuestAfsCheckout, getGuestOrder } from "@/lib/guest-checkout.functions";
 import { ShieldCheck, Loader2, Receipt, Truck, Store, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
