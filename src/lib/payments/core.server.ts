@@ -1,4 +1,4 @@
-import { amountCovers } from "./money";
+import { amountsMatch } from "./money";
 import type { GatewayStatus, PaymentOrder, PaymentState } from "./types";
 
 export async function loadOrderForPayment(orderId: string): Promise<PaymentOrder> {
