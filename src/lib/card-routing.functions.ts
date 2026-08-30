@@ -16,6 +16,17 @@ export type CardRoute = {
  * Only the BIN is ever sent, never the full card number, and nothing about
  * the card is stored.
  */
+/**
+ * Known locally-issued Bahraini (BENEFIT) BIN prefixes. Checked first because
+ * public BIN databases are rate limited and often mislabel local debit cards.
+ */
+const BH_LOCAL_BIN_PREFIXES = [
+  "588845", "588846", "588847", "588848", "588849", "588850",
+  "440795", "457997", "465002", "468686", "489317",
+  "519346", "521180", "530060", "535879", "540538", "542179",
+  "552211", "557080",
+];
+
 export const lookupCardBin = createServerFn({ method: "POST" })
   .inputValidator((input: { bin: string }) => {
     const bin = String(input.bin ?? "").replace(/\D/g, "").slice(0, 8);
@@ -23,6 +34,9 @@ export const lookupCardBin = createServerFn({ method: "POST" })
     return { bin };
   })
   .handler(async ({ data }): Promise<CardRoute> => {
+    if (BH_LOCAL_BIN_PREFIXES.some((p) => data.bin.startsWith(p))) {
+      return { route: "benefit", country: "BH", scheme: "benefit", type: "debit", known: true };
+    }
     try {
       const res = await fetch(`https://lookup.binlist.net/${data.bin}`, {
         headers: { "Accept-Version": "3" },
@@ -36,7 +50,9 @@ export const lookupCardBin = createServerFn({ method: "POST" })
       const country = body.country?.alpha2?.toUpperCase() ?? null;
       const scheme = body.scheme?.toLowerCase() ?? null;
       const type = body.type?.toLowerCase() ?? null;
-      const isLocalBahraini = country === "BH" && (type === "debit" || scheme === "benefit" || !scheme);
+      // Any card issued in Bahrain is treated as local (BENEFIT) unless it is
+      // an international-only scheme that BENEFIT cannot process.
+      const isLocalBahraini = country === "BH" && scheme !== "amex" && scheme !== "american express";
       return { route: isLocalBahraini ? "benefit" : "afs", country, scheme, type, known: true };
     } catch {
       // Unknown BIN: fall back to the international gateway; the shopper can
@@ -44,3 +60,4 @@ export const lookupCardBin = createServerFn({ method: "POST" })
       return { route: "afs", country: null, scheme: null, type: null, known: false };
     }
   });
+
