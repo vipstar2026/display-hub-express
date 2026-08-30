@@ -64,7 +64,6 @@ import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
 import { Route as AuthenticatedAdminPaymentLinksRouteImport } from './routes/_authenticated/admin.payment-links'
 import { Route as AuthenticatedAdminPaymentMethodsRouteImport } from './routes/_authenticated/admin.payment-methods'
-import { Route as AuthenticatedAdminPaymentSandboxRouteImport } from './routes/_authenticated/admin.payment-sandbox'
 import { Route as AuthenticatedAdminPaymentsRouteImport } from './routes/_authenticated/admin.payments'
 import { Route as AuthenticatedAdminPosRouteImport } from './routes/_authenticated/admin.pos'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
@@ -381,12 +380,6 @@ const AuthenticatedAdminPaymentMethodsRoute =
     path: '/payment-methods',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminPaymentSandboxRoute =
-  AuthenticatedAdminPaymentSandboxRouteImport.update({
-    id: '/payment-sandbox',
-    path: '/payment-sandbox',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
 const AuthenticatedAdminPaymentsRoute =
   AuthenticatedAdminPaymentsRouteImport.update({
     id: '/payments',
@@ -567,7 +560,6 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/payment-links': typeof AuthenticatedAdminPaymentLinksRoute
   '/admin/payment-methods': typeof AuthenticatedAdminPaymentMethodsRoute
-  '/admin/payment-sandbox': typeof AuthenticatedAdminPaymentSandboxRoute
   '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/admin/pos': typeof AuthenticatedAdminPosRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
@@ -645,7 +637,6 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/payment-links': typeof AuthenticatedAdminPaymentLinksRoute
   '/admin/payment-methods': typeof AuthenticatedAdminPaymentMethodsRoute
-  '/admin/payment-sandbox': typeof AuthenticatedAdminPaymentSandboxRoute
   '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/admin/pos': typeof AuthenticatedAdminPosRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
@@ -726,7 +717,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/payment-links': typeof AuthenticatedAdminPaymentLinksRoute
   '/_authenticated/admin/payment-methods': typeof AuthenticatedAdminPaymentMethodsRoute
-  '/_authenticated/admin/payment-sandbox': typeof AuthenticatedAdminPaymentSandboxRoute
   '/_authenticated/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/_authenticated/admin/pos': typeof AuthenticatedAdminPosRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
@@ -807,7 +797,6 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/payment-links'
     | '/admin/payment-methods'
-    | '/admin/payment-sandbox'
     | '/admin/payments'
     | '/admin/pos'
     | '/admin/products'
@@ -885,7 +874,6 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/payment-links'
     | '/admin/payment-methods'
-    | '/admin/payment-sandbox'
     | '/admin/payments'
     | '/admin/pos'
     | '/admin/products'
@@ -965,7 +953,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/payment-links'
     | '/_authenticated/admin/payment-methods'
-    | '/_authenticated/admin/payment-sandbox'
     | '/_authenticated/admin/payments'
     | '/_authenticated/admin/pos'
     | '/_authenticated/admin/products'
@@ -1419,13 +1406,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPaymentMethodsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/payment-sandbox': {
-      id: '/_authenticated/admin/payment-sandbox'
-      path: '/payment-sandbox'
-      fullPath: '/admin/payment-sandbox'
-      preLoaderRoute: typeof AuthenticatedAdminPaymentSandboxRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
     '/_authenticated/admin/payments': {
       id: '/_authenticated/admin/payments'
       path: '/payments'
@@ -1615,7 +1595,6 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminPaymentLinksRoute: typeof AuthenticatedAdminPaymentLinksRoute
   AuthenticatedAdminPaymentMethodsRoute: typeof AuthenticatedAdminPaymentMethodsRoute
-  AuthenticatedAdminPaymentSandboxRoute: typeof AuthenticatedAdminPaymentSandboxRoute
   AuthenticatedAdminPaymentsRoute: typeof AuthenticatedAdminPaymentsRoute
   AuthenticatedAdminPosRoute: typeof AuthenticatedAdminPosRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
@@ -1652,7 +1631,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminPaymentLinksRoute: AuthenticatedAdminPaymentLinksRoute,
   AuthenticatedAdminPaymentMethodsRoute: AuthenticatedAdminPaymentMethodsRoute,
-  AuthenticatedAdminPaymentSandboxRoute: AuthenticatedAdminPaymentSandboxRoute,
   AuthenticatedAdminPaymentsRoute: AuthenticatedAdminPaymentsRoute,
   AuthenticatedAdminPosRoute: AuthenticatedAdminPosRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,

@@ -2747,6 +2747,23 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_ledger: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          currency: string | null
+          failure_reason: string | null
+          id: string | null
+          order_id: string | null
+          paid_at: string | null
+          payment_method: string | null
+          provider: string | null
+          record_source: string | null
+          reference: string | null
+          status: string | null
+        }
+        Relationships: []
+      }
       payment_methods_public: {
         Row: {
           account_details: Json | null

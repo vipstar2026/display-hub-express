@@ -1,4 +1,5 @@
 import type { GatewayStatus, PaymentOrder } from "./types";
+import { formatGatewayAmount } from "./money";
 
 type Config = {
   entityId: string;
@@ -84,7 +85,7 @@ export async function createAfsPayment(order: PaymentOrder) {
   const names = (order.buyer_name ?? "").trim().split(/\s+/).filter(Boolean);
   const form = new URLSearchParams({
     entityId: config.entityId,
-    amount: Number(order.total).toFixed(2),
+    amount: formatGatewayAmount(order.total, order.currency),
     currency: order.currency.toUpperCase(),
     paymentType: config.paymentType,
     merchantTransactionId: order.order_number,
