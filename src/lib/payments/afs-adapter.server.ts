@@ -111,6 +111,7 @@ export async function createAfsPayment(order: PaymentOrder) {
 
 function normalizeStatus(body: Record<string, unknown>): GatewayStatus {
   const result = body.result as { code?: string; description?: string } | undefined;
+  const card = body.card as { last4Digits?: string } | undefined;
   const code = result?.code ?? "";
   const rateLimited = RATE_LIMITED.test(code);
   const state = SUCCESS.test(code) ? "succeeded" : PROCESSING.test(code) ? "processing" : !code || UNKNOWN.test(code) ? "unknown" : "failed";
@@ -120,12 +121,14 @@ function normalizeStatus(body: Record<string, unknown>): GatewayStatus {
     amount: typeof body.amount === "string" ? body.amount : null,
     currency: typeof body.currency === "string" ? body.currency : null,
     brand: typeof body.paymentBrand === "string" ? body.paymentBrand : null,
+    last4: typeof card?.last4Digits === "string" ? card.last4Digits : null,
     code,
     description: result?.description ?? "",
     rateLimited,
     state,
   };
 }
+
 
 export async function getAfsPaymentStatus(checkoutId: string, resourcePath?: string | null) {
   const config = await loadAfsPaymentConfig(getAfsCheckoutEnvironment(checkoutId));

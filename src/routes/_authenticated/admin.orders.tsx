@@ -34,6 +34,7 @@ function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
   const [payFilter, setPayFilter] = useState<"all" | PayStatus>("all");
   const [search, setSearch] = useState("");
+  const [view, setView] = useState<"active" | "archive">("active");
   const reviewPayment = useServerFn(reviewManualPayment);
 
   const { data } = useQuery({
@@ -41,16 +42,45 @@ function AdminOrders() {
     queryFn: async () => (await supabase.from("orders").select("*, order_items(*), payment_methods(name_en, name_ar, type)").order("created_at", { ascending: false })).data ?? [],
   });
 
+  // Unified electronic-payment metadata (card brand, authorization id, last 4).
+  const { data: attempts } = useQuery({
+    queryKey: ["admin-order-payments"],
+    queryFn: async () =>
+      (await supabase
+        .from("payment_attempts")
+        .select("order_id, provider, payment_brand, external_payment_id, metadata, state, created_at")
+        .eq("state", "succeeded")
+        .order("created_at", { ascending: false })).data ?? [],
+  });
+
+  const payMeta = useMemo(() => {
+    const map = new Map<string, PayMeta>();
+    for (const a of (attempts ?? []) as any[]) {
+      if (map.has(a.order_id)) continue;
+      map.set(a.order_id, {
+        provider: a.provider,
+        brand: (a.payment_brand as string | null) ?? null,
+        transactionId: (a.external_payment_id as string | null) ?? null,
+        last4: (a.metadata?.last4 as string | null) ?? null,
+      });
+    }
+    return map;
+  }, [attempts]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
+    const archived = (o: { status: string; payment_status: string }) =>
+      o.status === "cancelled" || o.status === "refunded" || o.payment_status === "refunded";
     return (data ?? []).filter((o) => {
+      // Cancelled / refunded orders live in their own section, never in active.
+      if (view === "active" ? archived(o) : !archived(o)) return false;
       if (statusFilter !== "all" && o.status !== statusFilter) return false;
       if (payFilter !== "all" && o.payment_status !== payFilter) return false;
       if (!q) return true;
       return [o.order_number, o.buyer_email, o.buyer_name ?? "", o.buyer_phone ?? "", o.tracking_number ?? ""]
         .some((s) => String(s).toLowerCase().includes(q));
     });
-  }, [data, statusFilter, payFilter, search]);
+  }, [data, statusFilter, payFilter, search, view]);
 
   const kpis = useMemo(() => {
     const all = data ?? [];
@@ -124,7 +154,13 @@ function AdminOrders() {
         <KpiCard label={te("Shipped")} value={kpis.shipped} tone="text-emerald-400" />
       </div>
 
+      <div className="flex gap-2">
+        <Button size="sm" variant={view === "active" ? "default" : "outline"} onClick={() => setView("active")}>{te("Active orders")}</Button>
+        <Button size="sm" variant={view === "archive" ? "default" : "outline"} onClick={() => setView("archive")}>{te("Cancelled / refunded")}</Button>
+      </div>
+
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/10 bg-card/40 p-3">
+
         <div className="relative min-w-[240px] flex-1">
           <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={te("Search order #, email, name, tracking...")} className="ps-9" />
@@ -151,7 +187,7 @@ function AdminOrders() {
 
       <div className="space-y-3">
         {filtered.length === 0 && <div className="rounded-xl border border-primary/10 bg-card p-8 text-center text-muted-foreground">{te("No orders")}</div>}
-        {filtered.map((o) => <OrderCard key={o.id} order={o} onConfirm={confirmPayment} onReject={rejectPayment} onStatus={updateStatus} onNotes={saveNotes} onTracking={saveTracking} payBadge={payBadge} statusLabel={statusLabel} te={te} />)}
+        {filtered.map((o) => <OrderCard key={o.id} order={o} pay={payMeta.get(o.id) ?? null} onConfirm={confirmPayment} onReject={rejectPayment} onStatus={updateStatus} onNotes={saveNotes} onTracking={saveTracking} payBadge={payBadge} statusLabel={statusLabel} te={te} />)}
       </div>
     </div>
   );
@@ -166,6 +202,15 @@ function KpiCard({ label, value, tone }: { label: string; value: number; tone: s
   );
 }
 
+export type PayMeta = { provider: string; brand: string | null; transactionId: string | null; last4: string | null };
+
+const BRAND_LABEL: Record<string, string> = {
+  visa: "Visa", master: "Mastercard", mastercard: "Mastercard", amex: "Amex", diners: "Diners",
+  discover: "Discover", jcb: "JCB", unionpay: "UnionPay", mada: "Mada", benefit: "BENEFIT", maestro: "Maestro",
+};
+const brandLabel = (brand: string | null, provider: string) =>
+  BRAND_LABEL[(brand ?? "").toLowerCase()] ?? (brand || (provider === "benefit" ? "BENEFIT" : "Card"));
+
 type OrderRow = {
   id: string; order_number: string; buyer_email: string; buyer_name: string | null; buyer_phone: string | null;
   created_at: string; total: number; currency: string; status: string; payment_status: string;
@@ -176,8 +221,9 @@ type OrderRow = {
   order_items: { id: string; product_name: string; quantity: number; total: number }[] | null;
 };
 
-function OrderCard({ order: o, onConfirm, onReject, onStatus, onNotes, onTracking, payBadge, statusLabel, te }: {
+function OrderCard({ order: o, pay, onConfirm, onReject, onStatus, onNotes, onTracking, payBadge, statusLabel, te }: {
   order: OrderRow;
+  pay: PayMeta | null;
   onConfirm: (id: string) => void;
   onReject: (id: string, notes: string) => void;
   onStatus: (id: string, s: OrderStatus) => void;
@@ -245,10 +291,23 @@ function OrderCard({ order: o, onConfirm, onReject, onStatus, onNotes, onTrackin
         <div>
           <div className="mb-1 text-xs font-semibold uppercase text-muted-foreground">{te("Payment")}</div>
           <div className="space-y-1 text-sm">
-            <div>{te("Method:")} <span className="font-medium">{o.payment_methods?.name_en ?? "—"}</span></div>
-            {o.payment_reference && <div>{te("Ref:")} <code className="text-xs">{o.payment_reference}</code></div>}
+            {pay ? (
+              <>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge className="bg-emerald-500/15 text-emerald-500">{te("Paid electronically")}</Badge>
+                  <Badge variant="outline" className="border-primary/30">{brandLabel(pay.brand, pay.provider)}</Badge>
+                  {pay.last4 && <span className="font-mono text-xs text-muted-foreground">•••• {pay.last4}</span>}
+                </div>
+                {pay.transactionId && <div>{te("Transaction:")} <code className="text-xs">{pay.transactionId}</code></div>}
+              </>
+            ) : (
+              <>
+                <div>{te("Method:")} <span className="font-medium">{o.payment_methods?.name_en ?? "—"}</span></div>
+                {o.payment_reference && <div>{te("Ref:")} <code className="text-xs">{o.payment_reference}</code></div>}
+              </>
+            )}
             {o.customer_notes && <div className="text-muted-foreground">"{o.customer_notes}"</div>}
-            {o.payment_proof_url && (
+            {!pay && o.payment_proof_url && (
               <Dialog>
                 <DialogTrigger asChild>
                   <Button size="sm" variant="outline" onClick={openProof} className="mt-1"><FileImage className="me-1 h-3.5 w-3.5" />{te("View proof")}</Button>

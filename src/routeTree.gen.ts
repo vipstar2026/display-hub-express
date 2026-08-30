@@ -76,6 +76,7 @@ import { Route as AuthenticatedAdminSuppliersRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedPayIdRouteImport } from './routes/_authenticated/pay.$id'
 import { Route as ApiPublicAfsReconcileRouteImport } from './routes/api/public/afs-reconcile'
+import { Route as ApiPublicBenefitReconcileRouteImport } from './routes/api/public/benefit-reconcile'
 import { Route as ApiPublicSendEmailsRouteImport } from './routes/api/public/send-emails'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
@@ -448,6 +449,12 @@ const ApiPublicAfsReconcileRoute = ApiPublicAfsReconcileRouteImport.update({
   path: '/api/public/afs-reconcile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicBenefitReconcileRoute =
+  ApiPublicBenefitReconcileRouteImport.update({
+    id: '/api/public/benefit-reconcile',
+    path: '/api/public/benefit-reconcile',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicSendEmailsRoute = ApiPublicSendEmailsRouteImport.update({
   id: '/api/public/send-emails',
   path: '/api/public/send-emails',
@@ -572,6 +579,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/pay/$id': typeof AuthenticatedPayIdRoute
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
+  '/api/public/benefit-reconcile': typeof ApiPublicBenefitReconcileRoute
   '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -649,6 +657,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/pay/$id': typeof AuthenticatedPayIdRoute
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
+  '/api/public/benefit-reconcile': typeof ApiPublicBenefitReconcileRoute
   '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -729,6 +738,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/pay/$id': typeof AuthenticatedPayIdRoute
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
+  '/api/public/benefit-reconcile': typeof ApiPublicBenefitReconcileRoute
   '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -809,6 +819,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/pay/$id'
     | '/api/public/afs-reconcile'
+    | '/api/public/benefit-reconcile'
     | '/api/public/send-emails'
     | '/lovable/email/suppression'
     | '/admin/'
@@ -886,6 +897,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/pay/$id'
     | '/api/public/afs-reconcile'
+    | '/api/public/benefit-reconcile'
     | '/api/public/send-emails'
     | '/lovable/email/suppression'
     | '/admin'
@@ -965,6 +977,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users'
     | '/_authenticated/pay/$id'
     | '/api/public/afs-reconcile'
+    | '/api/public/benefit-reconcile'
     | '/api/public/send-emails'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
@@ -1010,6 +1023,7 @@ export interface RootRouteChildren {
   ProductSlugRoute: typeof ProductSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ApiPublicAfsReconcileRoute: typeof ApiPublicAfsReconcileRoute
+  ApiPublicBenefitReconcileRoute: typeof ApiPublicBenefitReconcileRoute
   ApiPublicSendEmailsRoute: typeof ApiPublicSendEmailsRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicPaymentsAfsRoute: typeof ApiPublicPaymentsAfsRoute
@@ -1490,6 +1504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAfsReconcileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/benefit-reconcile': {
+      id: '/api/public/benefit-reconcile'
+      path: '/api/public/benefit-reconcile'
+      fullPath: '/api/public/benefit-reconcile'
+      preLoaderRoute: typeof ApiPublicBenefitReconcileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/send-emails': {
       id: '/api/public/send-emails'
       path: '/api/public/send-emails'
@@ -1701,6 +1722,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductSlugRoute: ProductSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
   ApiPublicAfsReconcileRoute: ApiPublicAfsReconcileRoute,
+  ApiPublicBenefitReconcileRoute: ApiPublicBenefitReconcileRoute,
   ApiPublicSendEmailsRoute: ApiPublicSendEmailsRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicPaymentsAfsRoute: ApiPublicPaymentsAfsRoute,
