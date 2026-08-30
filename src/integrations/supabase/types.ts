@@ -3069,6 +3069,10 @@ export type Database = {
         Args: { _id: string; _sent_count: number }
         Returns: undefined
       }
+      admin_set_payment_config: {
+        Args: { _config: Json; _id: string }
+        Returns: undefined
+      }
       admin_set_payment_credentials: {
         Args: { _id: string; _values: Json }
         Returns: undefined
