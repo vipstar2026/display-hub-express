@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 import { AfsPaymentWidget } from "@/components/AfsPaymentWidget";
+import { CardRouteGate } from "@/components/CardRouteGate";
+import { createBpayCheckout } from "@/lib/bpay.functions";
 
 export const Route = createFileRoute("/_authenticated/pay/$id")({
   ssr: false,
@@ -196,7 +198,24 @@ function PayPage() {
           </div>
         )}
 
-        {isLoading && (
+        {routingOn && !route && (
+          <CardRouteGate
+            onRoute={(r) => {
+              setRoute(r);
+              if (r === "benefit") void goBenefit();
+            }}
+            showBenefitOption={!!flags?.bpgVisible}
+            onPickOther={() => nav({ to: "/cart" })}
+          />
+        )}
+        {benefitBusy && (
+          <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> BENEFIT…
+          </div>
+        )}
+        {benefitError && <PayErrorInline message={benefitError} />}
+
+        {effectiveRoute === "afs" && isLoading && (
           <div className="flex items-center justify-center gap-2 rounded-xl border border-primary/10 bg-card py-10 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> …
           </div>
