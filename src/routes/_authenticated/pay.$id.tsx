@@ -95,11 +95,14 @@ function PayPage() {
       // Never silently send a local BENEFIT card to AFS — it always gets
       // declined by the risk screening. Tell the shopper instead.
       setBenefitError(benefitUnavailable(lang));
+      setRoute(null);
     } catch {
       setBenefitError(benefitUnavailable(lang));
+      setRoute(null);
     } finally {
       setBenefitBusy(false);
     }
+
   };
 
 
