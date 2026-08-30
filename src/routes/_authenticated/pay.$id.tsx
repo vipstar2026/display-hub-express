@@ -73,6 +73,15 @@ function PayPage() {
   const routingOn = !!flags?.binRouting && !!flags?.bpgEnabled;
   const effectiveRoute = routingOn ? route : "afs";
 
+  const benefitUnavailable = (l: string) =>
+    l === "ar"
+      ? "بوابة بنفت غير متاحة حالياً. بطاقات بنفت المحلية لا تُقبل على بوابة البطاقات الدولية — استخدم بطاقة فيزا/ماستركارد أو اختر طريقة دفع أخرى."
+      : l === "ur"
+        ? "BENEFIT گیٹ وے فی الحال دستیاب نہیں۔ براہ کرم Visa/Mastercard یا دوسرا طریقہ استعمال کریں۔"
+        : l === "bn"
+          ? "BENEFIT গেটওয়ে এখন উপলব্ধ নয়। Visa/Mastercard বা অন্য পদ্ধতি ব্যবহার করুন।"
+          : "The BENEFIT gateway is not available yet. Local BENEFIT debit cards are not accepted on the international card gateway — please use a Visa/Mastercard or another payment method.";
+
   const goBenefit = async () => {
     setBenefitBusy(true);
     setBenefitError(null);
@@ -83,13 +92,16 @@ function PayPage() {
         window.top?.location.assign(res.redirectUrl);
         return;
       }
-      setRoute("afs");
+      // Never silently send a local BENEFIT card to AFS — it always gets
+      // declined by the risk screening. Tell the shopper instead.
+      setBenefitError(benefitUnavailable(lang));
     } catch {
-      setBenefitError(payInitMessage(lang));
+      setBenefitError(benefitUnavailable(lang));
     } finally {
       setBenefitBusy(false);
     }
   };
+
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["afs-checkout", id],
