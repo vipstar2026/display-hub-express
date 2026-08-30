@@ -104,9 +104,16 @@ function AccountPage() {
                     ))}
                   </div>
                 )}
-                <div className="mt-3 flex justify-end">
+                <div className="mt-3 flex flex-wrap items-center justify-end gap-3">
+                  {o.payment_status !== "succeeded" && o.payment_status !== "refunded" && !["cancelled", "refunded"].includes(o.status) && (
+                    // Re-opens the SAME order — never creates a new one.
+                    <Link to="/pay/$id" params={{ id: o.id }}>
+                      <Button size="sm" className="bg-primary text-background hover:bg-primary">{t("order.complete_payment")}</Button>
+                    </Link>
+                  )}
                   <Link to="/order/success/$id" params={{ id: o.id }} className="text-xs text-primary hover:underline">{t("account.view_order")} →</Link>
                 </div>
+
               </div>
             );
           })}
