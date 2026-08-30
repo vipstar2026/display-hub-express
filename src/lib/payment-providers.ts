@@ -42,7 +42,6 @@ export interface PaymentProvider {
 }
 
 
-const cardTypes = "card";
 
 export const PAYMENT_PROVIDERS: PaymentProvider[] = [
   /* ── Manual / offline ─────────────────────────────── */
