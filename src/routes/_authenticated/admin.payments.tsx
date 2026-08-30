@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { formatPrice } from "@/lib/format";
+import { BASE_CURRENCY, sumInBase } from "@/lib/payments/money";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, RefreshCw, CreditCard, CheckCircle2, Clock, XCircle, RotateCcw, Download } from "lucide-react";
@@ -20,9 +21,10 @@ export const Route = createFileRoute("/_authenticated/admin/payments")({
 
 type Tx = {
   id: string;
+  record_source: string;
   order_id: string | null;
   provider: string;
-  provider_charge_id: string | null;
+  reference: string | null;
   amount: number;
   currency: string;
   status: string;
@@ -46,7 +48,7 @@ function AdminPaymentsPage() {
     queryKey: ["admin-payment-tx"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("payment_transactions")
+        .from("payment_ledger")
         .select("*, orders(order_number, buyer_email, buyer_name)")
         .order("created_at", { ascending: false })
         .limit(500);
@@ -63,7 +65,7 @@ function AdminPaymentsPage() {
       return (
         (r.orders?.order_number ?? "").toLowerCase().includes(s) ||
         (r.orders?.buyer_email ?? "").toLowerCase().includes(s) ||
-        (r.provider_charge_id ?? "").toLowerCase().includes(s) ||
+        (r.reference ?? "").toLowerCase().includes(s) ||
         r.provider.toLowerCase().includes(s)
       );
     });
@@ -72,19 +74,22 @@ function AdminPaymentsPage() {
   const kpis = useMemo(() => {
     const succeeded = rows.filter((r) => r.status === "succeeded" && Number(r.amount) > 0);
     const refunds = rows.filter((r) => Number(r.amount) < 0 || r.status === "refunded");
+    const grossBase = sumInBase(succeeded.map((r) => ({ amount: r.amount, currency: r.currency })));
+    const refundBase = sumInBase(refunds.map((r) => ({ amount: r.amount, currency: r.currency })));
     return {
-      gross: succeeded.reduce((a, r) => a + Number(r.amount), 0),
-      refunded: Math.abs(refunds.reduce((a, r) => a + Number(r.amount), 0)),
+      gross: grossBase.total,
+      refunded: Math.abs(refundBase.total),
+      skipped: [...new Set([...grossBase.skipped, ...refundBase.skipped])],
       pending: rows.filter((r) => r.status === "pending").length,
       failed: rows.filter((r) => r.status === "failed").length,
     };
   }, [rows]);
 
   const exportCsv = () => {
-    const head = ["created_at", "order", "email", "provider", "charge_id", "method", "amount", "currency", "status", "failure"];
+    const head = ["created_at", "order", "email", "provider", "reference", "method", "amount", "currency", "status", "failure"];
     const body = filtered.map((r) => [
       r.created_at, r.orders?.order_number ?? "", r.orders?.buyer_email ?? "", r.provider,
-      r.provider_charge_id ?? "", r.payment_method ?? "", r.amount, r.currency, r.status, r.failure_reason ?? "",
+      r.reference ?? "", r.payment_method ?? "", r.amount, r.currency, r.status, r.failure_reason ?? "",
     ]);
     const csv = [head, ...body].map((l) => l.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
@@ -145,8 +150,8 @@ function AdminPaymentsPage() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: txt("إجمالي المحصّل", "Collected", "وصول شدہ", "সংগৃহীত"), value: formatPrice(kpis.gross) },
-          { label: txt("المسترجع", "Refunded", "واپس", "ফেরত"), value: formatPrice(kpis.refunded) },
+          { label: txt("إجمالي المحصّل", "Collected", "وصول شدہ", "সংগৃহীত"), value: formatPrice(kpis.gross, BASE_CURRENCY) },
+          { label: txt("المسترجع", "Refunded", "واپس", "ফেরত"), value: formatPrice(kpis.refunded, BASE_CURRENCY) },
           { label: txt("قيد المعالجة", "Pending", "زیر عمل", "মুলতুবি"), value: String(kpis.pending) },
           { label: txt("فاشلة", "Failed", "ناکام", "ব্যর্থ"), value: String(kpis.failed) },
         ].map((k) => (
@@ -196,7 +201,7 @@ function AdminPaymentsPage() {
                   <div className="text-xs text-muted-foreground">{r.orders?.buyer_email}</div>
                 </td>
                 <td className="p-3 uppercase">{r.provider}{r.payment_method ? ` · ${r.payment_method}` : ""}</td>
-                <td className="max-w-[220px] truncate p-3 font-mono text-xs text-muted-foreground">{r.provider_charge_id ?? "—"}</td>
+                <td className="max-w-[220px] truncate p-3 font-mono text-xs text-muted-foreground">{r.reference ?? "—"}</td>
                 <td className={`p-3 font-mono ${Number(r.amount) < 0 ? "text-destructive" : ""}`}>{formatPrice(Number(r.amount), r.currency)}</td>
                 <td className="p-3">
                   {badge(r.status)}
