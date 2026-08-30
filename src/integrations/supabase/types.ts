@@ -3069,6 +3069,10 @@ export type Database = {
         Args: { _id: string; _sent_count: number }
         Returns: undefined
       }
+      admin_set_payment_credentials: {
+        Args: { _id: string; _values: Json }
+        Returns: undefined
+      }
       admin_set_review_approved: {
         Args: { _approved: boolean; _id: string }
         Returns: undefined
@@ -3112,6 +3116,23 @@ export type Database = {
         }
       }
       assign_digital_codes: { Args: { _order_id: string }; Returns: undefined }
+      begin_payment_refund: {
+        Args: {
+          _actor: string
+          _amount?: number
+          _order_id: string
+          _reason?: string
+        }
+        Returns: {
+          amount: number
+          attempt_id: string
+          currency: string
+          external_payment_id: string
+          provider: string
+          refund_id: string
+          remaining: number
+        }[]
+      }
       cancel_stale_pending_orders: {
         Args: { _minutes?: number }
         Returns: number
