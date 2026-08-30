@@ -56,7 +56,10 @@ export async function loadAfsPaymentConfig(_environment?: AfsEnvironment | null)
     baseUrl,
     widgetUrl: `${baseUrl}/v1/paymentWidgets.js`,
     paymentType: value(source, "payment_type") ?? "DB",
-    brands: value(source, "brands") ?? "VISA MASTER MAESTRO BENEFIT AMEX DINERS DISCOVER JCB UNIONPAY MADA",
+    // BENEFIT is intentionally NOT here: AFS confirmed Bahraini Benefit debit
+    // cards must go through the Benefit Payment Gateway only — routing them to
+    // AFS gets an automatic "Deny by ReD Shield" (100.400.142).
+    brands: value(source, "brands") ?? "VISA MASTER MAESTRO AMEX DINERS DISCOVER JCB UNIONPAY MADA",
     widgetLang: value(source, "widget_lang"),
     webhookKey: value(source, "webhook_decryption_key"),
   };
