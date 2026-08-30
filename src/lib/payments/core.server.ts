@@ -57,10 +57,20 @@ export async function getAttemptByCheckout(provider: string, checkoutId: string)
   return data;
 }
 
+// Explicit shopper/gateway cancellation codes (OPPWA 100.396.*).
+const CANCELLED = /^100\.396\.(101|103|104|106)/;
+
 export async function applyGatewayStatus(input: { attempt: any; order: PaymentOrder; status: GatewayStatus; source: string; background?: boolean }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const admin = supabaseAdmin as any;
   const { attempt, order, status } = input;
+
+  // Idempotency: an already-paid order (or already-succeeded attempt) is never
+  // finalized twice — no duplicate delivery and no duplicate notification.
+  if (order.payment_status === "succeeded" || attempt.state === "succeeded") {
+    return { success: true, pending: false, abandoned: false, cancelled: false, rateLimited: false, code: status.code, message: "" };
+  }
+
   const sameCurrency = (status.currency ?? "").toUpperCase() === order.currency.toUpperCase();
   const valid =
     status.state === "succeeded" &&
@@ -78,11 +88,12 @@ export async function applyGatewayStatus(input: { attempt: any; order: PaymentOr
       _payment_brand: status.brand,
       _source: input.source,
       _provider_code: status.code,
-      _sanitized_payload: { code: status.code, description: status.description },
+      _sanitized_payload: { code: status.code, description: status.description, last4: status.last4 ?? null, brand: status.brand ?? null },
     });
     if (error) throw new Error(error.message);
-    return { success: true, pending: false, abandoned: false, rateLimited: false, code: status.code, message: "" };
+    return { success: true, pending: false, abandoned: false, cancelled: false, rateLimited: false, code: status.code, message: "" };
   }
+
 
   // A terminal attempt must never be rewritten by a later duplicate status
   // call (e.g. the result page retrying seconds after a real decline and
