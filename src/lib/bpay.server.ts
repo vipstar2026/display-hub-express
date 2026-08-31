@@ -379,22 +379,23 @@ export async function bpayInquiry(input: { paymentId: string; trackId: string; a
     password: c.tranportalPassword,
     action: "8",
     transid: input.paymentId,
-    trackid: input.trackId,
+    trackId: input.trackId,
     amt: input.amount,
     currencycode: c.currencyCode,
     udf5: "TrackID",
   };
-  const trandata = await encryptTrandata(toQuery(fields), c.resourceKey);
+  const trandata = await encryptTrandata(JSON.stringify([fields]), c.resourceKey);
   const res = await fetch(c.endpoint, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ trandata, tranportalId: c.tranportalId }).toString(),
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify([{ id: c.tranportalId, trandata }]),
   });
   const text = (await res.text()).trim();
   if (!text || /^!?ERROR/i.test(text)) return null;
   try {
-    return await bpayParseNotification(text.startsWith("trandata=") ? text : `trandata=${text}`, c);
-  } catch {
     return await bpayParseNotification(text, c);
+  } catch {
+    return null;
   }
 }
+
