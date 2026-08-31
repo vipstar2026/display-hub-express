@@ -221,6 +221,9 @@ export async function bpayInitPayment(params: {
     langid: params.lang === "ar" ? "ARA" : "USA",
     udf1: params.orderId,
     udf2: params.email ? params.email.slice(0, 80) : "",
+    // Merchant reports should show the store domain next to the order number,
+    // not just a bare reference (e.g. "VIPSTAR.CC ORD-20260830-1GWL").
+    udf3: `VIPSTAR.CC ${params.trackId}`.slice(0, 80),
     responseURL: cfg.responseUrl,
     errorURL: cfg.errorUrl,
   };
