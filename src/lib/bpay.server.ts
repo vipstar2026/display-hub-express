@@ -144,8 +144,11 @@ export async function bpayIsEnabled(): Promise<boolean> {
       .limit(1)
       .maybeSingle();
     if (!data) return false;
-    await loadBpayConfig();
-    return true;
+    const cfg = await loadBpayConfig();
+    // The production storefront must never route real shoppers into BPG UAT.
+    // Until BENEFIT live credentials are installed, AFS remains the only card
+    // gateway and the checkout must advertise Visa/Mastercard only.
+    return !cfg.testMode;
   } catch {
     return false;
   }
