@@ -17,15 +17,16 @@ export type CardRoute = {
  * the card is stored.
  */
 /**
- * Known locally-issued Bahraini (BENEFIT) BIN prefixes. Checked first because
- * public BIN databases are rate limited and often mislabel local debit cards.
+ * Locally-issued BENEFIT (Bahrain domestic debit) BIN prefixes.
+ * Source: the BENEFIT domestic scheme range 5888 45-49 (ISO issuer range
+ * assigned to BENEFIT, Bahrain). Only prefixes we can attribute to the
+ * domestic scheme are listed — no Visa/Mastercard co-badged guesses, so an
+ * international Visa/Mastercard can never match this list.
  */
 const BH_LOCAL_BIN_PREFIXES = [
-  "588845", "588846", "588847", "588848", "588849", "588850",
-  "440795", "457997", "465002", "468686", "489317",
-  "519346", "521180", "530060", "535879", "540538", "542179",
-  "552211", "557080",
+  "588845", "588846", "588847", "588848", "588849",
 ];
+
 
 export const lookupCardBin = createServerFn({ method: "POST" })
   .inputValidator((input: { bin: string }) => {
@@ -50,9 +51,11 @@ export const lookupCardBin = createServerFn({ method: "POST" })
       const country = body.country?.alpha2?.toUpperCase() ?? null;
       const scheme = body.scheme?.toLowerCase() ?? null;
       const type = body.type?.toLowerCase() ?? null;
-      // Any card issued in Bahrain is treated as local (BENEFIT) unless it is
-      // an international-only scheme that BENEFIT cannot process.
-      const isLocalBahraini = country === "BH" && scheme !== "amex" && scheme !== "american express";
+      // Only a Bahrain-issued DEBIT card is treated as domestic (BENEFIT).
+      // Credit cards and Amex — even when issued in Bahrain — stay on AFS,
+      // and any card issued outside Bahrain always stays on AFS.
+      const isLocalBahraini =
+        country === "BH" && type === "debit" && scheme !== "amex" && scheme !== "american express";
       return { route: isLocalBahraini ? "benefit" : "afs", country, scheme, type, known: true };
     } catch {
       // Unknown BIN: fall back to the international gateway; the shopper can
