@@ -146,6 +146,24 @@ function CartPage() {
     queryFn: async () => (await supabase.from("payment_methods_public").select("*").order("sort_order")).data ?? [],
   });
 
+  // Independent gateway switches — mirror the pay page so the cart and the
+  // payment page agree on whether automatic card-type routing is active.
+  const { data: flags } = useQuery({
+    queryKey: ["payment-flags"],
+    queryFn: async () => {
+      const { data: rows } = await supabase.from("app_settings").select("key, value");
+      const map = Object.fromEntries((rows ?? []).map((r) => [r.key, r.value]));
+      return {
+        afsEnabled: map["afs_enabled"] !== false,
+        bpgEnabled: map["bpg_enabled"] !== false,
+        binRouting: map["bin_routing_enabled"] !== false,
+      };
+    },
+    staleTime: 60_000,
+  });
+
+  const binRoutingOn = !!flags?.binRouting && !!flags?.bpgEnabled;
+
   const { data: shippingRates } = useQuery({
     queryKey: ["shipping-rates-public"],
     queryFn: async () => (await supabase.from("shipping_rates").select("*, shipping_zones(name_ar,name_en,name_ur,name_bn)").eq("is_active", true).order("sort_order")).data ?? [],
