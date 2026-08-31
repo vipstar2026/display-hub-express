@@ -156,19 +156,38 @@ export async function bpayIsEnabled(): Promise<boolean> {
 export async function encryptTrandata(plain: string, resourceKey: string) {
   const { createCipheriv } = await import("crypto");
   const cipher = createCipheriv("aes-256-cbc", Buffer.from(resourceKey, "utf8"), Buffer.from(IV, "utf8"));
-  return Buffer.concat([cipher.update(plain, "utf8"), cipher.final()]).toString("hex");
+  // BPG manual §4.3: URL-encode the plain trandata before encrypting.
+  const payload = encodeURIComponent(plain);
+  return Buffer.concat([cipher.update(payload, "utf8"), cipher.final()]).toString("hex");
 }
 
 export async function decryptTrandata(hex: string, resourceKey: string) {
   const { createDecipheriv } = await import("crypto");
   const decipher = createDecipheriv("aes-256-cbc", Buffer.from(resourceKey, "utf8"), Buffer.from(IV, "utf8"));
-  return Buffer.concat([decipher.update(Buffer.from(hex, "hex")), decipher.final()]).toString("utf8");
+  const out = Buffer.concat([decipher.update(Buffer.from(hex, "hex")), decipher.final()]).toString("utf8");
+  // BPG manual §4.3: URL-decode after decrypting.
+  try {
+    return decodeURIComponent(out.replace(/\+/g, "%20"));
+  } catch {
+    return out;
+  }
 }
 
-function toQuery(fields: Record<string, string>) {
-  return Object.entries(fields)
-    .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
-    .join("&");
+/** Accepts BPG plain trandata either as a JSON array/object or a query string. */
+function parsePlainTrandata(plain: string): Record<string, string> {
+  const trimmed = plain.trim();
+  if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      const obj = Array.isArray(parsed) ? (parsed[0] ?? {}) : parsed;
+      const out: Record<string, string> = {};
+      for (const [k, v] of Object.entries(obj as Record<string, unknown>)) out[k] = String(v ?? "");
+      return out;
+    } catch {
+      /* fall through to query-string parsing */
+    }
+  }
+  return Object.fromEntries(new URLSearchParams(trimmed).entries());
 }
 
 /* --------------------------------------------------------------- payment */
@@ -193,41 +212,53 @@ export async function bpayInitPayment(params: {
   const currencyCode = CURRENCY_CODES[currency] ?? cfg.currencyCode;
 
   const fields: Record<string, string> = {
-    id: cfg.tranportalId,
-    password: cfg.tranportalPassword,
-    action: "1", // purchase
-    langid: params.lang === "ar" ? "ARA" : "USA",
-    currencycode: currencyCode,
     amt: bpayFormatAmount(params.amount, currency),
-    responseURL: cfg.responseUrl,
-    errorURL: cfg.errorUrl,
-    trackid: params.trackId,
+    action: "1", // purchase
+    password: cfg.tranportalPassword,
+    id: cfg.tranportalId,
+    currencycode: currencyCode,
+    trackId: params.trackId,
+    langid: params.lang === "ar" ? "ARA" : "USA",
     udf1: params.orderId,
-  };
-  if (params.email) fields["udf2"] = params.email.slice(0, 80);
-
-  const trandata = await encryptTrandata(toQuery(fields), cfg.resourceKey);
-  const body = new URLSearchParams({
-    trandata,
-    tranportalId: cfg.tranportalId,
+    udf2: params.email ? params.email.slice(0, 80) : "",
     responseURL: cfg.responseUrl,
     errorURL: cfg.errorUrl,
-  });
+  };
+
+  const trandata = await encryptTrandata(JSON.stringify([fields]), cfg.resourceKey);
 
   const res = await fetch(cfg.endpoint, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: body.toString(),
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify([{ id: cfg.tranportalId, trandata }]),
   });
   const text = (await res.text()).trim();
+  if (!text) throw new Error(`benefit_init_failed:${res.status}`);
 
-  // Success: "<paymentId>:<paymentPageUrl>". Failure: "!ERROR!..." / "ERROR:..."
-  if (!text || /^!?ERROR/i.test(text)) {
-    throw new Error(`benefit_init_failed:${text.slice(0, 200) || res.status}`);
+  // Expected: [{"status":"1","result":"<paymentId>:<paymentPageUrl>"}]
+  let status = "";
+  let result = "";
+  let error = "";
+  let errorText = "";
+  try {
+    const parsed = JSON.parse(text);
+    const row = (Array.isArray(parsed) ? parsed[0] : parsed) as Record<string, unknown>;
+    status = String(row?.["status"] ?? "");
+    result = String(row?.["result"] ?? "");
+    error = String(row?.["error"] ?? "");
+    errorText = String(row?.["errorText"] ?? row?.["errortext"] ?? "");
+  } catch {
+    // Legacy plain-text reply: "<paymentId>:<paymentPageUrl>"
+    result = text;
   }
-  const sep = text.indexOf(":");
-  const paymentId = sep > 0 ? text.slice(0, sep) : "";
-  const url = sep > 0 ? text.slice(sep + 1) : "";
+
+  if ((status && status !== "1") || error || /^!?ERROR/i.test(result) || !result) {
+    throw new Error(`benefit_init_failed:${(error || errorText || result || text).slice(0, 200)}`);
+  }
+
+  const sep = result.indexOf(":");
+  const paymentId = sep > 0 ? result.slice(0, sep) : "";
+  const url = sep > 0 ? result.slice(sep + 1) : "";
   if (!paymentId || !/^https?:\/\//i.test(url)) {
     throw new Error(`benefit_init_unexpected_response:${text.slice(0, 200)}`);
   }
@@ -236,6 +267,7 @@ export async function bpayInitPayment(params: {
     paymentUrl: `${url}${url.includes("?") ? "&" : "?"}PaymentID=${encodeURIComponent(paymentId)}`,
   };
 }
+
 
 export interface BpayNotification {
   paymentId: string | null;
@@ -255,22 +287,47 @@ export interface BpayNotification {
 /** Parses a BPG response/error post body (encrypted `trandata` or plain fields). */
 export async function bpayParseNotification(raw: string, cfg?: BpayConfig): Promise<BpayNotification> {
   const c = cfg ?? (await loadBpayConfig());
-  const outer = new URLSearchParams(raw);
-  let params = outer;
-  const trandata = outer.get("trandata");
-  if (trandata) {
-    const decrypted = await decryptTrandata(trandata.trim(), c.resourceKey);
-    params = new URLSearchParams(decrypted);
+  const trimmed = raw.trim();
+
+  let fields: Record<string, string>;
+  let trandata: string | null = null;
+
+  if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+    // JSON envelope: [{ "trandata": "<hex>" }] or already-plain JSON fields
+    try {
+      const parsed = JSON.parse(trimmed);
+      const row = (Array.isArray(parsed) ? parsed[0] : parsed) as Record<string, unknown>;
+      const t = row?.["trandata"];
+      if (typeof t === "string" && t.trim() !== "") trandata = t.trim();
+      else fields = Object.fromEntries(Object.entries(row ?? {}).map(([k, v]) => [k, String(v ?? "")]));
+    } catch {
+      /* handled below */
+    }
   }
+  if (!trandata) {
+    const outer = new URLSearchParams(trimmed);
+    const t = outer.get("trandata");
+    if (t) trandata = t.trim();
+    else if (/^[0-9a-fA-F]+$/.test(trimmed) && trimmed.length % 32 === 0) trandata = trimmed;
+    else fields ??= Object.fromEntries(outer.entries());
+  }
+  if (trandata) {
+    fields = parsePlainTrandata(await decryptTrandata(trandata, c.resourceKey));
+  }
+  fields ??= {};
+
+  const lower: Record<string, string> = {};
+  for (const [k, v] of Object.entries(fields)) lower[k.toLowerCase()] = v;
+
   const get = (...keys: string[]) => {
     for (const k of keys) {
-      const v = params.get(k) ?? params.get(k.toLowerCase()) ?? params.get(k.toUpperCase());
+      const v = lower[k.toLowerCase()];
       if (v != null && v !== "") return v;
     }
     return null;
   };
   return {
-    paymentId: get("paymentid", "PaymentID"),
+    paymentId: get("paymentid"),
     trackId: get("trackid"),
     tranId: get("tranid"),
     result: (get("result") ?? "").toUpperCase(),
@@ -279,11 +336,12 @@ export async function bpayParseNotification(raw: string, cfg?: BpayConfig): Prom
     ref: get("ref"),
     cardType: get("cardtype", "card"),
     orderId: get("udf1"),
-    error: get("Error", "error"),
-    errorText: get("ErrorText", "errortext"),
-    raw: Object.fromEntries(params.entries()),
+    error: get("error"),
+    errorText: get("errortext"),
+    raw: fields,
   };
 }
+
 
 export function bpayIsSuccessResult(result: string) {
   return result.toUpperCase() === "CAPTURED";
@@ -321,22 +379,23 @@ export async function bpayInquiry(input: { paymentId: string; trackId: string; a
     password: c.tranportalPassword,
     action: "8",
     transid: input.paymentId,
-    trackid: input.trackId,
+    trackId: input.trackId,
     amt: input.amount,
     currencycode: c.currencyCode,
     udf5: "TrackID",
   };
-  const trandata = await encryptTrandata(toQuery(fields), c.resourceKey);
+  const trandata = await encryptTrandata(JSON.stringify([fields]), c.resourceKey);
   const res = await fetch(c.endpoint, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ trandata, tranportalId: c.tranportalId }).toString(),
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify([{ id: c.tranportalId, trandata }]),
   });
   const text = (await res.text()).trim();
   if (!text || /^!?ERROR/i.test(text)) return null;
   try {
-    return await bpayParseNotification(text.startsWith("trandata=") ? text : `trandata=${text}`, c);
-  } catch {
     return await bpayParseNotification(text, c);
+  } catch {
+    return null;
   }
 }
+
