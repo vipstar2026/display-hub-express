@@ -208,6 +208,35 @@ function CartPage() {
   const nameOf = (m: Record<string, unknown>) => localizedName(m, "name", lang);
   const instrOf = (m: Record<string, unknown>) => localizedName(m, "instructions", lang);
 
+  // When automatic card-type routing is active, show ONE unified card tile
+  // (the AFS gateway) and hide the separate BENEFIT gateway tile. The first
+  // 6-8 digits are checked on the payment page, which routes Bahraini debit
+  // cards to BENEFIT and everything else to AFS — so the shopper never has
+  // to pick between two card gateways.
+  const visibleMethods = useMemo(() => {
+    const all = methods ?? [];
+    if (!binRoutingOn) return all;
+    const cardGateways = all.filter((m) => m.is_gateway && m.type === "card");
+    const afsCard = cardGateways.find((m) => m.gateway_provider === "afs" || m.code === "afs");
+    return all.filter((m) => {
+      if (m.is_gateway && m.type === "card") return m.id === afsCard?.id;
+      return true;
+    });
+  }, [methods, binRoutingOn]);
+
+  const cardLabel = (m: Record<string, unknown>) => {
+    if (binRoutingOn && m.is_gateway && m.type === "card") {
+      return lang === "ar"
+        ? "بطاقة ائتمانية / خصم"
+        : lang === "ur"
+          ? "کریڈٹ / ڈیبٹ کارڈ"
+          : lang === "bn"
+            ? "ক্রেডিট / ডেবিট কার্ড"
+            : "Credit / Debit Card";
+    }
+    return nameOf(m);
+  };
+
   const applyCoupon = async () => {
     if (!couponInput.trim()) return;
     setApplyingCoupon(true);
