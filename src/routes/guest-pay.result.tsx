@@ -17,6 +17,8 @@ const searchSchema = z.object({
   t: z.string().optional(),
   id: z.string().optional(),
   resourcePath: z.string().optional(),
+  provider: z.string().optional(),
+  cancel: z.string().optional(),
 });
 
 export const Route = createFileRoute("/guest-pay/result")({
@@ -32,22 +34,41 @@ export const Route = createFileRoute("/guest-pay/result")({
   }),
 });
 
+/** Confirmation window: poll every 6s, give up after 15 minutes. */
+const POLL_MS = 6_000;
+const MAX_WAIT_MS = 15 * 60 * 1000;
+
 function GuestPayResult() {
   const search = Route.useSearch();
   const { lang } = useI18n();
   const nav = useNavigate();
   const confirm = useServerFn(confirmGuestAfsPayment);
+  const readState = useServerFn(getOrderPaymentState);
 
   const checkoutId = (search.resourcePath ? search.resourcePath.split("/")[3] : undefined) ?? search.id;
+  const startedAt = useRef(Date.now());
+  const [expired, setExpired] = useState(false);
   const txt = (ar: string, en: string, ur: string, bn: string) => (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? bn : en);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["guest-afs-result", search.order, checkoutId],
-    enabled: !!search.order && !!search.t && !!checkoutId,
+  const { data, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ["guest-pay-result", search.order, checkoutId],
+    enabled: !!search.order,
     retry: false,
-    refetchInterval: (query) => query.state.data?.pending ? 3_000 : false,
+    refetchOnWindowFocus: true,
+    refetchInterval: (query) => {
+      const result = query.state.data;
+      if (!result?.pending) return false;
+      if (Date.now() - startedAt.current > MAX_WAIT_MS) return false;
+      return POLL_MS;
+    },
     refetchIntervalInBackground: true,
-    queryFn: () => confirm({ data: { order_id: search.order!, token: search.t!, checkout_id: checkoutId!, resource_path: search.resourcePath } }),
+    queryFn: async () => {
+      // Database first — a webhook may already have settled this order
+      // (especially for BENEFIT, which has no client-side checkout to confirm).
+      const dbState = await readState({ data: { order_id: search.order! } });
+      if (dbState.success || dbState.cancelled || !checkoutId || !search.t) return dbState;
+      return confirm({ data: { order_id: search.order!, token: search.t!, checkout_id: checkoutId, resource_path: search.resourcePath } });
+    },
   });
 
   useEffect(() => {
