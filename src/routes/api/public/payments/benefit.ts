@@ -51,9 +51,26 @@ export const Route = createFileRoute("/api/public/payments/benefit")({
         }
 
         // 2 — the exact contract BPG expects from the response page.
-        const target = orderId
-          ? `${BASE}/pay/result?order=${encodeURIComponent(orderId)}&provider=benefit`
-          : `${BASE}/pay/result?provider=benefit`;
+        // Detect guest orders so the browser lands on the guest result page
+        // (which uses the token, not a Supabase session, for confirmation).
+        let target = `${BASE}/pay/result?provider=benefit`;
+        if (orderId) {
+          try {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            const { data: ord } = await (supabaseAdmin as any)
+              .from("orders")
+              .select("guest_token")
+              .eq("id", orderId)
+              .maybeSingle();
+            if (ord?.guest_token) {
+              target = `${BASE}/guest-pay/result?order=${encodeURIComponent(orderId)}&t=${encodeURIComponent(ord.guest_token)}&provider=benefit`;
+            } else {
+              target = `${BASE}/pay/result?order=${encodeURIComponent(orderId)}&provider=benefit`;
+            }
+          } catch {
+            target = `${BASE}/pay/result?order=${encodeURIComponent(orderId)}&provider=benefit`;
+          }
+        }
         return new Response(`REDIRECT=${target}`, {
           status: 200,
           headers: { "Content-Type": "text/plain; charset=utf-8" },
