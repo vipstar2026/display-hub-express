@@ -146,6 +146,24 @@ function CartPage() {
     queryFn: async () => (await supabase.from("payment_methods_public").select("*").order("sort_order")).data ?? [],
   });
 
+  // Independent gateway switches — mirror the pay page so the cart and the
+  // payment page agree on whether automatic card-type routing is active.
+  const { data: flags } = useQuery({
+    queryKey: ["payment-flags"],
+    queryFn: async () => {
+      const { data: rows } = await supabase.from("app_settings").select("key, value");
+      const map = Object.fromEntries((rows ?? []).map((r) => [r.key, r.value]));
+      return {
+        afsEnabled: map["afs_enabled"] !== false,
+        bpgEnabled: map["bpg_enabled"] !== false,
+        binRouting: map["bin_routing_enabled"] !== false,
+      };
+    },
+    staleTime: 60_000,
+  });
+
+  const binRoutingOn = !!flags?.binRouting && !!flags?.bpgEnabled;
+
   const { data: shippingRates } = useQuery({
     queryKey: ["shipping-rates-public"],
     queryFn: async () => (await supabase.from("shipping_rates").select("*, shipping_zones(name_ar,name_en,name_ur,name_bn)").eq("is_active", true).order("sort_order")).data ?? [],
@@ -189,6 +207,35 @@ function CartPage() {
 
   const nameOf = (m: Record<string, unknown>) => localizedName(m, "name", lang);
   const instrOf = (m: Record<string, unknown>) => localizedName(m, "instructions", lang);
+
+  // When automatic card-type routing is active, show ONE unified card tile
+  // (the AFS gateway) and hide the separate BENEFIT gateway tile. The first
+  // 6-8 digits are checked on the payment page, which routes Bahraini debit
+  // cards to BENEFIT and everything else to AFS — so the shopper never has
+  // to pick between two card gateways.
+  const visibleMethods = useMemo(() => {
+    const all = methods ?? [];
+    if (!binRoutingOn) return all;
+    const cardGateways = all.filter((m) => m.is_gateway && m.type === "card");
+    const afsCard = cardGateways.find((m) => m.gateway_provider === "afs" || m.code === "afs");
+    return all.filter((m) => {
+      if (m.is_gateway && m.type === "card") return m.id === afsCard?.id;
+      return true;
+    });
+  }, [methods, binRoutingOn]);
+
+  const cardLabel = (m: Record<string, unknown>) => {
+    if (binRoutingOn && m.is_gateway && m.type === "card") {
+      return lang === "ar"
+        ? "بطاقة ائتمانية / خصم"
+        : lang === "ur"
+          ? "کریڈٹ / ڈیبٹ کارڈ"
+          : lang === "bn"
+            ? "ক্রেডিট / ডেবিট কার্ড"
+            : "Credit / Debit Card";
+    }
+    return nameOf(m);
+  };
 
   const applyCoupon = async () => {
     if (!couponInput.trim()) return;
@@ -564,7 +611,7 @@ function CartPage() {
                   <p className="text-sm text-muted-foreground">{t("cart.no_methods")}</p>
                 )}
                 <div className="grid gap-2 sm:grid-cols-2">
-                  {(methods ?? []).filter((m) => !(isGuest && m.requires_proof)).map((m) => {
+                  {visibleMethods.filter((m) => !(isGuest && m.requires_proof)).map((m) => {
 
                     const Icon = ICONS[m.icon ?? ""] ?? CreditCard;
                     const active = m.id === selectedMethod;
@@ -581,7 +628,7 @@ function CartPage() {
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="flex-1">
-                          <div className="text-sm font-medium">{nameOf(m)}</div>
+                          <div className="text-sm font-medium">{cardLabel(m)}</div>
                           {Number(m.fee_amount) > 0 || Number(m.fee_percent) > 0 ? (
                             <div className="text-[11px] text-muted-foreground">
                               +{formatPrice(Number(m.fee_amount) + (subtotal * Number(m.fee_percent)) / 100)}
