@@ -161,7 +161,21 @@ function PayPage() {
           <ShieldCheck className="h-4 w-4 text-primary" /> {secure}
         </p>
 
+        {routingOn && !route && (
+          <div className="mb-6">
+            <CardRouteGate
+              onRoute={(r) => {
+                setRoute(r);
+                if (r === "benefit") void goBenefit();
+              }}
+              showBenefitOption={!!flags?.bpgVisible}
+              onPickOther={() => nav({ to: "/cart" })}
+            />
+          </div>
+        )}
+
         {order && (
+
           <div className="mb-6 rounded-xl border border-primary/20 bg-card p-5">
             <div className="mb-3 flex items-center justify-between gap-2">
               <h2 className="flex items-center gap-2 font-display text-base font-bold">
