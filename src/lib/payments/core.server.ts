@@ -102,7 +102,7 @@ export async function applyGatewayStatus(input: { attempt: any; order: PaymentOr
   const cancelled = CANCELLED.test(status.code);
 
   if (attempt.state === "failed" || attempt.state === "succeeded" || attempt.state === "cancelled") {
-    return { success: attempt.state === "succeeded", pending: false, abandoned: false, cancelled: attempt.state === "cancelled", rateLimited: false, code: status.code, message: attempt.failure_reason ?? "" };
+    return { success: attempt.state === "succeeded", pending: false, abandoned: false, cancelled: attempt.state === "cancelled", rateLimited: false, code: attempt.failure_code ?? status.code, message: attempt.failure_reason ?? "" };
   }
 
   const integrityFailure = status.state === "succeeded";
