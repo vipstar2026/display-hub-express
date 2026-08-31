@@ -86,7 +86,7 @@ function PayPage() {
     setBenefitBusy(true);
     setBenefitError(null);
     try {
-      const res = await startBenefit({ data: { order_id: id } });
+      const res = await startBenefit({ data: { order_id: id, lang } });
       if (res.redirectUrl) {
         // Gateways block iframes — always leave in the top-level window.
         window.top?.location.assign(res.redirectUrl);
