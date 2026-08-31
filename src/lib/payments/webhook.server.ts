@@ -120,9 +120,18 @@ export async function processAfsNotification(input: {
 
 /* -------------------------------------------------------------- BENEFIT */
 
+/**
+ * BENEFIT (classic BPG) payment notification.
+ *
+ * Authenticity comes from the AES `trandata` envelope: only BPG holds the
+ * Terminal Resource Key, so a body that decrypts correctly is genuine. On top
+ * of that, a CAPTURED result is re-confirmed with a transaction inquiry
+ * (action = 8) before the order is finalized.
+ */
 export async function processBenefitNotification(input: { raw: string; signature: string | null }) {
   const { logBenefit } = await import("./webhook-log.server");
-  const { loadBpayConfig, bpayVerifySignature, bpayGetStatus, bpayIsSuccess, bpayIsPending } = await import("@/lib/bpay.server");
+  const { loadBpayConfig, bpayParseNotification, bpayInquiry, bpayToGatewayStatus, bpayFormatAmount } =
+    await import("@/lib/bpay.server");
 
   let cfg;
   try {
@@ -132,24 +141,16 @@ export async function processBenefitNotification(input: { raw: string; signature
     return;
   }
 
-  if (cfg.secretKey) {
-    const ok = await bpayVerifySignature(input.raw, input.signature, cfg.secretKey);
-    if (!ok) {
-      await logBenefit("invalid_signature", {});
-      return;
-    }
-  }
-
-  let payload: Record<string, unknown> = {};
+  let note;
   try {
-    payload = JSON.parse(input.raw) as Record<string, unknown>;
-  } catch {
-    payload = Object.fromEntries(new URLSearchParams(input.raw));
+    note = await bpayParseNotification(input.raw, cfg);
+  } catch (e) {
+    await logBenefit("decryption_failed", { message: (e as Error).message });
+    return;
   }
 
-  const checkoutId =
-    (payload["id"] as string) ?? (payload["checkoutId"] as string) ?? (payload["paymentId"] as string) ?? null;
-  const orderNumber = (payload["merchantTransactionId"] as string) ?? (payload["trackId"] as string) ?? null;
+  const checkoutId = note.paymentId;
+  const orderNumber = note.trackId;
   if (!checkoutId) {
     await logBenefit("no_checkout_reference", { orderNumber });
     return;
@@ -163,28 +164,37 @@ export async function processBenefitNotification(input: { raw: string; signature
     await logBenefit("attempt_not_found", { checkoutId, orderNumber });
     return;
   }
-  await logAttemptNotification(attempt.id, { checkoutId, orderNumber });
+  await logAttemptNotification(attempt.id, { checkoutId, orderNumber, result: note.result });
 
   const order = await loadOrderForPayment(attempt.order_id);
   if (orderNumber && order.order_number !== orderNumber) {
     await logBenefit("reference_mismatch", { checkoutId, orderNumber });
     return;
   }
-  const status = await bpayGetStatus(checkoutId, cfg);
-  const code = status.result?.code;
+
+  let confirmed = note;
+  if (note.result === "CAPTURED") {
+    try {
+      const inquiry = await bpayInquiry(
+        {
+          paymentId: note.tranId ?? checkoutId,
+          trackId: order.order_number,
+          amount: bpayFormatAmount(order.total, order.currency),
+        },
+        cfg,
+      );
+      if (inquiry) confirmed = inquiry;
+      else await logBenefit("inquiry_unavailable", { checkoutId });
+    } catch (e) {
+      await logBenefit("inquiry_failed", { checkoutId, message: (e as Error).message });
+    }
+  }
+
   await applyGatewayStatus({
     attempt,
     order,
-    status: {
-      externalPaymentId: status.id ?? null,
-      merchantReference: status.merchantTransactionId ?? null,
-      amount: status.amount ?? null,
-      currency: status.currency ?? null,
-      brand: status.paymentBrand ?? "BENEFIT",
-      code: code ?? "",
-      description: status.result?.description ?? "",
-      state: bpayIsSuccess(code) ? "succeeded" : bpayIsPending(code) ? "processing" : code ? "failed" : "unknown",
-    },
+    status: bpayToGatewayStatus(confirmed, order.currency),
     source: "webhook",
   });
 }
+
