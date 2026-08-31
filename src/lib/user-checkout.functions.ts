@@ -100,7 +100,11 @@ export const placeUserOrder = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!method || !method.is_active) bad("payment_method_unavailable");
     if (method.requires_proof && !data.payment_proof_url) bad("payment_proof_required");
-    const fee = Number(method.fee_amount ?? 0) + (subtotal * Number(method.fee_percent ?? 0)) / 100;
+    // Gateways charge with 2 decimals, so every derived amount is rounded to
+    // 0.01 here — otherwise a percentage fee/coupon/VAT leaves a stray fils and
+    // the card checkout refuses to start.
+    const round2 = (n: number) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+    const fee = round2(Number(method.fee_amount ?? 0) + (subtotal * Number(method.fee_percent ?? 0)) / 100);
 
     // Shipping
     let shippingCost = 0;
@@ -166,15 +170,16 @@ export const placeUserOrder = createServerFn({ method: "POST" })
       }
     }
 
-    const beforeTax = Math.max(0, subtotal + shippingCost + fee - discount);
+    discount = round2(discount);
+    const beforeTax = round2(Math.max(0, subtotal + shippingCost + fee - discount));
     const vat = Number(settings?.vat_percent ?? 0);
     const tax =
       vat > 0
         ? settings?.prices_include_vat
-          ? Number(((beforeTax * vat) / (100 + vat)).toFixed(3))
-          : Number(((beforeTax * vat) / 100).toFixed(3))
+          ? round2((beforeTax * vat) / (100 + vat))
+          : round2((beforeTax * vat) / 100)
         : 0;
-    const total = settings?.prices_include_vat ? beforeTax : Number((beforeTax + tax).toFixed(3));
+    const total = settings?.prices_include_vat ? beforeTax : round2(beforeTax + tax);
 
     const { data: profile } = await admin
       .from("profiles")
