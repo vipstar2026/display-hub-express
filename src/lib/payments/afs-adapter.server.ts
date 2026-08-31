@@ -47,8 +47,11 @@ export async function loadAfsPaymentConfig(_environment?: AfsEnvironment | null)
     .maybeSingle();
   if (!data) throw new Error("payment_method_unavailable");
   const source = { ...((data.config ?? {}) as Record<string, unknown>), ...((data.credentials ?? {}) as Record<string, unknown>) };
-  const entityId = value(source, "live_entity_id") ?? value(source, "entity_id");
-  const token = value(source, "live_access_token") ?? value(source, "access_token");
+  // Secrets from the encrypted env store (add_secret) take priority over DB credentials.
+  const envEntity = process.env['AFS_ENTITY_ID_LIVE'];
+  const envToken = process.env['AFS_ACCESS_TOKEN_LIVE'];
+  const entityId = (envEntity && envEntity.trim()) || value(source, "live_entity_id") || value(source, "entity_id");
+  const token = (envToken && envToken.trim()) || value(source, "live_access_token") || value(source, "access_token");
   if (!entityId || !token) throw new Error("gateway_not_configured");
   const baseUrl = "https://eu-prod.oppwa.com";
   return {
@@ -62,7 +65,7 @@ export async function loadAfsPaymentConfig(_environment?: AfsEnvironment | null)
     // AFS gets an automatic "Deny by ReD Shield" (100.400.142).
     brands: value(source, "brands") ?? "VISA MASTER MAESTRO AMEX DINERS DISCOVER JCB UNIONPAY MADA",
     widgetLang: value(source, "widget_lang"),
-    webhookKey: value(source, "webhook_decryption_key"),
+    webhookKey: process.env['AFS_WEBHOOK_SECRET_LIVE'] || value(source, "webhook_decryption_key"),
   };
 }
 
