@@ -108,7 +108,11 @@ export const placeGuestOrder = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!method || !method.is_active) bad("payment_method_unavailable");
     if (method.requires_proof) bad("payment_method_requires_account");
-    const fee = Number(method.fee_amount ?? 0) + (subtotal * Number(method.fee_percent ?? 0)) / 100;
+    // Gateways charge with 2 decimals, so every derived amount is rounded to
+    // 0.01 here — otherwise a percentage fee/coupon/VAT leaves a stray fils and
+    // the card checkout refuses to start.
+    const round2 = (n: number) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+    const fee = round2(Number(method.fee_amount ?? 0) + (subtotal * Number(method.fee_percent ?? 0)) / 100);
 
     // Shipping
     let shippingCost = 0;
