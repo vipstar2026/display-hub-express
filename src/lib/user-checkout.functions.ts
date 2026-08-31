@@ -170,15 +170,16 @@ export const placeUserOrder = createServerFn({ method: "POST" })
       }
     }
 
-    const beforeTax = Math.max(0, subtotal + shippingCost + fee - discount);
+    discount = round2(discount);
+    const beforeTax = round2(Math.max(0, subtotal + shippingCost + fee - discount));
     const vat = Number(settings?.vat_percent ?? 0);
     const tax =
       vat > 0
         ? settings?.prices_include_vat
-          ? Number(((beforeTax * vat) / (100 + vat)).toFixed(3))
-          : Number(((beforeTax * vat) / 100).toFixed(3))
+          ? round2((beforeTax * vat) / (100 + vat))
+          : round2((beforeTax * vat) / 100)
         : 0;
-    const total = settings?.prices_include_vat ? beforeTax : Number((beforeTax + tax).toFixed(3));
+    const total = settings?.prices_include_vat ? beforeTax : round2(beforeTax + tax);
 
     const { data: profile } = await admin
       .from("profiles")
