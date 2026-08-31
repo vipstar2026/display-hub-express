@@ -62,10 +62,22 @@ export function payFailureReason(lang: string, code?: string | null): string | n
       "ব্যাংকের নিরাপত্তা যাচাই পেমেন্টটি বাতিল করেছে। Benefit ডেবিট কার্ড এই গেটওয়েতে সমর্থিত নয় — অনুগ্রহ করে Visa/Mastercard বা অন্য পদ্ধতি ব্যবহার করুন।",
     );
   }
+  // Technical failures inside the 3-D Secure / bank authentication system.
+  // These are NOT a wrong OTP — telling the customer to re-enter the code is
+  // misleading, so they must be handled before the OTP branch below.
+  if (/^(100\.390\.10[1-7]|100\.390\.11[1-5]|100\.395\.502)/.test(code)) {
+    return L(
+      "حدث خلل تقني في نظام التحقق الآمن (3-D Secure) لدى البنك ولم يتم خصم أي مبلغ. أعد المحاولة بعد قليل أو استخدم بطاقة أخرى.",
+      "A technical error occurred in the bank's 3-D Secure system and you were not charged. Please try again shortly or use a different card.",
+      "بینک کے 3-D Secure سسٹم میں تکنیکی خرابی ہوئی اور کوئی رقم نہیں کٹی۔ تھوڑی دیر بعد دوبارہ کوشش کریں یا دوسرا کارڈ استعمال کریں۔",
+      "ব্যাংকের 3-D Secure সিস্টেমে কারিগরি ত্রুটি হয়েছে, কোনো অর্থ কাটা হয়নি। কিছুক্ষণ পরে আবার চেষ্টা করুন বা অন্য কার্ড ব্যবহার করুন।",
+    );
+  }
   // 3-D Secure / OTP failures. Must run BEFORE the generic issuer-decline
   // branch — 100.38x/100.39x codes also start with "100." and would otherwise
   // be misreported as a balance/limit decline instead of an OTP retry.
   if (/^(000\.400\.0|100\.390|100\.380|100\.395|100\.396)/.test(code)) {
+
     return L(
       "فشل التحقق الثلاثي (رمز OTP). أعد المحاولة وأدخل الرمز المرسل إلى هاتفك بشكل صحيح.",
       "3-D Secure (OTP) verification failed. Try again and enter the code sent to your phone correctly.",
