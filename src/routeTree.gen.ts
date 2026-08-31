@@ -78,6 +78,7 @@ import { Route as AuthenticatedPayIdRouteImport } from './routes/_authenticated/
 import { Route as ApiPublicAfsReconcileRouteImport } from './routes/api/public/afs-reconcile'
 import { Route as ApiPublicBenefitReconcileRouteImport } from './routes/api/public/benefit-reconcile'
 import { Route as ApiPublicSendEmailsRouteImport } from './routes/api/public/send-emails'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
 import { Route as AuthenticatedAdminCategoriesSlugRouteImport } from './routes/_authenticated/admin.categories.$slug'
@@ -462,6 +463,11 @@ const ApiPublicSendEmailsRoute = ApiPublicSendEmailsRouteImport.update({
   path: '/api/public/send-emails',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -593,6 +599,7 @@ export interface FileRoutesByFullPath {
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/api/public/benefit-reconcile': typeof ApiPublicBenefitReconcileRoute
   '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
@@ -673,6 +680,7 @@ export interface FileRoutesByTo {
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/api/public/benefit-reconcile': typeof ApiPublicBenefitReconcileRoute
   '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
@@ -756,6 +764,7 @@ export interface FileRoutesById {
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/api/public/benefit-reconcile': typeof ApiPublicBenefitReconcileRoute
   '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
@@ -839,6 +848,7 @@ export interface FileRouteTypes {
     | '/api/public/afs-reconcile'
     | '/api/public/benefit-reconcile'
     | '/api/public/send-emails'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/admin/'
     | '/admin/categories/$slug'
@@ -919,6 +929,7 @@ export interface FileRouteTypes {
     | '/api/public/afs-reconcile'
     | '/api/public/benefit-reconcile'
     | '/api/public/send-emails'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/admin'
     | '/admin/categories/$slug'
@@ -1001,6 +1012,7 @@ export interface FileRouteTypes {
     | '/api/public/afs-reconcile'
     | '/api/public/benefit-reconcile'
     | '/api/public/send-emails'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/categories/$slug'
@@ -1049,6 +1061,7 @@ export interface RootRouteChildren {
   ApiPublicAfsReconcileRoute: typeof ApiPublicAfsReconcileRoute
   ApiPublicBenefitReconcileRoute: typeof ApiPublicBenefitReconcileRoute
   ApiPublicSendEmailsRoute: typeof ApiPublicSendEmailsRoute
+  LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicPaymentsAfsRoute: typeof ApiPublicPaymentsAfsRoute
   ApiPublicPaymentsBenefitRoute: typeof ApiPublicPaymentsBenefitRoute
@@ -1544,6 +1557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSendEmailsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -1764,6 +1784,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAfsReconcileRoute: ApiPublicAfsReconcileRoute,
   ApiPublicBenefitReconcileRoute: ApiPublicBenefitReconcileRoute,
   ApiPublicSendEmailsRoute: ApiPublicSendEmailsRoute,
+  LovableEmailEventsRoute: LovableEmailEventsRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicPaymentsAfsRoute: ApiPublicPaymentsAfsRoute,
   ApiPublicPaymentsBenefitRoute: ApiPublicPaymentsBenefitRoute,
