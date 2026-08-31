@@ -243,3 +243,46 @@ export const confirmGuestAfsPayment = createServerFn({ method: "POST" })
     const { confirmAfsCheckout } = await import("@/lib/payments/checkout.server");
     return confirmAfsCheckout({ orderId: order.id, checkoutId: data.checkout_id, resourcePath: data.resource_path, source: "customer_return" });
   });
+
+/**
+ * Starts a BENEFIT Payment Gateway hosted payment for a guest order
+ * (token-authenticated, no Supabase session required).
+ */
+export const createGuestBpayCheckout = createServerFn({ method: "POST" })
+  .inputValidator((input: { order_id: string; token: string; attempt_key?: string; lang?: string }) => input)
+  .handler(async ({ data }) => {
+    const { order } = await loadGuestOrder(data.order_id, data.token);
+    if (order.payment_status === "succeeded") bad("order_already_paid");
+
+    const { bpayInitPayment, loadBpayConfig, bpayFormatAmount } = await import("@/lib/bpay.server");
+    const cfg = await loadBpayConfig();
+
+    const currency = (order.currency || cfg.currency || "BHD").toUpperCase();
+    const init = await bpayInitPayment({
+      amount: Number(order.total),
+      currency,
+      trackId: order.order_number,
+      orderId: order.id,
+      lang: data.lang,
+      email: order.buyer_email,
+      cfg,
+    });
+
+    const { createPaymentAttempt, attachGatewayCheckout } = await import("@/lib/payments/core.server");
+    const attempt = await createPaymentAttempt({
+      order: { ...order, total: Number(order.total), status: "pending" },
+      provider: "benefit",
+      kind: "gateway",
+      attemptKey: data.attempt_key ?? `guest-benefit:${order.id}:${crypto.randomUUID()}`,
+      returnUrl: cfg.responseUrl,
+    });
+    await attachGatewayCheckout(attempt.id, init.paymentId);
+
+    return {
+      paymentId: init.paymentId,
+      redirectUrl: init.paymentUrl,
+      amount: bpayFormatAmount(Number(order.total), currency),
+      currency,
+      testMode: cfg.testMode,
+    };
+  });
