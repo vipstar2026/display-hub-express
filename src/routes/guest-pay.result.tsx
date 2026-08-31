@@ -72,11 +72,12 @@ function GuestPayResult() {
   });
 
   useEffect(() => {
-    if (data?.success && search.order && search.t) {
-      const timer = setTimeout(() => nav({ to: "/guest-order/$id", params: { id: search.order! }, search: { t: search.t! } }), 1200);
-      return () => clearTimeout(timer);
-    }
-  }, [data?.success, search.order, search.t, nav]);
+    if (!data?.pending) return;
+    const timer = setInterval(() => {
+      if (Date.now() - startedAt.current > MAX_WAIT_MS) setExpired(true);
+    }, 5_000);
+    return () => clearInterval(timer);
+  }, [data?.pending]);
 
   return (
     <div className="min-h-screen bg-background">
