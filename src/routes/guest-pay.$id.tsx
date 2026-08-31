@@ -47,7 +47,7 @@ function GuestPayPage() {
 
   const L = (ar: string, en: string, ur: string, bn: string) => (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? bn : en);
 
-  const { data: order } = useQuery({
+  const { data: order, error: orderError } = useQuery({
     queryKey: ["guest-order", id, token],
     enabled: !!token,
     retry: false,
