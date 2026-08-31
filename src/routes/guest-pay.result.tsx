@@ -1,15 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
-import { payResultMessage } from "@/lib/pay-messages";
+import { payResultMessage, payFailureReason } from "@/lib/pay-messages";
 import { confirmGuestAfsPayment } from "@/lib/guest-checkout.functions";
+import { getOrderPaymentState } from "@/lib/payment-core.functions";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, Clock, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Loader2, Ban } from "lucide-react";
 
 const searchSchema = z.object({
   order: z.string().optional(),
