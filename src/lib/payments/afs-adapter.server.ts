@@ -65,7 +65,7 @@ export async function loadAfsPaymentConfig(_environment?: AfsEnvironment | null)
     // AFS gets an automatic "Deny by ReD Shield" (100.400.142).
     brands: value(source, "brands") ?? "VISA MASTER MAESTRO AMEX DINERS DISCOVER JCB UNIONPAY MADA",
     widgetLang: value(source, "widget_lang"),
-    webhookKey: value(source, "webhook_decryption_key"),
+    webhookKey: process.env['AFS_WEBHOOK_SECRET_LIVE'] || value(source, "webhook_decryption_key"),
   };
 }
 
