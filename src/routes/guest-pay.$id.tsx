@@ -131,7 +131,7 @@ function GuestPayPage() {
     lang === "ar" ? "الدفع مؤمّن عبر بوابة بنفت (BENEFIT)" : lang === "bn" ? "BENEFIT গেটওয়ে দ্বারা সুরক্ষিত" : lang === "ur" ? "BENEFIT گیٹ وے کے ذریعے محفوظ" : "Secured by the BENEFIT payment gateway";
   const secure = routingOn && !route ? genericSecure : effectiveRoute === "benefit" ? benefitSecure : afsSecure;
 
-  if (!token) {
+  if (!token || orderError) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
