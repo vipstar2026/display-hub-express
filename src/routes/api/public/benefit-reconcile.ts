@@ -49,7 +49,14 @@ export const Route = createFileRoute("/api/public/benefit-reconcile")({
         if (error) return json({ error: error.message }, 500);
 
         const { loadOrderForPayment, applyGatewayStatus } = await import("@/lib/payments/core.server");
-        const { bpayGetStatus, bpayIsSuccess, bpayIsPending } = await import("@/lib/bpay.server");
+        const { loadBpayConfig, bpayInquiry, bpayToGatewayStatus, bpayFormatAmount } = await import("@/lib/bpay.server");
+
+        let cfg;
+        try {
+          cfg = await loadBpayConfig();
+        } catch {
+          return json({ error: "benefit_not_configured" }, 503);
+        }
 
         let settled = 0;
         let failed = 0;
@@ -62,21 +69,22 @@ export const Route = createFileRoute("/api/public/benefit-reconcile")({
           first = false;
           try {
             const order = await loadOrderForPayment(attempt.order_id);
-            const status = await bpayGetStatus(attempt.external_checkout_id);
-            const code = status.result?.code;
+            const inquiry = await bpayInquiry(
+              {
+                paymentId: attempt.external_payment_id ?? attempt.external_checkout_id,
+                trackId: order.order_number,
+                amount: bpayFormatAmount(order.total, order.currency),
+              },
+              cfg,
+            );
+            if (!inquiry) {
+              review++;
+              continue;
+            }
             const result = await applyGatewayStatus({
               attempt,
               order,
-              status: {
-                externalPaymentId: status.id ?? null,
-                merchantReference: status.merchantTransactionId ?? null,
-                amount: status.amount ?? null,
-                currency: status.currency ?? null,
-                brand: status.paymentBrand ?? "BENEFIT",
-                code: code ?? "",
-                description: status.result?.description ?? "",
-                state: bpayIsSuccess(code) ? "succeeded" : bpayIsPending(code) ? "processing" : code ? "failed" : "unknown",
-              },
+              status: bpayToGatewayStatus(inquiry, order.currency),
               source: "reconciliation",
               background: true,
             });
@@ -87,6 +95,7 @@ export const Route = createFileRoute("/api/public/benefit-reconcile")({
             review++;
           }
         }
+
 
         return json({ checked: pending?.length ?? 0, settled, failed, review });
       },

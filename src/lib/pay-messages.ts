@@ -17,6 +17,42 @@ export function payFailureReason(lang: string, code?: string | null): string | n
   const L = (ar: string, en: string, ur: string, bn: string) =>
     lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? bn : en;
 
+  // BENEFIT Payment Gateway returns words, not OPPWA numeric codes.
+  const word = code.trim().toUpperCase();
+  if (word === "CANCELED" || word === "CANCELLED") {
+    return L(
+      "تم إلغاء العملية من صفحة الدفع. لم يتم خصم أي مبلغ — يمكنك إعادة المحاولة.",
+      "The payment was cancelled on the gateway page. You were not charged — you can try again.",
+      "ادائیگی منسوخ کر دی گئی۔ کوئی رقم نہیں کٹی — دوبارہ کوشش کریں۔",
+      "পেমেন্ট বাতিল করা হয়েছে। কোনো অর্থ কাটা হয়নি — আবার চেষ্টা করুন।",
+    );
+  }
+  if (word === "NOT CAPTURED") {
+    return L(
+      "رفض البنك المصدر للبطاقة العملية. تحقق من الرصيد أو صلاحية البطاقة أو الرمز السري، أو استخدم بطاقة أخرى.",
+      "Your card issuer declined the payment. Check the balance, card validity or PIN, or use a different card.",
+      "بینک نے ادائیگی مسترد کر دی۔ بیلنس، کارڈ کی میعاد یا PIN چیک کریں یا دوسرا کارڈ استعمال کریں۔",
+      "ব্যাংক পেমেন্ট বাতিল করেছে। ব্যালেন্স, কার্ডের মেয়াদ বা PIN যাচাই করুন বা অন্য কার্ড ব্যবহার করুন।",
+    );
+  }
+  if (word.includes("DENIED BY RISK")) {
+    return L(
+      "تم إيقاف العملية مؤقتاً من نظام الحماية بسبب تكرار المحاولات. انتظر بضع دقائق ثم أعد المحاولة.",
+      "The transaction was blocked by risk screening after repeated attempts. Please wait a few minutes and try again.",
+      "بار بار کوششوں کے باعث سیکیورٹی نے لین دین روک دیا۔ چند منٹ بعد دوبارہ کوشش کریں۔",
+      "বারবার চেষ্টার কারণে নিরাপত্তা ব্যবস্থা লেনদেন আটকে দিয়েছে। কয়েক মিনিট পরে আবার চেষ্টা করুন।",
+    );
+  }
+  if (word.includes("HOST TIMEOUT") || word === "TIMEOUT") {
+    return L(
+      "انتهت مهلة الاتصال بالبنك ولم يتم خصم أي مبلغ. أعد المحاولة.",
+      "The connection to the bank timed out and you were not charged. Please try again.",
+      "بینک سے رابطہ ٹائم آؤٹ ہو گیا اور کوئی رقم نہیں کٹی۔ دوبارہ کوشش کریں۔",
+      "ব্যাংকের সাথে সংযোগ টাইম আউট হয়েছে, কোনো অর্থ কাটা হয়নি। আবার চেষ্টা করুন।",
+    );
+  }
+
+
   // Benefit debit cards routed to AFS are auto-declined by risk screening.
   if (code === "100.400.142") {
     return L(
