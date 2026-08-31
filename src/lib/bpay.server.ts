@@ -1,42 +1,60 @@
-/** BENEFIT Payment Gateway (BPG) / BenefitPay Checkout — server helpers.
+/** BENEFIT Payment Gateway (BPG) — classic hosted API (`trandata` → hosted.htm).
  *
- *  Everything is driven by the row saved in `payment_methods`
- *  (gateway_provider = 'benefit' | 'bpay' | 'benefit_gateway'), so the whole
- *  gateway can be configured manually from the admin dashboard once BENEFIT
- *  sends the merchant credentials. No redeploy is needed.
+ *  BENEFIT confirmed (Aug 2026) that BPG is a completely separate integration
+ *  from AFS/OPPWA Copy&Pay. The supported flow is:
  *
- *  Supported integration shape: OPPWA-style Copy&Pay (the same family AFS
- *  uses) plus a generic hosted-redirect fallback. Adjust `api_base` /
- *  `widget_base` from the dashboard to match the endpoints BENEFIT provides.
+ *    1. Build a query string of transaction fields.
+ *    2. Encrypt it with AES-256-CBC (key = Terminal Resource Key,
+ *       IV = "PGKEYENCDECIVSPC") and hex-encode it → `trandata`.
+ *    3. POST `trandata` + `tranportalId` + `responseURL` + `errorURL` to the
+ *       API endpoint (`.../payment/API/hosted.htm`).
+ *    4. The reply body is `<paymentId>:<paymentPageUrl>` — redirect the
+ *       shopper to `paymentPageUrl?PaymentID=<paymentId>`.
+ *    5. BPG posts the encrypted result back to our response URL. We log it,
+ *       print `REDIRECT=<url>`, and only then process it.
+ *
+ *  Credentials come from the `payment_methods` row (gateway_provider =
+ *  benefit | bpay | benefit_gateway), with env secrets taking priority.
  */
 
 export interface BpayConfig {
-  /** Entity / Terminal identifier issued by BENEFIT. */
-  entityId: string;
-  /** Bearer access token (or terminal password when using the classic BPG). */
-  token: string;
+  tranportalId: string;
+  tranportalPassword: string;
+  resourceKey: string;
   merchantId: string | null;
-  secretKey: string | null;
-  base: string;
-  widgetBase: string;
+  /** Full endpoint, e.g. https://test.benefit-gateway.bh/payment/API/hosted.htm */
+  endpoint: string;
   testMode: boolean;
-  paymentType: string;
-  brands: string;
-  currency: string | null;
-  widgetLang: string | null;
-  resultUrl: string | null;
-  /** 'copyandpay' (widget) or 'redirect' (hosted page). */
-  flow: "copyandpay" | "redirect";
+  currency: string;
+  currencyCode: string;
+  responseUrl: string;
+  errorUrl: string;
 }
 
-const TEST_BASE = "https://test.benefit-gateway.bh";
-const LIVE_BASE = "https://benefit-gateway.bh";
+const TEST_ENDPOINT = "https://test.benefit-gateway.bh/payment/API/hosted.htm";
+const LIVE_ENDPOINT = "https://www.benefit-gateway.bh/payment/API/hosted.htm";
+const IV = "PGKEYENCDECIVSPC";
 
-export function bpayBaseUrl(mode?: string) {
-  return mode === "live" ? LIVE_BASE : TEST_BASE;
+/** ISO-4217 numeric codes used by BPG. */
+const CURRENCY_CODES: Record<string, string> = {
+  BHD: "048",
+  USD: "840",
+  EUR: "978",
+  GBP: "826",
+  SAR: "682",
+  AED: "784",
+  KWD: "414",
+  QAR: "634",
+  OMR: "512",
+};
+
+const CURRENCY_DECIMALS: Record<string, number> = { BHD: 3, KWD: 3, OMR: 3 };
+
+export function bpayFormatAmount(amount: number | string, currency: string) {
+  const decimals = CURRENCY_DECIMALS[currency.toUpperCase()] ?? 2;
+  return Number(amount).toFixed(decimals);
 }
 
-/** Loads the BENEFIT row from payment_methods. Throws when unconfigured. */
 export async function loadBpayConfig(): Promise<BpayConfig> {
   let cred: Record<string, string> = {};
   let rowTestMode: boolean | null = null;
@@ -58,46 +76,63 @@ export async function loadBpayConfig(): Promise<BpayConfig> {
     rowTestMode = data.test_mode;
   }
 
-  const pick = (k: string) => {
-    const v = cred[k];
-    return typeof v === "string" && v.trim() !== "" ? v.trim() : null;
+  const pick = (...keys: string[]) => {
+    for (const k of keys) {
+      const v = cred[k];
+      if (typeof v === "string" && v.trim() !== "") return v.trim();
+    }
+    return null;
   };
-  const env = (k: string) => {
-    const v = process.env[k];
-    return typeof v === "string" && v.trim() !== "" ? v.trim() : null;
+  const env = (...keys: string[]) => {
+    for (const k of keys) {
+      const v = process.env[k];
+      if (typeof v === "string" && v.trim() !== "") return v.trim();
+    }
+    return null;
   };
-
-  // Secrets from the encrypted env store (add_secret) take priority over DB credentials.
-  const entityId =
-    env('BPG_ENTITY_ID_LIVE') ?? env('BPG_TRANPORTAL_ID_LIVE') ??
-    pick("entity_id") ?? pick("entity_id_live") ?? pick("tranportal_id_live") ??
-    pick("terminal_id") ?? pick("merchant_id") ?? "";
-  const token =
-    env('BPG_ACCESS_TOKEN_LIVE') ?? env('BPG_TRANPORTAL_PASSWORD_LIVE') ?? env('BPG_RESOURCE_KEY_LIVE') ??
-    pick("access_token") ?? pick("access_token_live") ?? pick("password") ?? pick("tranportal_password_live") ?? "";
-  if (!entityId || !token) throw new Error("BENEFIT gateway is not configured yet");
 
   const mode = pick("mode") ?? (rowTestMode === false ? "live" : "test");
-  const base = pick("api_base") ?? bpayBaseUrl(mode);
+  const testMode = mode !== "live";
+  const suffix = testMode ? "_TEST" : "_LIVE";
+
+  const tranportalId =
+    env(`BPG_TRANPORTAL_ID${suffix}`, "BPG_TRANPORTAL_ID") ??
+    pick("tranportal_id", `tranportal_id_${mode}`, "terminal_id", "entity_id") ??
+    "";
+  const tranportalPassword =
+    env(`BPG_TRANPORTAL_PASSWORD${suffix}`, "BPG_TRANPORTAL_PASSWORD") ??
+    pick("tranportal_password", `tranportal_password_${mode}`, "password") ??
+    "";
+  const resourceKey =
+    env(`BPG_RESOURCE_KEY${suffix}`, "BPG_RESOURCE_KEY") ??
+    pick("resource_key", `resource_key_${mode}`, "terminal_resource_key", "secret_key") ??
+    "";
+
+  if (!tranportalId || !tranportalPassword || !resourceKey) {
+    throw new Error("BENEFIT gateway is not configured yet");
+  }
+  if (resourceKey.length !== 32) {
+    throw new Error("BENEFIT resource key must be exactly 32 characters");
+  }
+
+  const { BASE } = await import("@/lib/site-url");
+  const currency = (pick("currency") ?? "BHD").toUpperCase();
 
   return {
-    entityId,
-    token,
+    tranportalId,
+    tranportalPassword,
+    resourceKey,
     merchantId: pick("merchant_id"),
-    secretKey: pick("secret_key"),
-    base: base.replace(/\/+$/, ""),
-    widgetBase: pick("widget_base") ?? `${base.replace(/\/+$/, "")}/v1/paymentWidgets.js`,
-    testMode: mode !== "live",
-    paymentType: pick("payment_type") ?? "DB",
-    brands: pick("brands") ?? "BENEFIT VISA MASTER",
-    currency: pick("currency") ?? "BHD",
-    widgetLang: pick("widget_lang"),
-    resultUrl: pick("shopper_result_url"),
-    flow: (pick("flow") as BpayConfig["flow"]) ?? "copyandpay",
+    endpoint: pick("api_endpoint", "api_base") ?? (testMode ? TEST_ENDPOINT : LIVE_ENDPOINT),
+    testMode,
+    currency,
+    currencyCode: pick("currency_code") ?? CURRENCY_CODES[currency] ?? "048",
+    responseUrl: pick("response_url", "webhook_url") ?? `${BASE}/api/public/payments/benefit`,
+    errorUrl: pick("error_url") ?? `${BASE}/api/public/payments/benefit`,
   };
 }
 
-/** Returns true when a BENEFIT gateway row exists and is active. */
+/** Returns true when a BENEFIT gateway row exists, is active and configured. */
 export async function bpayIsEnabled(): Promise<boolean> {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -108,88 +143,200 @@ export async function bpayIsEnabled(): Promise<boolean> {
       .eq("is_active", true)
       .limit(1)
       .maybeSingle();
-    return !!data;
+    if (!data) return false;
+    await loadBpayConfig();
+    return true;
   } catch {
     return false;
   }
 }
 
-export async function bpayPrepareCheckout(params: {
-  amount: string;
-  currency: string;
-  merchantTransactionId: string;
-  email?: string | null;
-  givenName?: string | null;
-  surname?: string | null;
-  cfg?: BpayConfig;
-}) {
-  const cfg = params.cfg ?? (await loadBpayConfig());
-  const body = new URLSearchParams({
-    entityId: cfg.entityId,
-    amount: params.amount,
-    currency: cfg.currency || params.currency,
-    paymentType: cfg.paymentType,
-    merchantTransactionId: params.merchantTransactionId,
-  });
-  if (params.email) body.set("customer.email", params.email);
-  if (params.givenName) body.set("customer.givenName", params.givenName.slice(0, 48));
-  if (params.surname) body.set("customer.surname", params.surname.slice(0, 48));
+/* -------------------------------------------------------- trandata crypto */
 
-  const res = await fetch(`${cfg.base}/v1/checkouts`, {
+export async function encryptTrandata(plain: string, resourceKey: string) {
+  const { createCipheriv } = await import("crypto");
+  const cipher = createCipheriv("aes-256-cbc", Buffer.from(resourceKey, "utf8"), Buffer.from(IV, "utf8"));
+  return Buffer.concat([cipher.update(plain, "utf8"), cipher.final()]).toString("hex");
+}
+
+export async function decryptTrandata(hex: string, resourceKey: string) {
+  const { createDecipheriv } = await import("crypto");
+  const decipher = createDecipheriv("aes-256-cbc", Buffer.from(resourceKey, "utf8"), Buffer.from(IV, "utf8"));
+  return Buffer.concat([decipher.update(Buffer.from(hex, "hex")), decipher.final()]).toString("utf8");
+}
+
+function toQuery(fields: Record<string, string>) {
+  return Object.entries(fields)
+    .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+    .join("&");
+}
+
+/* --------------------------------------------------------------- payment */
+
+export interface BpayInitResult {
+  paymentId: string;
+  paymentUrl: string;
+}
+
+/** Step 1–4: creates the hosted payment session and returns the redirect URL. */
+export async function bpayInitPayment(params: {
+  amount: number | string;
+  currency?: string;
+  trackId: string;
+  orderId: string;
+  lang?: string;
+  email?: string | null;
+  cfg?: BpayConfig;
+}): Promise<BpayInitResult> {
+  const cfg = params.cfg ?? (await loadBpayConfig());
+  const currency = (params.currency ?? cfg.currency).toUpperCase();
+  const currencyCode = CURRENCY_CODES[currency] ?? cfg.currencyCode;
+
+  const fields: Record<string, string> = {
+    id: cfg.tranportalId,
+    password: cfg.tranportalPassword,
+    action: "1", // purchase
+    langid: params.lang === "ar" ? "ARA" : "USA",
+    currencycode: currencyCode,
+    amt: bpayFormatAmount(params.amount, currency),
+    responseURL: cfg.responseUrl,
+    errorURL: cfg.errorUrl,
+    trackid: params.trackId,
+    udf1: params.orderId,
+  };
+  if (params.email) fields["udf2"] = params.email.slice(0, 80);
+
+  const trandata = await encryptTrandata(toQuery(fields), cfg.resourceKey);
+  const body = new URLSearchParams({
+    trandata,
+    tranportalId: cfg.tranportalId,
+    responseURL: cfg.responseUrl,
+    errorURL: cfg.errorUrl,
+  });
+
+  const res = await fetch(cfg.endpoint, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${cfg.token}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
   });
-  const json = (await res.json()) as {
-    id?: string;
-    redirectUrl?: string;
-    result?: { code: string; description: string };
-  };
-  if (!json.id && !json.redirectUrl) {
-    throw new Error(json.result?.description ?? "BENEFIT checkout failed");
+  const text = (await res.text()).trim();
+
+  // Success: "<paymentId>:<paymentPageUrl>". Failure: "!ERROR!..." / "ERROR:..."
+  if (!text || /^!?ERROR/i.test(text)) {
+    throw new Error(`benefit_init_failed:${text.slice(0, 200) || res.status}`);
+  }
+  const sep = text.indexOf(":");
+  const paymentId = sep > 0 ? text.slice(0, sep) : "";
+  const url = sep > 0 ? text.slice(sep + 1) : "";
+  if (!paymentId || !/^https?:\/\//i.test(url)) {
+    throw new Error(`benefit_init_unexpected_response:${text.slice(0, 200)}`);
   }
   return {
-    checkoutId: json.id ?? "",
-    redirectUrl: json.redirectUrl ?? null,
-    resultCode: json.result?.code ?? "",
+    paymentId,
+    paymentUrl: `${url}${url.includes("?") ? "&" : "?"}PaymentID=${encodeURIComponent(paymentId)}`,
   };
 }
 
-export async function bpayGetStatus(checkoutId: string, cfg?: BpayConfig) {
+export interface BpayNotification {
+  paymentId: string | null;
+  trackId: string | null;
+  tranId: string | null;
+  result: string;
+  amount: string | null;
+  auth: string | null;
+  ref: string | null;
+  cardType: string | null;
+  orderId: string | null;
+  error: string | null;
+  errorText: string | null;
+  raw: Record<string, string>;
+}
+
+/** Parses a BPG response/error post body (encrypted `trandata` or plain fields). */
+export async function bpayParseNotification(raw: string, cfg?: BpayConfig): Promise<BpayNotification> {
   const c = cfg ?? (await loadBpayConfig());
-  const res = await fetch(
-    `${c.base}/v1/checkouts/${encodeURIComponent(checkoutId)}/payment?entityId=${c.entityId}`,
-    { headers: { Authorization: `Bearer ${c.token}` } },
-  );
-  return (await res.json()) as {
-    id?: string;
-    merchantTransactionId?: string;
-    amount?: string;
-    currency?: string;
-    paymentBrand?: string;
-    result?: { code: string; description: string };
+  const outer = new URLSearchParams(raw);
+  let params = outer;
+  const trandata = outer.get("trandata");
+  if (trandata) {
+    const decrypted = await decryptTrandata(trandata.trim(), c.resourceKey);
+    params = new URLSearchParams(decrypted);
+  }
+  const get = (...keys: string[]) => {
+    for (const k of keys) {
+      const v = params.get(k) ?? params.get(k.toLowerCase()) ?? params.get(k.toUpperCase());
+      if (v != null && v !== "") return v;
+    }
+    return null;
+  };
+  return {
+    paymentId: get("paymentid", "PaymentID"),
+    trackId: get("trackid"),
+    tranId: get("tranid"),
+    result: (get("result") ?? "").toUpperCase(),
+    amount: get("amt", "amount"),
+    auth: get("auth"),
+    ref: get("ref"),
+    cardType: get("cardtype", "card"),
+    orderId: get("udf1"),
+    error: get("Error", "error"),
+    errorText: get("ErrorText", "errortext"),
+    raw: Object.fromEntries(params.entries()),
   };
 }
 
-export function bpayIsSuccess(code?: string) {
-  if (!code) return false;
-  return /^(000\.000\.|000\.100\.1|000\.[36]|000\.400\.0[^3]|000\.400\.100)/.test(code);
+export function bpayIsSuccessResult(result: string) {
+  return result.toUpperCase() === "CAPTURED";
 }
 
-export function bpayIsPending(code?: string) {
-  if (!code) return false;
-  return /^(000\.200|800\.400\.5|100\.400\.500)/.test(code);
+export function bpayIsCancelled(result: string) {
+  return /CANCEL/i.test(result);
 }
 
-/** HMAC-SHA256 signature check used by BENEFIT webhook notifications. */
-export async function bpayVerifySignature(rawBody: string, signature: string | null, secret: string) {
-  if (!signature) return false;
-  const { createHmac, timingSafeEqual } = await import("crypto");
-  const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
-  const a = Buffer.from(signature.trim().toLowerCase());
-  const b = Buffer.from(expected);
-  return a.length === b.length && timingSafeEqual(a, b);
+/** Maps a parsed BPG notification onto the shared GatewayStatus shape. */
+export function bpayToGatewayStatus(n: BpayNotification, currency: string) {
+  const success = bpayIsSuccessResult(n.result);
+  const cancelled = bpayIsCancelled(n.result);
+  return {
+    externalPaymentId: n.tranId ?? n.paymentId,
+    merchantReference: n.trackId,
+    amount: n.amount,
+    currency,
+    brand: n.cardType ?? "BENEFIT",
+    code: n.result || n.error || "",
+    description: n.errorText ?? n.result ?? "",
+    state: (success ? "succeeded" : cancelled || n.result || n.error ? "failed" : "unknown") as
+      | "succeeded"
+      | "processing"
+      | "failed"
+      | "unknown",
+  };
+}
+
+/** Transaction inquiry (action = 8) used by the reconciliation watchdog. */
+export async function bpayInquiry(input: { paymentId: string; trackId: string; amount: string }, cfg?: BpayConfig) {
+  const c = cfg ?? (await loadBpayConfig());
+  const fields: Record<string, string> = {
+    id: c.tranportalId,
+    password: c.tranportalPassword,
+    action: "8",
+    transid: input.paymentId,
+    trackid: input.trackId,
+    amt: input.amount,
+    currencycode: c.currencyCode,
+    udf5: "TrackID",
+  };
+  const trandata = await encryptTrandata(toQuery(fields), c.resourceKey);
+  const res = await fetch(c.endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ trandata, tranportalId: c.tranportalId }).toString(),
+  });
+  const text = (await res.text()).trim();
+  if (!text || /^!?ERROR/i.test(text)) return null;
+  try {
+    return await bpayParseNotification(text.startsWith("trandata=") ? text : `trandata=${text}`, c);
+  } catch {
+    return await bpayParseNotification(text, c);
+  }
 }
