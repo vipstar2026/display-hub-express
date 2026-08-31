@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { AfsPaymentWidget } from "@/components/AfsPaymentWidget";
 import { CardRouteGate } from "@/components/CardRouteGate";
+import { bpayStatus } from "@/lib/bpay.functions";
 
 const searchSchema = z.object({ t: z.string().optional() });
 
@@ -40,6 +41,7 @@ function GuestPayPage() {
   const start = useServerFn(createGuestAfsCheckout);
   const fetchOrder = useServerFn(getGuestOrder);
   const startBenefit = useServerFn(createGuestBpayCheckout);
+  const checkBenefit = useServerFn(bpayStatus);
   const [attemptKey] = useState(() => `guest-afs:${id}:${crypto.randomUUID()}`);
   const [route, setRoute] = useState<"benefit" | "afs" | null>(null);
   const [benefitBusy, setBenefitBusy] = useState(false);
@@ -70,7 +72,16 @@ function GuestPayPage() {
     staleTime: 60_000,
   });
 
-  const routingOn = !!flags?.binRouting && !!flags?.bpgEnabled;
+  // Ask the server whether the BENEFIT gateway is actually live. When it is
+  // not, skip card routing entirely and take every shopper straight to the
+  // Visa/Mastercard gateway instead of failing on a BENEFIT attempt.
+  const { data: benefit } = useQuery({
+    queryKey: ["benefit-status"],
+    queryFn: () => checkBenefit({}),
+    staleTime: 60_000,
+  });
+
+  const routingOn = !!flags?.binRouting && !!flags?.bpgEnabled && benefit?.enabled === true;
   const effectiveRoute = routingOn ? route : "afs";
 
   const benefitUnavailable = (l: string) =>
