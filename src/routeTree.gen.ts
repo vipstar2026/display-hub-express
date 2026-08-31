@@ -34,7 +34,6 @@ import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticat
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
-import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as GuestOrderIdRouteImport } from './routes/guest-order.$id'
 import { Route as GuestPayIdRouteImport } from './routes/guest-pay.$id'
 import { Route as GuestPayResultRouteImport } from './routes/guest-pay.result'
@@ -78,15 +77,15 @@ import { Route as AuthenticatedPayIdRouteImport } from './routes/_authenticated/
 import { Route as ApiPublicAfsReconcileRouteImport } from './routes/api/public/afs-reconcile'
 import { Route as ApiPublicBenefitReconcileRouteImport } from './routes/api/public/benefit-reconcile'
 import { Route as ApiPublicSendEmailsRouteImport } from './routes/api/public/send-emails'
-import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
 import { Route as AuthenticatedAdminCategoriesSlugRouteImport } from './routes/_authenticated/admin.categories.$slug'
 import { Route as AuthenticatedOrderSuccessIdRouteImport } from './routes/_authenticated/order.success.$id'
 import { Route as ApiPublicPaymentsAfsRouteImport } from './routes/api/public/payments/afs'
 import { Route as ApiPublicPaymentsBenefitRouteImport } from './routes/api/public/payments/benefit'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -210,11 +209,6 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
 const CategorySlugRoute = CategorySlugRouteImport.update({
   id: '/category/$slug',
   path: '/category/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: '/email/unsubscribe',
-  path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuestOrderIdRoute = GuestOrderIdRouteImport.update({
@@ -460,9 +454,9 @@ const ApiPublicSendEmailsRoute = ApiPublicSendEmailsRouteImport.update({
   path: '/api/public/send-emails',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminCategoriesIndexRoute =
@@ -494,22 +488,20 @@ const ApiPublicPaymentsBenefitRoute =
     path: '/api/public/payments/benefit',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
     path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -537,7 +529,6 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/guest-order/$id': typeof GuestOrderIdRoute
   '/guest-pay/$id': typeof GuestPayIdRoute
   '/guest-pay/result': typeof GuestPayResultRoute
@@ -581,15 +572,15 @@ export interface FileRoutesByFullPath {
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/api/public/benefit-reconcile': typeof ApiPublicBenefitReconcileRoute
   '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
   '/api/public/payments/afs': typeof ApiPublicPaymentsAfsRoute
   '/api/public/payments/benefit': typeof ApiPublicPaymentsBenefitRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/categories/': typeof AuthenticatedAdminCategoriesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -615,7 +606,6 @@ export interface FileRoutesByTo {
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/guest-order/$id': typeof GuestOrderIdRoute
   '/guest-pay/$id': typeof GuestPayIdRoute
   '/guest-pay/result': typeof GuestPayResultRoute
@@ -659,15 +649,15 @@ export interface FileRoutesByTo {
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/api/public/benefit-reconcile': typeof ApiPublicBenefitReconcileRoute
   '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
   '/api/public/payments/afs': typeof ApiPublicPaymentsAfsRoute
   '/api/public/payments/benefit': typeof ApiPublicPaymentsBenefitRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesIndexRoute
 }
 export interface FileRoutesById {
@@ -696,7 +686,6 @@ export interface FileRoutesById {
   '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/guest-order/$id': typeof GuestOrderIdRoute
   '/guest-pay/$id': typeof GuestPayIdRoute
   '/guest-pay/result': typeof GuestPayResultRoute
@@ -740,15 +729,15 @@ export interface FileRoutesById {
   '/api/public/afs-reconcile': typeof ApiPublicAfsReconcileRoute
   '/api/public/benefit-reconcile': typeof ApiPublicBenefitReconcileRoute
   '/api/public/send-emails': typeof ApiPublicSendEmailsRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/categories/$slug': typeof AuthenticatedAdminCategoriesSlugRoute
   '/_authenticated/order/success/$id': typeof AuthenticatedOrderSuccessIdRoute
   '/api/public/payments/afs': typeof ApiPublicPaymentsAfsRoute
   '/api/public/payments/benefit': typeof ApiPublicPaymentsBenefitRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_authenticated/admin/categories/': typeof AuthenticatedAdminCategoriesIndexRoute
 }
 export interface FileRouteTypes {
@@ -777,7 +766,6 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/blog/$slug'
     | '/category/$slug'
-    | '/email/unsubscribe'
     | '/guest-order/$id'
     | '/guest-pay/$id'
     | '/guest-pay/result'
@@ -821,15 +809,15 @@ export interface FileRouteTypes {
     | '/api/public/afs-reconcile'
     | '/api/public/benefit-reconcile'
     | '/api/public/send-emails'
-    | '/lovable/email/suppression'
+    | '/lovable/email/events'
     | '/admin/'
     | '/admin/categories/$slug'
     | '/order/success/$id'
     | '/api/public/payments/afs'
     | '/api/public/payments/benefit'
-    | '/lovable/email/queue/process'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
     | '/admin/categories/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -855,7 +843,6 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/blog/$slug'
     | '/category/$slug'
-    | '/email/unsubscribe'
     | '/guest-order/$id'
     | '/guest-pay/$id'
     | '/guest-pay/result'
@@ -899,15 +886,15 @@ export interface FileRouteTypes {
     | '/api/public/afs-reconcile'
     | '/api/public/benefit-reconcile'
     | '/api/public/send-emails'
-    | '/lovable/email/suppression'
+    | '/lovable/email/events'
     | '/admin'
     | '/admin/categories/$slug'
     | '/order/success/$id'
     | '/api/public/payments/afs'
     | '/api/public/payments/benefit'
-    | '/lovable/email/queue/process'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
     | '/admin/categories'
   id:
     | '__root__'
@@ -935,7 +922,6 @@ export interface FileRouteTypes {
     | '/_authenticated/wishlist'
     | '/blog/$slug'
     | '/category/$slug'
-    | '/email/unsubscribe'
     | '/guest-order/$id'
     | '/guest-pay/$id'
     | '/guest-pay/result'
@@ -979,15 +965,15 @@ export interface FileRouteTypes {
     | '/api/public/afs-reconcile'
     | '/api/public/benefit-reconcile'
     | '/api/public/send-emails'
-    | '/lovable/email/suppression'
+    | '/lovable/email/events'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/categories/$slug'
     | '/_authenticated/order/success/$id'
     | '/api/public/payments/afs'
     | '/api/public/payments/benefit'
-    | '/lovable/email/queue/process'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
     | '/_authenticated/admin/categories/'
   fileRoutesById: FileRoutesById
 }
@@ -1013,7 +999,6 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   BlogSlugRoute: typeof BlogSlugRoute
   CategorySlugRoute: typeof CategorySlugRoute
-  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   GuestOrderIdRoute: typeof GuestOrderIdRoute
   GuestPayIdRoute: typeof GuestPayIdRoute
   GuestPayResultRoute: typeof GuestPayResultRoute
@@ -1025,12 +1010,12 @@ export interface RootRouteChildren {
   ApiPublicAfsReconcileRoute: typeof ApiPublicAfsReconcileRoute
   ApiPublicBenefitReconcileRoute: typeof ApiPublicBenefitReconcileRoute
   ApiPublicSendEmailsRoute: typeof ApiPublicSendEmailsRoute
-  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   ApiPublicPaymentsAfsRoute: typeof ApiPublicPaymentsAfsRoute
   ApiPublicPaymentsBenefitRoute: typeof ApiPublicPaymentsBenefitRoute
-  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
-  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1208,13 +1193,6 @@ declare module '@tanstack/react-router' {
       path: '/category/$slug'
       fullPath: '/category/$slug'
       preLoaderRoute: typeof CategorySlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/email/unsubscribe': {
-      id: '/email/unsubscribe'
-      path: '/email/unsubscribe'
-      fullPath: '/email/unsubscribe'
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guest-order/$id': {
@@ -1518,11 +1496,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSendEmailsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/categories/': {
@@ -1560,11 +1538,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsBenefitRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/transactional/preview': {
@@ -1572,13 +1557,6 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/transactional/preview'
       fullPath: '/lovable/email/transactional/preview'
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1712,7 +1690,6 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   BlogSlugRoute: BlogSlugRoute,
   CategorySlugRoute: CategorySlugRoute,
-  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   GuestOrderIdRoute: GuestOrderIdRoute,
   GuestPayIdRoute: GuestPayIdRoute,
   GuestPayResultRoute: GuestPayResultRoute,
@@ -1724,12 +1701,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAfsReconcileRoute: ApiPublicAfsReconcileRoute,
   ApiPublicBenefitReconcileRoute: ApiPublicBenefitReconcileRoute,
   ApiPublicSendEmailsRoute: ApiPublicSendEmailsRoute,
-  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  LovableEmailEventsRoute: LovableEmailEventsRoute,
   ApiPublicPaymentsAfsRoute: ApiPublicPaymentsAfsRoute,
   ApiPublicPaymentsBenefitRoute: ApiPublicPaymentsBenefitRoute,
-  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
-  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

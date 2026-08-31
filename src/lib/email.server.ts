@@ -128,91 +128,45 @@ export async function sendEmail(cfg: EmailConfig, mail: OutgoingEmail): Promise<
 }
 
 /* -------------------------------------------------------------------------
- * Lovable email (default) — enqueues into the managed sending queue using the
+ * Lovable email (default) — sends through Lovable's managed email API using the
  * verified sender domain. Used whenever no external API provider is enabled.
  * ---------------------------------------------------------------------- */
 
-const SITE_NAME = "VIPSTAR";
-const SENDER_DOMAIN = "notify.vipstar.cc";
-const FROM_DOMAIN = "vipstar.cc";
-
-function randomToken() {
-  const bytes = new Uint8Array(32);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-async function unsubscribeToken(admin: any, email: string) {
-  const { data: existing } = await admin
-    .from("email_unsubscribe_tokens")
-    .select("token, used_at")
-    .eq("email", email)
-    .maybeSingle();
-  if (existing?.token) return existing.token as string;
-  const token = randomToken();
-  await admin
-    .from("email_unsubscribe_tokens")
-    .upsert({ token, email }, { onConflict: "email", ignoreDuplicates: true });
-  const { data: stored } = await admin
-    .from("email_unsubscribe_tokens")
-    .select("token")
-    .eq("email", email)
-    .maybeSingle();
-  return (stored?.token as string) ?? token;
-}
-
-/** Sends through Lovable's managed email queue (no API key needed). */
+/** Sends through Lovable's managed email delivery (no API key needed). */
 export async function sendViaLovable(mail: OutgoingEmail, idempotencyKey?: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const admin = supabaseAdmin as any;
   const to = mail.to.trim();
-  const normalized = to.toLowerCase();
 
-  const { data: suppressed } = await admin
-    .from("suppressed_emails")
-    .select("id")
-    .eq("email", normalized)
-    .maybeSingle();
-  if (suppressed) throw new Error("email_suppressed");
+  const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
 
-  const messageId = crypto.randomUUID();
-  const token = await unsubscribeToken(admin, normalized);
+  const log = async (status: string, errorMessage?: string) => {
+    const { error } = await admin.from("email_send_log").insert({
+      template_name: "notification",
+      recipient_email: to,
+      status,
+      ...(errorMessage ? { error_message: errorMessage } : {}),
+    });
+    if (error) console.error("Failed to write email_send_log", error.message);
+  };
 
-  const { render } = await import("@react-email/render");
-  const React = await import("react");
-  const { template } = await import("@/lib/email-templates/notification");
-  const element = React.createElement(template.component, {
-    title: mail.subject,
-    message: mail.text,
-  });
-  const html = await render(element as any);
-  const text = await render(element as any, { plainText: true });
+  let result;
+  try {
+    result = await sendTemplateEmail("notification", to, {
+      templateData: { title: mail.subject, message: mail.text },
+      idempotencyKey,
+    });
+  } catch (e) {
+    await log("failed", (e as Error).message);
+    throw e;
+  }
 
-  await admin.from("email_send_log").insert({
-    message_id: messageId,
-    template_name: "notification",
-    recipient_email: to,
-    status: "pending",
-  });
+  if (!result.sent) {
+    await log("suppressed");
+    throw new Error("email_suppressed");
+  }
 
-  const { error } = await admin.rpc("enqueue_email", {
-    queue_name: "transactional_emails",
-    payload: {
-      message_id: messageId,
-      to,
-      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-      sender_domain: SENDER_DOMAIN,
-      subject: mail.subject,
-      html,
-      text,
-      purpose: "transactional",
-      label: "notification",
-      idempotency_key: idempotencyKey || messageId,
-      unsubscribe_token: token,
-      queued_at: new Date().toISOString(),
-    },
-  });
-  if (error) throw new Error(error.message);
+  await log("sent");
 }
 
 /** Sends a single email: external API provider if enabled, otherwise Lovable. */
