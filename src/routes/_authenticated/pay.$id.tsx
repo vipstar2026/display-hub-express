@@ -128,7 +128,15 @@ function PayPage() {
   });
 
   const heading = lang === "ar" ? "إتمام الدفع" : lang === "ur" ? "ادائیگی مکمل کریں" : lang === "bn" ? "পেমেন্ট সম্পন্ন করুন" : "Complete payment";
-  const secure =
+  const genericSecure =
+    lang === "ar"
+      ? "دفع آمن ومشفّر — نحدّد البوابة المناسبة بعد فحص نوع بطاقتك"
+      : lang === "ur"
+        ? "محفوظ ادائیگی — کارڈ چیک کے بعد مناسب گیٹ وے منتخب ہوگا"
+        : lang === "bn"
+          ? "নিরাপদ পেমেন্ট — কার্ড যাচাইয়ের পর গেটওয়ে নির্ধারিত হবে"
+          : "Secure encrypted payment — the gateway is selected after we check your card";
+  const afsSecure =
     lang === "ar"
       ? "الدفع مؤمّن عبر بوابة AFS للخدمات المالية العربية"
       : lang === "ur"
@@ -136,6 +144,10 @@ function PayPage() {
         : lang === "bn"
           ? "AFS পেমেন্ট গেটওয়ে দ্বারা সুরক্ষিত"
           : "Secured by AFS payment gateway";
+  const benefitSecure =
+    lang === "ar" ? "الدفع مؤمّن عبر بوابة بنفت (BENEFIT)" : lang === "bn" ? "BENEFIT গেটওয়ে দ্বারা সুরক্ষিত" : lang === "ur" ? "BENEFIT گیٹ وے کے ذریعے محفوظ" : "Secured by the BENEFIT payment gateway";
+  const secure = routingOn && !route ? genericSecure : effectiveRoute === "benefit" ? benefitSecure : afsSecure;
+
 
   const L = (ar: string, en: string, ur: string, bn: string) => (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? bn : en);
   const money = (n: number) => `${Number(n).toFixed(3)} ${order?.currency ?? "BHD"}`;
@@ -149,7 +161,21 @@ function PayPage() {
           <ShieldCheck className="h-4 w-4 text-primary" /> {secure}
         </p>
 
+        {routingOn && !route && (
+          <div className="mb-6">
+            <CardRouteGate
+              onRoute={(r) => {
+                setRoute(r);
+                if (r === "benefit") void goBenefit();
+              }}
+              showBenefitOption={!!flags?.bpgVisible}
+              onPickOther={() => nav({ to: "/cart" })}
+            />
+          </div>
+        )}
+
         {order && (
+
           <div className="mb-6 rounded-xl border border-primary/20 bg-card p-5">
             <div className="mb-3 flex items-center justify-between gap-2">
               <h2 className="flex items-center gap-2 font-display text-base font-bold">
@@ -213,16 +239,8 @@ function PayPage() {
           </div>
         )}
 
-        {routingOn && !route && (
-          <CardRouteGate
-            onRoute={(r) => {
-              setRoute(r);
-              if (r === "benefit") void goBenefit();
-            }}
-            showBenefitOption={!!flags?.bpgVisible}
-            onPickOther={() => nav({ to: "/cart" })}
-          />
-        )}
+
+
         {benefitBusy && (
           <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> BENEFIT…
