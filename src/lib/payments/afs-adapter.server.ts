@@ -94,6 +94,10 @@ export async function createAfsPayment(order: PaymentOrder) {
     merchantTransactionId: order.order_number,
     integrity: "true",
   });
+  // Show the store domain alongside the order number in gateway/bank reports
+  // and on the cardholder's statement instead of a bare order reference.
+  form.set("descriptor", `VIPSTAR.CC ${order.order_number}`.slice(0, 127));
+  form.set("merchantInvoiceId", `VIPSTAR.CC-${order.order_number}`.slice(0, 255));
   if (order.buyer_email) form.set("customer.email", order.buyer_email);
   if (names[0]) form.set("customer.givenName", names[0].slice(0, 48));
   if (names.length > 1) form.set("customer.surname", names.slice(1).join(" ").slice(0, 48));
