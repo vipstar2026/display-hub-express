@@ -611,7 +611,7 @@ function CartPage() {
                   <p className="text-sm text-muted-foreground">{t("cart.no_methods")}</p>
                 )}
                 <div className="grid gap-2 sm:grid-cols-2">
-                  {(methods ?? []).filter((m) => !(isGuest && m.requires_proof)).map((m) => {
+                  {visibleMethods.filter((m) => !(isGuest && m.requires_proof)).map((m) => {
 
                     const Icon = ICONS[m.icon ?? ""] ?? CreditCard;
                     const active = m.id === selectedMethod;
@@ -628,7 +628,7 @@ function CartPage() {
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="flex-1">
-                          <div className="text-sm font-medium">{nameOf(m)}</div>
+                          <div className="text-sm font-medium">{cardLabel(m)}</div>
                           {Number(m.fee_amount) > 0 || Number(m.fee_percent) > 0 ? (
                             <div className="text-[11px] text-muted-foreground">
                               +{formatPrice(Number(m.fee_amount) + (subtotal * Number(m.fee_percent)) / 100)}
