@@ -79,6 +79,16 @@ function GuestPayResult() {
     return () => clearInterval(timer);
   }, [data?.pending]);
 
+  useEffect(() => {
+    if (data?.success && search.order && search.t) {
+      const timer = setTimeout(() => nav({ to: "/guest-order/$id", params: { id: search.order! }, search: { t: search.t! } }), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [data?.success, search.order, search.t, nav]);
+
+  const cancelled = !!data?.cancelled || search.cancel === "1";
+  const pending = !!data?.pending && !cancelled;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -93,26 +103,66 @@ function GuestPayResult() {
             <h1 className="font-display text-2xl font-bold">{txt("تم الدفع بنجاح", "Payment successful", "ادائیگی کامیاب", "পেমেন্ট সফল")}</h1>
             <p className="mt-2 text-sm text-muted-foreground">{txt("يتم تحويلك إلى تفاصيل الطلب…", "Redirecting to your order…", "آرڈر کی تفصیل…", "অর্ডারে নিয়ে যাওয়া হচ্ছে…")}</p>
           </>
+        ) : cancelled ? (
+          <>
+            <Ban className="mx-auto mb-4 h-14 w-14 text-muted-foreground" />
+            <h1 className="font-display text-2xl font-bold">{txt("تم إلغاء الدفع", "Payment cancelled", "ادائیگی منسوخ", "পেমেন্ট বাতিল")}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {txt(
+                "لم يتم خصم أي مبلغ. يمكنك إكمال الدفع لنفس الطلب في أي وقت.",
+                "You were not charged. You can complete payment for the same order at any time.",
+                "کوئی رقم منہا نہیں ہوئی۔",
+                "কোনো টাকা কাটা হয়নি।",
+              )}
+            </p>
+          </>
+        ) : pending ? (
+          <>
+            <Clock className="mx-auto mb-4 h-14 w-14 text-orange-500" />
+            <h1 className="font-display text-2xl font-bold">{txt("قيد التأكيد", "Awaiting confirmation", "تصدیق زیر التوا", "নিশ্চিতকরণের অপেক্ষায়")}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">{payResultMessage(lang, true)}</p>
+            <p className="mx-auto mt-3 max-w-md rounded-lg border border-orange-500/30 bg-orange-500/10 px-4 py-3 text-sm font-medium text-orange-600 dark:text-orange-400">
+              {txt(
+                "لم يُرفض طلبك — لا تدفع مرة أخرى. نتحقق تلقائياً كل بضع ثوانٍ.",
+                "Your order was not declined — do not pay again. We re-check automatically every few seconds.",
+                "آپ کا آرڈر مسترد نہیں ہوا — دوبارہ ادائیگی نہ کریں۔",
+                "আপনার অর্ডার বাতিল হয়নি — আবার পেমেন্ট করবেন না।",
+              )}
+            </p>
+            {expired && (
+              <p className="mt-3 text-xs text-muted-foreground">
+                {txt("انتهت مهلة الانتظار التلقائي — استخدم زر التحقق الآن.", "Automatic checking stopped — use “Check now”.", "خودکار جانچ رک گئی۔", "স্বয়ংক্রিয় যাচাই বন্ধ হয়েছে।")}
+              </p>
+            )}
+          </>
         ) : (
           <>
-            {data.pending ? (
-              <Clock className="mx-auto mb-4 h-14 w-14 text-muted-foreground" />
-            ) : (
-              <XCircle className="mx-auto mb-4 h-14 w-14 text-destructive" />
+            <XCircle className="mx-auto mb-4 h-14 w-14 text-destructive" />
+            <h1 className="font-display text-2xl font-bold">{txt("فشل الدفع", "Payment failed", "ادائیگی ناکام", "পেমেন্ট ব্যর্থ")}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">{payResultMessage(lang, false)}</p>
+            {payFailureReason(lang, data.code) && (
+              <p className="mx-auto mt-3 max-w-md rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+                {payFailureReason(lang, data.code)}
+              </p>
             )}
-            <h1 className="font-display text-2xl font-bold">
-              {data.pending ? txt("الدفع قيد المعالجة", "Payment pending", "ادائیگی زیر عمل", "পেমেন্ট প্রক্রিয়াধীন") : txt("فشل الدفع", "Payment failed", "ادائیگی ناکام", "পেমেন্ট ব্যর্থ")}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">{payResultMessage(lang, !!data.pending)}</p>
-            <div className="mt-6 flex justify-center gap-2">
-              {search.order && search.t && (
-                <Button onClick={() => window.location.assign(`/guest-pay/${encodeURIComponent(search.order!)}?t=${encodeURIComponent(search.t!)}`)}>
-                  {txt("إعادة المحاولة", "Try again", "دوبارہ کوشش", "আবার চেষ্টা")}
-                </Button>
-              )}
-              <Button variant="outline" onClick={() => nav({ to: "/cart" })}>{txt("السلة", "Cart", "کارٹ", "কার্ট")}</Button>
-            </div>
           </>
+        )}
+
+        {data && !data.success && (
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            {pending && (
+              <Button onClick={() => refetch()} disabled={isFetching}>
+                {isFetching && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {txt("تحقق الآن", "Check now", "ابھی چیک کریں", "এখনই যাচাই করুন")}
+              </Button>
+            )}
+            {!pending && search.order && search.t && (
+              <Button onClick={() => window.location.assign(`/guest-pay/${encodeURIComponent(search.order!)}?t=${encodeURIComponent(search.t!)}`)}>
+                {txt("إكمال الدفع الآن", "Complete payment now", "ابھی ادائیگی مکمل کریں", "এখনই পেমেন্ট সম্পন্ন করুন")}
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => nav({ to: "/cart" })}>{txt("السلة", "Cart", "کارٹ", "কার্ট")}</Button>
+          </div>
         )}
       </div>
       <Footer />
