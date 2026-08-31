@@ -7,13 +7,15 @@ import { z } from "zod";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
-import { payInitMessage } from "@/lib/pay-messages";
+import { payInitMessage, payResultMessage } from "@/lib/pay-messages";
 import { formatAmount } from "@/lib/payments/money";
-import { createGuestAfsCheckout, getGuestOrder } from "@/lib/guest-checkout.functions";
+import { createGuestAfsCheckout, getGuestOrder, createGuestBpayCheckout } from "@/lib/guest-checkout.functions";
 import { ShieldCheck, Loader2, Receipt, Truck, Store, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 import { AfsPaymentWidget } from "@/components/AfsPaymentWidget";
+import { CardRouteGate } from "@/components/CardRouteGate";
 
 const searchSchema = z.object({ t: z.string().optional() });
 
@@ -37,7 +39,11 @@ function GuestPayPage() {
   const nav = useNavigate();
   const start = useServerFn(createGuestAfsCheckout);
   const fetchOrder = useServerFn(getGuestOrder);
+  const startBenefit = useServerFn(createGuestBpayCheckout);
   const [attemptKey] = useState(() => `guest-afs:${id}:${crypto.randomUUID()}`);
+  const [route, setRoute] = useState<"benefit" | "afs" | null>(null);
+  const [benefitBusy, setBenefitBusy] = useState(false);
+  const [benefitError, setBenefitError] = useState<string | null>(null);
 
   const L = (ar: string, en: string, ur: string, bn: string) => (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? bn : en);
 
@@ -48,15 +54,82 @@ function GuestPayPage() {
     queryFn: () => fetchOrder({ data: { order_id: id, token: token! } }),
   });
 
+  // Independent gateway switches (mirrors the authenticated pay page).
+  const { data: flags } = useQuery({
+    queryKey: ["payment-flags"],
+    queryFn: async () => {
+      const { data: rows } = await supabase.from("app_settings").select("key, value");
+      const map = Object.fromEntries((rows ?? []).map((r) => [r.key, r.value]));
+      return {
+        afsEnabled: map["afs_enabled"] !== false,
+        bpgEnabled: map["bpg_enabled"] !== false,
+        bpgVisible: map["bpg_show_in_checkout"] === true,
+        binRouting: map["bin_routing_enabled"] !== false,
+      };
+    },
+    staleTime: 60_000,
+  });
+
+  const routingOn = !!flags?.binRouting && !!flags?.bpgEnabled;
+  const effectiveRoute = routingOn ? route : "afs";
+
+  const benefitUnavailable = (l: string) =>
+    l === "ar"
+      ? "بوابة بنفت غير متاحة حالياً. بطاقات بنفت المحلية لا تُقبل على بوابة البطاقات الدولية — استخدم بطاقة فيزا/ماستركارد أو اختر طريقة دفع أخرى."
+      : l === "ur"
+        ? "BENEFIT گیٹ وے فی الحال دستیاب نہیں۔ براہ کرم Visa/Mastercard یا دوسرا طریقہ استعمال کریں۔"
+        : l === "bn"
+          ? "BENEFIT গেটওয়ে এখন উপলব্ধ নয়। Visa/Mastercard বা অন্য পদ্ধতি ব্যবহার করুন।"
+          : "The BENEFIT gateway is not available yet. Local BENEFIT debit cards are not accepted on the international card gateway — please use a Visa/Mastercard or another payment method.";
+
+  const goBenefit = async () => {
+    setBenefitBusy(true);
+    setBenefitError(null);
+    try {
+      const res = await startBenefit({ data: { order_id: id, token: token!, lang } });
+      if (res.redirectUrl) {
+        window.top?.location.assign(res.redirectUrl);
+        return;
+      }
+      setBenefitError(benefitUnavailable(lang));
+      setRoute(null);
+    } catch {
+      setBenefitError(benefitUnavailable(lang));
+      setRoute(null);
+    } finally {
+      setBenefitBusy(false);
+    }
+  };
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["guest-afs-checkout", id, token],
-    enabled: !!token,
+    enabled: !!token && effectiveRoute === "afs",
     staleTime: Infinity,
     retry: false,
     queryFn: () => start({ data: { order_id: id, token: token!, attempt_key: attemptKey } }),
   });
 
   const money = (n: number) => `${Number(n).toFixed(3)} ${order?.currency ?? "BHD"}`;
+
+  const genericSecure =
+    lang === "ar"
+      ? "دفع آمن ومشفّر — نحدّد البوابة المناسبة بعد فحص نوع بطاقتك"
+      : lang === "ur"
+        ? "محفوظ ادائیگی — کارڈ چیک کے بعد مناسب گیٹ وے منتخب ہوگا"
+        : lang === "bn"
+          ? "নিরাপদ পেমেন্ট — কার্ড যাচাইয়ের পর গেটওয়ে নির্ধারিত হবে"
+          : "Secure encrypted payment — the gateway is selected after we check your card";
+  const afsSecure =
+    lang === "ar"
+      ? "الدفع مؤمّن عبر بوابة AFS للخدمات المالية العربية"
+      : lang === "ur"
+        ? "ادائیگی AFS گیٹ وے کے ذریعے محفوظ ہے"
+        : lang === "bn"
+          ? "AFS পেমেন্ট গেটওয়ে দ্বারা সুরক্ষিত"
+          : "Secured by AFS payment gateway";
+  const benefitSecure =
+    lang === "ar" ? "الدفع مؤمّن عبر بوابة بنفت (BENEFIT)" : lang === "bn" ? "BENEFIT গেটওয়ে দ্বারা সুরক্ষিত" : lang === "ur" ? "BENEFIT گیٹ وے کے ذریعے محفوظ" : "Secured by the BENEFIT payment gateway";
+  const secure = routingOn && !route ? genericSecure : effectiveRoute === "benefit" ? benefitSecure : afsSecure;
 
   if (!token) {
     return (
@@ -78,8 +151,21 @@ function GuestPayPage() {
         <h1 className="mb-1 font-display text-2xl font-bold">{L("إتمام الدفع", "Complete payment", "ادائیگی مکمل کریں", "পেমেন্ট সম্পন্ন করুন")}</h1>
         <p className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
           <ShieldCheck className="h-4 w-4 text-primary" />
-          {L("الدفع مؤمّن عبر بوابة AFS", "Secured by AFS payment gateway", "AFS گیٹ وے کے ذریعے محفوظ", "AFS গেটওয়ে দ্বারা সুরক্ষিত")}
+          {secure}
         </p>
+
+        {routingOn && !route && (
+          <div className="mb-6">
+            <CardRouteGate
+              onRoute={(r) => {
+                setRoute(r);
+                if (r === "benefit") void goBenefit();
+              }}
+              showBenefitOption={!!flags?.bpgVisible}
+              onPickOther={() => nav({ to: "/cart" })}
+            />
+          </div>
+        )}
 
         {order && (
           <div className="mb-6 rounded-xl border border-primary/20 bg-card p-5">
@@ -142,7 +228,14 @@ function GuestPayPage() {
           </div>
         )}
 
-        {isLoading && (
+        {benefitBusy && (
+          <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> BENEFIT…
+          </div>
+        )}
+        {benefitError && <p className="py-6 text-center text-sm text-destructive">{benefitError}</p>}
+
+        {effectiveRoute === "afs" && isLoading && (
           <div className="flex items-center justify-center gap-2 rounded-xl border border-primary/10 bg-card py-10 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> …
           </div>
