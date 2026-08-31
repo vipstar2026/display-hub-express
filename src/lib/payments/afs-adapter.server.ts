@@ -47,8 +47,11 @@ export async function loadAfsPaymentConfig(_environment?: AfsEnvironment | null)
     .maybeSingle();
   if (!data) throw new Error("payment_method_unavailable");
   const source = { ...((data.config ?? {}) as Record<string, unknown>), ...((data.credentials ?? {}) as Record<string, unknown>) };
-  const entityId = value(source, "live_entity_id") ?? value(source, "entity_id");
-  const token = value(source, "live_access_token") ?? value(source, "access_token");
+  // Secrets from the encrypted env store (add_secret) take priority over DB credentials.
+  const envEntity = process.env['AFS_ENTITY_ID_LIVE'];
+  const envToken = process.env['AFS_ACCESS_TOKEN_LIVE'];
+  const entityId = (envEntity && envEntity.trim()) || value(source, "live_entity_id") || value(source, "entity_id");
+  const token = (envToken && envToken.trim()) || value(source, "live_access_token") || value(source, "access_token");
   if (!entityId || !token) throw new Error("gateway_not_configured");
   const baseUrl = "https://eu-prod.oppwa.com";
   return {

@@ -62,9 +62,19 @@ export async function loadBpayConfig(): Promise<BpayConfig> {
     const v = cred[k];
     return typeof v === "string" && v.trim() !== "" ? v.trim() : null;
   };
+  const env = (k: string) => {
+    const v = process.env[k];
+    return typeof v === "string" && v.trim() !== "" ? v.trim() : null;
+  };
 
-  const entityId = pick("entity_id") ?? pick("terminal_id") ?? pick("merchant_id") ?? "";
-  const token = pick("access_token") ?? pick("password") ?? "";
+  // Secrets from the encrypted env store (add_secret) take priority over DB credentials.
+  const entityId =
+    env('BPG_ENTITY_ID_LIVE') ?? env('BPG_TRANPORTAL_ID_LIVE') ??
+    pick("entity_id") ?? pick("entity_id_live") ?? pick("tranportal_id_live") ??
+    pick("terminal_id") ?? pick("merchant_id") ?? "";
+  const token =
+    env('BPG_ACCESS_TOKEN_LIVE') ?? env('BPG_TRANPORTAL_PASSWORD_LIVE') ?? env('BPG_RESOURCE_KEY_LIVE') ??
+    pick("access_token") ?? pick("access_token_live") ?? pick("password") ?? pick("tranportal_password_live") ?? "";
   if (!entityId || !token) throw new Error("BENEFIT gateway is not configured yet");
 
   const mode = pick("mode") ?? (rowTestMode === false ? "live" : "test");
