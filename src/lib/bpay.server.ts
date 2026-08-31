@@ -287,22 +287,47 @@ export interface BpayNotification {
 /** Parses a BPG response/error post body (encrypted `trandata` or plain fields). */
 export async function bpayParseNotification(raw: string, cfg?: BpayConfig): Promise<BpayNotification> {
   const c = cfg ?? (await loadBpayConfig());
-  const outer = new URLSearchParams(raw);
-  let params = outer;
-  const trandata = outer.get("trandata");
-  if (trandata) {
-    const decrypted = await decryptTrandata(trandata.trim(), c.resourceKey);
-    params = new URLSearchParams(decrypted);
+  const trimmed = raw.trim();
+
+  let fields: Record<string, string>;
+  let trandata: string | null = null;
+
+  if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+    // JSON envelope: [{ "trandata": "<hex>" }] or already-plain JSON fields
+    try {
+      const parsed = JSON.parse(trimmed);
+      const row = (Array.isArray(parsed) ? parsed[0] : parsed) as Record<string, unknown>;
+      const t = row?.["trandata"];
+      if (typeof t === "string" && t.trim() !== "") trandata = t.trim();
+      else fields = Object.fromEntries(Object.entries(row ?? {}).map(([k, v]) => [k, String(v ?? "")]));
+    } catch {
+      /* handled below */
+    }
   }
+  if (!trandata) {
+    const outer = new URLSearchParams(trimmed);
+    const t = outer.get("trandata");
+    if (t) trandata = t.trim();
+    else if (/^[0-9a-fA-F]+$/.test(trimmed) && trimmed.length % 32 === 0) trandata = trimmed;
+    else fields ??= Object.fromEntries(outer.entries());
+  }
+  if (trandata) {
+    fields = parsePlainTrandata(await decryptTrandata(trandata, c.resourceKey));
+  }
+  fields ??= {};
+
+  const lower: Record<string, string> = {};
+  for (const [k, v] of Object.entries(fields)) lower[k.toLowerCase()] = v;
+
   const get = (...keys: string[]) => {
     for (const k of keys) {
-      const v = params.get(k) ?? params.get(k.toLowerCase()) ?? params.get(k.toUpperCase());
+      const v = lower[k.toLowerCase()];
       if (v != null && v !== "") return v;
     }
     return null;
   };
   return {
-    paymentId: get("paymentid", "PaymentID"),
+    paymentId: get("paymentid"),
     trackId: get("trackid"),
     tranId: get("tranid"),
     result: (get("result") ?? "").toUpperCase(),
@@ -311,11 +336,12 @@ export async function bpayParseNotification(raw: string, cfg?: BpayConfig): Prom
     ref: get("ref"),
     cardType: get("cardtype", "card"),
     orderId: get("udf1"),
-    error: get("Error", "error"),
-    errorText: get("ErrorText", "errortext"),
-    raw: Object.fromEntries(params.entries()),
+    error: get("error"),
+    errorText: get("errortext"),
+    raw: fields,
   };
 }
+
 
 export function bpayIsSuccessResult(result: string) {
   return result.toUpperCase() === "CAPTURED";
