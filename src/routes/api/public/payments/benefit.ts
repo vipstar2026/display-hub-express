@@ -2,56 +2,61 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BASE } from "@/lib/site-url";
 
 /**
- * BENEFIT / BPay notification (callback) endpoint.
- * Give this URL to the bank: https://vipstar.cc/api/public/payments/benefit
+ * BENEFIT Payment Gateway (classic BPG) response / error endpoint.
+ * Registered with the bank as: https://vipstar.cc/api/public/payments/benefit
  *
- * Behaviour: the raw notification is recorded, the gateway is answered
- * immediately (200 for server-to-server, 303 to the public result page when
- * the shopper's browser is redirected here), and signature verification plus
- * gateway re-query happen in the background. A forged body can never flip an
- * order to "succeeded" because the result is always re-fetched from BPG.
+ * BENEFIT's required order for this page:
+ *   1. log the received notification,
+ *   2. print the string `REDIRECT=<someURL>`,
+ *   3. only then run internal processing (in the background).
+ *
+ * The posted body is AES-encrypted with the Terminal Resource Key, so a body
+ * that decrypts is genuine; a CAPTURED result is still re-confirmed with a
+ * transaction inquiry before the order is finalized.
  */
 export const Route = createFileRoute("/api/public/payments/benefit")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const raw = await request.text();
-        const signature =
-          request.headers.get("x-signature") ??
-          request.headers.get("x-benefit-signature") ??
-          request.headers.get("signature");
 
-        let orderId: string | null = null;
+        let orderId = new URL(request.url).searchParams.get("order");
         try {
-          const { logRawNotification, headerMap, processBenefitNotification } = await import("@/lib/payments/webhook.server");
+          const { logRawNotification, headerMap, processBenefitNotification } = await import(
+            "@/lib/payments/webhook.server"
+          );
           const { runInBackground } = await import("@/lib/payments/background.server");
+
+          // 1 — log the raw notification first (backup if processing fails).
           await logRawNotification({
             provider: "benefit",
             raw,
-            headers: headerMap(request, ["x-signature", "x-benefit-signature", "signature", "content-type"]),
+            headers: headerMap(request, ["content-type", "user-agent"]),
           });
-          runInBackground(() => processBenefitNotification({ raw, signature }));
-          orderId = new URL(request.url).searchParams.get("order");
+
+          if (!orderId) {
+            try {
+              const { bpayParseNotification } = await import("@/lib/bpay.server");
+              const note = await bpayParseNotification(raw);
+              orderId = note.orderId;
+            } catch {
+              /* keep the generic result page */
+            }
+          }
+
+          // 3 — internal processing runs after the reply is produced.
+          runInBackground(() => processBenefitNotification({ raw, signature: null }));
         } catch {
-          return new Response(JSON.stringify({ error: "temporary" }), {
-            status: 503,
-            headers: { "Content-Type": "application/json" },
-          });
+          /* never block the REDIRECT reply */
         }
 
-        // Browser return (BPG posts the shopper back): send them to the public
-        // result page instead of rendering a JSON body in their browser.
-        const accept = request.headers.get("accept") ?? "";
-        if (orderId && accept.includes("text/html")) {
-          return new Response(null, {
-            status: 303,
-            headers: { Location: `${BASE}/pay/result?order=${encodeURIComponent(orderId)}&provider=benefit` },
-          });
-        }
-
-        return new Response(JSON.stringify({ received: true }), {
+        // 2 — the exact contract BPG expects from the response page.
+        const target = orderId
+          ? `${BASE}/pay/result?order=${encodeURIComponent(orderId)}&provider=benefit`
+          : `${BASE}/pay/result?provider=benefit`;
+        return new Response(`REDIRECT=${target}`, {
           status: 200,
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
         });
       },
       GET: async ({ request }) => {
