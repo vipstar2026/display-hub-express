@@ -3176,10 +3176,6 @@ export type Database = {
         Args: { _minutes?: number }
         Returns: number
       }
-      delete_email: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
       digital_stock_available: {
         Args: { _product_id: string }
         Returns: number
@@ -3190,11 +3186,6 @@ export type Database = {
           available: number
           product_id: string
         }[]
-      }
-      email_queue_dispatch: { Args: never; Returns: undefined }
-      enqueue_email: {
-        Args: { payload: Json; queue_name: string }
-        Returns: number
       }
       finalize_coupon_use: {
         Args: { _coupon_id: string; _discount: number; _order_id: string }
@@ -3345,26 +3336,9 @@ export type Database = {
         Returns: boolean
       }
       increment_blog_views: { Args: { _slug: string }; Returns: undefined }
-      move_to_dlq: {
-        Args: {
-          dlq_name: string
-          message_id: number
-          payload: Json
-          source_queue: string
-        }
-        Returns: number
-      }
       post_order_journal: {
         Args: { _order_id: string; _reverse?: boolean }
         Returns: string
-      }
-      read_email_batch: {
-        Args: { batch_size: number; queue_name: string; vt: number }
-        Returns: {
-          message: Json
-          msg_id: number
-          read_ct: number
-        }[]
       }
       redeem_coupon: {
         Args: { _code: string; _subtotal: number }

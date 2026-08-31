@@ -35,6 +35,13 @@ export const lookupCardBin = createServerFn({ method: "POST" })
     return { bin };
   })
   .handler(async ({ data }): Promise<CardRoute> => {
+    // If the BENEFIT gateway is not live/configured, never route a card to it:
+    // everything goes to the international card gateway (Visa/Mastercard).
+    const { bpayIsEnabled } = await import("@/lib/bpay.server");
+    const benefitLive = await bpayIsEnabled();
+    if (!benefitLive) {
+      return { route: "afs", country: null, scheme: null, type: null, known: false };
+    }
     if (BH_LOCAL_BIN_PREFIXES.some((p) => data.bin.startsWith(p))) {
       return { route: "benefit", country: "BH", scheme: "benefit", type: "debit", known: true };
     }
