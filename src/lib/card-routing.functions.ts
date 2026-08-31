@@ -51,9 +51,11 @@ export const lookupCardBin = createServerFn({ method: "POST" })
       const country = body.country?.alpha2?.toUpperCase() ?? null;
       const scheme = body.scheme?.toLowerCase() ?? null;
       const type = body.type?.toLowerCase() ?? null;
-      // Any card issued in Bahrain is treated as local (BENEFIT) unless it is
-      // an international-only scheme that BENEFIT cannot process.
-      const isLocalBahraini = country === "BH" && scheme !== "amex" && scheme !== "american express";
+      // Only a Bahrain-issued DEBIT card is treated as domestic (BENEFIT).
+      // Credit cards and Amex — even when issued in Bahrain — stay on AFS,
+      // and any card issued outside Bahrain always stays on AFS.
+      const isLocalBahraini =
+        country === "BH" && type === "debit" && scheme !== "amex" && scheme !== "american express";
       return { route: isLocalBahraini ? "benefit" : "afs", country, scheme, type, known: true };
     } catch {
       // Unknown BIN: fall back to the international gateway; the shopper can
