@@ -47,7 +47,7 @@ function GuestPayPage() {
 
   const L = (ar: string, en: string, ur: string, bn: string) => (lang === "ar" ? ar : lang === "ur" ? ur : lang === "bn" ? bn : en);
 
-  const { data: order } = useQuery({
+  const { data: order, error: orderError } = useQuery({
     queryKey: ["guest-order", id, token],
     enabled: !!token,
     retry: false,
@@ -131,7 +131,7 @@ function GuestPayPage() {
     lang === "ar" ? "الدفع مؤمّن عبر بوابة بنفت (BENEFIT)" : lang === "bn" ? "BENEFIT গেটওয়ে দ্বারা সুরক্ষিত" : lang === "ur" ? "BENEFIT گیٹ وے کے ذریعے محفوظ" : "Secured by the BENEFIT payment gateway";
   const secure = routingOn && !route ? genericSecure : effectiveRoute === "benefit" ? benefitSecure : afsSecure;
 
-  if (!token) {
+  if (!token || orderError) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
