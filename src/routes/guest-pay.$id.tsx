@@ -57,7 +57,7 @@ function GuestPayPage() {
   });
 
   // Independent gateway switches (mirrors the authenticated pay page).
-  const { data: flags } = useQuery({
+  const { data: flags, isLoading: flagsLoading } = useQuery({
     queryKey: ["payment-flags"],
     queryFn: async () => {
       const { data: rows } = await supabase.from("app_settings").select("key, value");
@@ -75,14 +75,15 @@ function GuestPayPage() {
   // Ask the server whether the BENEFIT gateway is actually live. When it is
   // not, skip card routing entirely and take every shopper straight to the
   // Visa/Mastercard gateway instead of failing on a BENEFIT attempt.
-  const { data: benefit } = useQuery({
+  const { data: benefit, isLoading: benefitStatusLoading } = useQuery({
     queryKey: ["benefit-status"],
     queryFn: () => checkBenefit({}),
     staleTime: 60_000,
   });
 
-  const routingOn = !!flags?.binRouting && !!flags?.bpgEnabled && benefit?.enabled === true;
-  const effectiveRoute = routingOn ? route : "afs";
+  const gatewayStatusLoading = flagsLoading || benefitStatusLoading;
+  const routingOn = !gatewayStatusLoading && !!flags?.binRouting && !!flags?.bpgEnabled && benefit?.enabled === true;
+  const effectiveRoute = gatewayStatusLoading ? null : routingOn ? route : "afs";
 
   const benefitUnavailable = (l: string) =>
     l === "ar"
@@ -175,6 +176,13 @@ function GuestPayPage() {
               showBenefitOption={!!flags?.bpgVisible}
               onPickOther={() => nav({ to: "/cart" })}
             />
+          </div>
+        )}
+
+        {gatewayStatusLoading && (
+          <div className="mb-6 flex items-center justify-center gap-2 rounded-xl border border-primary/10 bg-card py-10 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {L("جارٍ تجهيز الدفع الآمن…", "Preparing secure payment…", "محفوظ ادائیگی تیار ہو رہی ہے…", "নিরাপদ পেমেন্ট প্রস্তুত হচ্ছে…")}
           </div>
         )}
 

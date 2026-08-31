@@ -53,13 +53,15 @@ export function payFailureReason(lang: string, code?: string | null): string | n
   }
 
 
-  // Benefit debit cards routed to AFS are auto-declined by risk screening.
+  // ReD Shield does not identify the card brand in this response. Do not tell
+  // the shopper that a Visa/Mastercard was a BENEFIT card; report the bank's
+  // actual risk-screening decision and offer useful next steps.
   if (code === "100.400.142") {
     return L(
-      "تم رفض العملية من نظام الحماية البنكي. إذا كنت تستخدم بطاقة بنفت (Benefit) فهي غير مدعومة في هذه البوابة — يرجى استخدام بطاقة فيزا أو ماستركارد أو وسيلة دفع أخرى.",
-      "The payment was declined by the bank's security screening. If you used a Benefit debit card, it is not supported on this gateway — please use a Visa/Mastercard or another payment method.",
-      "ادائیگی بینک کی سیکیورٹی اسکریننگ سے مسترد ہو گئی۔ اگر آپ نے Benefit ڈیبٹ کارڈ استعمال کیا تو وہ اس گیٹ وے پر نہیں چلتا — براہ کرم Visa/Mastercard یا کوئی اور طریقہ استعمال کریں۔",
-      "ব্যাংকের নিরাপত্তা যাচাই পেমেন্টটি বাতিল করেছে। Benefit ডেবিট কার্ড এই গেটওয়েতে সমর্থিত নয় — অনুগ্রহ করে Visa/Mastercard বা অন্য পদ্ধতি ব্যবহার করুন।",
+      "رفض نظام الحماية لدى البنك العملية. لم يتم خصم أي مبلغ. جرّب بطاقة فيزا أو ماستركارد أخرى، أو تواصل مع البنك المصدر للبطاقة للسماح بالشراء عبر الإنترنت.",
+      "The bank's security screening declined this payment. You were not charged. Try another Visa or Mastercard, or ask your card issuer to allow online purchases.",
+      "بینک کے سیکیورٹی نظام نے ادائیگی مسترد کر دی۔ کوئی رقم نہیں کٹی۔ دوسرا Visa یا Mastercard آزمائیں، یا اپنے بینک سے آن لائن خریداری کی اجازت دلوائیں۔",
+      "ব্যাংকের নিরাপত্তা ব্যবস্থা পেমেন্টটি বাতিল করেছে। কোনো অর্থ কাটা হয়নি। অন্য Visa বা Mastercard ব্যবহার করুন, অথবা অনলাইন কেনাকাটার অনুমতির জন্য কার্ড প্রদানকারী ব্যাংকের সাথে যোগাযোগ করুন।",
     );
   }
   // Technical failures inside the 3-D Secure / bank authentication system.
