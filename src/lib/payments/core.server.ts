@@ -58,7 +58,9 @@ export async function getAttemptByCheckout(provider: string, checkoutId: string)
 }
 
 // Explicit shopper/gateway cancellation codes (OPPWA 100.396.*).
-const CANCELLED = /^100\.396\.(101|103|104|106)/;
+// Explicit cancellation: OPPWA 100.396.* (AFS) or a BPG "CANCELED" result.
+const CANCELLED = /^(100\.396\.(101|103|104|106)|CANCEL)/i;
+
 
 export async function applyGatewayStatus(input: { attempt: any; order: PaymentOrder; status: GatewayStatus; source: string; background?: boolean }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
