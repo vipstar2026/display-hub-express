@@ -44,7 +44,7 @@ function POPage() {
     const [{ data: p }, { data: s }, { data: pr }] = await Promise.all([
       supabase.from("purchase_orders").select("*").order("created_at", { ascending: false }),
       supabase.from("suppliers").select("id,name").order("name"),
-      supabase.from("products").select("id,name_en,name_ar,sku,stock,cost_price").order("name_en"),
+      supabase.rpc("get_product_costs"),
     ]);
     setPos((p as PO[]) ?? []);
     setSuppliers((s as Supplier[]) ?? []);
