@@ -54,36 +54,44 @@ export const Route = createFileRoute("/email/unsubscribe")({
         }
         if (!token) return json({ ok: false }, 400);
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const admin = supabaseAdmin as any;
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const admin = supabaseAdmin as any;
 
-        const { data: row, error } = await admin
-          .from("email_unsubscribe_tokens")
-          .select("email, used_at")
-          .eq("token", token)
-          .maybeSingle();
-        if (error) return json({ ok: false }, 500);
-        if (!row) return json({ ok: false }, 404);
-
-        const email = String(row.email).toLowerCase();
-
-        await admin
-          .from("suppressed_emails")
-          .upsert({ email, reason: "unsubscribe", metadata: null }, { onConflict: "email" });
-
-        await admin
-          .from("newsletter_subscribers")
-          .update({ is_active: false, unsubscribed_at: new Date().toISOString() })
-          .eq("email", email);
-
-        if (!row.used_at) {
-          await admin
+          const { data: row, error } = await admin
             .from("email_unsubscribe_tokens")
-            .update({ used_at: new Date().toISOString() })
-            .eq("token", token);
-        }
+            .select("email, used_at")
+            .eq("token", token)
+            .maybeSingle();
+          if (error) {
+            console.error("[unsubscribe] POST lookup failed", error.message);
+            return json({ ok: false, reason: "lookup_failed" });
+          }
+          if (!row) return json({ ok: false, reason: "not_found" });
 
-        return json({ ok: true });
+          const email = String(row.email).toLowerCase();
+
+          await admin
+            .from("suppressed_emails")
+            .upsert({ email, reason: "unsubscribe", metadata: null }, { onConflict: "email" });
+
+          await admin
+            .from("newsletter_subscribers")
+            .update({ is_active: false, unsubscribed_at: new Date().toISOString() })
+            .eq("email", email);
+
+          if (!row.used_at) {
+            await admin
+              .from("email_unsubscribe_tokens")
+              .update({ used_at: new Date().toISOString() })
+              .eq("token", token);
+          }
+
+          return json({ ok: true });
+        } catch (e) {
+          console.error("[unsubscribe] POST threw", (e as Error).message);
+          return json({ ok: false, reason: "lookup_failed" });
+        }
       },
     },
   },
