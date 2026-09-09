@@ -16,18 +16,26 @@ export const Route = createFileRoute("/email/unsubscribe")({
           });
 
         const token = new URL(request.url).searchParams.get("token")?.trim();
-        if (!token) return json({ valid: false }, 400);
+        if (!token) return json({ valid: false, reason: "missing_token" });
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data, error } = await supabaseAdmin
-          .from("email_unsubscribe_tokens")
-          .select("email, used_at")
-          .eq("token", token)
-          .maybeSingle();
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data, error } = await supabaseAdmin
+            .from("email_unsubscribe_tokens")
+            .select("email, used_at")
+            .eq("token", token)
+            .maybeSingle();
 
-        if (error) return json({ valid: false }, 500);
-        if (!data) return json({ valid: false }, 404);
-        return json({ valid: true, email: data.email, used: !!data.used_at });
+          if (error) {
+            console.error("[unsubscribe] lookup failed", error.message);
+            return json({ valid: false, reason: "lookup_failed" });
+          }
+          if (!data) return json({ valid: false, reason: "not_found" });
+          return json({ valid: true, email: data.email, used: !!data.used_at });
+        } catch (e) {
+          console.error("[unsubscribe] lookup threw", (e as Error).message);
+          return json({ valid: false, reason: "lookup_failed" });
+        }
       },
 
       POST: async ({ request }) => {
