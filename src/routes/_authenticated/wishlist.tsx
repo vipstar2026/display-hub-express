@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useWishlist } from "@/lib/wishlist";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PRODUCT_PUBLIC_COLUMNS } from "@/lib/product-columns";
 
 export const Route = createFileRoute("/_authenticated/wishlist")({
   component: WishlistPage,
@@ -21,7 +22,7 @@ function WishlistPage() {
     queryKey: ["wishlist-products", idArr.sort().join(",")],
     queryFn: async () => {
       if (idArr.length === 0) return [];
-      const { data } = await supabase.from("products").select("*").in("id", idArr).eq("status", "active");
+      const { data } = await supabase.from("products").select(PRODUCT_PUBLIC_COLUMNS).in("id", idArr).eq("status", "active");
       return data ?? [];
     },
   });

@@ -265,7 +265,7 @@ function AdminProducts() {
 
   const { data: products } = useQuery({
     queryKey: ["admin-products"],
-    queryFn: async () => (await supabase.from("products").select("*, categories(slug, name_en, name_ar, name_ur, name_bn)").order("created_at", { ascending: false })).data ?? [],
+    queryFn: async () => (await supabase.from("products").select("id, slug, sku, barcode, name_ar, name_en, name_ur, name_bn, description_ar, description_en, description_ur, description_bn, category_id, type, status, price, compare_price, currency, stock, track_stock, weight_grams, images, features, is_featured, created_at, updated_at, categories(slug, name_en, name_ar, name_ur, name_bn)").order("created_at", { ascending: false })).data ?? [],
   });
 
   const { data: cats } = useQuery({

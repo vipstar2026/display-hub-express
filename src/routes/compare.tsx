@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Check, X, GitCompareArrows, ShoppingCart, Package } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { toast } from "sonner";
+import { PRODUCT_PUBLIC_COLUMNS } from "@/lib/product-columns";
 
 export const Route = createFileRoute("/compare")({
   component: ComparePage,
@@ -34,7 +35,7 @@ function ComparePage() {
     queryKey: ["compare-products", ids],
     queryFn: async () => {
       if (ids.length === 0) return [];
-      const { data } = await supabase.from("products").select("*").in("id", ids);
+      const { data } = await supabase.from("products").select(PRODUCT_PUBLIC_COLUMNS).in("id", ids);
       return data ?? [];
     },
     enabled: ids.length > 0,

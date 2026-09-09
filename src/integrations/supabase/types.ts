@@ -3247,6 +3247,17 @@ export type Database = {
           token: string
         }[]
       }
+      get_product_costs: {
+        Args: never
+        Returns: {
+          cost_price: number
+          id: string
+          name_ar: string
+          name_en: string
+          sku: string
+          stock: number
+        }[]
+      }
       get_site_settings_admin: {
         Args: never
         Returns: {

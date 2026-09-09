@@ -55,7 +55,7 @@ function ShopPage() {
   const { data: products } = useQuery({
     queryKey: ["shop-products", category, q, sort, min, max],
     queryFn: async () => {
-      let query = supabase.from("products").select("*, categories!inner(id, slug, name_ar, name_en, name_ur, name_bn, sort_order)").eq("status", "active");
+      let query = supabase.from("products").select("id, slug, sku, barcode, name_ar, name_en, name_ur, name_bn, description_ar, description_en, description_ur, description_bn, category_id, type, status, price, compare_price, currency, stock, track_stock, weight_grams, images, features, is_featured, created_at, updated_at, categories!inner(id, slug, name_ar, name_en, name_ur, name_bn, sort_order)").eq("status", "active");
       if (category) query = query.eq("categories.slug", category);
       if (q) query = query.or(`name_ar.ilike.%${q}%,name_en.ilike.%${q}%`);
       if (min) query = query.gte("price", Number(min));
