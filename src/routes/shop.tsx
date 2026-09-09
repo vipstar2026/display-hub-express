@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
+import { PRODUCT_PUBLIC_COLUMNS } from "@/lib/product-columns";
 
 type ShopSearch = { category: string; q: string; sort: string; min: string; max: string };
 const search = z.object({
@@ -55,7 +56,7 @@ function ShopPage() {
   const { data: products } = useQuery({
     queryKey: ["shop-products", category, q, sort, min, max],
     queryFn: async () => {
-      let query = supabase.from("products").select("*, categories!inner(id, slug, name_ar, name_en, name_ur, name_bn, sort_order)").eq("status", "active");
+      let query = supabase.from("products").select(`${PRODUCT_PUBLIC_COLUMNS}, categories!inner(id, slug, name_ar, name_en, name_ur, name_bn, sort_order)`).eq("status", "active");
       if (category) query = query.eq("categories.slug", category);
       if (q) query = query.or(`name_ar.ilike.%${q}%,name_en.ilike.%${q}%`);
       if (min) query = query.gte("price", Number(min));

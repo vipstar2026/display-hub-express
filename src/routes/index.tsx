@@ -11,6 +11,7 @@ import { HeroBanners } from "@/components/HeroBanners";
 import { FlashSalesSection } from "@/components/FlashSalesSection";
 import { cleanPhoneNumber, pickLocalized, socialHandle, useSiteSettings } from "@/lib/site-settings";
 import { waAnchorProps } from "@/lib/whatsapp";
+import { PRODUCT_PUBLIC_COLUMNS } from "@/lib/product-columns";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -53,7 +54,7 @@ function HomePage() {
   const { data: featured } = useQuery({
     queryKey: ["home-featured"],
     queryFn: async () => {
-      const { data } = await supabase.from("products").select("*").eq("status", "active").eq("is_featured", true).limit(8);
+      const { data } = await supabase.from("products").select(PRODUCT_PUBLIC_COLUMNS).eq("status", "active").eq("is_featured", true).limit(8);
       return data ?? [];
     },
   });
@@ -61,7 +62,7 @@ function HomePage() {
   const { data: latest } = useQuery({
     queryKey: ["home-latest"],
     queryFn: async () => {
-      const { data } = await supabase.from("products").select("*").eq("status", "active").order("created_at", { ascending: false }).limit(8);
+      const { data } = await supabase.from("products").select(PRODUCT_PUBLIC_COLUMNS).eq("status", "active").order("created_at", { ascending: false }).limit(8);
       return data ?? [];
     },
   });

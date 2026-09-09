@@ -22,6 +22,7 @@ import { Breadcrumbs, breadcrumbJsonLd } from "@/components/Breadcrumbs";
 import { ProductGallery } from "@/components/ProductGallery";
 import { useDigitalStock, isDigital } from "@/lib/digital-stock";
 import { BASE } from "@/lib/site-url";
+import { PRODUCT_PUBLIC_COLUMNS } from "@/lib/product-columns";
 
 
 export const Route = createFileRoute("/product/$slug")({
@@ -116,7 +117,7 @@ function ProductPage() {
   const { data: p, isLoading } = useQuery({
     queryKey: ["product", slug],
     queryFn: async () => {
-      const { data } = await supabase.from("products").select("*").eq("slug", slug).eq("status", "active").maybeSingle();
+      const { data } = await supabase.from("products").select(PRODUCT_PUBLIC_COLUMNS).eq("slug", slug).eq("status", "active").maybeSingle();
       if (!data) throw notFound();
       return data;
     },

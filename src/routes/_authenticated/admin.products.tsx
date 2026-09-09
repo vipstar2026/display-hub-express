@@ -15,6 +15,7 @@ import { useI18n } from "@/lib/i18n";
 import { makeAdminT } from "@/lib/admin-i18n";
 import { translatePresetLabel } from "@/lib/category-presets";
 import { dirForLang } from "@/lib/dir";
+import { PRODUCT_PUBLIC_COLUMNS } from "@/lib/product-columns";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
   component: AdminProducts,
@@ -265,7 +266,7 @@ function AdminProducts() {
 
   const { data: products } = useQuery({
     queryKey: ["admin-products"],
-    queryFn: async () => (await supabase.from("products").select("*, categories(slug, name_en, name_ar, name_ur, name_bn)").order("created_at", { ascending: false })).data ?? [],
+    queryFn: async () => (await supabase.from("products").select(`${PRODUCT_PUBLIC_COLUMNS}, categories(slug, name_en, name_ar, name_ur, name_bn)`).order("created_at", { ascending: false })).data ?? [],
   });
 
   const { data: cats } = useQuery({

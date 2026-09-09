@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { formatPrice, firstImage } from "@/lib/format";
 import { CATEGORY_PRESETS, RESERVED_FEATURE_KEYS, translatePresetLabel, WARRANTY_OPTIONS, WARRANTY_LABEL_I18N, WARRANTY_CUSTOM_PLACEHOLDER_I18N } from "@/lib/category-presets";
 import { useI18n, localizedName } from "@/lib/i18n";
+import { PRODUCT_PUBLIC_COLUMNS } from "@/lib/product-columns";
 
 export const Route = createFileRoute("/_authenticated/admin/categories/$slug")({
   component: AdminCategoryProducts,
@@ -67,7 +68,7 @@ function AdminCategoryProducts() {
   const { data: products } = useQuery({
     queryKey: ["admin-cat-products", category?.id],
     enabled: !!category?.id,
-    queryFn: async () => (await supabase.from("products").select("*").eq("category_id", category!.id).order("created_at", { ascending: false })).data ?? [],
+    queryFn: async () => (await supabase.from("products").select(PRODUCT_PUBLIC_COLUMNS).eq("category_id", category!.id).order("created_at", { ascending: false })).data ?? [],
   });
 
   const handleEdit = (p: {
