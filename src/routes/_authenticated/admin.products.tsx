@@ -15,7 +15,6 @@ import { useI18n } from "@/lib/i18n";
 import { makeAdminT } from "@/lib/admin-i18n";
 import { translatePresetLabel } from "@/lib/category-presets";
 import { dirForLang } from "@/lib/dir";
-import { PRODUCT_PUBLIC_COLUMNS } from "@/lib/product-columns";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
   component: AdminProducts,

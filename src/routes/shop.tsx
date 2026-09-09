@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
-import { PRODUCT_PUBLIC_COLUMNS } from "@/lib/product-columns";
 
 type ShopSearch = { category: string; q: string; sort: string; min: string; max: string };
 const search = z.object({
