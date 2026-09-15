@@ -71,20 +71,37 @@ export const Route = createFileRoute("/email/unsubscribe")({
 
           const email = String(row.email).toLowerCase();
 
-          await admin
+          const { error: suppressError } = await admin
             .from("suppressed_emails")
             .upsert({ email, reason: "unsubscribe", metadata: null }, { onConflict: "email" });
 
-          await admin
+          const { error: subError } = await admin
             .from("newsletter_subscribers")
             .update({ is_active: false, unsubscribed_at: new Date().toISOString() })
             .eq("email", email);
 
           if (!row.used_at) {
-            await admin
+            const { error: tokenError } = await admin
               .from("email_unsubscribe_tokens")
               .update({ used_at: new Date().toISOString() })
               .eq("token", token);
+            if (tokenError) console.warn("[unsubscribe] token stamp failed", tokenError.message);
+          }
+
+          const writeFailed = suppressError || subError;
+          const { error: logError } = await admin.from("email_send_log").insert({
+            template_name: "unsubscribe",
+            recipient_email: email,
+            status: writeFailed ? "failed" : "suppressed",
+            ...(writeFailed
+              ? { error_message: `unsubscribe_write_failed: ${(suppressError || subError)!.message}` }
+              : {}),
+          });
+          if (logError) console.warn("[unsubscribe] log insert failed", logError.message);
+
+          if (writeFailed) {
+            console.error("[unsubscribe] write failed", (suppressError || subError)!.message);
+            return json({ ok: false, reason: "write_failed" }, 500);
           }
 
           return json({ ok: true });
