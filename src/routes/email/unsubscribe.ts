@@ -80,14 +80,6 @@ export const Route = createFileRoute("/email/unsubscribe")({
             .update({ is_active: false, unsubscribed_at: new Date().toISOString() })
             .eq("email", email);
 
-          if (!row.used_at) {
-            const { error: tokenError } = await admin
-              .from("email_unsubscribe_tokens")
-              .update({ used_at: new Date().toISOString() })
-              .eq("token", token);
-            if (tokenError) console.warn("[unsubscribe] token stamp failed", tokenError.message);
-          }
-
           const writeFailed = suppressError || subError;
           const { error: logError } = await admin.from("email_send_log").insert({
             template_name: "unsubscribe",
@@ -102,6 +94,14 @@ export const Route = createFileRoute("/email/unsubscribe")({
           if (writeFailed) {
             console.error("[unsubscribe] write failed", (suppressError || subError)!.message);
             return json({ ok: false, reason: "write_failed" }, 500);
+          }
+
+          if (!row.used_at) {
+            const { error: tokenError } = await admin
+              .from("email_unsubscribe_tokens")
+              .update({ used_at: new Date().toISOString() })
+              .eq("token", token);
+            if (tokenError) console.warn("[unsubscribe] token stamp failed", tokenError.message);
           }
 
           return json({ ok: true });
