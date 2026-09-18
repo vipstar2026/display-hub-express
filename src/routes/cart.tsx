@@ -151,12 +151,11 @@ function CartPage() {
   const { data: flags } = useQuery({
     queryKey: ["payment-flags"],
     queryFn: async () => {
-      const { data: rows } = await supabase.from("app_settings").select("key, value");
-      const map = Object.fromEntries((rows ?? []).map((r) => [r.key, r.value]));
+      const { data } = await (supabase as any).rpc("public_payment_flags");
       return {
-        afsEnabled: map["afs_enabled"] !== false,
-        bpgEnabled: map["bpg_enabled"] !== false,
-        binRouting: map["bin_routing_enabled"] !== false,
+        afsEnabled: data?.afs_enabled !== false,
+        bpgEnabled: data?.bpg_enabled !== false,
+        binRouting: data?.bin_routing_enabled !== false,
       };
     },
     staleTime: 60_000,

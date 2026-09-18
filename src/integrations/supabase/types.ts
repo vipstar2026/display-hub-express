@@ -3351,6 +3351,7 @@ export type Database = {
         Args: { _order_id: string; _reverse?: boolean }
         Returns: string
       }
+      public_payment_flags: { Args: never; Returns: Json }
       redeem_coupon: {
         Args: { _code: string; _subtotal: number }
         Returns: {
