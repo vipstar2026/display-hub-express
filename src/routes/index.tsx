@@ -12,6 +12,7 @@ import { FlashSalesSection } from "@/components/FlashSalesSection";
 import { cleanPhoneNumber, pickLocalized, socialHandle, useSiteSettings } from "@/lib/site-settings";
 import { waAnchorProps } from "@/lib/whatsapp";
 import { PRODUCT_PUBLIC_COLUMNS } from "@/lib/product-columns";
+import { ProductCardSkeleton, CategoryTileSkeleton } from "@/components/ProductCardSkeleton";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -43,15 +44,15 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const { t, lang } = useI18n();
 
-  const { data: categories } = useQuery({
+  const { data: categories, isPending: catsPending } = useQuery({
     queryKey: ["home-categories"],
     queryFn: async () => {
-      const { data } = await supabase.from("categories").select("*").eq("is_active", true).order("sort_order");
+      const { data } = await supabase.from("categories").select("*").eq("is_active", true).order("sort_order").limit(12);
       return data ?? [];
     },
   });
 
-  const { data: featured } = useQuery({
+  const { data: featured, isPending: featuredPending } = useQuery({
     queryKey: ["home-featured"],
     queryFn: async () => {
       const { data } = await supabase.from("products").select(PRODUCT_PUBLIC_COLUMNS).eq("status", "active").eq("is_featured", true).limit(8);
@@ -59,7 +60,7 @@ function HomePage() {
     },
   });
 
-  const { data: latest } = useQuery({
+  const { data: latest, isPending: latestPending } = useQuery({
     queryKey: ["home-latest"],
     queryFn: async () => {
       const { data } = await supabase.from("products").select(PRODUCT_PUBLIC_COLUMNS).eq("status", "active").order("created_at", { ascending: false }).limit(8);
@@ -132,6 +133,7 @@ function HomePage() {
       <section className="container mx-auto px-4 py-12">
         <h2 className="mb-6 font-display text-2xl font-bold">{t("home.cats")}</h2>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+          {catsPending && Array.from({ length: 12 }).map((_, i) => <CategoryTileSkeleton key={`cs-${i}`} />)}
           {(categories ?? []).map((c) => (
             <Link key={c.id} to="/shop" search={{ category: c.slug }} className="group rounded-xl border border-primary/10 bg-card p-4 text-center transition hover:border-primary/40 hover:bg-primary/5">
               <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20">
@@ -144,21 +146,25 @@ function HomePage() {
       </section>
 
       {/* Featured */}
-      {featured && featured.length > 0 && (
+      {(featuredPending || (featured && featured.length > 0)) && (
         <section className="container mx-auto px-4 py-8">
           <h2 className="mb-6 font-display text-2xl font-bold">{t("home.featured")}</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {featured.map((p) => <ProductCard key={p.id} p={p} />)}
+            {featuredPending
+              ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={`fs-${i}`} />)
+              : featured!.map((p) => <ProductCard key={p.id} p={p} />)}
           </div>
         </section>
       )}
 
       {/* Latest */}
-      {latest && latest.length > 0 && (
+      {(latestPending || (latest && latest.length > 0)) && (
         <section className="container mx-auto px-4 py-8">
           <h2 className="mb-6 font-display text-2xl font-bold">{t("shop.all")}</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {latest.map((p) => <ProductCard key={p.id} p={p} />)}
+            {latestPending
+              ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={`ls-${i}`} />)
+              : latest!.map((p) => <ProductCard key={p.id} p={p} />)}
           </div>
         </section>
       )}
