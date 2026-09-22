@@ -43,15 +43,15 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const { t, lang } = useI18n();
 
-  const { data: categories } = useQuery({
+  const { data: categories, isPending: catsPending } = useQuery({
     queryKey: ["home-categories"],
     queryFn: async () => {
-      const { data } = await supabase.from("categories").select("*").eq("is_active", true).order("sort_order");
+      const { data } = await supabase.from("categories").select("*").eq("is_active", true).order("sort_order").limit(12);
       return data ?? [];
     },
   });
 
-  const { data: featured } = useQuery({
+  const { data: featured, isPending: featuredPending } = useQuery({
     queryKey: ["home-featured"],
     queryFn: async () => {
       const { data } = await supabase.from("products").select(PRODUCT_PUBLIC_COLUMNS).eq("status", "active").eq("is_featured", true).limit(8);
@@ -59,7 +59,7 @@ function HomePage() {
     },
   });
 
-  const { data: latest } = useQuery({
+  const { data: latest, isPending: latestPending } = useQuery({
     queryKey: ["home-latest"],
     queryFn: async () => {
       const { data } = await supabase.from("products").select(PRODUCT_PUBLIC_COLUMNS).eq("status", "active").order("created_at", { ascending: false }).limit(8);
