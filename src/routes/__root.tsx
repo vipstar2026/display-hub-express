@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, lazyRouteComponent, HeadContent, Scripts } from "@tanstack/react-router";
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/lib/i18n";
 import { CartProvider } from "@/lib/cart";
@@ -28,23 +28,6 @@ function NotFoundComponent() {
           <Link to="/" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-background transition hover:bg-primary">
             Go home
           </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
-  const router = useRouter();
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold">This page didn't load</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Try refreshing or head back home.</p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button onClick={() => { router.invalidate(); reset(); }} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-background">Try again</button>
-          <a href="/" className="rounded-md border border-primary/30 px-4 py-2 text-sm">Go home</a>
         </div>
       </div>
     </div>
@@ -101,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
   }),
   notFoundComponent: NotFoundComponent,
-  errorComponent: ErrorComponent,
+  errorComponent: lazyRouteComponent(() => import("@/components/RootError")),
   shellComponent: RootShell,
 });
 
