@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, lazyRouteComponent, HeadContent, Scripts } from "@tanstack/react-router";
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/lib/i18n";
 import { CartProvider } from "@/lib/cart";
